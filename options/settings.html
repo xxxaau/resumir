@@ -18,6 +18,9 @@
     <button class="nav-item" data-tab="custom">
       Personalització
     </button>
+    <button class="nav-item" data-tab="extensions">
+      Extensions
+    </button>
     <button class="nav-item" data-tab="stats">
       Estadístiques
     </button>
@@ -105,7 +108,7 @@
 
     </div>
 
-    <!-- Tab: Customization (Theme, System Prompt, Export) -->
+    <!-- Tab: Customization (Theme, System Prompt) -->
     <div id="tab-custom" class="tab-pane">
         <h1 class="page-title">Personalització</h1>
 
@@ -130,21 +133,79 @@
             </div>
         </div>
         
+        <div class="section-actions">
+           <button id="saveCustom" class="btn btn-primary">Desar canvis</button>
+        </div>
+    </div>
+
+    <!-- Tab: Extensions -->
+    <div id="tab-extensions" class="tab-pane">
+        <h1 class="page-title">Extensions i Integracions</h1>
+
         <div class="section">
-            <h3>Exportació (Markdown)</h3>
-            <p style="color: #666; margin-bottom: 20px;">Personalitza el format en què es copien els resums.</p>
-            
-            <div class="form-group">
-                <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
-                <div class="help-text">
-                    Variables: <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary}}</code>
+            <div class="section-header-row">
+                <h3>Integració Obsidian</h3>
+                <label class="switch">
+                    <input type="checkbox" id="enableObsidian">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div id="config-obsidian" class="extension-config">
+                <p style="color: #666; margin-bottom: 20px;">Guarda els resums directament al teu Vault.</p>
+                
+
+
+                <div class="form-group">
+                <label for="obsidianVault">Nom del Vault</label>
+                <input type="text" id="obsidianVault" class="form-control" placeholder="ex: Obsidian (Per defecte)">
+            </div>
+
+                <div class="form-group">
+                <label for="obsidianPath">Ruta de la Nota</label>
+                <input type="text" id="obsidianPath" class="form-control" placeholder="ex: [Notes/]YYYY/gggg-Www">
+                <div class="help-text">Formats: <code>YYYY</code> (Any), <code>MM</code> (Mes), <code>DD</code> (Dia), <code>gggg</code> (Any Setmana ISO), <code>ww</code> (Setmana). Text fix entre <code>[]</code>.</div>
+            </div>
+
+                <div class="form-group">
+                    <label for="obsidianTemplate">Plantilla Obsidian</label>
+                    <textarea id="obsidianTemplate" class="form-control code-editor" rows="6"></textarea>
+                    <div class="help-text">
+                        Variables: <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary}}</code>, <code>{{summary_executive}}</code> (curt)
+                    </div>
+                </div>
+                
+                <div class="section-actions">
+                    <button id="resetObsidianTemplate" class="btn btn-secondary">Restaurar Plantilla</button>
                 </div>
             </div>
-            
-            <div class="section-actions">
-                <button id="resetTemplate" class="btn btn-secondary">Restaurar per defecte</button>
-                <button id="saveExport" class="btn btn-primary">Desar canvis</button>
+        </div>
+
+        <div class="section">
+            <div class="section-header-row">
+                <h3>Exportació Markdown</h3>
+                <label class="switch">
+                    <input type="checkbox" id="enableMarkdown">
+                    <span class="slider round"></span>
+                </label>
             </div>
+            
+            <div id="config-markdown" class="extension-config">
+                <p style="color: #666; margin-bottom: 20px;">Personalitza el format en què es copien els resums al porta-retalls.</p>
+                <div class="form-group">
+                    <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
+                    <div class="help-text">
+                        Variables: <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary}}</code>
+                    </div>
+                </div>
+                <div class="section-actions">
+                    <button id="resetTemplate" class="btn btn-secondary">Restaurar per defecte</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-actions">
+           <button id="saveExtensions" class="btn btn-primary">Desar canvis</button>
         </div>
     </div>
 

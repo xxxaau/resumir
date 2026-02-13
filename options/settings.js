@@ -1,18 +1,25 @@
-const DEFAULT_MARKDOWN_TEMPLATE = `# [{{title}}]({{url}})\n\n{{summary}}`;
+const DEFAULT_MARKDOWN_TEMPLATE = `- [{{title}}]({{url}})\n\t- {{summary_executive}}`;
 
-const DEFAULT_SYSTEM_PROMPT = `Ets un assistent expert en resumir contingut web. La teva tasca és analitzar el text proporcionat i generar un resum estructurat en CATALÀ.
+const DEFAULT_SYSTEM_PROMPT = `Ets un assistent expert en resumir contingut web. La teva tasca és analitzar el text i generar un resum en CATALÀ.
 
-Objectius:
-1. Analitzar el contingut principal, ignorant menús i publicitat.
-2. Identificar els punts clau i aprenentatges pràctics.
-3. Mantenir un to objectiu i professional.
-4. IMPORTANT: Respon sempre en CATALÀ, independentment de l'idioma original del text.
+CRITERIS IMPORTANTS:
+1. Respon SEMPRE en CATALÀ.
+2. NO incloguis cap frase introductòria (ex: "Aquí teniu el resum...", "A continuació...").
+3. NO incloguis el títol "**Resum Executiu**". Comença DIRECTAMENT amb el primer paràgraf del resum.
 
-Estructura de la resposta (en Markdown):
-- **Resum Executiu**: Un paràgraf de màxim 150 paraules que sintetitzi la idea central.
-- **Punts Clau**: Llista de 5-10 punts essencials. Sigues concís.
-- **Aprenentatges**: Mínim 3 "takeaways" pràctics o conclusions rellevants.
-- **Cites Destacades**: Màxim 3 frases literals del text original (traduïdes si cal, o en idioma original si és més precís, però explicades).`;
+Estructura de la resposta:
+[Aquí va directament el paràgraf del resum executiu de màxim 150 paraules, sense cap títol previ]
+
+### Punts Clau
+- [Llista de 5-10 punts essencials]
+
+### Aprenentatges
+- [Mínim 3 conclusions pràctiques]
+
+### Cites Destacades
+- [Màxim 3 cites literals]`;
+
+const DEFAULT_OBSIDIAN_TEMPLATE = `- [{{title}}]({{url}})\n\t- {{summary_executive}}`;
 
 // --- Navigation Logic ---
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -30,16 +37,26 @@ document.querySelectorAll('.nav-item').forEach(item => {
 
 // --- Options Management ---
 
+// --- Options Management ---
+
 function saveOptions(e) {
   e.preventDefault();
   
-  // Save both General and Export settings regardless of which button was clicked
+  // Save all settings including Main, Custom and Extensions
   const settings = {
     apiKey: document.querySelector("#apiKey").value,
     modelName: document.querySelector("#modelName").value,
     theme: document.querySelector("#themeSelect").value,
     systemPrompt: document.querySelector("#systemPrompt").value,
-    markdownTemplate: document.querySelector("#markdownTemplate").value
+    
+    // Extensions
+    enableMarkdown: document.querySelector("#enableMarkdown").checked,
+    markdownTemplate: document.querySelector("#markdownTemplate").value,
+    
+    enableObsidian: document.querySelector("#enableObsidian").checked,
+    obsidianVault: document.querySelector("#obsidianVault").value,
+    obsidianPath: document.querySelector("#obsidianPath").value,
+    obsidianTemplate: document.querySelector("#obsidianTemplate").value
   };
 
   browser.storage.local.set(settings).then(() => {
@@ -50,13 +67,28 @@ function saveOptions(e) {
 function restoreOptions() {
   // 1. Restore Fields
   browser.storage.local.get([
-      "apiKey", "modelName", "theme", "systemPrompt", "stats", "markdownTemplate"
+      "apiKey", "modelName", "theme", "systemPrompt", "stats", 
+      "enableMarkdown", "markdownTemplate",
+      "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate"
   ]).then(result => {
     document.querySelector("#apiKey").value = result.apiKey || "";
     document.querySelector("#modelName").value = result.modelName || "gemma-3-27b-it";
     document.querySelector("#themeSelect").value = result.theme || "system";
     document.querySelector("#systemPrompt").value = result.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    
+    // Markdown Extension
+    const enableMarkdown = result.enableMarkdown !== false; // Default true
+    document.querySelector("#enableMarkdown").checked = enableMarkdown;
     document.querySelector("#markdownTemplate").value = result.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
+    toggleConfigVisibility("config-markdown", enableMarkdown);
+
+    // Obsidian Extension
+    const enableObsidian = result.enableObsidian !== false; // Default true (was false)
+    document.querySelector("#enableObsidian").checked = enableObsidian;
+    document.querySelector("#obsidianVault").value = result.obsidianVault || "Obsidian";
+    document.querySelector("#obsidianPath").value = result.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
+    document.querySelector("#obsidianTemplate").value = result.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
+    toggleConfigVisibility("config-obsidian", enableObsidian);
 
     // 2. Restore Stats
     const stats = result.stats || { articles: 0, tokens: 0 };
@@ -81,8 +113,35 @@ function restoreOptions() {
   updateCacheInfo();
 }
 
+function toggleConfigVisibility(id, enabled) {
+    const el = document.getElementById(id);
+    if (enabled) {
+        el.style.display = "block";
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+    } else {
+        el.style.opacity = "0.5";
+        el.style.pointerEvents = "none";
+        // Optionally hide completely: el.style.display = "none";
+        // But users prefer to see what they are enabling.
+        // Let's use disabled look
+    }
+}
+
+// Add listeners for toggles
+document.querySelector("#enableMarkdown").addEventListener("change", (e) => {
+    toggleConfigVisibility("config-markdown", e.target.checked);
+});
+document.querySelector("#enableObsidian").addEventListener("change", (e) => {
+    toggleConfigVisibility("config-obsidian", e.target.checked);
+});
+
 function resetTemplate() {
     document.querySelector("#markdownTemplate").value = DEFAULT_MARKDOWN_TEMPLATE;
+}
+
+function resetObsidianTemplate() {
+    document.querySelector("#obsidianTemplate").value = DEFAULT_OBSIDIAN_TEMPLATE;
 }
 
 function showStatus(text) {
@@ -305,8 +364,10 @@ async function clearCache() {
 // --- Event Listeners ---
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("#save").addEventListener("click", saveOptions);
-document.querySelector("#saveExport").addEventListener("click", saveOptions);
+document.querySelector("#saveCustom").addEventListener("click", saveOptions);
+document.querySelector("#saveExtensions").addEventListener("click", saveOptions);
 document.querySelector("#resetTemplate").addEventListener("click", resetTemplate);
+document.querySelector("#resetObsidianTemplate").addEventListener("click", resetObsidianTemplate);
 document.querySelector("#checkModels").addEventListener("click", listModels);
 document.getElementById("clearHistory").addEventListener("click", clearHistory);
 document.getElementById("clearCache").addEventListener("click", clearCache);

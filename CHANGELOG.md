@@ -2,6 +2,13 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [1.0.4] - 2026-02-13
+
+### Corregit
+
+- **Filtre de Models (Sidebar)**: Ara la barra lateral oculta correctament els models "preview", "pro-exp" i "embedding", alineant-se amb la configuració.
+- **Resum de YouTube**: Millora en l'extracció de transcripcions (YouTube Transcript) per evitar l'error "Proporcioneu el text".
+
 ## [1.0.0] - 2026-02-13
 
 ### Afegit
