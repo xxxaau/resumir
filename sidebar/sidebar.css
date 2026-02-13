@@ -1,0 +1,224 @@
+:root {
+  --bg-color: #f9f9fb;
+  --text-color: #15141a;
+  --text-muted: #666;
+  --border-color: #ddd;
+  --toolbar-bg: transparent;
+  --button-hover: #e0e0e0;
+  --button-text: #333;
+  --primary-color: #0060df;
+  --primary-hover: #003eaa;
+  --primary-text: white;
+  --secondary-bg: #e0e0e0;
+  --secondary-hover: #d0d0d0;
+  --error-bg: #fdf2f5;
+  --error-text: #d70022;
+  --footer-bg: #f0f0f4;
+  --footer-border: #ddd;
+  --footer-text: #666;
+  --icon-color: currentColor;
+}
+
+[data-actual-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --text-muted: #bfbfbf; /* Lighter for better contrast */
+  --border-color: #333333;
+  --toolbar-bg: #1e1e1e;
+  --button-hover: #2c2c2e;
+  --button-text: #ffffff;
+  --primary-color: #8cb4ff; /* Accessible Light Blue */
+  --primary-hover: #b3d1ff;
+  --primary-text: #000000; /* Dark text on light blue button */
+  --secondary-bg: #2c2c2e;
+  --secondary-hover: #3a3a3c;
+  --error-bg: #3b0f15;
+  --error-text: #ffb4b4;
+  --footer-bg: #1e1e1e;
+  --footer-border: #333333;
+  --footer-text: #bfbfbf;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 15px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Toolbar Styles */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 8px 12px; /* Add padding for header look */
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--toolbar-bg) !important;
+  /* Ensure generic styles work */
+  margin-top: -15px; /* Offset body padding if needed, or adjust body padding. 
+     Actually body has padding 15px. To make toolbar full width, we might need negative margin 
+     or move toolbar out of body padding. 
+     Let's keep it simple: just bg color for now, maybe rounded? 
+     User said "barra superior quedi en fosc". If it's inside body padding, it's just a bar. 
+     Let's try to make it look like a header by removing top margin impact if possible. 
+     But seeing current CSS, it's just a flex box. */
+  border-radius: 4px; /* Slight roundness if inside padding */
+}
+
+/* Button Styles */
+.toolbar button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 4px;
+  transition: background-color 0.2s;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  color: var(--text-muted);
+}
+
+.toolbar button:hover:not(:disabled) {
+  background-color: var(--button-hover);
+  color: var(--button-text);
+}
+
+.toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#settingsBtn {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+#settingsBtn:hover {
+  background-color: var(--button-hover);
+  color: var(--button-text);
+}
+
+/* Content Area */
+#content {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none;
+}
+
+#loading {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+#error {
+  color: var(--error-text);
+  background-color: var(--error-bg);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+/* Specific Action Buttons (Summarize etc) */
+/* button.action-btn { } */
+
+/* Main Buttons (if any outside toolbar, like "Stop") */
+#summarizeBtn.stop-btn {
+   background-color: var(--secondary-bg);
+   color: var(--button-text);
+}
+#summarizeBtn.stop-btn:hover {
+   background-color: var(--secondary-hover);
+   color: var(--error-text);
+}
+
+#summarizeBtn.primary {
+   /* Icon color is inherited from button color usually, but primary has white text */
+   color: var(--primary-color); 
+}
+#summarizeBtn.primary:hover {
+   background-color: var(--button-hover); /* Keep consistent with toolbar */
+}
+/* Wait, the implementation of summarizeBtn in HTML is inside .toolbar now? 
+   No, looking at HTML: 
+   <div class="toolbar">
+      <button id="summarizeBtn" ...>
+   So it is a toolbar button. 
+   Original CSS had .primary class with blue background. 
+   But in the toolbar design (icon only), usually we don't want a big blue block unless it's the main action. 
+   The original CSS had:
+   .primary { background-color: #0060df; color: white; }
+   But also .toolbar button { ... background: none ... } 
+   Let's see if specific classes override.
+   Yes, .primary overrides if it has higher specificity or comes later.
+   In original CSS, .primary was later.
+   However, for an icon-only toolbar, a filled background might look heavy.
+   Let's stick to the subtle design: transparent background, color changes on hover, OR icon color is primary.
+   Let's make the "Play" icon primary color, but background transparent until hover.
+*/
+
+#summarizeBtn.primary {
+    color: var(--primary-color);
+    background-color: transparent;
+}
+#summarizeBtn.primary:hover {
+    background-color: __rgba_primary_weak__; /* We don't have alpha var yet. Let's use button-hover */
+    background-color: var(--button-hover);
+}
+
+/* Footer Status */
+#footer-status {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--footer-bg);
+  border-top: 1px solid var(--footer-border);
+  padding: 8px 15px;
+  font-size: 11px;
+  color: var(--footer-text);
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  z-index: 100;
+  align-items: center;
+}
+
+#model-select {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  appearance: auto; 
+  max-width: 110px;
+}
+
+#model-select option {
+  color: var(--text-color);
+  background: var(--bg-color);
+}
+
+#footer-status .separator {
+  margin: 0 8px;
+  color: var(--border-color); /* or strict color */
+  opacity: 0.5;
+}
+
+#container {
+  padding-bottom: 40px;
+}

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Resumir contingut - Configuració</title>
+  <link rel="stylesheet" href="settings.css">
+  <script src="../theme.js"></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      Configuració
+    </div>
+    <button class="nav-item active" data-tab="general">
+      General
+    </button>
+    <button class="nav-item" data-tab="custom">
+      Personalització
+    </button>
+    <button class="nav-item" data-tab="stats">
+      Estadístiques
+    </button>
+    <button class="nav-item" data-tab="about">
+      Sobre l'extensió
+    </button>
+
+    <div class="sidebar-spacer"></div>
+  </div>
+
+  <div class="main-content">
+    
+    <!-- Tab: General -->
+    <div id="tab-general" class="tab-pane active">
+      <h1 class="page-title">Configuració general</h1>
+      
+      <!-- Stats Section -->
+      <div class="section">
+        <div class="section-header">
+            <h3>Activitat</h3>
+            <div class="date-filter">Últims 30 dies</div>
+        </div>
+        <div class="stats-overview">
+            <div class="stat-highlight">
+                <span id="statsArticles" class="stat-value">0</span>
+                <span class="stat-label">pàgines resumides</span>
+            </div>
+            <!-- Simple SVG Chart Placeholder -->
+            <div class="chart-placeholder">
+                <svg aria-hidden="true" viewBox="0 0 500 100" class="chart-svg">
+                    <!-- Blue Bar Chart -->
+                    <rect x="20" y="40" width="40" height="60" fill="#0060df" rx="2"></rect>
+                    <rect x="80" y="60" width="40" height="40" fill="#0060df" rx="2"></rect>
+                    <rect x="140" y="30" width="40" height="70" fill="#0060df" rx="2"></rect>
+                    <rect x="200" y="50" width="40" height="50" fill="#0060df" rx="2"></rect>
+                    <rect x="260" y="20" width="40" height="80" fill="#0060df" rx="2"></rect>
+                    <rect x="320" y="45" width="40" height="55" fill="#0060df" rx="2"></rect>
+                    <rect x="380" y="70" width="40" height="30" fill="#0060df" rx="2"></rect>
+                    <rect x="440" y="10" width="40" height="90" fill="#0060df" rx="2"></rect>
+                </svg>
+            </div>
+        </div>
+        <div class="stats-details">
+             Tokens estimats: <span id="statsTokens">0</span> | Cost aprox: <span id="statsCost">0.00 €</span>
+        </div>
+      </div>
+
+      <div class="section">
+          <h3>Claus i Models</h3>
+          <div class="form-group">
+            <label for="apiKey">Google Gemini API Key</label>
+            <input type="password" id="apiKey" class="form-control" placeholder="Introdueix la teva clau API">
+            <div class="help-text">Necessària per connectar amb els serveis de Google AI.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="modelName">Model de Resum</label>
+            <div class="model-input-group">
+                <input type="text" id="modelName" class="form-control" placeholder="gemini-1.5-flash">
+                <button id="checkModels" class="btn btn-secondary">Cercar models</button>
+            </div>
+            <div id="modelsList"></div>
+            <div class="help-text">El model utilitzat per generar els resums.</div>
+          </div>
+      </div>
+
+      <div class="section">
+          <h3>Emmagatzematge i Privadesa</h3>
+          <div class="form-group">
+              <label>Memòria Cau Local</label>
+              <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                  L'extensió guarda còpies locals dels resums per estalviar costos i millorar la velocitat.
+                  Aquesta informació no surt mai del teu ordinador.
+              </p>
+              <div style="display: flex; align-items: center; gap: 15px;">
+                  <button id="clearCache" class="btn btn-secondary" style="border-color: #d70022; color: #d70022;">Buidar Memòria Cau</button>
+                  <span id="cacheStatus" style="font-size: 0.9em; color: #666;">Calculant...</span>
+              </div>
+          </div>
+      </div>
+
+      <div class="section-actions">
+           <button id="save" class="btn btn-primary">Desar canvis</button>
+      </div>
+
+    </div>
+
+    <!-- Tab: Customization (Theme, System Prompt, Export) -->
+    <div id="tab-custom" class="tab-pane">
+        <h1 class="page-title">Personalització</h1>
+
+        <div class="section">
+            <h3>Aparença</h3>
+            <div class="form-group">
+              <label for="themeSelect">Tema</label>
+              <select id="themeSelect" class="form-control">
+                <option value="system">Sistema (Automàtic)</option>
+                <option value="light">Clar</option>
+                <option value="dark">Fosc</option>
+              </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Comportament</h3>
+            <div class="form-group">
+              <label for="systemPrompt">Instruccions de l'Assistent (System Prompt)</label>
+              <textarea id="systemPrompt" class="form-control" rows="20" placeholder="Instruccions pel model..."></textarea>
+              <div class="help-text">Defineix com vols que es comporti l'assistent (idioma, to, longitud).</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Exportació (Markdown)</h3>
+            <p style="color: #666; margin-bottom: 20px;">Personalitza el format en què es copien els resums.</p>
+            
+            <div class="form-group">
+                <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
+                <div class="help-text">
+                    Variables: <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary}}</code>
+                </div>
+            </div>
+            
+            <div class="section-actions">
+                <button id="resetTemplate" class="btn btn-secondary">Restaurar per defecte</button>
+                <button id="saveExport" class="btn btn-primary">Desar canvis</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Statistics -->
+    <div id="tab-stats" class="tab-pane">
+        <h1 class="page-title">Estadístiques d'Ús</h1>
+        
+        <!-- KPI Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="kpiRequests">0</div>
+                <div class="stat-label">Peticions Totals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="kpiTokens">0</div>
+                <div class="stat-label">Tokens Processats</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="kpiSpeed">0 t/s</div>
+                <div class="stat-label">Velocitat Mitjana</div>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="section">
+            <h3>Historial de Peticions</h3>
+            <div class="table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Model</th>
+                            <th>Article</th>
+                            <th>Tokens</th>
+                            <th>Temps</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <button id="clearHistory" class="btn btn-secondary btn-sm">Esborrar Historial</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: About (Moved to end) -->
+    <div id="tab-about" class="tab-pane">
+        <h1 class="page-title">Sobre l'extensió</h1>
+        
+        <div class="section about-section">
+            <div class="app-info">
+                <img src="../icons/icon.svg" width="64" height="64" alt="Logo">
+                <div>
+                     <h3>Resumir contingut</h3>
+                     <p>Versió <span id="appVersion">1.0.0</span></p>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="btnGithub" class="btn btn-secondary">GitHub</button>
+                <button id="btnIssues" class="btn btn-secondary">Reportar un error</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Historial de Canvis</h3>
+            <div class="changelog" style="border-left: 2px solid #e0e0e6; padding-left: 20px; margin-left: 10px;">
+                <div class="version-entry" style="margin-bottom: 25px; position: relative;">
+                    <div class="version-title" style="font-weight: bold; margin-bottom: 5px;">
+                        v1.0.0 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                    </div>
+                    <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444;">
+                         <li>Llançament inicial de la versió pública 1.0.</li>
+                         <li>Canvi de nom a "Resumir contingut".</li>
+                         <li>Noves funcionalitats d'estadístiques i suport per a YouTube.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-footer" style="text-align: center; margin-top: 50px; color: #999; font-size: 13px;">
+            <small>Creat per <a id="linkAuthor" href="#" style="color: inherit; text-decoration: none;">Sergi Xaudiera</a></small>
+        </div>
+    </div>
+
+  </div> <!-- End Main Content -->
+
+  <div id="status" class="toast">Configuració guardada correctament!</div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
