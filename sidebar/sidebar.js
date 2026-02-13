@@ -87,17 +87,7 @@ Estructura de la resposta:
         const data = await browser.storage.local.get("markdownTemplate");
         const template = data.markdownTemplate || "# [{{title}}]({{url}})\n\n{{summary}}";
         
-        let execSummary = currentMetadata.summary || "";
-        const headerMatch = execSummary.match(/^###/m);
-        if (headerMatch) {
-            execSummary = execSummary.substring(0, headerMatch.index).trim();
-        }
-
-        const markdown = template
-            .replace(/{{title}}/g, currentMetadata.title)
-            .replace(/{{url}}/g, currentMetadata.url)
-            .replace(/{{summary}}/g, currentMetadata.summary)
-            .replace(/{{summary_executive}}/g, execSummary);
+        const markdown = formatMarkdownContent(template, currentMetadata);
     
         await navigator.clipboard.writeText(markdown);
         
@@ -140,13 +130,22 @@ Estructura de la resposta:
         // https://help.obsidian.md/Extending+Obsidian/Obsidian+URI
         const uri = `obsidian://new?vault=${encodeURIComponent(vault)}&file=${encodeURIComponent(filePath)}&content=${encodeURIComponent(content.trim())}&append=true`;
 
-        // Open using a hidden iframe to avoid opening a new tab/window in Firefox
-        // This is often more reliable for protocols than link clicks
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = uri;
-        document.body.appendChild(iframe);
-        setTimeout(() => iframe.remove(), 2000); // Give it enough time to trigger
+        // Use browser.tabs.update to trigger the protocol handler from the active tab.
+        // This is the standard way for WebExtensions to open external protocols without CSP issues.
+        try {
+            const tabs = await browser.tabs.query({active: true, currentWindow: true});
+            if (tabs.length > 0) {
+                await browser.tabs.update(tabs[0].id, {url: uri});
+            } else {
+                // No active tab? Create a new one and close it (fallback)
+                const tab = await browser.tabs.create({ url: uri, active: false });
+                setTimeout(() => browser.tabs.remove(tab.id), 5000);
+            }
+        } catch (err) {
+            console.error("Obsidian protocol failed:", err);
+            errorDiv.textContent = "Error obrint Obsidian: " + err.message;
+            errorDiv.classList.remove("hidden");
+        }
         
         // Visual feedback
         const originalChild = obsidianBtn.firstElementChild.cloneNode(true);
@@ -160,81 +159,7 @@ Estructura de la resposta:
     }
   });
 
-  // ISO Week Date functions
-  function getISOWeekDate(d) {
-    const date = new Date(d.valueOf());
-    const dayNumber = (d.getUTCDay() + 6) % 7;
-    date.setUTCDate(date.getUTCDate() - dayNumber + 3);
-    const firstThursday = date.valueOf();
-    date.setUTCMonth(0, 1);
-    if (date.getUTCDay() !== 4) {
-      date.setUTCMonth(0, 1 + ((4 - date.getUTCDay()) + 7) % 7);
-    }
-    const weekNumber = 1 + Math.ceil((firstThursday - date) / 604800000);
-    const weekYear = date.getUTCFullYear();
-    return { week: weekNumber, year: weekYear };
-  }
 
-  function formatObsidianPath(template) {
-      const now = new Date();
-      
-      const tokens = {
-          'YYYY': now.getFullYear().toString(),
-          'MM': (now.getMonth() + 1).toString().padStart(2, '0'),
-          'DD': now.getDate().toString().padStart(2, '0'),
-          'HH': now.getHours().toString().padStart(2, '0'),
-          'mm': now.getMinutes().toString().padStart(2, '0'),
-          // ISO Week Year
-          'gggg': () => getISOWeekDate(now).year.toString(),
-          // ISO Week Number
-          'ww': () => getISOWeekDate(now).week.toString().padStart(2, '0')
-      };
-
-      // 1. Handle escaped brackets [text] -> protect them
-      // We'll replace them with a placeholder, process date tokens, then restore
-      const placeholders = [];
-      let processed = template.replace(/\[([^\]]+)\]/g, (match, content) => {
-          placeholders.push(content);
-          return `__ESC_${placeholders.length - 1}__`;
-      });
-
-      // 2. Process Date Tokens (Sort by length desc to avoid substring collisions)
-      // Actually simple replace for known tokens is fine if we are careful
-      // But user might use 'YYYY' or 'gggg'
-      
-      // Let's use a regex that matches our tokens
-      const tokenRegex = /gggg|YYYY|MM|DD|ww|HH|mm/g;
-      
-      processed = processed.replace(tokenRegex, (match) => {
-          const val = tokens[match];
-          return typeof val === 'function' ? val() : val;
-      });
-
-      // 3. Restore escaped content
-      return processed.replace(/__ESC_(\d+)__/g, (match, index) => {
-          return placeholders[index];
-      });
-  }
-
-  // Alias for compatibility if needed, using the new logic
-  const parseObsidianPath = formatObsidianPath;
-
-  function formatObsidianContent(template, metadata) {
-      // Extract Executive Summary (Text before first Header)
-      let execSummary = metadata.summary || "";
-      // Regex: Start of string until first markdown header (### or **) or specific marker
-      // Since our Prompt enforces no headers for the first paragraph, it should be everything until "### Punts Clau"
-      const headerMatch = execSummary.match(/^###/m);
-      if (headerMatch) {
-          execSummary = execSummary.substring(0, headerMatch.index).trim();
-      }
-      
-      return template
-          .replace(/{{title}}/g, metadata.title)
-          .replace(/{{url}}/g, metadata.url)
-          .replace(/{{summary}}/g, metadata.summary)
-          .replace(/{{summary_executive}}/g, execSummary).trim();
-  }
 
   settingsBtn.addEventListener("click", () => {
     browser.runtime.openOptionsPage();
@@ -444,7 +369,7 @@ Estructura de la resposta:
       };
       
       const safeLimit = tokenLimits[modelName] || 8000;
-      const estimatedTokens = Math.ceil(pageText.length / 4);
+      const estimatedTokens = estimateTokens(pageText);
       
       if (estimatedTokens > safeLimit) {
            const charLimit = safeLimit * 3.5; // Conservative char count

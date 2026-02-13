@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Resumir Contingut - Unit Tests</title>
+  <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f5f5f5; }
+      h1 { color: #333; }
+      .test-group { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+      .test-group h2 { margin-top: 0; color: #555; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+      .test-case { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+      .test-case:last-child { border-bottom: none; }
+      .status { font-weight: bold; margin-right: 15px; min-width: 60px; }
+      .status.pass { color: #28a745; }
+      .status.fail { color: #dc3545; }
+      .name { flex-grow: 1; }
+      .error { color: #dc3545; font-size: 0.9em; margin-top: 4px; display: block; }
+      #summary { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
+  </style>
+  <script src="../sidebar/utils.js"></script>
+</head>
+<body>
+
+  <h1>Extensió Resumir Contingut - Tests</h1>
+  
+  <div id="results"></div>
+  <div id="summary"></div>
+
+  <script src="test_logic.js"></script>
+</body>
+</html>

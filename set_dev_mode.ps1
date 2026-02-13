@@ -13,11 +13,11 @@ if ($Mode -eq "dev") {
     
     # Update Manifest
     $json.name = "Resumir contingut (DEV)"
-    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum-dev@example.com"
+    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum@example.com"
     
     # Save Manifest
-    $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath
-    Write-Host "Manifest updated with DEV ID."
+    $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
+    Write-Host "Manifest updated with DEV ID (using PROD UUID for compatibility)."
 
     # Generate DEV Icons (Orange/Red)
     Add-Type -AssemblyName System.Drawing
@@ -63,10 +63,10 @@ elseif ($Mode -eq "prod") {
     
     # Restore Manifest
     $json.name = "Resumir contingut"
-    $json.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
+    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum@example.com"
     
     # Save Manifest
-    $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath
+    $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
     Write-Host "Manifest restored to PROD ID."
     
     # Regenerate Original Icons

@@ -2,6 +2,24 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [1.1.4] - 2026-02-13
+
+### Corregit
+
+- **Integració Obsidian (Fix Final)**: Canvi d'estratègia tècnica. Substituït `window.open` per `browser.tabs.update` per evitar bloquejos de CSP en producció i garantir que l'URI `obsidian://` s'obre correctament.
+
+## [1.1.3] - 2026-02-13
+
+### Corregit
+
+- **Validació AMO**: Corregit l'ID de l'extensió al `manifest.json` (`sergi-firefox-resum@example.com`) per coincidir amb el registrat a Mozilla Add-ons, permetent la pujada de noves versions.
+
+## [1.1.2] - 2026-02-13
+
+### Corregit
+
+- **Integració Obsidian**: Primera temptativa de solucionar l'error en producció eliminant l'`iframe` ocult i utilitzant `window.open` amb `_self`.
+
 ## [1.0.4] - 2026-02-13
 
 ### Corregit
