@@ -13,7 +13,7 @@ if ($Mode -eq "dev") {
     
     # Update Manifest
     $json.name = "Resumir contingut (DEV)"
-    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum@example.com"
+    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum-dev@example.com"
     
     # Save Manifest
     $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8

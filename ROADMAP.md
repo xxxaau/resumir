@@ -4,19 +4,11 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 
 ## 🐛 Known Issues & Bugs
 
-- **[CRITICAL] Obsidian Integration in Production:** The "Click to Obsidian" feature fails in the signed/production version of the extension.
-  - _Symptoms:_ Clicking the button does nothing or logs an error.
-  - _Potential Cause:_ Firefox production security policies (CSP) or sandbox blocking the hidden `iframe` used to trigger the `obsidian://` protocol.
-  - _Proposed Fix:_ Replace hidden iframe with `window.open(uri, '_self')` or use `tabs.update`.
+- (Cap error crític conegut actualment)
 
 ## 🛡️ Millores Tècniques i Manteniment
 
-### 1. Tests Unitaris (Vitest/Jest)
-
-- **Prioritat:** Alta (Estabilitat Produecció)
-- **Benefici:** Assegurar que la lògica de neteja de text i gestió d'errors no es trenca amb futures actualitzacions. Evitar regressions en producció.
-
-### 2. Migració a TypeScript
+### 1. Migració a TypeScript
 
 - **Prioritat:** Baixa (Millora no urgent)
 - **Benefici:** Major robustesa del codi, tipat estàtic per a les estructures de dades.
@@ -24,6 +16,16 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 ---
 
 ## ✅ Implementat
+
+### 2. Tests Unitaris
+
+- **Estat:** ✅ Implementat (v1.1.4)
+- **Detalls:** Tests d'integració bàsics a `tests/test.html` i lògica separada a `utils.js`.
+
+### 3. Integració Obsidian (Fix Producció)
+
+- **Estat:** ✅ Implementat (v1.1.4)
+- **Detalls:** Solucionat l'error de CSP utilitzant `browser.tabs.update`.
 
 ### 3. Sistema de Memòria Cau (Cache) Local
 
