@@ -21,9 +21,19 @@ Estructura de la resposta:
 
 const DEFAULT_OBSIDIAN_TEMPLATE = `- [{{title}}]({{url}})\n\t- {{summary_executive}}`;
 
+const DEFAULT_DEEP_DIVE_PROMPT = `Actua com un expert analista. Proporciona una anàlisi profunda i exhaustiva del contingut següent.
+Inclou arguments detallats, evidències mencionades i matisos importants.
+Estructura la resposta amb seccions clares.
+Respon SEMPRE en CATALÀ.`;
+
 // --- Navigation Logic ---
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
+
+// Event Delegation for Sidebar Navigation (Static & Dynamic)
+document.querySelector('.sidebar').addEventListener('click', (e) => {
+    // Traverse up to find .nav-item
+    const item = e.target.closest('.nav-item');
+    if (!item) return;
+
     // Remove active class from all
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
@@ -31,18 +41,73 @@ document.querySelectorAll('.nav-item').forEach(item => {
     // Add to current
     item.classList.add('active');
     const tabId = item.getAttribute('data-tab');
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-  });
+    const tab = document.getElementById(`tab-${tabId}`);
+    if (tab) {
+        tab.classList.add('active');
+    }
 });
 
-// --- Options Management ---
+// Navigate to tab helper
+function navigateToTab(tabId) {
+    // Find nav item (might be dynamic)
+    const navItem = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+    
+    // Simulate click if exists, otherwise manually switch
+    if (navItem) {
+        navItem.click();
+    } else {
+        // Fallback for sub-tabs not in sidebar (shouldn't happen with new design, but safety)
+        document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+}
+
+// --- Dynamic Sidebar Logic ---
+function updateSidebar() {
+    const list = document.getElementById("activeExtensionsList");
+    const header = document.getElementById("activeExtensionsHeader");
+    list.replaceChildren(); // Clear
+
+    const extensions = [
+        { id: "obsidian", label: "Obsidian", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>' },
+        { id: "markdown", label: "Markdown", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l4 5 4-5v10"/><path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"/></svg>' },
+        { id: "deepdive", label: "Aprofundiment", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>' },
+        { id: "bionic", label: "Lectura Biònica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' }
+    ];
+
+    let count = 0;
+    extensions.forEach(ext => {
+        // Special case for ID construction if needed, but 'enableObsidian', 'enableMarkdown', 'enableDeepdive', 'enableBionic' match
+        const checkboxId = "enable" + ext.id.charAt(0).toUpperCase() + ext.id.slice(1);
+        const checkbox = document.getElementById(checkboxId);
+        
+        if (checkbox && checkbox.checked) {
+            count++;
+            const btn = document.createElement("button");
+            btn.className = "nav-item dynamic-extension";
+            btn.setAttribute("data-tab", ext.id);
+            btn.innerHTML = `${ext.icon}${ext.label}`;
+            
+            if (document.getElementById(`tab-${ext.id}`)?.classList.contains('active')) {
+                btn.classList.add('active');
+            }
+
+            list.appendChild(btn);
+        }
+    });
+
+    if (count > 0) {
+        header.style.display = "block";
+    } else {
+        header.style.display = "none";
+    }
+}
 
 // --- Options Management ---
 
 function saveOptions(e) {
-  e.preventDefault();
+  if(e) e.preventDefault();
   
-  // Save all settings including Main, Custom and Extensions
   const settings = {
     apiKey: document.querySelector("#apiKey").value,
     modelName: document.querySelector("#modelName").value,
@@ -56,85 +121,93 @@ function saveOptions(e) {
     enableObsidian: document.querySelector("#enableObsidian").checked,
     obsidianVault: document.querySelector("#obsidianVault").value,
     obsidianPath: document.querySelector("#obsidianPath").value,
-    obsidianTemplate: document.querySelector("#obsidianTemplate").value
+    obsidianTemplate: document.querySelector("#obsidianTemplate").value,
+
+    enableBionic: document.querySelector("#enableBionic").checked,
+    bionicFixation: parseInt(document.querySelector("#bionicFixation").value),
+    bionicFont: document.querySelector("#bionicFont").value,
+    bionicLineHeight: document.querySelector("#bionicLineHeight").value,
+
+    enableDeepdive: document.querySelector("#enableDeepdive").checked,
+    deepDivePrompt: document.querySelector("#deepDivePrompt").value
   };
 
-  browser.storage.local.set(settings).then(() => {
+
+  Promise.all([
+      browser.storage.sync.set(settings),
+      browser.storage.local.set(settings)
+  ]).then(() => {
      showStatus("Configuració guardada correctament!");
+     updateSidebar(); 
+  }).catch(err => {
+     console.error("Error saving options:", err);
+     showStatus("Error guardant configuració.");
   });
 }
 
 function restoreOptions() {
-  // 1. Restore Fields
-  browser.storage.local.get([
-      "apiKey", "modelName", "theme", "systemPrompt", "stats", 
+  browser.storage.sync.get([
+      "apiKey", "modelName", "theme", "systemPrompt", 
       "enableMarkdown", "markdownTemplate",
-      "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate"
+      "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate",
+      "enableBionic", "enableDeepdive", "enableDeepDive", "deepDivePrompt"
   ]).then(result => {
     document.querySelector("#apiKey").value = result.apiKey || "";
-    document.querySelector("#modelName").value = result.modelName || "gemma-3-27b-it";
+    document.querySelector("#modelName").value = result.modelName || "gemini-1.5-flash-latest";
     document.querySelector("#themeSelect").value = result.theme || "system";
     document.querySelector("#systemPrompt").value = result.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     
-    // Markdown Extension
-    const enableMarkdown = result.enableMarkdown !== false; // Default true
-    document.querySelector("#enableMarkdown").checked = enableMarkdown;
+    document.querySelector("#enableMarkdown").checked = result.enableMarkdown === true;
     document.querySelector("#markdownTemplate").value = result.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
-    toggleConfigVisibility("config-markdown", enableMarkdown);
 
-    // Obsidian Extension
-    const enableObsidian = result.enableObsidian !== false; // Default true (was false)
-    document.querySelector("#enableObsidian").checked = enableObsidian;
+    document.querySelector("#enableObsidian").checked = result.enableObsidian === true;
     document.querySelector("#obsidianVault").value = result.obsidianVault || "Obsidian";
     document.querySelector("#obsidianPath").value = result.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
     document.querySelector("#obsidianTemplate").value = result.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
-    toggleConfigVisibility("config-obsidian", enableObsidian);
 
-    // 2. Restore Stats
-    const stats = result.stats || { articles: 0, tokens: 0 };
-    document.querySelector("#statsArticles").textContent = stats.articles;
-    document.querySelector("#statsTokens").textContent = stats.tokens.toLocaleString();
-    
-    // Cost estimation
-    const costUSD = (stats.tokens / 1000000) * 0.10;
-    const costEUR = costUSD * 0.92;
-    document.querySelector("#statsCost").textContent = costEUR.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 6 });
+    document.querySelector("#enableBionic").checked = result.enableBionic === true;
+    document.querySelector("#bionicFixation").value = result.bionicFixation || 45;
+    document.querySelector("#bionicFixationValue").textContent = (result.bionicFixation || 45) + "%";
+    document.querySelector("#bionicFont").value = result.bionicFont || "sans-serif";
+    document.querySelector("#bionicLineHeight").value = result.bionicLineHeight || "1.5";
+
+    // Handle migration/fallback for Deep Dive
+    const isDeepDiveEnabled = result.enableDeepdive === true || result.enableDeepDive === true;
+    document.querySelector("#enableDeepdive").checked = isDeepDiveEnabled;
+    document.querySelector("#deepDivePrompt").value = result.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT;
+
+    updateSidebar();
+    updateCacheInfo();
+    loadStatistics();
+
   });
 
-  // 3. Restore Version
   const manifest = browser.runtime.getManifest();
   document.getElementById("appVersion").textContent = manifest.version;
-  
-  // 4. Load Stats
-  loadStatistics();
-
-  
-  // 5. Load Cache Info
-  updateCacheInfo();
 }
-
-function toggleConfigVisibility(id, enabled) {
-    const el = document.getElementById(id);
-    if (enabled) {
-        el.style.display = "block";
-        el.style.opacity = "1";
-        el.style.pointerEvents = "auto";
-    } else {
-        el.style.opacity = "0.5";
-        el.style.pointerEvents = "none";
-        // Optionally hide completely: el.style.display = "none";
-        // But users prefer to see what they are enabling.
-        // Let's use disabled look
-    }
-}
-
-// Add listeners for toggles
-document.querySelector("#enableMarkdown").addEventListener("change", (e) => {
-    toggleConfigVisibility("config-markdown", e.target.checked);
+ 
+// Real-time fixation value update
+document.getElementById("bionicFixation").addEventListener("input", (e) => {
+    document.getElementById("bionicFixationValue").textContent = e.target.value + "%";
 });
-document.querySelector("#enableObsidian").addEventListener("change", (e) => {
-    toggleConfigVisibility("config-obsidian", e.target.checked);
+
+// Handle "Configure" buttons in extension list
+document.querySelectorAll('.btn-icon[data-target]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const target = e.currentTarget.getAttribute('data-target');
+        navigateToTab(target);
+    });
 });
+
+// Handle "Live" Toggles in extension list
+const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic"];
+extensionToggles.forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+        updateSidebar();
+        saveOptions(); // Auto-save on toggle? or just update visuals? User implies toggle == active. Safer to save.
+    });
+});
+
 
 function resetTemplate() {
     document.querySelector("#markdownTemplate").value = DEFAULT_MARKDOWN_TEMPLATE;
@@ -210,6 +283,9 @@ async function listModels(e) {
 
 // --- Statistics Logic ---
 
+const PAGE_SIZE = 20;
+let currentPage = 1;
+
 async function loadStatistics() {
     try {
         const data = await browser.storage.local.get(["stats", "usageHistory"]);
@@ -217,12 +293,15 @@ async function loadStatistics() {
         const history = data.usageHistory || []; // Array of {date, title, url, model, inputTokens, outputTokens, latency}
 
         // 1. Update KPI Cards
-        document.getElementById("kpiRequests").textContent = stats.articles;
-        document.getElementById("kpiTokens").textContent = stats.tokens.toLocaleString();
+        // Use standard element IDs as defined in the new HTML
+        const elRequests = document.getElementById("kpiRequests");
+        const elTokens = document.getElementById("kpiTokens");
+        const elSpeed = document.getElementById("kpiSpeed");
+
+        if(elRequests) elRequests.textContent = stats.articles;
+        if(elTokens) elTokens.textContent = stats.tokens.toLocaleString();
         
         // Calculate Avg Speed (Tokens / Second)
-        // We can use history for a more accurate recent speed, or just global if we tracked time globally (we didn't).
-        // Let's use the average of the last 100 requests in history for the "Current Speed" KPI.
         let avgSpeed = 0;
         if (history.length > 0) {
             const totalSpeed = history.reduce((acc, curr) => {
@@ -232,11 +311,42 @@ async function loadStatistics() {
             }, 0);
             avgSpeed = Math.round(totalSpeed / history.length);
         }
-        document.getElementById("kpiSpeed").textContent = `${avgSpeed} t/s`;
+        if(elSpeed) elSpeed.textContent = `${avgSpeed} t/s`;
+
+        // Update legacy stats in General tab if they still exist (stats-details)
+        const elStatsTokens = document.querySelector("#statsTokens");
+        const elStatsCost = document.querySelector("#statsCost");
+        if (elStatsTokens) elStatsTokens.textContent = stats.tokens.toLocaleString();
+        if (elStatsCost) {
+             const costUSD = (stats.tokens / 1000000) * 0.10;
+             const costEUR = costUSD * 0.92;
+             elStatsCost.textContent = costEUR.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 6 });
+        }
 
 
-        // 2. Render History Table
-        renderHistoryTable(history);
+        // 2. Render History Table with Pagination
+        // Sort history by date desc (newest first) if not already
+        // Assuming history is appended, so we might want to reverse it for display
+        const sortedHistory = [...history].reverse();
+
+        const visibleCount = currentPage * PAGE_SIZE;
+        const visibleHistory = sortedHistory.slice(0, visibleCount);
+        
+        renderHistoryTable(visibleHistory);
+
+        // 3. Manage Load More Button
+        const loadMoreBtn = document.getElementById("loadMoreHistory");
+        if (loadMoreBtn) {
+            if (sortedHistory.length > visibleCount) {
+                loadMoreBtn.style.display = "block";
+                loadMoreBtn.onclick = () => {
+                    currentPage++;
+                    loadStatistics();
+                };
+            } else {
+                loadMoreBtn.style.display = "none";
+            }
+        }
 
     } catch (e) {
         console.error("Error loading stats:", e);
@@ -261,9 +371,6 @@ function renderHistoryTable(history) {
         return;
     }
 
-    // Sort by date desc (assuming mostly sorted by unshift, but good to be sure if we merge)
-    // Actually sidebar uses unshift so index 0 is newest.
-    
     history.forEach(entry => {
         const tr = document.createElement("tr");
         
@@ -312,6 +419,7 @@ function renderHistoryTable(history) {
 function clearHistory() {
     if (confirm("Estàs segur que vols esborrar l'historial de peticions?")) {
         browser.storage.local.set({ usageHistory: [] }).then(() => {
+            currentPage = 1; // Reset pagination
             loadStatistics();
             showStatus("Historial esborrat.");
         });
@@ -363,9 +471,15 @@ async function clearCache() {
 
 // --- Event Listeners ---
 document.addEventListener("DOMContentLoaded", restoreOptions);
-document.querySelector("#save").addEventListener("click", saveOptions);
-document.querySelector("#saveCustom").addEventListener("click", saveOptions);
-document.querySelector("#saveExtensions").addEventListener("click", saveOptions);
+
+// Bind all save buttons to saveOptions
+const saveBtns = ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic"];
+saveBtns.forEach(id => {
+    const btn = document.querySelector("#" + id);
+    if(btn) btn.addEventListener("click", saveOptions);
+});
+
+
 document.querySelector("#resetTemplate").addEventListener("click", resetTemplate);
 document.querySelector("#resetObsidianTemplate").addEventListener("click", resetObsidianTemplate);
 document.querySelector("#checkModels").addEventListener("click", listModels);
@@ -383,3 +497,4 @@ document.getElementById("linkAuthor").addEventListener("click", (e) => {
     e.preventDefault();
     window.open("https://sergi.xaudiera.xyz", "_blank");
 });
+

@@ -1,330 +1,459 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Resumir contingut - Configuració</title>
-  <link rel="stylesheet" href="settings.css">
-  <script src="../theme.js"></script>
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Resumir contingut - Configuració</title>
+    <link rel="stylesheet" href="settings.css" />
+    <script src="../theme.js"></script>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="sidebar-header">Configuració</div>
+      <button class="nav-item active" data-tab="general">General</button>
+      <button class="nav-item" data-tab="custom">Personalització</button>
+      <button class="nav-item" data-tab="extensions">Extensions</button>
+      <button class="nav-item" data-tab="stats">Estadístiques</button>
+      <button class="nav-item" data-tab="about">Sobre l'extensió</button>
 
-  <div class="sidebar">
-    <div class="sidebar-header">
-      Configuració
-    </div>
-    <button class="nav-item active" data-tab="general">
-      General
-    </button>
-    <button class="nav-item" data-tab="custom">
-      Personalització
-    </button>
-    <button class="nav-item" data-tab="extensions">
-      Extensions
-    </button>
-    <button class="nav-item" data-tab="stats">
-      Estadístiques
-    </button>
-    <button class="nav-item" data-tab="about">
-      Sobre l'extensió
-    </button>
-
-    <div class="sidebar-spacer"></div>
-  </div>
-
-  <div class="main-content">
-    
-    <!-- Tab: General -->
-    <div id="tab-general" class="tab-pane active">
-      <h1 class="page-title">Configuració general</h1>
-      
-      <!-- Stats Section -->
-      <div class="section">
-        <div class="section-header">
-            <h3>Activitat</h3>
-            <div class="date-filter">Últims 30 dies</div>
-        </div>
-        <div class="stats-overview">
-            <div class="stat-highlight">
-                <span id="statsArticles" class="stat-value">0</span>
-                <span class="stat-label">pàgines resumides</span>
-            </div>
-            <!-- Simple SVG Chart Placeholder -->
-            <div class="chart-placeholder">
-                <svg aria-hidden="true" viewBox="0 0 500 100" class="chart-svg">
-                    <!-- Blue Bar Chart -->
-                    <rect x="20" y="40" width="40" height="60" fill="#0060df" rx="2"></rect>
-                    <rect x="80" y="60" width="40" height="40" fill="#0060df" rx="2"></rect>
-                    <rect x="140" y="30" width="40" height="70" fill="#0060df" rx="2"></rect>
-                    <rect x="200" y="50" width="40" height="50" fill="#0060df" rx="2"></rect>
-                    <rect x="260" y="20" width="40" height="80" fill="#0060df" rx="2"></rect>
-                    <rect x="320" y="45" width="40" height="55" fill="#0060df" rx="2"></rect>
-                    <rect x="380" y="70" width="40" height="30" fill="#0060df" rx="2"></rect>
-                    <rect x="440" y="10" width="40" height="90" fill="#0060df" rx="2"></rect>
-                </svg>
-            </div>
-        </div>
-        <div class="stats-details">
-             Tokens estimats: <span id="statsTokens">0</span> | Cost aprox: <span id="statsCost">0.00 €</span>
-        </div>
+      <div id="activeExtensionsHeader" class="sidebar-header" style="display:none; margin-top: 20px;">Extensions Actives</div>
+      <div id="activeExtensionsList">
+          <!-- Dynamic Links -->
       </div>
 
-      <div class="section">
+      <div class="sidebar-spacer"></div>
+      
+    </div>
+
+
+
+    <div class="main-content">
+      <!-- Tab: General -->
+      <div id="tab-general" class="tab-pane active">
+        <h1 class="page-title">Configuració general</h1>
+
+
+
+        <div class="section">
           <h3>Claus i Models</h3>
           <div class="form-group">
             <label for="apiKey">Google Gemini API Key</label>
-            <input type="password" id="apiKey" class="form-control" placeholder="Introdueix la teva clau API">
-            <div class="help-text">Necessària per connectar amb els serveis de Google AI.</div>
+            <input
+              type="password"
+              id="apiKey"
+              class="form-control"
+              placeholder="Introdueix la teva clau API"
+            />
+            <div class="help-text">
+              Necessària per connectar amb els serveis de Google AI.
+            </div>
           </div>
 
           <div class="form-group">
             <label for="modelName">Model de Resum</label>
             <div class="model-input-group">
-                <input type="text" id="modelName" class="form-control" placeholder="gemini-1.5-flash">
-                <button id="checkModels" class="btn btn-secondary">Cercar models</button>
+              <input
+                type="text"
+                id="modelName"
+                class="form-control"
+                placeholder="gemini-1.5-flash"
+              />
+              <button id="checkModels" class="btn btn-secondary">
+                Cercar models
+              </button>
             </div>
             <div id="modelsList"></div>
-            <div class="help-text">El model utilitzat per generar els resums.</div>
+            <div class="help-text">
+              El model utilitzat per generar els resums.
+            </div>
           </div>
-      </div>
+        </div>
 
-      <div class="section">
+        <div class="section">
           <h3>Emmagatzematge i Privadesa</h3>
           <div class="form-group">
-              <label>Memòria Cau Local</label>
-              <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
-                  L'extensió guarda còpies locals dels resums per estalviar costos i millorar la velocitat.
-                  Aquesta informació no surt mai del teu ordinador.
-              </p>
-              <div style="display: flex; align-items: center; gap: 15px;">
-                  <button id="clearCache" class="btn btn-secondary" style="border-color: #d70022; color: #d70022;">Buidar Memòria Cau</button>
-                  <span id="cacheStatus" style="font-size: 0.9em; color: #666;">Calculant...</span>
+            <label>Memòria Cau Local</label>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px">
+              L'extensió guarda còpies locals dels resums per estalviar costos i
+              millorar la velocitat. Aquesta informació no surt mai del teu
+              ordinador.
+            </p>
+            <div style="display: flex; align-items: center; gap: 15px">
+              <button
+                id="clearCache"
+                class="btn btn-secondary"
+                style="border-color: #d70022; color: #d70022"
+              >
+                Buidar Memòria Cau
+              </button>
+              <span id="cacheStatus" style="font-size: 0.9em; color: #666"
+                >Calculant...</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button id="save" class="btn btn-primary">Desar canvis</button>
+        </div>
+      </div>
+
+      <!-- Tab: Customization (Theme, System Prompt) -->
+      <div id="tab-custom" class="tab-pane">
+        <h1 class="page-title">Personalització</h1>
+
+        <div class="section">
+          <h3>Aparença</h3>
+          <div class="form-group">
+            <label for="themeSelect">Tema</label>
+            <select id="themeSelect" class="form-control">
+              <option value="system">Sistema (Automàtic)</option>
+              <option value="light">Clar</option>
+              <option value="dark">Fosc</option>
+              <option value="sepia">Sèpia (Crema)</option>
+              <option value="soft-gray">Gris Clar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Comportament</h3>
+          <div class="form-group">
+            <label for="systemPrompt"
+              >Instruccions de l'Assistent (System Prompt)</label
+            >
+            <textarea
+              id="systemPrompt"
+              class="form-control"
+              rows="20"
+              placeholder="Instruccions pel model..."
+            ></textarea>
+            <div class="help-text">
+              Defineix com vols que es comporti l'assistent (idioma, to,
+              longitud).
+            </div>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button id="saveCustom" class="btn btn-primary">Desar canvis</button>
+        </div>
+      </div>
+
+
+
+      <!-- Tab: Extensions List -->
+      <div id="tab-extensions" class="tab-pane">
+        <h1 class="page-title">Extensions i Integracions</h1>
+        <p class="section-desc">Gestiona les funcionalitats addicionals de l'extensió.</p>
+
+        <div class="extensions-list">
+            <!-- Obsidian -->
+            <div class="extension-item">
+                <div class="extension-icon" style="color: #a855f7;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
+                </div>
+                <div class="extension-info">
+                    <div class="extension-name">Integració Obsidian</div>
+                    <div class="extension-desc">Guarda els resums directament al teu Vault.</div>
+                </div>
+                <div class="extension-actions">
+                    <label class="switch">
+                        <input type="checkbox" id="enableObsidian" />
+                        <span class="slider round"></span>
+                    </label>
+                    <button class="btn-icon" data-target="obsidian" title="Configuració">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Markdown -->
+            <div class="extension-item">
+                <div class="extension-icon" style="color: #666;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l4 5 4-5v10"/><path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"/></svg>
+                </div>
+                <div class="extension-info">
+                    <div class="extension-name">Exportació Markdown</div>
+                    <div class="extension-desc">Copiar resums al porta-retalls amb format personalitzat.</div>
+                </div>
+                <div class="extension-actions">
+                    <label class="switch">
+                        <input type="checkbox" id="enableMarkdown" />
+                        <span class="slider round"></span>
+                    </label>
+                    <button class="btn-icon" data-target="markdown" title="Configuració">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Deep Dive -->
+            <div class="extension-item">
+                <div class="extension-icon" style="color: #0060df;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div class="extension-info">
+                    <div class="extension-name">Aprofundiment (Deep Dive)</div>
+                    <div class="extension-desc">Genera una anàlisi detallada i extensa del contingut.</div>
+                </div>
+                <div class="extension-actions">
+                    <label class="switch">
+                        <input type="checkbox" id="enableDeepdive" />
+                        <span class="slider round"></span>
+                    </label>
+                    <button class="btn-icon" data-target="deepdive" title="Configuració">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bionic Reading -->
+            <div class="extension-item">
+                <div class="extension-icon" style="color: #666;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </div>
+                <div class="extension-info">
+                    <div class="extension-name">Lectura Biònica</div>
+                    <div class="extension-desc">Ressalta l'inici de les paraules per a una lectura més ràpida.</div>
+                </div>
+                <div class="extension-actions">
+                    <label class="switch">
+                        <input type="checkbox" id="enableBionic" />
+                        <span class="slider round"></span>
+                    </label>
+                    <!-- No config for Bionic yet, maybe disable button or remove it -->
+                    <button class="btn-icon" data-target="bionic" title="Configuració">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Tab: Obsidian Config -->
+      <div id="tab-obsidian" class="tab-pane">
+        <h1 class="page-title">Configuració Obsidian</h1>
+        
+        <div class="section">
+             <div class="form-group">
+              <label for="obsidianVault">Nom del Vault</label>
+              <input type="text" id="obsidianVault" class="form-control" placeholder="ex: Obsidian (Per defecte)"/>
+            </div>
+
+            <div class="form-group">
+              <label for="obsidianPath">Ruta de la Nota</label>
+              <input type="text" id="obsidianPath" class="form-control" placeholder="ex: [Notes/]YYYY/gggg-Www"/>
+              <div class="field-legend">
+                <span><strong>Camps de data:</strong> <code>YYYY</code>, <code>MM</code>, <code>DD</code>, <code>HH</code>, <code>mm</code>, <code>gggg</code>, <code>ww</code></span>
+              </div>
+              <div class="help-text">Utilitza corxers per a text estàtic: <code>[Notes/]</code>.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="obsidianTemplate">Plantilla Obsidian</label>
+              <textarea id="obsidianTemplate" class="form-control code-editor" rows="6"></textarea>
+              <div class="field-legend">
+                <span><strong>Camps:</strong> <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code>, <code>{{summary}}</code></span>
+              </div>
+            </div>
+             <div class="section-actions">
+              <button id="saveObsidian" class="btn btn-primary">Desar</button>
+              <button id="resetObsidianTemplate" class="btn btn-secondary">Restaurar Plantilla</button>
+            </div>
+        </div>
+      </div>
+
+      <!-- Tab: Markdown Config -->
+      <div id="tab-markdown" class="tab-pane">
+        <h1 class="page-title">Configuració Markdown</h1>
+        <div class="section">
+            <div class="form-group">
+              <label for="markdownTemplate">Plantilla d'Exportació</label>
+              <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
+              <div class="field-legend">
+                <span><strong>Camps:</strong> <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code>, <code>{{summary}}</code></span>
+              </div>
+            </div>
+            <div class="section-actions">
+              <button id="saveMarkdown" class="btn btn-primary">Desar</button>
+              <button id="resetTemplate" class="btn btn-secondary">Restaurar per defecte</button>
+            </div>
+        </div>
+      </div>
+
+      <!-- Tab: Deep Dive Config -->
+      <div id="tab-deepdive" class="tab-pane">
+          <h1 class="page-title">Configuració Deep Dive</h1>
+          <div class="section">
+              <div class="form-group">
+                <label for="deepDivePrompt">Prompt d'Aprofundiment</label>
+                <textarea id="deepDivePrompt" class="form-control" rows="10" placeholder="Actua com un expert analista..."></textarea>
+                <div class="help-text">Instruccions que s'enviaran al model per generar l'anàlisi detallada.</div>
+            </div>
+             <div class="section-actions">
+              <button id="saveDeepDive" class="btn btn-primary">Desar</button>
+            </div>
+          </div>
+      </div>
+ 
+      <!-- Tab: Bionic Reader Config -->
+      <div id="tab-bionic" class="tab-pane">
+          <h1 class="page-title">Configuració Lectura Biònica</h1>
+          <div class="section">
+              <div class="form-group">
+                  <label for="bionicFixation">Percentatge de Fixació (Per paraules > 3 lletres)</label>
+                  <div style="display: flex; align-items: center; gap: 15px;">
+                      <input type="range" id="bionicFixation" min="20" max="80" step="5" value="45" style="flex-grow: 1;" />
+                      <span id="bionicFixationValue" style="min-width: 40px; font-weight: bold;">45%</span>
+                  </div>
+                  <div class="help-text">Defineix quina part de la paraula es resaltarà en negreta.</div>
+              </div>
+ 
+              <div class="form-group">
+                  <label for="bionicFont">Tipografia</label>
+                  <select id="bionicFont" class="form-control">
+                      <option value="sans-serif">Per defecte (Sans-serif)</option>
+                      <option value="'Inter', sans-serif">Inter</option>
+                      <option value="'Helvetica', sans-serif">Helvetica</option>
+                      <option value="'Open Sans', sans-serif">Open Sans</option>
+                  </select>
+              </div>
+ 
+              <div class="form-group">
+                  <label for="bionicLineHeight">Interlineat</label>
+                  <select id="bionicLineHeight" class="form-control">
+                      <option value="1.2">Normal (1.2)</option>
+                      <option value="1.5">Espaiat (1.5)</option>
+                      <option value="2.0">Doble (2.0)</option>
+                  </select>
+              </div>
+ 
+              <div class="section-actions">
+                  <button id="saveBionic" class="btn btn-primary">Desar</button>
               </div>
           </div>
       </div>
 
-      <div class="section-actions">
-           <button id="save" class="btn btn-primary">Desar canvis</button>
-      </div>
-
-    </div>
-
-    <!-- Tab: Customization (Theme, System Prompt) -->
-    <div id="tab-custom" class="tab-pane">
-        <h1 class="page-title">Personalització</h1>
-
-        <div class="section">
-            <h3>Aparença</h3>
-            <div class="form-group">
-              <label for="themeSelect">Tema</label>
-              <select id="themeSelect" class="form-control">
-                <option value="system">Sistema (Automàtic)</option>
-                <option value="light">Clar</option>
-                <option value="dark">Fosc</option>
-              </select>
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>Comportament</h3>
-            <div class="form-group">
-              <label for="systemPrompt">Instruccions de l'Assistent (System Prompt)</label>
-              <textarea id="systemPrompt" class="form-control" rows="20" placeholder="Instruccions pel model..."></textarea>
-              <div class="help-text">Defineix com vols que es comporti l'assistent (idioma, to, longitud).</div>
-            </div>
-        </div>
-        
-        <div class="section-actions">
-           <button id="saveCustom" class="btn btn-primary">Desar canvis</button>
-        </div>
-    </div>
-
-    <!-- Tab: Extensions -->
-    <div id="tab-extensions" class="tab-pane">
-        <h1 class="page-title">Extensions i Integracions</h1>
-
-        <div class="section">
-            <div class="section-header-row">
-                <h3>Integració Obsidian</h3>
-                <label class="switch">
-                    <input type="checkbox" id="enableObsidian">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-
-            <div id="config-obsidian" class="extension-config">
-                <p style="color: #666; margin-bottom: 20px;">Guarda els resums directament al teu Vault.</p>
-                
-
-
-                <div class="form-group">
-                <label for="obsidianVault">Nom del Vault</label>
-                <input type="text" id="obsidianVault" class="form-control" placeholder="ex: Obsidian (Per defecte)">
-            </div>
-
-                <div class="form-group">
-                <label for="obsidianPath">Ruta de la Nota</label>
-                <input type="text" id="obsidianPath" class="form-control" placeholder="ex: [Notes/]YYYY/gggg-Www">
-                <div class="help-text">Formats: <code>YYYY</code> (Any), <code>MM</code> (Mes), <code>DD</code> (Dia), <code>gggg</code> (Any Setmana ISO), <code>ww</code> (Setmana). Text fix entre <code>[]</code>.</div>
-            </div>
-
-                <div class="form-group">
-                    <label for="obsidianTemplate">Plantilla Obsidian</label>
-                    <textarea id="obsidianTemplate" class="form-control code-editor" rows="6"></textarea>
-                    <div class="help-text">
-                        Variables: <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary}}</code>, <code>{{summary_executive}}</code> (curt)
-                    </div>
-                </div>
-                
-                <div class="section-actions">
-                    <button id="resetObsidianTemplate" class="btn btn-secondary">Restaurar Plantilla</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-header-row">
-                <h3>Exportació Markdown</h3>
-                <label class="switch">
-                    <input type="checkbox" id="enableMarkdown">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-            
-            <div id="config-markdown" class="extension-config">
-                <p style="color: #666; margin-bottom: 20px;">Personalitza el format en què es copien els resums al porta-retalls.</p>
-                <div class="form-group">
-                    <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
-                    <div class="help-text">
-                        Variables: <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary}}</code>
-                    </div>
-                </div>
-                <div class="section-actions">
-                    <button id="resetTemplate" class="btn btn-secondary">Restaurar per defecte</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="section-actions">
-           <button id="saveExtensions" class="btn btn-primary">Desar canvis</button>
-        </div>
-    </div>
-
-    <!-- Tab: Statistics -->
-    <div id="tab-stats" class="tab-pane">
+      <!-- Tab: Statistics -->
+      <div id="tab-stats" class="tab-pane">
         <h1 class="page-title">Estadístiques d'Ús</h1>
-        
+
         <!-- KPI Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value" id="kpiRequests">0</div>
-                <div class="stat-label">Peticions Totals</div>
+        <div class="section">
+          <div class="section-header">
+            <h3>Activitat</h3>
+            <div class="date-filter">Últims 30 dies</div>
+          </div>
+          <div class="stats-overview">
+            <div class="stat-highlight">
+              <span id="statsArticles" class="stat-value">0</span>
+              <span class="stat-label">pàgines resumides</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="kpiTokens">0</div>
-                <div class="stat-label">Tokens Processats</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="kpiSpeed">0 t/s</div>
-                <div class="stat-label">Velocitat Mitjana</div>
-            </div>
+             <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px;">
+                <div class="stat-card" style="padding: 15px;">
+                  <div class="stat-value" id="kpiTokens" style="font-size: 1.5em;">0</div>
+                  <div class="stat-label">Tokens Processats</div>
+                </div>
+                <div class="stat-card" style="padding: 15px;">
+                  <div class="stat-value" id="kpiSpeed" style="font-size: 1.5em;">0 t/s</div>
+                  <div class="stat-label">Velocitat Mitjana</div>
+                </div>
+              </div>
+          </div>
+          <div class="stats-details">
+            Tokens estimats: <span id="statsTokens">0</span> | Cost aprox:
+            <span id="statsCost">0.00 €</span>
+          </div>
         </div>
 
         <!-- History Table -->
         <div class="section">
-            <h3>Historial de Peticions</h3>
-            <div class="table-container">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Model</th>
-                            <th>Article</th>
-                            <th>Tokens</th>
-                            <th>Temps</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTableBody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="table-footer">
-                <button id="clearHistory" class="btn btn-secondary btn-sm">Esborrar Historial</button>
-            </div>
+          <h3>Historial de Peticions</h3>
+          <div class="table-container">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Model</th>
+                  <th>Article</th>
+                  <th>Tokens</th>
+                  <th>Temps</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer" style="display: flex; flex-direction: column; gap: 10px;">
+            <button id="loadMoreHistory" class="btn btn-secondary" style="width: 100%; display: none;">Carregar més resultats</button>
+            <button id="clearHistory" class="btn btn-secondary btn-sm" style="align-self: flex-end;">
+              Esborrar Historial
+            </button>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Tab: About (Moved to end) -->
-    <div id="tab-about" class="tab-pane">
+      <!-- Tab: About -->
+      <div id="tab-about" class="tab-pane">
         <h1 class="page-title">Sobre l'extensió</h1>
         
         <div class="section about-section">
-            <div class="app-info">
-                <img src="../icons/icon.svg" width="64" height="64" alt="Logo">
-                <div>
-                     <h3>Resumir contingut</h3>
-                     <p>Versió <span id="appVersion">1.0.0</span></p>
-                </div>
+          <div class="app-info">
+            <img src="../icons/icon.svg" width="64" height="64" alt="Logo" />
+            <div>
+              <h3>Resumir contingut</h3>
+              <p>Versió <span id="appVersion">1.0.0</span></p>
             </div>
-            <div class="actions">
-                <button id="btnGithub" class="btn btn-secondary">GitHub</button>
-                <button id="btnIssues" class="btn btn-secondary">Reportar un error</button>
-            </div>
+          </div>
+          <div class="actions">
+            <button id="btnGithub" class="btn btn-secondary">GitHub</button>
+            <button id="btnIssues" class="btn btn-secondary">
+              Reportar un error
+            </button>
+          </div>
         </div>
 
         <div class="section">
-            <h3>Historial de Canvis</h3>
-            <div class="changelog" style="border-left: 2px solid #e0e0e6; padding-left: 20px; margin-left: 10px;">
-                <div class="version-entry" style="margin-bottom: 25px; position: relative;">
-                    <div class="version-title" style="font-weight: bold; margin-bottom: 5px;">
-                        v1.1.4 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
-                    </div>
-                    <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444;">
-                         <li>**Fix Crític Obsidian**: Solucionat el problema que impedia obrir Obsidian en la versió signada/producció. Ara utilitza `browser.tabs.update`.</li>
-                    </ul>
-                </div>
+          <h3>Historial de Canvis</h3>
+          <div class="changelog" style="border-left: 2px solid #e0e0e6; padding-left: 20px; margin-left: 10px;">
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.4
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  **Fix Crític Obsidian**: Solucionat el problema que impedia obrir Obsidian en la versió signada/producció. Ara utilitza `browser.tabs.update`.
+                </li>
+              </ul>
+            </div>
+             <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.3
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  Correcció de l'ID intern per permetre actualitzacions a l'AMO.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
-                <div class="version-entry" style="margin-bottom: 25px; position: relative;">
-                    <div class="version-title" style="font-weight: bold; margin-bottom: 5px;">
-                        v1.1.3 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
-                    </div>
-                    <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444;">
-                         <li>Correcció de l'ID intern per permetre actualitzacions a l'AMO.</li>
-                    </ul>
-                </div>
-
-                <div class="version-entry" style="margin-bottom: 25px; position: relative;">
-                    <div class="version-title" style="font-weight: bold; margin-bottom: 5px;">
-                        v1.0.4 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
-                    </div>
-                    <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444;">
-                         <li>Corregit el filtre de models "preview" a la barra lateral.</li>
-                         <li>Millora en l'extracció de transcripcions de YouTube.</li>
-                    </ul>
-                </div>
-                
-                <div class="version-entry" style="margin-bottom: 25px; position: relative;">
-                    <div class="version-title" style="font-weight: bold; margin-bottom: 5px;">
-                        v1.0.0 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
-                    </div>
-                    <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444;">
-                         <li>Llançament inicial de la versió pública 1.0.</li>
-                         <li>Canvi de nom a "Resumir contingut".</li>
-                         <li>Noves funcionalitats d'estadístiques i suport per a YouTube.</li>
-                    </ul>
-                </div>
+        <div class="section">
+           <div class="about-footer" style="text-align: center; margin-top: 50px; color: #999; font-size: 13px;">
+              <small>Creat per <a id="linkAuthor" href="#" style="color: inherit; text-decoration: none">Sergi Xaudiera</a></small>
             </div>
         </div>
+      </div>
 
-        <div class="about-footer" style="text-align: center; margin-top: 50px; color: #999; font-size: 13px;">
-            <small>Creat per <a id="linkAuthor" href="#" style="color: inherit; text-decoration: none;">Sergi Xaudiera</a></small>
-        </div>
     </div>
+    <!-- End Main Content -->
 
-  </div> <!-- End Main Content -->
+    <div id="status" class="toast">Configuració guardada correctament!</div>
 
-  <div id="status" class="toast">Configuració guardada correctament!</div>
-
-  <script src="settings.js"></script>
-</body>
+    <script src="settings.js"></script>
+  </body>
 </html>

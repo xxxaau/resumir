@@ -37,31 +37,70 @@ Estructura de la resposta:
   let abortController = null;
   // Store metadata for markdown export
   let currentMetadata = { title: "", url: "", summary: "", fromCache: false };
+  let currentSourceText = ""; // Store original text for deep dive context
   let contentPreload = null; // Promise for speculative loading
 
   // Models will be loaded dynamically via API
 
   // Initial Visibility Check
-  browser.storage.local.get(["enableMarkdown", "enableObsidian"]).then(config => {
+  // MIGRATION LOGIC: Check if sync has config, if not and local has it, migrate.
+  browser.storage.sync.get(["apiKey"]).then(async (syncConfig) => {
+      if (!syncConfig.apiKey) {
+          const localConfig = await browser.storage.local.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate", "markdownTemplate"]);
+          if (localConfig.apiKey) {
+              console.log("Migrating settings from Local to Sync...");
+              await browser.storage.sync.set(localConfig);
+              // Optional: Clear local settings? modifying local is risky if things go wrong. Let's keep duplicate for now or specific keys.
+          }
+      }
+  });
+
+  browser.storage.sync.get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive"]).then(config => {
+      const isDeepDiveEnabled = config.enableDeepdive === true || config.enableDeepDive === true;
       const copyBtn = document.getElementById("copyBtn");
       const obsidianBtn = document.getElementById("obsidianBtn");
       
-      if (config.enableMarkdown === false) copyBtn.style.display = "none";
-      if (config.enableObsidian === false) obsidianBtn.style.display = "none"; // Default visible if not disabled
+      if (config.enableMarkdown) copyBtn.style.display = "flex";
+      else copyBtn.style.display = "none";
+      
+      if (config.enableObsidian) obsidianBtn.style.display = "flex";
+      else obsidianBtn.style.display = "none";
+
+      if (config.enableBionic) document.getElementById("bionicBtn").style.display = "flex";
+      else document.getElementById("bionicBtn").style.display = "none";
+
+      if (isDeepDiveEnabled) document.getElementById("deepDiveBtn").style.display = "flex";
+      else document.getElementById("deepDiveBtn").style.display = "none";
+      
+      resetUI(); // Initialize button states (disabled if no content)
   });
 
   // Listen for configuration changes
   browser.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local') {
+      if (area === 'sync') {
+          if (changes.apiKey) {
+              window.location.reload();
+          }
           if (changes.enableMarkdown) {
               const copyBtn = document.getElementById("copyBtn");
-              if (changes.enableMarkdown.newValue === false) copyBtn.style.display = "none";
-              else copyBtn.style.display = "flex";
+              if (changes.enableMarkdown.newValue === true) copyBtn.style.display = "flex";
+              else copyBtn.style.display = "none";
           }
           if (changes.enableObsidian) {
               const obsidianBtn = document.getElementById("obsidianBtn");
-              if (changes.enableObsidian.newValue === false) obsidianBtn.style.display = "none";
-              else obsidianBtn.style.display = "flex";
+              if (changes.enableObsidian.newValue === true) obsidianBtn.style.display = "flex";
+              else obsidianBtn.style.display = "none";
+          }
+          if (changes.enableBionic) {
+              const bionicBtn = document.getElementById("bionicBtn");
+              if (changes.enableBionic.newValue === true) bionicBtn.style.display = "flex";
+              else bionicBtn.style.display = "none";
+          }
+          if (changes.enableDeepdive || changes.enableDeepDive) {
+              const deepDiveBtn = document.getElementById("deepDiveBtn");
+              const newVal = (changes.enableDeepdive?.newValue === true) || (changes.enableDeepDive?.newValue === true);
+              if (newVal) deepDiveBtn.style.display = "flex";
+              else deepDiveBtn.style.display = "none";
           }
       }
   });
@@ -77,14 +116,14 @@ Estructura de la resposta:
         return;
     }
     // START Action
-    await startSummary();
+    await startSummary(null, false, true);
   });
   
   copyBtn.addEventListener("click", async () => {
     if (!currentMetadata.summary) return;
     
     try {
-        const data = await browser.storage.local.get("markdownTemplate");
+        const data = await browser.storage.sync.get("markdownTemplate");
         const template = data.markdownTemplate || "# [{{title}}]({{url}})\n\n{{summary}}";
         
         const markdown = formatMarkdownContent(template, currentMetadata);
@@ -111,7 +150,7 @@ Estructura de la resposta:
     if (!currentMetadata.summary) return;
 
     try {
-        const config = await browser.storage.local.get(["obsidianVault", "obsidianPath", "obsidianTemplate"]);
+        const config = await browser.storage.sync.get(["obsidianVault", "obsidianPath", "obsidianTemplate"]);
         const vault = config.obsidianVault || "Obsidian";
         const pathTemplate = config.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
         const contentTemplate = config.obsidianTemplate || "- [{{title}}]({{url}})\n\t- {{summary_executive}}";
@@ -161,9 +200,22 @@ Estructura de la resposta:
 
 
 
+  const deepDiveBtn = document.getElementById("deepDiveBtn");
+  deepDiveBtn.addEventListener("click", async () => {
+      // Logic for Deep Dive
+      // Should we re-use the current page content? Yes.
+      // We don't need to re-extract if we can just re-trigger summary with new prompt.
+      // But startSummary extracts content again, which is fine and safer (in case page changed).
+      
+      // Visual feedback?
+      await startSummary(null, true);
+  });
+
   settingsBtn.addEventListener("click", () => {
     browser.runtime.openOptionsPage();
   });
+
+  // ... (setGeneratingState, resetUI are fine) ...
 
   function setGeneratingState(generating) {
       isGenerating = generating;
@@ -173,6 +225,9 @@ Estructura de la resposta:
           summarizeBtn.classList.remove("primary");
           summarizeBtn.title = "Aturar Generació";
           copyBtn.disabled = true;
+          document.getElementById("obsidianBtn").disabled = true;
+          document.getElementById("bionicBtn").disabled = true;
+          document.getElementById("deepDiveBtn").disabled = true;
           loadingDiv.classList.remove("hidden");
       } else {
           summarizeBtn.replaceChildren(getIcon(PLAY_ICON_STR));
@@ -186,6 +241,8 @@ Estructura de la resposta:
           const hasContent = !!currentMetadata.summary;
           copyBtn.disabled = !hasContent;
           document.getElementById("obsidianBtn").disabled = !hasContent;
+          document.getElementById("bionicBtn").disabled = !hasContent;
+          document.getElementById("deepDiveBtn").disabled = !hasContent;
       }
   }
 
@@ -200,18 +257,33 @@ Estructura de la resposta:
     const hasContent = !!currentMetadata.summary;
     copyBtn.disabled = !hasContent;
     document.getElementById("obsidianBtn").disabled = !hasContent;
+    document.getElementById("bionicBtn").disabled = !hasContent;
+    document.getElementById("deepDiveBtn").disabled = !hasContent;
     
     // Check visibility preference
-    browser.storage.local.get(["enableMarkdown", "enableObsidian"]).then(config => {
-        if (config.enableMarkdown === false) copyBtn.style.display = "none";
-        else copyBtn.style.display = "flex";
+    browser.storage.sync.get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive"]).then(config => {
+        const isDeepDiveEnabled = config.enableDeepdive === true || config.enableDeepDive === true;
+        if (config.enableMarkdown) copyBtn.style.display = "flex";
+        else copyBtn.style.display = "none";
         
-        if (config.enableObsidian !== false) document.getElementById("obsidianBtn").style.display = "flex";
+        if (config.enableObsidian) document.getElementById("obsidianBtn").style.display = "flex";
         else document.getElementById("obsidianBtn").style.display = "none";
+
+        if (config.enableBionic) document.getElementById("bionicBtn").style.display = "flex";
+        else document.getElementById("bionicBtn").style.display = "none";
+
+        if (isDeepDiveEnabled) document.getElementById("deepDiveBtn").style.display = "flex";
+        else document.getElementById("deepDiveBtn").style.display = "none";
     });
   }
 
-  async function startSummary(overrideText = null) {
+  async function startSummary(overrideText = null, isDeepDive = false, isUserInitiated = false) {
+    // Only proceed if triggered by user action, context menu, or deep dive
+    // This prevents auto-refreshing when switching tabs back to a cached URL
+    if (!overrideText && !isDeepDive && !isUserInitiated) {
+        return; 
+    }
+
     contentDiv.replaceChildren(); // Clear content
     contentDiv.classList.add("hidden");
     errorDiv.textContent = "";
@@ -228,26 +300,47 @@ Estructura de la resposta:
     startGenerationTimer();
 
     try {
-      // 1. Get Configuration
-      const config = await browser.storage.local.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian"]);
+      // 1. Get Configuration (FROM SYNC)
+      const config = await browser.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt"]);
       const apiKey = config.apiKey;
       const modelName = config.modelName || "gemma-3-27b-it";
-      const systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
       
+      let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+      if (isDeepDive) {
+          systemPrompt = config.deepDivePrompt || "Actua com un expert analista..."; // Fallback if empty but enabled
+      }
+
       // Update Button Visibility based on config
       const copyBtn = document.getElementById("copyBtn");
       const obsidianBtn = document.getElementById("obsidianBtn");
       
-      if (config.enableMarkdown === false) { // Default is true if undefined
-          copyBtn.style.display = "none";
-      } else {
+      // ... visibility logic repeated? It's already handled by visibility check, but startSummary re-checks? 
+      // Actually startSummary function in the file has this visibility logic inside it.
+      // We should keep it or refactor. The replacement content should match the target content context.
+      
+      if (config.enableMarkdown) { 
           copyBtn.style.display = "flex";
+      } else {
+          copyBtn.style.display = "none";
       }
+      // ... continue with existing logic ...
 
-      if (config.enableObsidian !== false) { // Default is true if undefined
+      if (config.enableObsidian) { 
           obsidianBtn.style.display = "flex";
       } else {
            obsidianBtn.style.display = "none";
+      }
+
+      if (config.enableBionic) {
+        document.getElementById("bionicBtn").style.display = "flex";
+      } else {
+        document.getElementById("bionicBtn").style.display = "none";
+      }
+
+      if (config.enableDeepdive) {
+        document.getElementById("deepDiveBtn").style.display = "flex";
+      } else {
+        document.getElementById("deepDiveBtn").style.display = "none";
       }
 
       if (!apiKey) {
@@ -263,7 +356,11 @@ Estructura de la resposta:
       if (tabs.length === 0) throw new Error("No s'ha trobat cap pestanya activa.");
       const currentUrl = tabs[0].url;
 
-      // 1b. Check Cache (Local Storage)
+      // 1b. Check for Active Session check moved to init()
+      // We rely on init() to restore session on load.
+      // Here we only check cache if we are explicitly running a new summary flow (which shouldn't happen automatically now).
+
+      // Check Cache (Local Storage) ONLY if no active session (should not happen often now)
       // Logic: If we are already showing the cached version for this URL, force refresh (ignore cache)
       const isRefresh = (currentMetadata.url === currentUrl && currentMetadata.fromCache);
       
@@ -317,6 +414,23 @@ Estructura de la resposta:
                   resetEl.textContent = `Generat: ${dateStr}`;
                   resetEl.style.color = "#666";
 
+                  // Background fetch context for potential Deep Dive
+                  // Since we are on the page (URL match confirmed above), this is safe
+                  getPageContent().then(data => {
+                      if (data && data.text) currentSourceText = data.text;
+                  }).catch(e => console.log("Background context fetch failed:", e));
+                  
+                  // Don't save session here implicitly, explicit action needed usually.
+                  // But if we load cache, maybe we should set session being active?
+                  // Yes, let's set session so swapping tabs keeps this cache visible.
+                  browser.storage.local.set({ 
+                      currentSession: {
+                          ...currentMetadata,
+                          sourceText: currentSourceText, // Might be empty until fetch completes
+                          timestamp: cachedEntry.timestamp
+                      }
+                  });
+
                   // Stop execution here
                   return;
               }
@@ -343,6 +457,13 @@ Estructura de la resposta:
              url: currentUrl,
              text: overrideText
           };
+      } else if (isDeepDive && currentSourceText) {
+          // Use stored text context for Deep Dive if available
+          pageData = {
+              title: currentMetadata.title,
+              url: currentMetadata.url,
+              text: currentSourceText
+          };
       } else if (!pageData) {
           pageData = await getPageContent();
       }
@@ -350,12 +471,13 @@ Estructura de la resposta:
       // Update metadata
       currentMetadata.title = pageData.title;
       currentMetadata.url = pageData.url;
-      currentMetadata.title = pageData.title;
-      currentMetadata.url = pageData.url;
+      // Note: Do not clear summary/metadata yet for deep dive? 
+      // Actually Deep Dive replaces content, so yes clear summary.
       currentMetadata.summary = ""; 
       currentMetadata.fromCache = false; 
       
       let pageText = pageData.text;
+      currentSourceText = pageText; // Update context for next Deep Dive
 
       if (signal.aborted) return;
       
@@ -466,12 +588,14 @@ Estructura de la resposta:
 
           // API Key Error Handling
           if (err.message.includes("API Key") || err.message.includes("not found")) {
-            const link = document.createElement("a");
-            link.href = "#";
-            link.textContent = " Obre la configuració";
-            link.style.color = "inherit";
-            link.onclick = () => browser.runtime.openOptionsPage();
-            errorDiv.appendChild(link);
+             // Already showing prominent message usually, but if they clicked anyway:
+             const btn = document.createElement("button");
+             btn.textContent = "Configurar";
+             btn.className = "primary";
+             btn.style.marginTop = "10px";
+             btn.onclick = () => browser.runtime.openOptionsPage();
+             errorDiv.appendChild(document.createElement("br"));
+             errorDiv.appendChild(btn);
           }
           
           // Handle Quota/Rate Limit Errors
@@ -480,10 +604,21 @@ Estructura de la resposta:
              errorDiv.textContent += " (Quota excedida)"; // Simple feedback
           }
       }
-    } finally {
-        setGeneratingState(false);
-        abortController = null;
-    }
+      } finally {
+          setGeneratingState(false);
+          abortController = null;
+          
+          // Persist current session state to survive sidebar reloads
+          if (currentMetadata.summary) {
+              browser.storage.local.set({ 
+                  currentSession: {
+                      ...currentMetadata,
+                      sourceText: currentSourceText,
+                      timestamp: Date.now()
+                  }
+              });
+          }
+      }
   }
 
   async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, onChunk) {
@@ -602,7 +737,7 @@ Estructura de la resposta:
             .map(m => m.name.replace("models/", ""));
 
         // Prioritize popular/summary models
-        const preferred = ["gemma-3-27b-it", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemma-2-9b-it"];
+        const preferred = ["gemini-1.5-flash-latest", "gemini-2.0-flash-lite-preview-02-05", "gemini-2.0-flash", "gemma-3-27b-it", "gemini-1.5-flash", "gemini-1.5-pro"];
         
         validModels.sort((a, b) => {
             const idxA = preferred.indexOf(a);
@@ -619,7 +754,13 @@ Estructura de la resposta:
             opt.value = m;
             // Clean up name for display
             let displayName = m.replace("gemini-", "").replace("gemma-", "gemma ");
-            displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+            
+            // Friendly names for specific models
+            if (m === "gemini-1.5-flash-latest") displayName = "Gemini 1.5 Flash (Latest)";
+            else if (m.includes("flash-lite")) displayName = "Gemini 2.0 Flash Lite";
+            else if (m === "gemma-3-27b-it") displayName = "Gemma 3 27B";
+            else displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+            
             opt.textContent = displayName;
             modelSelect.appendChild(opt);
         });
@@ -639,11 +780,15 @@ Estructura de la resposta:
         // Fallback to basic list if fetch fails
         if (modelSelect.options.length <= 1) {
             modelSelect.replaceChildren();
-            const fallbackModels = ["gemma-3-27b-it", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash", "gemma-2-9b-it"];
+            const fallbackModels = ["gemini-1.5-flash-latest", "gemini-2.0-flash-lite-preview-02-05", "gemini-2.0-flash", "gemma-3-27b-it"];
             fallbackModels.forEach(m => {
                 const opt = document.createElement("option");
                 opt.value = m;
-                opt.textContent = m;
+                let name = m;
+                if (m === "gemini-1.5-flash-latest") name = "Gemini 1.5 Flash (Latest)";
+                else if (m.includes("flash-lite")) name = "Gemini 2.0 Flash Lite";
+                
+                opt.textContent = name;
                 modelSelect.appendChild(opt);
             });
             if (currentModel) modelSelect.value = currentModel;
@@ -651,27 +796,154 @@ Estructura de la resposta:
     }
   }
 
-  function formatTextToFragment(text) {
+  let isBionicEnabled = false;
+
+  // Initialize visibility from config is already done above.
+  
+  const bionicBtn = document.getElementById("bionicBtn");
+  bionicBtn.addEventListener("click", async () => {
+    isBionicEnabled = !isBionicEnabled;
+    const contentDiv = document.getElementById("content");
+    
+    if (isBionicEnabled) {
+        bionicBtn.style.color = "var(--primary-color)";
+        bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
+        
+        // Load custom styles
+        const settings = await browser.storage.sync.get(["bionicFont", "bionicLineHeight", "bionicFixation"]);
+        contentDiv.style.fontFamily = settings.bionicFont || "inherit";
+        contentDiv.style.lineHeight = settings.bionicLineHeight || "1.5";
+        const fixation = (settings.bionicFixation || 45) / 100;
+        
+        if (currentMetadata.summary) {
+           contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
+        }
+    } else {
+        bionicBtn.style.color = "";
+        bionicBtn.style.backgroundColor = "";
+        contentDiv.style.fontFamily = "";
+        contentDiv.style.lineHeight = "";
+        
+        if (currentMetadata.summary) {
+           contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
+        }
+    }
+  });
+
+  function formatBionicText(text, fixation = 0.45) {
+      const fragment = document.createDocumentFragment();
+      const parts = text.split(/(\s+)/); 
+      parts.forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) {
+             fragment.appendChild(document.createTextNode(part));
+             return;
+        }
+ 
+        const len = part.length;
+        if (len === 0) return;
+ 
+        let boldLen = 1;
+        if (len > 3) {
+            boldLen = Math.ceil(len * fixation);
+        }
+        
+        const boldStr = part.slice(0, boldLen);
+        const restStr = part.slice(boldLen);
+        
+        const b = document.createElement("b");
+        b.textContent = boldStr;
+        fragment.appendChild(b);
+        fragment.appendChild(document.createTextNode(restStr));
+      });
+      return fragment;
+  }
+
+  function formatTextToFragment(text, bionic = false, fixation = 0.45) {
       if (!text) return document.createDocumentFragment();
       const fragment = document.createDocumentFragment();
       const lines = text.split(/\n/);
       
-      lines.forEach((line, i) => {
-          if (i > 0) fragment.appendChild(document.createElement('br'));
-          
-          const parts = line.split(/\*\*(.*?)\*\*/g);
-          parts.forEach((part, index) => {
-              if (index % 2 === 1) { // Bold
-                  const strong = document.createElement('strong');
-                  strong.textContent = part;
-                  fragment.appendChild(strong);
-              } else if (part) {
-                  fragment.appendChild(document.createTextNode(part));
+      let currentList = null;
+ 
+      const formatInline = (textStr) => {
+        const span = document.createElement('span');
+        const parts = textStr.split(/\*\*(.*?)\*\*/g);
+        parts.forEach((part, index) => {
+            if (index % 2 === 1) { // Bold (Already Markdown Bold)
+                const strong = document.createElement('strong');
+                strong.textContent = part;
+                span.appendChild(strong);
+            } else if (part) {
+                if (bionic) {
+                    span.appendChild(formatBionicText(part, fixation));
+                } else {
+                    span.appendChild(document.createTextNode(part));
+                }
+            }
+        });
+        return span;
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const trimmed = line.trim();
+
+          if (trimmed === "") {
+              if (currentList) {
+                  fragment.appendChild(currentList);
+                  currentList = null;
               }
-          });
-      });
+              const p = document.createElement('p'); // Empty line as p min-height?
+              // Just spacing
+              continue;
+          }
+
+          // Headers
+          const headerMatch = line.match(/^(#{1,3})\s+(.*)/);
+          if (headerMatch) {
+              if (currentList) {
+                  fragment.appendChild(currentList);
+                  currentList = null;
+              }
+              const level = headerMatch[1].length;
+              const content = headerMatch[2];
+              const h = document.createElement(`h${level}`);
+              h.appendChild(formatInline(content));
+              fragment.appendChild(h);
+              continue;
+          }
+
+          // List Items
+          const listMatch = line.match(/^(\*|-)\s+(.*)/);
+          if (listMatch) {
+              if (!currentList) {
+                  currentList = document.createElement('ul');
+              }
+              const li = document.createElement('li');
+              li.appendChild(formatInline(listMatch[2]));
+              currentList.appendChild(li);
+              continue;
+          }
+
+          // Regular Paragraph
+          if (currentList) {
+              fragment.appendChild(currentList);
+              currentList = null;
+          }
+          
+          const p = document.createElement('p');
+          p.appendChild(formatInline(line));
+          fragment.appendChild(p);
+      }
+      
+      if (currentList) {
+          fragment.appendChild(currentList);
+      }
+
       return fragment;
   }
+
 
   // --- Token Stats Management ---
 
@@ -771,6 +1043,28 @@ Estructura de la resposta:
 
   // --- Content Extraction Logic ---
 
+  async function executeScriptSafe(injection) {
+      try {
+          return await browser.scripting.executeScript(injection);
+      } catch (err) {
+          if (err.message.includes("Missing host permission") || err.message.includes("Missing permissions")) {
+              try {
+                  const tabId = injection.target.tabId;
+                  const tab = await browser.tabs.get(tabId);
+                  const granted = await browser.permissions.request({
+                      origins: [tab.url]
+                  });
+                  if (granted) {
+                      return await browser.scripting.executeScript(injection);
+                  }
+              } catch (permErr) {
+                  console.warn("Permission request failed (likely no user gesture):", permErr);
+              }
+          }
+          throw err;
+      }
+  }
+
   async function getPageContent() {
       const tabs = await browser.tabs.query({active: true, currentWindow: true});
       if (tabs.length === 0) throw new Error("No active tab found");
@@ -784,7 +1078,7 @@ Estructura de la resposta:
       if (tabUrl.includes("news.ycombinator.com/item")) {
           // ... (existing HN logic) ...
           try {
-              const scriptResults = await browser.scripting.executeScript({
+              const scriptResults = await executeScriptSafe({
                  target: {tabId: tabId},
                  func: () => {
                      const titleEl = document.querySelector(".titleline a");
@@ -806,7 +1100,7 @@ Estructura de la resposta:
               let transcriptText = "";
               
               // 1. Try to get Transcript via Internal API (MAIN world injection)
-              const playerResponse = await browser.scripting.executeScript({
+              const playerResponse = await executeScriptSafe({
                   target: {tabId: tabId},
                   world: "MAIN", 
                   func: () => {
@@ -875,7 +1169,7 @@ Estructura de la resposta:
               
               // 2. UI Fallback (if API failed)
               if (!transcriptText) {
-                   const transcriptResult = await browser.scripting.executeScript({
+                   const transcriptResult = await executeScriptSafe({
                        target: {tabId: tabId},
                        func: () => {
                            const segments = document.querySelectorAll('ytd-transcript-segment-renderer .segment-text');
@@ -893,7 +1187,7 @@ Estructura de la resposta:
               // 3. Description Fallback (Critical if no transcript found)
               // Better to summarize description than send empty text
               if (!transcriptText) {
-                  const descResult = await browser.scripting.executeScript({
+                  const descResult = await executeScriptSafe({
                       target: {tabId: tabId},
                       func: () => {
                           const title = document.title;
@@ -923,13 +1217,13 @@ Estructura de la resposta:
       // FALLBACK / STANDARD LOGIC
       if (!text) {
           try {
-            await browser.scripting.executeScript({
+            await executeScriptSafe({
                 target: {tabId: tabId},
                 files: ["Readability.js"]
             });
           } catch (e) {}
 
-          const scriptResults = await browser.scripting.executeScript({
+          const scriptResults = await executeScriptSafe({
             target: {tabId: tabId},
             func: () => {
                 if (typeof Readability !== 'undefined') {
@@ -940,16 +1234,6 @@ Estructura de la resposta:
                 }
                 return document.body.innerText;
             }
-          }).catch(async (err) => {
-            if (err.message.includes("Missing host permission")) {
-               // We don't request permission during preload/speculative, only explicit
-               // But if this is called from startSummary, we might want to.
-               // For simplicity in this refactor, we let it fail if permission missing, 
-               // and startSummary logic will handle "retry fresh" but logic inside here needs to support it?
-               // Actually, if getPageContent fails, startSummary catches it.
-               throw err;
-            }
-            throw err;
           });
           
           if (scriptResults?.[0]?.result) text = scriptResults[0].result;
@@ -992,8 +1276,12 @@ Estructura de la resposta:
   
   (async () => {
       try {
-          const data = await browser.storage.local.get(["apiKey", "modelName", "blockedUntil"]);
-          const modelName = data.modelName || "gemma-3-27b-it";
+          // Get config from SYNC (apiKey, modelName) and local state (blockedUntil)
+          const syncData = await browser.storage.sync.get(["apiKey", "modelName"]);
+          const localData = await browser.storage.local.get(["blockedUntil"]);
+          
+          const apiKey = syncData.apiKey;
+          const modelName = syncData.modelName || "gemini-1.5-flash-latest";
           
           // Init UI with zero stats
           updateTokenStats(0, 0);
@@ -1002,20 +1290,114 @@ Estructura de la resposta:
           contentPreload = getPageContent().catch(e => console.log("Speculative load failed:", e));
 
           // Check if blocked
-          if (data.blockedUntil && Date.now() < data.blockedUntil) {
-              runCountdownTimer(data.blockedUntil);
+          if (localData.blockedUntil && Date.now() < localData.blockedUntil) {
+              runCountdownTimer(localData.blockedUntil);
           } else {
-              if (data.blockedUntil) await browser.storage.local.remove("blockedUntil");
+              if (localData.blockedUntil) await browser.storage.local.remove("blockedUntil");
           }
 
           // Load Models
-          if (data.apiKey) {
-              await loadModels(data.apiKey, modelName);
+          if (apiKey) {
+              await loadModels(apiKey, modelName);
+
+              // --- SESSION RESTORATION LOGIC ---
+              // Restore active session if exists to persist state across tab switches/sidebar reloads
+              try {
+                  const sessionData = await browser.storage.local.get("currentSession");
+                  if (sessionData.currentSession) {
+                      const session = sessionData.currentSession;
+                      console.log("Init: Restoring active session for:", session.url);
+                      
+                      const contentDiv = document.getElementById("content");
+                      
+                      // Restore Metadata
+                      currentMetadata.title = session.title;
+                      currentMetadata.url = session.url;
+                      currentMetadata.summary = session.summary;
+                      currentMetadata.fromCache = session.fromCache;
+                      currentSourceText = session.sourceText || "";
+            
+                      // Render Content
+                      contentDiv.replaceChildren(formatTextToFragment(session.summary));
+                      contentDiv.classList.remove("hidden");
+                      
+                      // Update UI stats
+                      const footer = document.getElementById("footer-status");
+                      footer.classList.remove("hidden");
+                      
+                      const quotaCount = document.getElementById("quota-count");
+                      if (session.fromCache) {
+                         quotaCount.textContent = "MEMÒRIA CAU";
+                         quotaCount.style.color = "#28a745"; 
+                      } else {
+                         quotaCount.textContent = "SESSIÓ ACTIVA";
+                         quotaCount.style.color = "#17a2b8"; 
+                      }
+                      
+                      const resetEl = document.getElementById("quota-reset");
+                      if (session.timestamp) {
+                          const dateStr = new Date(session.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                          resetEl.textContent = `Generat: ${dateStr}`;
+                      }
+                      resetEl.style.color = "#666";
+
+                      // Validation: If session URL matches current tab, we are good.
+                      // If not, we still show session (desired behavior).
+                      // But we might want to update the "Preload" context just in case user clicks "Summarize"
+                      // Preload is already handled above.
+                  }
+              } catch (e) {
+                  console.error("Session restore failed:", e);
+              }
+
           } else {
+              // Missing API Key UX
               const modelSelect = document.getElementById("model-select");
               const opt = document.createElement("option");
-              opt.textContent = "Configura l'API Key";
+              opt.textContent = "Falta API Key";
               modelSelect.replaceChildren(opt);
+              modelSelect.disabled = true;
+              
+              // Style: Red text and border
+              modelSelect.style.color = "#d70022";
+              modelSelect.style.borderColor = "#d70022";
+              modelSelect.style.backgroundColor = "#fff0f0"; // Light red background
+              modelSelect.style.fontWeight = "bold";
+
+              // Show prominent message in Sidebar
+              const contentDiv = document.getElementById("content");
+              contentDiv.innerHTML = `
+                <div class="api-key-warning-container">
+                    <div style="margin-bottom: 25px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="api-key-icon">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <p class="api-key-title">Falta configurar l'API Key</p>
+                        <p class="api-key-desc">Necessària per connectar amb Google Gemini.</p>
+                    </div>
+                    
+                    <button id="configApiKeyBtn" class="primary api-key-btn-primary">Configurar Ara</button>
+                    
+                    <div class="api-key-cta-footer">
+                        <span class="api-key-cta-text">Encara no en tens?</span>
+                        <a id="getApiKeyLink" href="#" class="api-key-cta-link">
+                            Obtenir API Key gratuïta &rarr;
+                        </a>
+                    </div>
+                </div>
+              `;
+              contentDiv.classList.remove("hidden");
+              
+              document.getElementById("configApiKeyBtn").addEventListener("click", () => {
+                  browser.runtime.openOptionsPage();
+              });
+
+              document.getElementById("getApiKeyLink").addEventListener("click", (e) => {
+                  e.preventDefault();
+                  // Open in new tab using browser API
+                  browser.tabs.create({ url: "https://aistudio.google.com/app/apikey" });
+              });
           }
 
       } catch (e) {
@@ -1036,9 +1418,11 @@ Estructura de la resposta:
   async function handleTrigger(data) {
       if (data.type === 'selection' && data.content) {
           // Add a small delay to ensure UI is ready if just opened
-          setTimeout(() => startSummary(data.content), 100);
+          // Passes overrideText=data.content, isDeepDive=false, isUserInitiated=true
+          setTimeout(() => startSummary(data.content, false, true), 100);
       } else if (data.type === 'page') {
-          setTimeout(() => startSummary(), 100);
+          // Passes overrideText=null, isDeepDive=false, isUserInitiated=true
+          setTimeout(() => startSummary(null, false, true), 100);
       }
   }
 
