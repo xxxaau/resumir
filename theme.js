@@ -2,7 +2,7 @@
 (function() {
     const STORAGE_KEY = 'theme';
     const DEFAULT_THEME = 'system';
-    const VALID_THEMES = ['system', 'light', 'dark'];
+    const VALID_THEMES = ['system', 'light', 'dark', 'sepia', 'soft-gray'];
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
