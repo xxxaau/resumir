@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const obsidianBtn = document.getElementById("obsidianBtn");
     const bionicBtn = document.getElementById("bionicBtn");
     const deepDiveBtn = document.getElementById("deepDiveBtn");
+    const scienceBtn = document.getElementById("scienceBtn");
     const modelSelect = document.getElementById("model-select");
 
     let isGenerating = false;
@@ -48,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     ext.storage.sync
-      .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicLineHeight", "bionicFixation"])
+      .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "enableScience", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicLineHeight", "bionicFixation"])
       .then(config => {
           globalConfigCache = config;
           applyExtensionVisibility(config);
@@ -74,12 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             if (changes.enableMarkdown || changes.enableObsidian || changes.enableBionic || 
-                changes.enableDeepdive || changes.enableDeepDive || changes.extensionOrder ||
+                changes.enableDeepdive || changes.enableDeepDive || changes.enableScience || changes.extensionOrder ||
                 changes.markdownTemplate || changes.obsidianVault || changes.obsidianPath ||
                 changes.obsidianTemplate || changes.bionicFont || changes.bionicLineHeight ||
                 changes.bionicFixation) {
                 ext.storage.sync
-                  .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicLineHeight", "bionicFixation"])
+                  .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "enableScience", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicLineHeight", "bionicFixation"])
                   .then(config => {
                       globalConfigCache = config;
                       applyExtensionVisibility(config);
@@ -103,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setGeneratingState(false, !!currentMetadata.summary);
             return;
         }
-        await startSummary(null, false, true);
+        await startSummary(null, false, false, true);
     });
 
     copyBtn.addEventListener("click", async () => {
@@ -191,7 +192,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     deepDiveBtn.addEventListener("click", async () => {
-        await startSummary(null, true, true);
+        await startSummary(null, true, false, true);
+    });
+
+    scienceBtn.addEventListener("click", async () => {
+        await startSummary(null, false, true, true);
     });
 
     settingsBtn.addEventListener("click", () => {
@@ -204,8 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Main Generation Logic ---
 
-    async function startSummary(overrideText = null, isDeepDive = false, isUserInitiated = false) {
-        if (!overrideText && !isDeepDive && !isUserInitiated) {
+    async function startSummary(overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false) {
+        if (!overrideText && !isDeepDive && !isScience && !isUserInitiated) {
             return; 
         }
 
@@ -217,6 +222,15 @@ document.addEventListener("DOMContentLoaded", () => {
         isGenerating = true;
         setGeneratingState(true, false);
         
+        const loadingDiv = document.getElementById("loading");
+        if (isScience) {
+            loadingDiv.textContent = "Investigant la validació científica...";
+        } else if (isDeepDive) {
+            loadingDiv.textContent = "Generant anàlisi detallada...";
+        } else {
+            loadingDiv.textContent = "Generant resum...";
+        }
+        
         abortController = new AbortController();
         const signal = abortController.signal;
         
@@ -224,13 +238,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // 1. Get Configuration
-            const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "extensionOrder"]);
+            const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder"]);
             const apiKey = config.apiKey;
             const modelName = config.modelName || "gemma-3-27b-it";
             
             let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
             if (isDeepDive) {
                 systemPrompt = config.deepDivePrompt || "Actua com un expert analista..."; 
+            } else if (isScience) {
+                systemPrompt = config.sciencePrompt || "Avalua científicament aquest text. IMPORTANT: Respon ÚNICAMENT amb els punts d'avaluació. PROHIBIT fer introduccions o conclusions. Assenyala de forma directa afirmacions dubtoses o desviacions del consens actual. Has de justificar cada punt citant de forma intergrada en el propi text de l'argumentació almenys 3 referències acadèmiques altament reputades, incloent els seus respectius enllaços (URL o DOI)."; 
             }
 
             applyExtensionVisibility(config);
@@ -252,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const isRefresh = (currentMetadata.url === currentUrl && currentMetadata.fromCache);
             
-            if (!isRefresh && !overrideText && !isDeepDive) {
+            if (!isRefresh && !overrideText && !isDeepDive && !isScience) {
                 const cachedEntry = await getSummaryCache(currentUrl);
                 if (cachedEntry && cachedEntry.summary) {
                     currentMetadata.title = cachedEntry.title || tabs[0].title;
@@ -317,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
                    url: currentUrl,
                    text: overrideText
                 };
-            } else if (isDeepDive && currentSourceText) {
+            } else if ((isDeepDive || isScience) && currentSourceText) {
                 pageData = {
                     title: currentMetadata.title,
                     url: currentMetadata.url,
@@ -367,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const outputTokens = currentMetadata.summary.length / 4;
             
             await saveSummaryCache(currentMetadata.url, currentMetadata.title, currentMetadata.summary, modelName, inputTokens, outputTokens);
-            await saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url);
+            await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url);
             
             updateTokenStats(Math.round(inputTokens), Math.round(outputTokens));
 
@@ -404,9 +420,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Context Menu / Message Handling ---
     async function handleTrigger(data) {
         if (data.type === 'selection' && data.content) {
-            setTimeout(() => startSummary(data.content, false, true), 100);
+            setTimeout(() => startSummary(data.content, false, false, true), 100);
         } else if (data.type === 'page') {
-            setTimeout(() => startSummary(null, false, true), 100);
+            setTimeout(() => startSummary(null, false, false, true), 100);
         }
     }
 

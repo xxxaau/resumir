@@ -8,6 +8,8 @@ description: Publicar nova versió de l'extensió (Standard Release Process)
 Aquest workflow defineix els passos estàndard per publicar una nova versió.
 
 ## 1. Validació Prèvia
+> [!IMPORTANT]
+> **No es poden realitzar `git commit` automàtics de noves funcionalitats o arreglos fins que l'usuari no hagi validat expressament la feature a Firefox**. Els preparatius locals i d'empaquetat s'han de provar sempre primer en mode `dev`.
 
 1. **Netedat de codi i seguretat**
 

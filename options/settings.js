@@ -73,7 +73,8 @@ function updateSidebar() {
         { id: "obsidian", label: "Obsidian", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>' },
         { id: "markdown", label: "Markdown", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l4 5 4-5v10"/><path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"/></svg>' },
         { id: "deepdive", label: "Aprofundiment", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>' },
-        { id: "bionic", label: "Lectura Biònica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' }
+        { id: "bionic", label: "Lectura biònica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' },
+        { id: "science", label: "Validació científica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/><path d="M9 2h6"/><path d="M14 15h-4"/><path d="M16 11h-4"/></svg>' }
     ];
 
     let count = 0;
@@ -136,6 +137,9 @@ function saveOptions(e) {
     enableDeepdive: document.querySelector("#enableDeepdive").checked,
     deepDivePrompt: document.querySelector("#deepDivePrompt").value,
     
+    enableScience: document.querySelector("#enableScience").checked,
+    sciencePrompt: document.querySelector("#sciencePrompt").value,
+    
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder()
   };
@@ -154,51 +158,47 @@ function saveOptions(e) {
 }
 
 function restoreOptions() {
-  ext.storage.sync.get([
-      "apiKey",
-      "modelName",
-      "theme",
-      "systemPrompt",
-      "enableMarkdown",
-      "markdownTemplate",
-      "enableObsidian",
-      "obsidianVault",
-      "obsidianPath",
-      "obsidianTemplate",
-      "enableBionic",
-      "enableDeepdive",
-      "enableDeepDive",
-      "deepDivePrompt",
-      "extensionOrder"
-  ]).then(result => {
-    document.querySelector("#apiKey").value = result.apiKey || "";
-    document.querySelector("#modelName").value = result.modelName || "gemini-1.5-flash-latest";
-    document.querySelector("#themeSelect").value = result.theme || "system";
-    document.querySelector("#systemPrompt").value = result.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+  const configKeys = ["apiKey", "modelName", "theme", "systemPrompt", 
+    "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault", 
+    "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation", 
+    "bionicFont", "bionicLineHeight", "enableDeepdive", "deepDivePrompt", 
+    "enableScience", "sciencePrompt", "extensionOrder"];
     
-    document.querySelector("#enableMarkdown").checked = result.enableMarkdown === true;
-    document.querySelector("#markdownTemplate").value = result.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
+  ext.storage.sync.get(configKeys).then((data) => {
+    document.querySelector("#apiKey").value = data.apiKey || "";
+    document.querySelector("#modelName").value = data.modelName || "gemini-1.5-flash-latest";
+    document.querySelector("#themeSelect").value = data.theme || "system";
+    document.querySelector("#systemPrompt").value = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    
+    document.querySelector("#enableMarkdown").checked = data.enableMarkdown === true;
+    document.querySelector("#markdownTemplate").value = data.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
 
-    document.querySelector("#enableObsidian").checked = result.enableObsidian === true;
-    document.querySelector("#obsidianVault").value = result.obsidianVault || "Obsidian";
-    document.querySelector("#obsidianPath").value = result.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
-    document.querySelector("#obsidianTemplate").value = result.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
+    document.querySelector("#enableObsidian").checked = data.enableObsidian === true;
+    document.querySelector("#obsidianVault").value = data.obsidianVault || "Obsidian";
+    document.querySelector("#obsidianPath").value = data.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
+    document.querySelector("#obsidianTemplate").value = data.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
 
-    document.querySelector("#enableBionic").checked = result.enableBionic === true;
-    document.querySelector("#bionicFixation").value = result.bionicFixation || 45;
-    document.querySelector("#bionicFixationValue").textContent = (result.bionicFixation || 45) + "%";
-    document.querySelector("#bionicFont").value = result.bionicFont || "sans-serif";
-    document.querySelector("#bionicLineHeight").value = result.bionicLineHeight || "1.5";
+    document.querySelector("#enableBionic").checked = data.enableBionic === true;
+    document.querySelector("#bionicFixation").value = data.bionicFixation || 45;
+    document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 45) + "%";
+    document.querySelector("#bionicFont").value = data.bionicFont || "sans-serif";
+    document.querySelector("#bionicLineHeight").value = data.bionicLineHeight || "1.5";
 
     // Handle migration/fallback for Deep Dive
-    const isDeepDiveEnabled = result.enableDeepdive === true || result.enableDeepDive === true;
-    document.querySelector("#enableDeepdive").checked = isDeepDiveEnabled;
-    document.querySelector("#enableDeepdive").checked = isDeepDiveEnabled;
-    document.querySelector("#deepDivePrompt").value = result.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT;
+    if (data.enableDeepdive !== undefined) document.querySelector("#enableDeepdive").checked = data.enableDeepdive;
+    else if (data.enableDeepDive !== undefined) document.querySelector("#enableDeepdive").checked = data.enableDeepDive; // Fallback for old key
+    else document.querySelector("#enableDeepdive").checked = false; // Default to false if neither is set
 
-    // Apply Extension Order
-    if (result.extensionOrder && Array.isArray(result.extensionOrder)) {
-        applyExtensionOrder(result.extensionOrder);
+    if (data.deepDivePrompt !== undefined) document.querySelector("#deepDivePrompt").value = data.deepDivePrompt;
+    else document.querySelector("#deepDivePrompt").value = DEFAULT_DEEP_DIVE_PROMPT; // Default if not set
+
+    if (data.enableScience !== undefined) document.querySelector("#enableScience").checked = data.enableScience;
+    else document.querySelector("#enableScience").checked = false; // Default to false if not set
+
+    if (data.sciencePrompt !== undefined) document.querySelector("#sciencePrompt").value = data.sciencePrompt;
+    else document.querySelector("#sciencePrompt").value = "Avalua científicament aquest text. IMPORTANT: Respon ÚNICAMENT amb els punts d'avaluació. PROHIBIT fer introduccions o conclusions. Assenyala de forma directa afirmacions dubtoses o desviacions del consens actual. Has de justificar cada punt citant de forma intergrada en el propi text de l'argumentació almenys 3 referències acadèmiques altament reputades, incloent els seus respectius enllaços (URL o DOI).";
+    if (data.extensionOrder && Array.isArray(data.extensionOrder)) {
+        applyExtensionOrder(data.extensionOrder);
     }
 
     updateSidebar();
@@ -643,7 +643,7 @@ async function clearCache() {
 document.addEventListener("DOMContentLoaded", restoreOptions);
 
 // Bind all save buttons to saveOptions
-const saveBtns = ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic"];
+const saveBtns = ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience"];
 saveBtns.forEach(id => {
     const btn = document.querySelector("#" + id);
     if(btn) btn.addEventListener("click", saveOptions);

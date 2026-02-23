@@ -35,6 +35,11 @@ function applyExtensionVisibility(config) {
     if (deepDiveBtnEl) {
         deepDiveBtnEl.style.display = isDeepDiveEnabled ? "flex" : "none";
     }
+
+    const scienceBtnEl = document.getElementById("scienceBtn");
+    if (scienceBtnEl) {
+        scienceBtnEl.style.display = config.enableScience ? "flex" : "none";
+    }
 }
 
 /**
@@ -53,7 +58,8 @@ function applyExtensionOrder(order) {
         "obsidian": "obsidianBtn",
         "markdown": "copyBtn",
         "deepdive": "deepDiveBtn",
-        "bionic": "bionicBtn"
+        "bionic": "bionicBtn",
+        "science": "scienceBtn"
     };
     
     const orderedButtons = [];
@@ -104,6 +110,7 @@ function setGeneratingState(generating, hasContent = false) {
         document.getElementById("obsidianBtn").disabled = true;
         document.getElementById("bionicBtn").disabled = true;
         document.getElementById("deepDiveBtn").disabled = true;
+        document.getElementById("scienceBtn").disabled = true;
         
         loadingDiv.classList.remove("hidden");
     } else {
@@ -119,6 +126,7 @@ function setGeneratingState(generating, hasContent = false) {
         document.getElementById("obsidianBtn").disabled = !hasContent;
         document.getElementById("bionicBtn").disabled = !hasContent;
         document.getElementById("deepDiveBtn").disabled = !hasContent;
+        document.getElementById("scienceBtn").disabled = !hasContent;
     }
 }
 
@@ -142,6 +150,8 @@ function resetUI(hasContent, config = null) {
     if (bionicBtn) bionicBtn.disabled = !hasContent;
     const deepDiveBtn = document.getElementById("deepDiveBtn");
     if (deepDiveBtn) deepDiveBtn.disabled = !hasContent;
+    const scienceBtn = document.getElementById("scienceBtn");
+    if (scienceBtn) scienceBtn.disabled = !hasContent;
     
     if (config) {
         applyExtensionVisibility(config);
@@ -150,7 +160,7 @@ function resetUI(hasContent, config = null) {
         }
     } else {
         ext.storage.sync
-            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "extensionOrder"])
+            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "enableScience", "extensionOrder"])
             .then(fetchedConfig => {
                 applyExtensionVisibility(fetchedConfig);
                 if (fetchedConfig.extensionOrder) {
