@@ -1,86 +1,90 @@
 :root {
-  --primary-color: #15141a; /* Black for text/links/outlines */
-  --primary-hover: #333333;
-  --button-color: #0060df;  /* Blue from Sidebar */
-  --button-hover-bg: #003eaa;
-  --bg-color: #ffffff;
-  --sidebar-bg: #f7f7f9;
-  --text-color: #15141a;
-  --text-muted: #5e5e6e;
-  --border-color: #e0e0e6;
-  --input-bg: #f5f5f7; /* Very light gray */
-  --input-border: #dcdce0;
-  --nav-hover: rgba(0,0,0,0.04);
-  --nav-active-bg: rgba(0, 0, 0, 0.05); /* Neutral grey/black tint */
-  --card-bg: #fff;
-  --shadow-color: rgba(0,0,0,0.02);
+  /* Classic Light Theme */
+  --primary-color: #100F0F; /* Flexoki Black */
+  --primary-hover: #6F6E69;
+  --button-color: #205EA6;  /* Flexoki Blue */
+  --button-hover-bg: #4385BE; 
+  --bg-color: #ffffff; 
+  --sidebar-bg: #f7f7f9; 
+  --text-color: #100F0F;
+  --text-muted: #6F6E69; /* Flexoki Base-70 */
+  --border-color: #e0e0e6; 
+  --input-bg: #f5f5f7;
+  --input-border: #dcdce0; 
+  --nav-hover: rgba(16,15,15,0.04);
+  --nav-active-bg: rgba(16,15,15,0.05);
+  --card-bg: #ffffff;
+  --shadow-color: rgba(16,15,15,0.05);
   --table-header-bg: #f7f7f9;
-  --table-border: #f0f0f4;
-  --toast-bg: #333;
+  --table-border: #e0e0e6;
+  --toast-bg: #100F0F;
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 [data-actual-theme="dark"] {
-  --primary-color: #e0e0e0; /* Off-white accent */
-  --primary-hover: #ffffff;
-  --button-color: #0060df; /* Blue buttons contrast well on dark */
-  --button-hover-bg: #003eaa;
-  --bg-color: #121212; /* Dim black */
-  --sidebar-bg: #1e1e1e; /* Surface */
-  --text-color: #e0e0e0;
-  --text-muted: #a0a0a0;
-  --border-color: #333333;
-  --input-bg: #2c2c2e; /* Slightly lighter than bg for inputs */
-  --input-border: #48484a;
-  --nav-hover: rgba(255,255,255,0.08);
-  --nav-active-bg: rgba(255, 255, 255, 0.12);
-  --card-bg: #1e1e1e;
+  /* Flexoki Dark Theme */
+  --primary-color: #CECDC3; /* Flexoki Base-100 Light */
+  --primary-hover: #FFFCF0;
+  --button-color: #4385BE; /* Flexoki Blue Dark */
+  --button-hover-bg: #205EA6;
+  --bg-color: #100F0F; /* Flexoki Black */
+  --sidebar-bg: #1C1B1A; /* Surface */
+  --text-color: #CECDC3;
+  --text-muted: #878580; /* Flexoki Base-70 */
+  --border-color: #282726; /* Flexoki Base-30 */
+  --input-bg: #100F0F;
+  --input-border: #403E3C; /* Flexoki Base-40 */
+  --nav-hover: rgba(206,205,195,0.08);
+  --nav-active-bg: rgba(206,205,195,0.12);
+  --card-bg: #100F0F;
   --shadow-color: rgba(0,0,0,0.5);
-  --table-header-bg: #2c2c2e;
-  --table-border: #333333;
-  --toast-bg: #333333;
+  --table-header-bg: #1C1B1A;
+  --table-border: #282726;
+  --toast-bg: #343331; /* Flexoki Base-35 */
 }
  
-[data-actual-theme="sepia"] {
-  --primary-color: #b58900;
-  --primary-hover: #cb4b16;
-  --button-color: #b58900;
-  --button-hover-bg: #cb4b16;
-  --bg-color: #fdf6e3;
-  --sidebar-bg: #eee8d5;
-  --text-color: #586e75;
-  --text-muted: #93a1a1;
-  --border-color: #eee8d5;
-  --input-bg: #eee8d5;
-  --input-border: #93a1a1;
-  --nav-hover: rgba(0,0,0,0.04);
-  --nav-active-bg: rgba(0,0,0,0.06);
-  --card-bg: #fdf6e3;
-  --shadow-color: rgba(0,0,0,0.02);
-  --table-header-bg: #eee8d5;
-  --table-border: #eee8d5;
-  --toast-bg: #586e75;
+[data-actual-theme="solarized"] {
+  /* Solarized via Flexoki */
+  --primary-color: #AD8301; /* Yellow */
+  --primary-hover: #BC5215; /* Orange */
+  --button-color: #AD8301;
+  --button-hover-bg: #BC5215;
+  --bg-color: #FFFCF0; /* Flexoki's paper naturally warm */
+  --sidebar-bg: #F2F0E5; 
+  --text-color: #6F6E69;
+  --text-muted: #878580;
+  --border-color: #E6E4D9;
+  --input-bg: #F2F0E5;
+  --input-border: #DAD8CE;
+  --nav-hover: rgba(175,48,41,0.04);
+  --nav-active-bg: rgba(175,48,41,0.06);
+  --card-bg: #FFFCF0;
+  --shadow-color: rgba(16,15,15,0.02);
+  --table-header-bg: #F2F0E5;
+  --table-border: #E6E4D9;
+  --toast-bg: #6F6E69;
 }
  
 [data-actual-theme="soft-gray"] {
+  /* Clean Soft Greys */
   --primary-color: #555555;
   --primary-hover: #333333;
   --button-color: #555555;
   --button-hover-bg: #333333;
-  --bg-color: #f5f5f5;
+  --bg-color: #f5f5f5; /* Clean light gray */
   --sidebar-bg: #e8e8e8;
-  --text-color: #333333;
-  --text-muted: #777777;
+  --text-color: #100F0F;
+  --text-muted: #6F6E69;
   --border-color: #e0e0e0;
   --input-bg: #e8e8e8;
   --input-border: #cccccc;
-  --nav-hover: rgba(0,0,0,0.04);
-  --nav-active-bg: rgba(0,0,0,0.06);
+  --nav-hover: rgba(16,15,15,0.04);
+  --nav-active-bg: rgba(16,15,15,0.06);
   --card-bg: #f5f5f5;
-  --shadow-color: rgba(0,0,0,0.02);
+  --shadow-color: rgba(16,15,15,0.02);
   --table-header-bg: #e8e8e8;
   --table-border: #e0e0e0;
-  --toast-bg: #333333;
+  --toast-bg: #100F0F;
 }
 
 body {

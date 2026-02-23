@@ -1,82 +1,86 @@
 :root {
+  /* Classic Light Theme (clean base, Flexoki UI elements) */
   --bg-color: #f9f9fb;
-  --text-color: #15141a;
-  --text-muted: #666;
-  --border-color: #ddd;
+  --text-color: #100f0f; /* Flexoki Black */
+  --text-muted: #6f6e69; /* Flexoki Base-70 */
+  --border-color: #e0e0e0;
   --toolbar-bg: transparent;
-  --button-hover: #e0e0e0;
-  --button-text: #333;
-  --primary-color: #0060df;
-  --primary-hover: #003eaa;
-  --primary-text: white;
-  --secondary-bg: #e0e0e0;
-  --secondary-hover: #d0d0d0;
+  --button-hover: #e0e0e0; 
+  --button-text: #100f0f;
+  --primary-color: #205ea6; /* Flexoki Blue */
+  --primary-hover: #4385be;
+  --primary-text: #ffffff;
+  --secondary-bg: #e0e0e6;
+  --secondary-hover: #cecdc3;
   --error-bg: #fdf2f5;
-  --error-text: #d70022;
+  --error-text: #af3029; /* Flexoki Red */
   --footer-bg: #f0f0f4;
-  --footer-border: #ddd;
-  --footer-text: #666;
+  --footer-border: #e0e0e0;
+  --footer-text: #6f6e69;
   --icon-color: currentColor;
 }
 
 [data-actual-theme="dark"] {
-  --bg-color: #121212;
-  --text-color: #e0e0e0;
-  --text-muted: #bfbfbf; /* Lighter for better contrast */
-  --border-color: #333333;
-  --toolbar-bg: #1e1e1e;
-  --button-hover: #2c2c2e;
-  --button-text: #ffffff;
-  --primary-color: #8cb4ff; /* Accessible Light Blue */
-  --primary-hover: #b3d1ff;
-  --primary-text: #000000; /* Dark text on light blue button */
-  --secondary-bg: #2c2c2e;
-  --secondary-hover: #3a3a3c;
-  --error-bg: #3b0f15;
-  --error-text: #ffb4b4;
-  --footer-bg: #1e1e1e;
-  --footer-border: #333333;
-  --footer-text: #bfbfbf;
+  /* Flexoki Dark Theme */
+  --bg-color: #100f0f; /* Flexoki Base-00/Black */
+  --text-color: #cecdc3; /* Flexoki Base-100/Paper */
+  --text-muted: #878580; /* Flexoki Base-70 */
+  --border-color: #282726; /* Flexoki Base-30 */
+  --toolbar-bg: #100f0f;
+  --button-hover: #1c1b1a; /* Flexoki Base-20 */
+  --button-text: #cecdc3;
+  --primary-color: #4385be; /* Flexoki Dark Blue */
+  --primary-hover: #205ea6;
+  --primary-text: #100f0f;
+  --secondary-bg: #282726;
+  --secondary-hover: #343331;
+  --error-bg: #1c1b1a;
+  --error-text: #d14d41; /* Flexoki Dark Red */
+  --footer-bg: #100f0f;
+  --footer-border: #282726;
+  --footer-text: #878580;
 }
- 
-[data-actual-theme="sepia"] {
-  --bg-color: #fdf6e3;
-  --text-color: #586e75;
-  --text-muted: #93a1a1;
-  --border-color: #eee8d5;
-  --toolbar-bg: #eee8d5;
-  --button-hover: #eee8d5;
-  --button-text: #b58900;
-  --primary-color: #b58900;
-  --primary-hover: #cb4b16;
-  --primary-text: #ffffff;
-  --secondary-bg: #eee8d5;
-  --secondary-hover: #93a1a1;
-  --error-bg: #fdf2f5;
-  --error-text: #d33682;
-  --footer-bg: #eee8d5;
-  --footer-border: #93a1a1;
-  --footer-text: #586e75;
+
+[data-actual-theme="solarized"] {
+  /* Solarized/Sepia adapted with Flexoki Warmth */
+  --bg-color: #f2f0e5;
+  --text-color: #6f6e69;
+  --text-muted: #878580;
+  --border-color: #e6e4d9;
+  --toolbar-bg: #f2f0e5;
+  --button-hover: #e6e4d9;
+  --button-text: #ad8301; /* Flexoki Yellow */
+  --primary-color: #ad8301;
+  --primary-hover: #bc5215; /* Flexoki Orange */
+  --primary-text: #fffcf0;
+  --secondary-bg: #e6e4d9;
+  --secondary-hover: #dad8ce;
+  --error-bg: #f2f0e5;
+  --error-text: #af3029;
+  --footer-bg: #f2f0e5;
+  --footer-border: #e6e4d9;
+  --footer-text: #878580;
 }
- 
+
 [data-actual-theme="soft-gray"] {
-  --bg-color: #f5f5f5;
-  --text-color: #333333;
-  --text-muted: #777777;
+  /* Soft Gray (clean base, Flexoki Greys) */
+  --bg-color: #f5f5f5; /* Clean light gray */
+  --text-color: #100f0f;
+  --text-muted: #6f6e69;
   --border-color: #e0e0e0;
   --toolbar-bg: #e8e8e8;
   --button-hover: #e0e0e0;
-  --button-text: #222222;
+  --button-text: #100f0f;
   --primary-color: #555555;
-  --primary-hover: #333333;
+  --primary-hover: #100f0f;
   --primary-text: #ffffff;
   --secondary-bg: #e0e0e0;
-  --secondary-hover: #d0d0d0;
+  --secondary-hover: #cecdc3;
   --error-bg: #fee;
-  --error-text: #c00;
+  --error-text: #af3029;
   --footer-bg: #e8e8e8;
   --footer-border: #cccccc;
-  --footer-text: #666666;
+  --footer-text: #6f6e69;
 }
 
 body {

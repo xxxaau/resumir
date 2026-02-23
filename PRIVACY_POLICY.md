@@ -31,6 +31,6 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 - **storage**: Per guardar la teva API Key i preferències localment.
 - **scripting**: Per netejar el contingut de la pàgina (mòde lectura) abans d'enviar-lo.
 
-## 4. Contacte
+## 4. Contacte i codi font
 
-Si tens algun dubte sobre aquesta política, pots contactar amb el desenvolupador o consultar el codi font obert al repositori del projecte.
+Si tens algun dubte sobre aquesta política, pots contactar amb el desenvolupador o consultar el codi font al repositori oficial del projecte (vegeu l'enllaç `homepage_url` al `manifest.json` o al `README.md`).

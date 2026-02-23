@@ -71,19 +71,34 @@ Abans de fer servir l'extensió, necessites configurar la teva clau API de Googl
     - A la pàgina de configuració (`Configuració General`), enganxa la teva clau al camp **Google Gemini API Key**.
     - Fes clic a **"Desar canvis"**.
 
-## Estructura del Projecte
+## Estructura del Projecte i Arquitectura
 
-- `/sidebar`: Codi HTML/JS/CSS de la barra lateral principal.
+Des de la versió 1.2.x, l'extensió compta amb una arquitectura modular a la barra lateral per facilitar-ne el manteniment:
+
+- `/sidebar`: Codi de la barra lateral principal, dividit en mòduls lògics:
+  - `sidebar.js`: Controlador principal (Event Listeners i orquestració).
+  - `api.js`: Comunicació amb l'API de Gemini (autenticació, streaming SSE).
+  - `content.js`: Lògica d'extracció i neteja de text de la pàgina activa (suport YouTube, HN, Readability).
+  - `cache.js`: Gestió d'emmagatzematge local (memòria cau, historial i estadístiques).
+  - `ui.js`: Interfície d'usuari (visibilitat, estats de càrrega, formats de text).
+  - `utils.js`: Funcions auxiliars i de formatat d'exportació (MD, Obsidian).
 - `/options`: Pàgina de configuració independent (estil "Web Clipper").
+- `/tests`: Arxius de proves unitàries d'integració i lògica (`test.html`, `test_logic.js`).
 - `/icons`: Icones de l'aplicació.
 - `manifest.json`: Configuració principal de l'extensió (Manifest V3).
-- `background.js`: Scripts de fons per a la gestió d'esdeveniments.
+- `background.js`: Scripts de fons per a la gestió d'esdeveniments i el menú contextual.
+- `ext.js`: Wrapper de compatibilitat (api agnostic) introduït a la sèrie 1.3 formiguejant les operacions del navegador per un objecte únic unificat `ext.*`.
 
 ## Seguretat i Privadesa
 
-- **Dades locals**: La teva clau API i l'historial de quotes es guarden localment al navegador (`browser.storage.local`).
-- **Connexions externes**: L'extensió només es connecta als servidors de Google (`generativelanguage.googleapis.com`) per enviar el text de la pàgina i rebre el resum. No s'envia cap dada a servidors de tercers ni es rastreja l'activitat de navegació més enllà de la pàgina que demanes resumir.
+**Nota Tècnica sobre el Manifest:**  
+L'extensió manté elements únics per evitar reescriptures denses al fitxer `manifest.json` com `browser_specific_settings` i `sidebar_action` que pertanyen només a Firefox. Com a partícep de les modificacions de la sèrie 1.3, el projecte ha centralitzat el codi JavaScript però el manifest contindrà aquests dominis incontrolats de Gecko fins la distribució Chromium (Sèrie 2.0), moment on segurament muti i ometi paràmetres com `sidebar_action` per adaptar l'API Chromium `sidePanel`.
 
-## Llicència
+- **Dades locals**: La teva clau API, les preferències i l'historial d'ús es guarden exclusivament al teu navegador (emmagatzematge local/sync de Firefox).
+- **Connexions externes**: L'extensió només es connecta als servidors de Google (`generativelanguage.googleapis.com`) per enviar el text de la pàgina i rebre el resum. No s'envia cap dada a servidors de tercers addicionals ni es rastreja l'activitat de navegació més enllà de la pàgina que demanes resumir.
+- Pots consultar tots els detalls a la política de privadesa (`PRIVACY_POLICY.md`).
 
-Projecte d'ús personal en desenvolupament.
+## Llicència i codi font
+
+- El projecte es distribueix sota la llicència **Mozilla Public License 2.0 (MPL-2.0)**. Consulta el fitxer `LICENSE` per als detalls complets.
+- L'objectiu és mantenir l'extensió com a projecte **open source**, amb el codi disponible i versionat al repositori indicat al `manifest.json` (`homepage_url`) i obert a contribucions en el futur.

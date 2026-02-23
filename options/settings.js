@@ -24,6 +24,7 @@ const DEFAULT_OBSIDIAN_TEMPLATE = `- [{{title}}]({{url}})\n\t- {{summary_executi
 const DEFAULT_DEEP_DIVE_PROMPT = `Actua com un expert analista. Proporciona una anàlisi profunda i exhaustiva del contingut següent.
 Inclou arguments detallats, evidències mencionades i matisos importants.
 Estructura la resposta amb seccions clares.
+IMPORTANT: Respon directament amb el resultat de l'anàlisi. NO comencis saludant ni incloguis cap introducció de l'estil "Com a analista expert, proporciono...".
 Respon SEMPRE en CATALÀ.`;
 
 // --- Navigation Logic ---
@@ -86,7 +87,11 @@ function updateSidebar() {
             const btn = document.createElement("button");
             btn.className = "nav-item dynamic-extension";
             btn.setAttribute("data-tab", ext.id);
-            btn.innerHTML = `${ext.icon}${ext.label}`;
+            
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(ext.icon, "image/svg+xml");
+            btn.appendChild(svgDoc.documentElement);
+            btn.appendChild(document.createTextNode(ext.label));
             
             if (document.getElementById(`tab-${ext.id}`)?.classList.contains('active')) {
                 btn.classList.add('active');
@@ -129,13 +134,16 @@ function saveOptions(e) {
     bionicLineHeight: document.querySelector("#bionicLineHeight").value,
 
     enableDeepdive: document.querySelector("#enableDeepdive").checked,
-    deepDivePrompt: document.querySelector("#deepDivePrompt").value
+    deepDivePrompt: document.querySelector("#deepDivePrompt").value,
+    
+    // Configura l'ordre de les extensions
+    extensionOrder: getCurrentExtensionOrder()
   };
 
 
   Promise.all([
-      browser.storage.sync.set(settings),
-      browser.storage.local.set(settings)
+      ext.storage.sync.set(settings),
+      ext.storage.local.set(settings)
   ]).then(() => {
      showStatus("Configuració guardada correctament!");
      updateSidebar(); 
@@ -146,11 +154,22 @@ function saveOptions(e) {
 }
 
 function restoreOptions() {
-  browser.storage.sync.get([
-      "apiKey", "modelName", "theme", "systemPrompt", 
-      "enableMarkdown", "markdownTemplate",
-      "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate",
-      "enableBionic", "enableDeepdive", "enableDeepDive", "deepDivePrompt"
+  ext.storage.sync.get([
+      "apiKey",
+      "modelName",
+      "theme",
+      "systemPrompt",
+      "enableMarkdown",
+      "markdownTemplate",
+      "enableObsidian",
+      "obsidianVault",
+      "obsidianPath",
+      "obsidianTemplate",
+      "enableBionic",
+      "enableDeepdive",
+      "enableDeepDive",
+      "deepDivePrompt",
+      "extensionOrder"
   ]).then(result => {
     document.querySelector("#apiKey").value = result.apiKey || "";
     document.querySelector("#modelName").value = result.modelName || "gemini-1.5-flash-latest";
@@ -174,7 +193,13 @@ function restoreOptions() {
     // Handle migration/fallback for Deep Dive
     const isDeepDiveEnabled = result.enableDeepdive === true || result.enableDeepDive === true;
     document.querySelector("#enableDeepdive").checked = isDeepDiveEnabled;
+    document.querySelector("#enableDeepdive").checked = isDeepDiveEnabled;
     document.querySelector("#deepDivePrompt").value = result.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT;
+
+    // Apply Extension Order
+    if (result.extensionOrder && Array.isArray(result.extensionOrder)) {
+        applyExtensionOrder(result.extensionOrder);
+    }
 
     updateSidebar();
     updateCacheInfo();
@@ -182,7 +207,7 @@ function restoreOptions() {
 
   });
 
-  const manifest = browser.runtime.getManifest();
+  const manifest = ext.runtime.getManifest();
   document.getElementById("appVersion").textContent = manifest.version;
 }
  
@@ -200,11 +225,14 @@ document.querySelectorAll('.btn-icon[data-target]').forEach(btn => {
 });
 
 // Handle "Live" Toggles in extension list
+// Nota: només actualitza la UI de la barra lateral de configuració;
+// la persistència real es fa quan l'usuari prem un botó de "Desar" explícit.
 const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic"];
 extensionToggles.forEach(id => {
-    document.getElementById(id).addEventListener('change', () => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', () => {
         updateSidebar();
-        saveOptions(); // Auto-save on toggle? or just update visuals? User implies toggle == active. Safer to save.
     });
 });
 
@@ -253,7 +281,7 @@ async function listModels(e) {
     // Filter for models that support generateContent
     const validModels = data.models?.filter(m => 
         m.supportedGenerationMethods?.includes("generateContent") &&
-        !/embedding|aqa|robotics|vision|image|preview|pro/i.test(m.name)
+        !/embedding|aqa|robotics|vision|image/i.test(m.name)
     ).map(m => m.name.replace("models/", "")) || [];
 
     if (validModels.length === 0) {
@@ -283,70 +311,63 @@ async function listModels(e) {
 
 // --- Statistics Logic ---
 
-const PAGE_SIZE = 20;
+let PAGE_SIZE = 20;
 let currentPage = 1;
+let totalPages = 1;
 
 async function loadStatistics() {
     try {
-        const data = await browser.storage.local.get(["stats", "usageHistory"]);
+        const data = await ext.storage.local.get(["stats", "usageHistory"]);
         const stats = data.stats || { articles: 0, tokens: 0 };
         const history = data.usageHistory || []; // Array of {date, title, url, model, inputTokens, outputTokens, latency}
 
         // 1. Update KPI Cards
-        // Use standard element IDs as defined in the new HTML
-        const elRequests = document.getElementById("kpiRequests");
-        const elTokens = document.getElementById("kpiTokens");
-        const elSpeed = document.getElementById("kpiSpeed");
+        const elArticles = document.getElementById("statsArticles");
+        const elTimeSaved = document.getElementById("kpiTimeSaved");
 
-        if(elRequests) elRequests.textContent = stats.articles;
-        if(elTokens) elTokens.textContent = stats.tokens.toLocaleString();
+        if(elArticles) elArticles.textContent = history.length;
         
-        // Calculate Avg Speed (Tokens / Second)
-        let avgSpeed = 0;
+        // Calculate Time Saved (Estimated reading time - wait time)
+        // Assume 1 token ~ 0.75 words, Average reading speed = 250 wpm.
+        // Therefore, 1 token takes ~0.18 seconds to read. We use 0.2s for simplicity.
+        let timeSavedSeconds = 0;
         if (history.length > 0) {
-            const totalSpeed = history.reduce((acc, curr) => {
-                const totalTokens = (curr.inputTokens || 0) + (curr.outputTokens || 0);
-                const seconds = (curr.latency || 1000) / 1000;
-                return acc + (totalTokens / seconds);
+            timeSavedSeconds = history.reduce((acc, curr) => {
+                const readSecs = (curr.inputTokens || 0) * 0.2;
+                const waitSecs = (curr.latency || 0) / 1000;
+                return acc + Math.max(0, readSecs - waitSecs);
             }, 0);
-            avgSpeed = Math.round(totalSpeed / history.length);
         }
-        if(elSpeed) elSpeed.textContent = `${avgSpeed} t/s`;
+        
+        const hours = Math.floor(timeSavedSeconds / 3600);
+        const minutes = Math.floor((timeSavedSeconds % 3600) / 60);
+        if(elTimeSaved) elTimeSaved.textContent = `${hours}h ${minutes}m`;
 
-        // Update legacy stats in General tab if they still exist (stats-details)
-        const elStatsTokens = document.querySelector("#statsTokens");
-        const elStatsCost = document.querySelector("#statsCost");
-        if (elStatsTokens) elStatsTokens.textContent = stats.tokens.toLocaleString();
-        if (elStatsCost) {
-             const costUSD = (stats.tokens / 1000000) * 0.10;
-             const costEUR = costUSD * 0.92;
-             elStatsCost.textContent = costEUR.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 6 });
-        }
+        // Render Bar Chart
+        renderDailyChart(history);
 
 
         // 2. Render History Table with Pagination
-        // Sort history by date desc (newest first) if not already
-        // Assuming history is appended, so we might want to reverse it for display
-        const sortedHistory = [...history].reverse();
+        // Sort history by date desc (newest first)
+        const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        totalPages = Math.ceil(sortedHistory.length / PAGE_SIZE) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
 
-        const visibleCount = currentPage * PAGE_SIZE;
-        const visibleHistory = sortedHistory.slice(0, visibleCount);
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const endIndex = startIndex + PAGE_SIZE;
+        const visibleHistory = sortedHistory.slice(startIndex, endIndex);
         
         renderHistoryTable(visibleHistory);
 
-        // 3. Manage Load More Button
-        const loadMoreBtn = document.getElementById("loadMoreHistory");
-        if (loadMoreBtn) {
-            if (sortedHistory.length > visibleCount) {
-                loadMoreBtn.style.display = "block";
-                loadMoreBtn.onclick = () => {
-                    currentPage++;
-                    loadStatistics();
-                };
-            } else {
-                loadMoreBtn.style.display = "none";
-            }
-        }
+        // 3. Manage Pagination UI
+        const prevBtn = document.getElementById("prevPage");
+        const nextBtn = document.getElementById("nextPage");
+        const pageInfo = document.getElementById("pageInfo");
+
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+        if (pageInfo) pageInfo.textContent = `Pàgina ${currentPage} de ${totalPages}`;
 
     } catch (e) {
         console.error("Error loading stats:", e);
@@ -355,6 +376,170 @@ async function loadStatistics() {
 
 
 
+
+// --- Reordering Logic ---
+
+function getCurrentExtensionOrder() {
+    const list = document.querySelector(".extensions-list");
+    const items = Array.from(list.querySelectorAll(".extension-item"));
+    return items.map(item => {
+        const actionDiv = item.querySelector(".extension-actions");
+        return actionDiv ? actionDiv.getAttribute("data-extension-id") : null;
+    }).filter(id => id !== null);
+}
+
+function applyExtensionOrder(order) {
+    const list = document.querySelector(".extensions-list");
+    const items = Array.from(list.querySelectorAll(".extension-item"));
+    const itemsMap = new Map();
+    
+    items.forEach(item => {
+        const id = item.querySelector(".extension-actions").getAttribute("data-extension-id");
+        if (id) itemsMap.set(id, item);
+    });
+
+    // Re-append items in order
+    order.forEach(id => {
+        const item = itemsMap.get(id);
+        if (item) {
+            list.appendChild(item); // Moves it to the end (reordering)
+            itemsMap.delete(id);
+        }
+    });
+
+    // Append any remaining items (new ones?)
+    itemsMap.forEach(item => {
+        list.appendChild(item);
+    });
+
+    updateMoveButtonsState();
+}
+
+function moveExtension(extensionId, direction) {
+    const list = document.querySelector(".extensions-list");
+    const item = list.querySelector(`.extension-actions[data-extension-id="${extensionId}"]`).closest(".extension-item");
+    if (!item) return;
+
+    if (direction === "up") {
+        const prev = item.previousElementSibling;
+        if (prev) {
+            list.insertBefore(item, prev);
+        }
+    } else if (direction === "down") {
+        const next = item.nextElementSibling;
+        if (next) {
+            list.insertBefore(next, item);
+        }
+    }
+
+    updateMoveButtonsState();
+}
+
+function updateMoveButtonsState() {
+    const list = document.querySelector(".extensions-list");
+    const items = list.querySelectorAll(".extension-item");
+    
+    items.forEach((item, index) => {
+        const upBtn = item.querySelector(".btn-move-up");
+        const downBtn = item.querySelector(".btn-move-down");
+        
+        if (upBtn) upBtn.disabled = (index === 0);
+        if (downBtn) downBtn.disabled = (index === items.length - 1);
+    });
+}
+
+
+function getRelativeTime(dateInput) {
+    const date = new Date(dateInput);
+    const now = new Date();
+    
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+
+    if (diffMins < 1) return "fa uns segons";
+    if (diffMins < 60) return `fa ${diffMins} minuts`;
+    if (diffHours < 24 && now.getDate() === date.getDate()) {
+        if (diffHours === 1) return "fa 1 hora";
+        return `fa ${diffHours} hores`;
+    }
+    
+    // For days, calculate calendar day difference
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const inputDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.round((today - inputDay) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "ahir";
+    return `fa ${diffDays} dies`;
+}
+
+function renderDailyChart(history) {
+    const container = document.getElementById("dailyChartContainer");
+    if (!container) return;
+    container.replaceChildren();
+
+    // Initialize last 7 days count
+    const days = {};
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    // Build array of keys from 6 days ago to today
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        days[d.toLocaleDateString('ca-ES', { weekday: 'short' })] = 0;
+    }
+
+    // Count history in those days
+    history.forEach(entry => {
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0,0,0,0);
+        const diffTime = today - entryDate;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); 
+        if (diffDays <= 6 && diffDays >= 0) {
+             const key = entryDate.toLocaleDateString('ca-ES', { weekday: 'short' });
+             if(days[key] !== undefined) days[key]++;
+        }
+    });
+
+    const maxCount = Math.max(...Object.values(days), 1);
+
+    // Draw bars
+    Object.entries(days).forEach(([dayLabel, count]) => {
+        const barWrapper = document.createElement("div");
+        barWrapper.style.display = "flex";
+        barWrapper.style.flexDirection = "column";
+        barWrapper.style.alignItems = "center";
+        barWrapper.style.flex = "1";
+        barWrapper.style.height = "100%";
+        barWrapper.style.justifyContent = "flex-end";
+        
+        const bar = document.createElement("div");
+        const heightPct = (count / maxCount) * 80; // max 80% height for visual padding
+        bar.style.height = Math.max(heightPct, 2) + "%"; 
+        bar.style.width = "70%";
+        bar.style.backgroundColor = "var(--button-hover-bg)";
+        bar.style.borderRadius = "4px 4px 0 0";
+        bar.style.transition = "height 0.3s";
+        
+        if (count === 1) {
+            bar.title = `1 article resumit`;
+        } else {
+            bar.title = `${count} articles resumits`;
+        }
+
+        const label = document.createElement("div");
+        label.textContent = dayLabel;
+        label.style.fontSize = "12px";
+        label.style.marginTop = "5px";
+        label.style.color = "var(--text-muted)";
+        label.style.textTransform = "capitalize";
+
+        barWrapper.appendChild(bar);
+        barWrapper.appendChild(label);
+        container.appendChild(barWrapper);
+    });
+}
+
 function renderHistoryTable(history) {
     const tbody = document.getElementById("historyTableBody");
     tbody.replaceChildren(); // Clear content
@@ -362,7 +547,7 @@ function renderHistoryTable(history) {
     if (history.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 5;
+        td.colSpan = 2;
         td.style.textAlign = "center";
         td.style.color = "#999";
         td.textContent = "Encara no hi ha dades d'ús.";
@@ -377,40 +562,25 @@ function renderHistoryTable(history) {
         // Date
         const tdDate = document.createElement("td");
         const dateObj = new Date(entry.date);
-        tdDate.textContent = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        tdDate.textContent = getRelativeTime(dateObj);
+        tdDate.title = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         tr.appendChild(tdDate);
         
-        // Model
-        const tdModel = document.createElement("td");
-        tdModel.textContent = entry.model;
-        tr.appendChild(tdModel);
-
         // Title/Url
         const tdTitle = document.createElement("td");
+        let prefix = entry.type === "deep" ? "+ " : "";
+        
         if (entry.url) {
             const a = document.createElement("a");
             a.href = entry.url;
             a.target = "_blank";
             a.rel = "noopener noreferrer";
-            a.textContent = entry.title || "Sense títol";
+            a.textContent = prefix + (entry.title || "Sense títol");
             tdTitle.appendChild(a);
         } else {
-            tdTitle.textContent = entry.title || "Sense títol";
+            tdTitle.textContent = prefix + (entry.title || "Sense títol");
         }
         tr.appendChild(tdTitle);
-
-        // Tokens
-        const tdTokens = document.createElement("td");
-        const spanTokens = document.createElement("span");
-        spanTokens.title = `Input: ${entry.inputTokens} / Output: ${entry.outputTokens}`;
-        spanTokens.textContent = entry.inputTokens + entry.outputTokens;
-        tdTokens.appendChild(spanTokens);
-        tr.appendChild(tdTokens);
-        
-        // Time
-        const tdTime = document.createElement("td");
-        tdTime.textContent = (entry.latency / 1000).toFixed(1) + "s";
-        tr.appendChild(tdTime);
 
         tbody.appendChild(tr);
     });
@@ -418,7 +588,7 @@ function renderHistoryTable(history) {
 
 function clearHistory() {
     if (confirm("Estàs segur que vols esborrar l'historial de peticions?")) {
-        browser.storage.local.set({ usageHistory: [] }).then(() => {
+        ext.storage.local.set({ usageHistory: [] }).then(() => {
             currentPage = 1; // Reset pagination
             loadStatistics();
             showStatus("Historial esborrat.");
@@ -431,7 +601,7 @@ function clearHistory() {
 
 async function updateCacheInfo() {
     try {
-        const data = await browser.storage.local.get(null);
+        const data = await ext.storage.local.get(null);
         // Count keys starting with summary_cache:
         let count = 0;
         let size = 0;
@@ -457,10 +627,10 @@ async function clearCache() {
     if (!confirm("Estàs segur que vols esborrar la memòria cau de resums?")) return;
     
     try {
-        const data = await browser.storage.local.get(null);
+        const data = await ext.storage.local.get(null);
         const keysToRemove = Object.keys(data).filter(k => k.startsWith("summary_cache:"));
         
-        await browser.storage.local.remove(keysToRemove);
+        await ext.storage.local.remove(keysToRemove);
         updateCacheInfo();
         showStatus("Memòria de resums esborrada.");
     } catch (e) {
@@ -486,6 +656,39 @@ document.querySelector("#checkModels").addEventListener("click", listModels);
 document.getElementById("clearHistory").addEventListener("click", clearHistory);
 document.getElementById("clearCache").addEventListener("click", clearCache);
 
+// Pagination Event Listeners
+document.getElementById("prevPage")?.addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        loadStatistics();
+    }
+});
+
+document.getElementById("nextPage")?.addEventListener("click", () => {
+    if (currentPage < totalPages) {
+        currentPage++;
+        loadStatistics();
+    }
+});
+
+document.getElementById("pageSizeSelect")?.addEventListener("change", (e) => {
+    PAGE_SIZE = parseInt(e.target.value, 10);
+    currentPage = 1;
+    loadStatistics();
+});
+
+// Reordering Event Delegation
+document.querySelector(".extensions-list").addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-move-up, .btn-move-down");
+    if (!btn) return;
+
+    const actionDiv = btn.closest(".extension-actions");
+    const id = actionDiv.getAttribute("data-extension-id");
+    const direction = btn.classList.contains("btn-move-up") ? "up" : "down";
+
+    moveExtension(id, direction);
+});
+
 // --- About Links (CSP Safe) ---
 document.getElementById("btnGithub").addEventListener("click", () => {
     window.open("https://github.com/xxxaau/extensio-resumir-contingut", "_blank");
@@ -498,3 +701,12 @@ document.getElementById("linkAuthor").addEventListener("click", (e) => {
     window.open("https://sergi.xaudiera.xyz", "_blank");
 });
 
+// Sync model selection with sidebar changes in real-time
+ext.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.modelName && changes.modelName.newValue) {
+        const modelEl = document.querySelector("#modelName");
+        if (modelEl && modelEl.value !== changes.modelName.newValue) {
+            modelEl.value = changes.modelName.newValue;
+        }
+    }
+});

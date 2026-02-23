@@ -100,7 +100,50 @@ test("formatObsidianContent - Empty Metadata", () => {
     assertEquals(result, "-", "Should handle undefined metadata gracefully");
 });
 
-// 4. Token Estimation
+test("formatObsidianContent - No Headers", () => {
+    const metadata = {
+        title: "No Headers Test",
+        summary: "This is a plain summary with no extra headers to split on."
+    };
+    const template = "{{summary_executive}}";
+    const result = formatObsidianContent(template, metadata);
+    assertEquals(result, "This is a plain summary with no extra headers to split on.", "Should return full summary if no headers");
+});
+
+test("formatObsidianContent - Level 2 Header Split", () => {
+    const metadata = {
+        summary: "Executive summary here.\n\n## Secció 1\nContingut..."
+    };
+    const template = "{{summary_executive}}";
+    const result = formatObsidianContent(template, metadata);
+    assertEquals(result, "Executive summary here.", "Should split at H2 headers (##)");
+});
+
+// 4. Markdown Content Formatting
+test("formatMarkdownContent - Basic Substitution", () => {
+    const metadata = {
+        title: "MD Test Page",
+        url: "https://example.com/md",
+        summary: "Full summary text.\n\n### Punts Clau\n- MD Point 1"
+    };
+    const template = "# [{{title}}]({{url}})\n\n{{summary}}";
+    const result = formatMarkdownContent(template, metadata);
+    const expected = "# [MD Test Page](https://example.com/md)\n\nFull summary text.\n\n### Punts Clau\n- MD Point 1";
+    
+    assertEquals(result, expected, "Markdown general substitution failed");
+});
+
+test("formatMarkdownContent - Executive Summary Extraction", () => {
+    const metadata = {
+        title: "Exec Test",
+        summary: "Short intro.\n\n**Key Points**\n- Point A"
+    };
+    const template = "{{title}}\n\n{{summary_executive}}";
+    const result = formatMarkdownContent(template, metadata);
+    assertEquals(result, "Exec Test\n\nShort intro.", "Markdown executive summary extraction failed");
+});
+
+// 5. Token Estimation
 test("estimateTokens - Basic calculation", () => {
     const text = "12345678"; // 8 chars
     assertEquals(estimateTokens(text), 2, "Should be 2 tokens");

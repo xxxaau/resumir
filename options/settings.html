@@ -11,11 +11,11 @@
       <div class="sidebar-header">Configuració</div>
       <button class="nav-item active" data-tab="general">General</button>
       <button class="nav-item" data-tab="custom">Personalització</button>
-      <button class="nav-item" data-tab="extensions">Extensions</button>
+      <button class="nav-item" data-tab="extensions">Plugins</button>
       <button class="nav-item" data-tab="stats">Estadístiques</button>
       <button class="nav-item" data-tab="about">Sobre l'extensió</button>
 
-      <div id="activeExtensionsHeader" class="sidebar-header" style="display:none; margin-top: 20px;">Extensions Actives</div>
+      <div id="activeExtensionsHeader" class="sidebar-header" style="display:none; margin-top: 20px;">Plugins actius</div>
       <div id="activeExtensionsList">
           <!-- Dynamic Links -->
       </div>
@@ -34,7 +34,7 @@
 
 
         <div class="section">
-          <h3>Claus i Models</h3>
+          <h3>Claus i models</h3>
           <div class="form-group">
             <label for="apiKey">Google Gemini API Key</label>
             <input
@@ -49,7 +49,7 @@
           </div>
 
           <div class="form-group">
-            <label for="modelName">Model de Resum</label>
+            <label for="modelName">Model de resum</label>
             <div class="model-input-group">
               <input
                 type="text"
@@ -69,9 +69,9 @@
         </div>
 
         <div class="section">
-          <h3>Emmagatzematge i Privadesa</h3>
+          <h3>Emmagatzematge i privadesa</h3>
           <div class="form-group">
-            <label>Memòria Cau Local</label>
+            <label>Memòria cau local</label>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 10px">
               L'extensió guarda còpies locals dels resums per estalviar costos i
               millorar la velocitat. Aquesta informació no surt mai del teu
@@ -83,7 +83,7 @@
                 class="btn btn-secondary"
                 style="border-color: #d70022; color: #d70022"
               >
-                Buidar Memòria Cau
+                Buidar memòria cau
               </button>
               <span id="cacheStatus" style="font-size: 0.9em; color: #666"
                 >Calculant...</span
@@ -106,11 +106,11 @@
           <div class="form-group">
             <label for="themeSelect">Tema</label>
             <select id="themeSelect" class="form-control">
-              <option value="system">Sistema (Automàtic)</option>
+              <option value="system">Sistema (automàtic)</option>
               <option value="light">Clar</option>
               <option value="dark">Fosc</option>
-              <option value="sepia">Sèpia (Crema)</option>
-              <option value="soft-gray">Gris Clar</option>
+              <option value="solarized">Solarized (crema)</option>
+              <option value="soft-gray">Gris clar</option>
             </select>
           </div>
         </div>
@@ -119,7 +119,7 @@
           <h3>Comportament</h3>
           <div class="form-group">
             <label for="systemPrompt"
-              >Instruccions de l'Assistent (System Prompt)</label
+              >Instruccions de l'assistent (System Prompt)</label
             >
             <textarea
               id="systemPrompt"
@@ -143,7 +143,7 @@
 
       <!-- Tab: Extensions List -->
       <div id="tab-extensions" class="tab-pane">
-        <h1 class="page-title">Extensions i Integracions</h1>
+        <h1 class="page-title">Plugins i integracions</h1>
         <p class="section-desc">Gestiona les funcionalitats addicionals de l'extensió.</p>
 
         <div class="extensions-list">
@@ -156,7 +156,13 @@
                     <div class="extension-name">Integració Obsidian</div>
                     <div class="extension-desc">Guarda els resums directament al teu Vault.</div>
                 </div>
-                <div class="extension-actions">
+                <div class="extension-actions" data-extension-id="obsidian">
+                    <button class="btn-icon btn-move-up" title="Moure amunt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                    <button class="btn-icon btn-move-down" title="Moure avall">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
                     <label class="switch">
                         <input type="checkbox" id="enableObsidian" />
                         <span class="slider round"></span>
@@ -176,7 +182,13 @@
                     <div class="extension-name">Exportació Markdown</div>
                     <div class="extension-desc">Copiar resums al porta-retalls amb format personalitzat.</div>
                 </div>
-                <div class="extension-actions">
+                <div class="extension-actions" data-extension-id="markdown">
+                    <button class="btn-icon btn-move-up" title="Moure amunt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                    <button class="btn-icon btn-move-down" title="Moure avall">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
                     <label class="switch">
                         <input type="checkbox" id="enableMarkdown" />
                         <span class="slider round"></span>
@@ -196,7 +208,13 @@
                     <div class="extension-name">Aprofundiment (Deep Dive)</div>
                     <div class="extension-desc">Genera una anàlisi detallada i extensa del contingut.</div>
                 </div>
-                <div class="extension-actions">
+                <div class="extension-actions" data-extension-id="deepdive">
+                    <button class="btn-icon btn-move-up" title="Moure amunt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                    <button class="btn-icon btn-move-down" title="Moure avall">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
                     <label class="switch">
                         <input type="checkbox" id="enableDeepdive" />
                         <span class="slider round"></span>
@@ -213,10 +231,16 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 </div>
                 <div class="extension-info">
-                    <div class="extension-name">Lectura Biònica</div>
+                    <div class="extension-name">Lectura biònica</div>
                     <div class="extension-desc">Ressalta l'inici de les paraules per a una lectura més ràpida.</div>
                 </div>
-                <div class="extension-actions">
+                <div class="extension-actions" data-extension-id="bionic">
+                    <button class="btn-icon btn-move-up" title="Moure amunt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                    <button class="btn-icon btn-move-down" title="Moure avall">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
                     <label class="switch">
                         <input type="checkbox" id="enableBionic" />
                         <span class="slider round"></span>
@@ -226,6 +250,10 @@
                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                     </button>
                 </div>
+            </div>
+            
+            <div class="section-actions">
+              <button id="saveExtensions" class="btn btn-primary">Desar canvis</button>
             </div>
         </div>
       </div>
@@ -241,7 +269,7 @@
             </div>
 
             <div class="form-group">
-              <label for="obsidianPath">Ruta de la Nota</label>
+              <label for="obsidianPath">Ruta de la nota</label>
               <input type="text" id="obsidianPath" class="form-control" placeholder="ex: [Notes/]YYYY/gggg-Www"/>
               <div class="field-legend">
                 <span><strong>Camps de data:</strong> <code>YYYY</code>, <code>MM</code>, <code>DD</code>, <code>HH</code>, <code>mm</code>, <code>gggg</code>, <code>ww</code></span>
@@ -258,7 +286,7 @@
             </div>
              <div class="section-actions">
               <button id="saveObsidian" class="btn btn-primary">Desar</button>
-              <button id="resetObsidianTemplate" class="btn btn-secondary">Restaurar Plantilla</button>
+              <button id="resetObsidianTemplate" class="btn btn-secondary">Restaurar plantilla</button>
             </div>
         </div>
       </div>
@@ -268,7 +296,7 @@
         <h1 class="page-title">Configuració Markdown</h1>
         <div class="section">
             <div class="form-group">
-              <label for="markdownTemplate">Plantilla d'Exportació</label>
+              <label for="markdownTemplate">Plantilla d'exportació</label>
               <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
               <div class="field-legend">
                 <span><strong>Camps:</strong> <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code>, <code>{{summary}}</code></span>
@@ -286,7 +314,7 @@
           <h1 class="page-title">Configuració Deep Dive</h1>
           <div class="section">
               <div class="form-group">
-                <label for="deepDivePrompt">Prompt d'Aprofundiment</label>
+                <label for="deepDivePrompt">Prompt d'aprofundiment</label>
                 <textarea id="deepDivePrompt" class="form-control" rows="10" placeholder="Actua com un expert analista..."></textarea>
                 <div class="help-text">Instruccions que s'enviaran al model per generar l'anàlisi detallada.</div>
             </div>
@@ -298,10 +326,10 @@
  
       <!-- Tab: Bionic Reader Config -->
       <div id="tab-bionic" class="tab-pane">
-          <h1 class="page-title">Configuració Lectura Biònica</h1>
+          <h1 class="page-title">Configuració de lectura biònica</h1>
           <div class="section">
               <div class="form-group">
-                  <label for="bionicFixation">Percentatge de Fixació (Per paraules > 3 lletres)</label>
+                  <label for="bionicFixation">Percentatge de fixació (per a paraules > 3 lletres)</label>
                   <div style="display: flex; align-items: center; gap: 15px;">
                       <input type="range" id="bionicFixation" min="20" max="80" step="5" value="45" style="flex-grow: 1;" />
                       <span id="bionicFixationValue" style="min-width: 40px; font-weight: bold;">45%</span>
@@ -336,48 +364,43 @@
 
       <!-- Tab: Statistics -->
       <div id="tab-stats" class="tab-pane">
-        <h1 class="page-title">Estadístiques d'Ús</h1>
+        <h1 class="page-title">Estadístiques d'ús</h1>
 
         <!-- KPI Cards -->
         <div class="section">
           <div class="section-header">
-            <h3>Activitat</h3>
-            <div class="date-filter">Últims 30 dies</div>
+            <h3>Activitat global</h3>
+            <div class="date-filter">Sempre</div>
           </div>
-          <div class="stats-overview">
-            <div class="stat-highlight">
-              <span id="statsArticles" class="stat-value">0</span>
-              <span class="stat-label">pàgines resumides</span>
-            </div>
-             <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px;">
-                <div class="stat-card" style="padding: 15px;">
-                  <div class="stat-value" id="kpiTokens" style="font-size: 1.5em;">0</div>
-                  <div class="stat-label">Tokens Processats</div>
-                </div>
-                <div class="stat-card" style="padding: 15px;">
-                  <div class="stat-value" id="kpiSpeed" style="font-size: 1.5em;">0 t/s</div>
-                  <div class="stat-label">Velocitat Mitjana</div>
-                </div>
+          <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+              <div class="stat-card" style="padding: 20px; text-align: center;">
+                <div class="stat-value" id="statsArticles" style="font-size: 2.5em; color: var(--button-hover-bg);">0</div>
+                <div class="stat-label">Pàgines resumides</div>
+              </div>
+              <div class="stat-card" style="padding: 20px; text-align: center;">
+                <div class="stat-value" id="kpiTimeSaved" style="font-size: 2.5em; color: #2e7d32;">0h 0m</div>
+                <div class="stat-label">Temps estalviat aprox.</div>
               </div>
           </div>
-          <div class="stats-details">
-            Tokens estimats: <span id="statsTokens">0</span> | Cost aprox:
-            <span id="statsCost">0.00 €</span>
-          </div>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="section">
+           <h3>Resums per dia (últims 7 dies)</h3>
+           <div id="dailyChartContainer" style="height: 150px; display: flex; align-items: flex-end; gap: 10px; margin-top: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+              <!-- Bars injected by JS -->
+           </div>
         </div>
 
         <!-- History Table -->
         <div class="section">
-          <h3>Historial de Peticions</h3>
+          <h3>Historial de peticions</h3>
           <div class="table-container">
             <table class="history-table">
               <thead>
                 <tr>
-                  <th>Data</th>
-                  <th>Model</th>
+                  <th style="width: 20%;">Data</th>
                   <th>Article</th>
-                  <th>Tokens</th>
-                  <th>Temps</th>
                 </tr>
               </thead>
               <tbody id="historyTableBody">
@@ -385,11 +408,23 @@
               </tbody>
             </table>
           </div>
-          <div class="table-footer" style="display: flex; flex-direction: column; gap: 10px;">
-            <button id="loadMoreHistory" class="btn btn-secondary" style="width: 100%; display: none;">Carregar més resultats</button>
-            <button id="clearHistory" class="btn btn-secondary btn-sm" style="align-self: flex-end;">
-              Esborrar Historial
-            </button>
+          <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+            <div class="pagination-controls" style="display: flex; gap: 10px; align-items: center;">
+              <button id="prevPage" class="btn btn-secondary btn-sm" disabled>&larr; Anterior</button>
+              <span id="pageInfo" style="font-size: 0.9em; color: var(--text-muted);">Pàgina 1</span>
+              <button id="nextPage" class="btn btn-secondary btn-sm" disabled>Següent &rarr;</button>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <select id="pageSizeSelect" class="form-control" style="width: auto; padding: 4px 8px;">
+                  <option value="20" selected>20 per pàgina</option>
+                  <option value="50">50 per pàgina</option>
+                  <option value="100">100 per pàgina</option>
+                </select>
+                <button id="clearHistory" class="btn btn-secondary btn-sm" style="border-color: #d70022; color: #d70022;">
+                  Esborrar historial
+                </button>
+            </div>
           </div>
         </div>
       </div>
@@ -403,7 +438,7 @@
             <img src="../icons/icon.svg" width="64" height="64" alt="Logo" />
             <div>
               <h3>Resumir contingut</h3>
-              <p>Versió <span id="appVersion">1.0.0</span></p>
+              <p>Versió <span id="appVersion">1.1.5</span></p>
             </div>
           </div>
           <div class="actions">
@@ -415,8 +450,22 @@
         </div>
 
         <div class="section">
-          <h3>Historial de Canvis</h3>
+          <h3>Historial de canvis</h3>
           <div class="changelog" style="border-left: 2px solid #e0e0e6; padding-left: 20px; margin-left: 10px;">
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.5
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  Nova mètrica de "Temps Estalviat" i bar chart a les estadístiques.
+                </li>
+                <li>
+                  Re-ordenació d'extensions i paginació històrica afegida.
+                </li>
+              </ul>
+            </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.1.4
@@ -424,11 +473,11 @@
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
                 <li>
-                  **Fix Crític Obsidian**: Solucionat el problema que impedia obrir Obsidian en la versió signada/producció. Ara utilitza `browser.tabs.update`.
+                  **Fix crític Obsidian**: Solucionat el problema que impedia obrir Obsidian en la versió signada/producció. Ara utilitza `browser.tabs.update`.
                 </li>
               </ul>
             </div>
-             <div class="version-entry" style="margin-bottom: 25px; position: relative">
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.1.3
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
@@ -436,6 +485,62 @@
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
                 <li>
                   Correcció de l'ID intern per permetre actualitzacions a l'AMO.
+                </li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.2
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  Primera correcció de la integració amb Obsidian per millorar el comportament en entorns de producció.
+                </li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.0.4
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  Filtre de models a la barra lateral per ocultar variants \"preview\", \"pro-exp\" i d'embeddings.
+                </li>
+                <li>
+                  Millores en l'extracció de transcripcions de YouTube per reduir errors de tipus \"Proporcioneu el text\".
+                </li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.0.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  Nou tauler d'estadístiques amb tokens, peticions i velocitat mitjana de resposta.
+                </li>
+                <li>
+                  Historial de peticions amb informació de model, URL i cost en tokens.
+                </li>
+                <li>
+                  Streaming de resposta i càrrega especulativa per millorar la sensació de velocitat.
+                </li>
+                <li>
+                  Suport especial per a Hacker News i extracció intel·ligent de contingut.
+                </li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v0.1.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>
+                  Versió interna inicial de prova amb resum bàsic de pàgines web mitjançant Google Gemini.
                 </li>
               </ul>
             </div>
@@ -454,6 +559,7 @@
 
     <div id="status" class="toast">Configuració guardada correctament!</div>
 
+    <script src="../ext.js"></script>
     <script src="settings.js"></script>
   </body>
 </html>

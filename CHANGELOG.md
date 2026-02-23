@@ -2,6 +2,21 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [1.1.5] - 2026-02-23
+
+### Afegit
+
+- **Reordenació de Plugins**: Funcionalitat per moure amunt i avall l'ordre dels plugins/extensions des de la configuració i el panell lateral.
+- **Gràfic i Nou KPI**: Afegit un gràfic de barres d'activitat dels últims 7 dies i la nova mètrica "Temps Estalviat Aprox" a les Estadístiques.
+- **Paginació a l'historial**: Selector de quantitat de resultats (20, 50, 100) i paginació real a la llista d'historial de peticions.
+- **Data relativa**: Les entrades de referència a l'historial informatiu de peticions ara figuren en "fa X temps" de forma orgànica enlloc d'estricta, amb una lògica calculada amb el calendari actual humà (hores, minuts i "ahir"). 
+
+### Canviat
+
+- **Sentence Case UI**: Tots els títols de funcions, tabulacions i botons s'han re-estandarditzat en format català acadèmic deixant de banda el Title Case anglès innecessari.
+- **Plugins**: Reanomenat oficial del terme "Extensions" integrades per "Plugins".
+- **Tema Solarized**: S'ha rellevat i integrat manualment el perfil i els matisos de la variant de previsualització de color sèpia "Sepia" pel sistema "Solarized".
+
 ## [1.1.4] - 2026-02-13
 
 ### Corregit
@@ -68,9 +83,9 @@ Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
 - Errors en la selecció del model per defecte.
 
-## [1.0.0] - 2026-02-01
+## [0.1.0] - 2026-02-01
 
-### Inicial
+### Inicial (versió interna)
 
 - Versió inicial de l'extensió Resumir contingut.
 - Resum de pàgines web amb Google Gemini API.
