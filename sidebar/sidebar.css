@@ -5,7 +5,7 @@
   --text-muted: #6f6e69; /* Flexoki Base-70 */
   --border-color: #e0e0e0;
   --toolbar-bg: transparent;
-  --button-hover: #e0e0e0; 
+  --button-hover: #e0e0e0;
   --button-text: #100f0f;
   --primary-color: #205ea6; /* Flexoki Blue */
   --primary-hover: #4385be;
@@ -158,6 +158,17 @@ body {
   font-size: 14px;
 }
 
+#content a {
+  color: var(--primary-color);
+  text-decoration: underline;
+  word-break: break-all;
+  cursor: pointer;
+}
+
+#content a:hover {
+  color: var(--primary-hover);
+}
+
 .hidden {
   display: none;
 }
@@ -179,13 +190,13 @@ body {
 /* button.action-btn { } */
 
 /* Main Buttons (if any outside toolbar, like "Stop") */
-#summarizeBtn.stop-btn {
-  background-color: var(--secondary-bg);
-  color: var(--button-text);
+.stop-btn {
+  background-color: var(--secondary-bg) !important;
+  color: var(--button-text) !important;
 }
-#summarizeBtn.stop-btn:hover {
-  background-color: var(--secondary-hover);
-  color: var(--error-text);
+.stop-btn:hover {
+  background-color: var(--secondary-hover) !important;
+  color: var(--error-text) !important;
 }
 
 #summarizeBtn.primary {
@@ -335,6 +346,7 @@ body {
   text-align: center;
   color: var(--text-muted);
   box-sizing: border-box;
+  white-space: normal;
 }
 
 .api-key-icon {
@@ -391,4 +403,26 @@ body {
 
 .api-key-cta-link:hover {
   background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Error state for model select (no API key) */
+#model-select.error-state {
+  color: var(--error-text);
+  border-color: var(--error-text);
+  background-color: var(--error-bg);
+  font-weight: bold;
+}
+
+/* Cache hit indicators */
+.cache-hit {
+  color: #28a745;
+}
+
+.cache-timestamp {
+  color: var(--text-muted);
+}
+
+/* Bionic reading bold weight — controlled via JS custom property */
+#content b {
+  font-weight: var(--bionic-weight, 700);
 }

@@ -46,6 +46,23 @@ browser.runtime.reload()
 - [ ] Obrir article i clicar botó Obsidian.
 - [ ] Verificar que s'obre la nota correctament.
 
+## 1.5. Auditoria Exhaustiva Pre-Release
+
+> [!IMPORTANT]
+> Obligatòria a cada nova versió. Seguir el workflow `/pre_release_audit`.
+
+Executar l'auditoria completa que cobreix:
+- **AMO Compliance**: eval, codi remot, ofuscació, tercers, manifest
+- **Seguretat**: API key, innerHTML, secrets, permisos, world MAIN
+- **Accessibilitat**: lang, aria, HTML, keyboard
+- **Qualitat de codi**: console.log, typos, claus duplicades, dead code
+- **UX**: botons, temes, configuració, extensions, menú contextual
+- **Funcionalitat core**: resum, YouTube, HN, deep dive, ciència, cache, streaming
+- **Privadesa**: PRIVACY_POLICY.md actualitzada
+- **Documentació**: CHANGELOG, README, settings, ROADMAP
+
+- [ ] Tots els ítems de l'auditoria estan ✅ (sense ⚠️ ni 🔴).
+
 ## 2. Actualització de Versió
 
 1. **Llista de models de Gemini**: Revisar i actualitzar els models disponibles (`sidebar/api.js` i `options/settings.js`) si s'han llançat noves versions (ex: Gemini 2.5 Flash).

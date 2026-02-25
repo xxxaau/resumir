@@ -2,7 +2,13 @@
 (function() {
     const STORAGE_KEY = 'theme';
     const DEFAULT_THEME = 'system';
-    const VALID_THEMES = ['system', 'light', 'dark', 'solarized', 'soft-gray'];
+
+    // Cross-browser storage API
+    const storageApi = (typeof browser !== 'undefined' && browser.storage)
+        ? browser.storage
+        : (typeof chrome !== 'undefined' && chrome.storage)
+            ? chrome.storage
+            : null;
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
@@ -16,8 +22,8 @@
     }
 
     function initTheme() {
-        if (typeof browser !== 'undefined' && browser.storage && browser.storage.local) {
-            browser.storage.local.get(STORAGE_KEY).then(result => {
+        if (storageApi && storageApi.sync) {
+            storageApi.sync.get(STORAGE_KEY).then(result => {
                 const theme = result[STORAGE_KEY] || DEFAULT_THEME;
                 applyTheme(theme);
             }).catch(err => {
@@ -25,20 +31,18 @@
                 applyTheme(DEFAULT_THEME);
             });
 
-            // Listen for changes
-            browser.storage.onChanged.addListener((changes, area) => {
-                if (area === 'local' && changes[STORAGE_KEY]) {
+            // Listen for changes in sync storage
+            storageApi.onChanged.addListener((changes, area) => {
+                if (area === 'sync' && changes[STORAGE_KEY]) {
                     applyTheme(changes[STORAGE_KEY].newValue);
                 }
             });
         } else {
-            // Fallback for non-extension context or if storage fails
             applyTheme(DEFAULT_THEME);
         }
 
         // Listen for system preference changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-             // Re-apply if current setting is 'system'
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
              const currentTheme = document.documentElement.getAttribute('data-theme');
              if (currentTheme === 'system') applyTheme('system');
         });

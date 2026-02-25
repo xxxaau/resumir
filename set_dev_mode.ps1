@@ -2,8 +2,8 @@ param (
     [string]$Mode = "dev" # "dev" or "prod"
 )
 
-$manifestPath = "d:/40361989w/Dev/sergi-firefox-resum/manifest.json"
-$iconsDir = "d:/40361989w/Dev/sergi-firefox-resum/icons"
+$manifestPath = "d:/40361989w/Dev/sergi-resum-navegador/manifest.json"
+$iconsDir = "d:/40361989w/Dev/sergi-resum-navegador/icons"
 
 # Read Manifest
 $json = Get-Content -Path $manifestPath -Raw | ConvertFrom-Json
@@ -13,7 +13,7 @@ if ($Mode -eq "dev") {
     
     # Update Manifest
     $json.name = "Resumir contingut (DEV)"
-    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum-dev@example.com"
+    $json.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz"
     
     # Save Manifest
     $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
@@ -63,14 +63,14 @@ elseif ($Mode -eq "prod") {
     
     # Restore Manifest
     $json.name = "Resumir contingut"
-    $json.browser_specific_settings.gecko.id = "sergi-firefox-resum@example.com"
+    $json.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
     
     # Save Manifest
     $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
     Write-Host "Manifest restored to PROD ID."
     
     # Regenerate Original Icons
-    & "d:/40361989w/Dev/sergi-firefox-resum/generate_icons_blue.ps1"
+    & "d:/40361989w/Dev/sergi-resum-navegador/generate_icons_blue.ps1"
     Write-Host "Icons restored to PROD style."
 }
 else {

@@ -1,21 +1,8 @@
-const DEFAULT_SYSTEM_PROMPT = `Ets un assistent expert en resumir contingut web. La teva tasca és analitzar el text i generar un resum en CATALÀ.
-
-CRITERIS IMPORTANTS:
-1. Respon SEMPRE en CATALÀ.
-2. NO incloguis cap frase introductòria (ex: "Aquí teniu el resum...", "A continuació...").
-3. NO incloguis el títol "**Resum Executiu**". Comença DIRECTAMENT amb el primer paràgraf del resum.
-
-Estructura de la resposta:
-[Aquí va directament el paràgraf del resum executiu de màxim 150 paraules, sense cap títol previ]
-
-### Punts Clau
-- [Llista de 5-10 punts essencials]
-
-### Aprenentatges
-- [Mínim 3 conclusions pràctiques]
-
-### Cites Destacades
-- [Màxim 3 cites literals]`;
+// Fallback prompts — the full defaults live in settings.js and are saved to storage.
+// These are only used if storage has never been written (fresh install, first run).
+const DEFAULT_SYSTEM_PROMPT = "Ets un assistent expert en resumir contingut web. Respon SEMPRE en CATALÀ.";
+const DEFAULT_DEEP_DIVE_PROMPT = "Actua com un expert analista. Proporciona una anàlisi profunda. Respon en CATALÀ.";
+const DEFAULT_SCIENCE_PROMPT = "Ets un científic amb àmplia trajectòria acadèmica. Valida la veracitat científica. Respon en CATALÀ.";
 
 document.addEventListener("DOMContentLoaded", () => {
     const contentDiv = document.getElementById("content");
@@ -42,14 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!syncConfig.apiKey) {
             const localConfig = await ext.storage.local.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate", "markdownTemplate"]);
             if (localConfig.apiKey) {
-                console.log("Migrating settings from Local to Sync...");
+                console.warn("Migrating settings from Local to Sync...");
                 await ext.storage.sync.set(localConfig);
             }
         }
     });
 
     ext.storage.sync
-      .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "enableScience", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicLineHeight", "bionicFixation"])
+      .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicLineHeight", "bionicFixation"])
       .then(config => {
           globalConfigCache = config;
           applyExtensionVisibility(config);
@@ -75,17 +62,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             if (changes.enableMarkdown || changes.enableObsidian || changes.enableBionic || 
-                changes.enableDeepdive || changes.enableDeepDive || changes.enableScience || changes.extensionOrder ||
+                changes.enableDeepdive || changes.enableScience || 
+                changes.enableResum || changes.extensionOrder ||
                 changes.markdownTemplate || changes.obsidianVault || changes.obsidianPath ||
                 changes.obsidianTemplate || changes.bionicFont || changes.bionicLineHeight ||
                 changes.bionicFixation) {
                 ext.storage.sync
-                  .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableDeepDive", "enableScience", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicLineHeight", "bionicFixation"])
+                  .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicLineHeight", "bionicFixation"])
                   .then(config => {
                       globalConfigCache = config;
                       applyExtensionVisibility(config);
                       if (config.extensionOrder) {
                           applyExtensionOrder(config.extensionOrder);
+                      }
+                      // Re-render bionic with new settings if currently active
+                      if (isBionicEnabled && (changes.bionicFont || changes.bionicWeight || changes.bionicLineHeight || changes.bionicFixation)) {
+                          applyBionicToContent(config);
                       }
                   });
             }
@@ -94,17 +86,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Button Event Listeners ---
 
-    summarizeBtn.addEventListener("click", async () => {
-        if (isGenerating) {
-            if (abortController) {
-                abortController.abort();
-                abortController = null;
-            }
-            isGenerating = false;
-            setGeneratingState(false, !!currentMetadata.summary);
-            return;
+    const abortGeneration = () => {
+        if (abortController) {
+            abortController.abort();
+            abortController = null;
         }
+        isGenerating = false;
+        setGeneratingState(false, !!currentMetadata.summary);
+    };
+
+    summarizeBtn.addEventListener("click", async () => {
+        if (isGenerating) return abortGeneration();
         await startSummary(null, false, false, true);
+    });
+
+    // Open links in content area in a new browser tab (extension sidebar context)
+    contentDiv.addEventListener("click", (e) => {
+        const anchor = e.target.closest("a[href]");
+        if (anchor) {
+            e.preventDefault();
+            ext.tabs.create({ url: anchor.href });
+        }
     });
 
     copyBtn.addEventListener("click", async () => {
@@ -142,13 +144,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const uri = `obsidian://new?vault=${encodeURIComponent(vault)}&file=${encodeURIComponent(filePath)}&content=${encodeURIComponent(content.trim())}&append=true`;
 
             try {
-                const tabs = await ext.tabs.query({active: true, currentWindow: true});
-                if (tabs.length > 0) {
-                    await ext.tabs.update(tabs[0].id, {url: uri});
-                } else {
-                    const tab = await ext.tabs.create({ url: uri, active: false });
-                    setTimeout(() => ext.tabs.remove(tab.id), 5000);
-                }
+                const tab = await ext.tabs.create({ url: uri, active: false });
+                setTimeout(() => ext.tabs.remove(tab.id), 3000);
             } catch (err) {
                 console.error("Obsidian protocol failed:", err);
                 errorDiv.textContent = "Error obrint Obsidian: " + err.message;
@@ -160,31 +157,34 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => obsidianBtn.replaceChildren(originalChild), 1500);
 
         } catch (e) {
-            console.error("Error Obisidian:", e);
+            console.error("Error Obsidian:", e);
             errorDiv.textContent = "Error: " + e.message;
             errorDiv.classList.remove("hidden");
         }
     });
+
+    function applyBionicToContent(config) {
+        const cfg = config || globalConfigCache;
+        contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
+        contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
+        contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "700");
+        const fixation = (cfg.bionicFixation || 30) / 100;
+        if (currentMetadata.summary) {
+            contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
+        }
+    }
 
     bionicBtn.addEventListener("click", async () => {
         isBionicEnabled = !isBionicEnabled;
         if (isBionicEnabled) {
             bionicBtn.style.color = "var(--primary-color)";
             bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
-            
-            contentDiv.style.fontFamily = globalConfigCache.bionicFont || "inherit";
-            contentDiv.style.lineHeight = globalConfigCache.bionicLineHeight || "1.5";
-            const fixation = (globalConfigCache.bionicFixation || 45) / 100;
-            
-            if (currentMetadata.summary) {
-               contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
-            }
+            applyBionicToContent();
         } else {
             bionicBtn.style.color = "";
             bionicBtn.style.backgroundColor = "";
             contentDiv.style.fontFamily = "";
             contentDiv.style.lineHeight = "";
-            
             if (currentMetadata.summary) {
                contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
             }
@@ -192,10 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     deepDiveBtn.addEventListener("click", async () => {
+        if (isGenerating) return abortGeneration();
         await startSummary(null, true, false, true);
     });
 
     scienceBtn.addEventListener("click", async () => {
+        if (isGenerating) return abortGeneration();
         await startSummary(null, false, true, true);
     });
 
@@ -205,7 +207,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modelSelect.addEventListener("change", async (e) => {
         await ext.storage.sync.set({ modelName: e.target.value });
+        refreshRemainingOnModelChange(e.target.value);
     });
+
+    // --- Helpers ---
+
+    /**
+     * Counts today's requests for a specific model (for quota tracking).
+     */
+    async function getTodayRequestCount(modelId) {
+        try {
+            const data = await ext.storage.local.get("usageHistory");
+            const history = data.usageHistory || [];
+            const todayStr = new Date().toISOString().slice(0, 10);
+            return history.filter(entry => {
+                const ts = entry.date || entry.timestamp;
+                return entry.model === modelId &&
+                    ts &&
+                    new Date(ts).toISOString().slice(0, 10) === todayStr;
+            }).length;
+        } catch {
+            return 0;
+        }
+    }
+
+    /**
+     * Counts ALL today's requests (all models) for water consumption.
+     */
+    async function getTotalTodayCount() {
+        try {
+            const data = await ext.storage.local.get("usageHistory");
+            const history = data.usageHistory || [];
+            const todayStr = new Date().toISOString().slice(0, 10);
+            return history.filter(entry => {
+                const ts = entry.date || entry.timestamp;
+                return ts && new Date(ts).toISOString().slice(0, 10) === todayStr;
+            }).length;
+        } catch {
+            return 0;
+        }
+    }
+
+    /**
+     * Refreshes water indicator + remaining requests when model changes.
+     */
+    async function refreshRemainingOnModelChange(modelId) {
+        const usedModel = await getTodayRequestCount(modelId);
+        const totalAll  = await getTotalTodayCount();
+        updateWaterStats(totalAll, modelId, usedModel);
+    }
 
     // --- Main Generation Logic ---
 
@@ -220,7 +270,12 @@ document.addEventListener("DOMContentLoaded", () => {
         errorDiv.classList.add("hidden");
         
         isGenerating = true;
-        setGeneratingState(true, false);
+        
+        let activeBtnId = "summarizeBtn";
+        if (isDeepDive) activeBtnId = "deepDiveBtn";
+        else if (isScience) activeBtnId = "scienceBtn";
+        
+        setGeneratingState(true, false, activeBtnId);
         
         const loadingDiv = document.getElementById("loading");
         if (isScience) {
@@ -240,13 +295,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // 1. Get Configuration
             const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder"]);
             const apiKey = config.apiKey;
-            const modelName = config.modelName || "gemma-3-27b-it";
+            let modelName = config.modelName || "gemini-2.5-flash";
             
             let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
             if (isDeepDive) {
-                systemPrompt = config.deepDivePrompt || "Actua com un expert analista..."; 
+                systemPrompt = config.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT; 
             } else if (isScience) {
-                systemPrompt = config.sciencePrompt || "Avalua científicament aquest text. IMPORTANT: Respon ÚNICAMENT amb els punts d'avaluació. PROHIBIT fer introduccions o conclusions. Assenyala de forma directa afirmacions dubtoses o desviacions del consens actual. Has de justificar cada punt citant de forma intergrada en el propi text de l'argumentació almenys 3 referències acadèmiques altament reputades, incloent els seus respectius enllaços (URL o DOI)."; 
+                systemPrompt = config.sciencePrompt || DEFAULT_SCIENCE_PROMPT; 
             }
 
             applyExtensionVisibility(config);
@@ -287,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     if (cachedEntry.model) {
                         if (modelSelect.value !== cachedEntry.model) {
-                            if (!modelSelect.querySelector(`option[value='${cachedEntry.model}']`)) {
+                            if (!modelSelect.querySelector(`option[value='${CSS.escape(cachedEntry.model)}']`)) {
                                 const opt = document.createElement("option");
                                 opt.value = cachedEntry.model;
                                 opt.textContent = cachedEntry.model;
@@ -299,18 +354,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const quotaCount = document.getElementById("quota-count");
                     quotaCount.textContent = "MEMÒRIA CAU";
-                    quotaCount.style.color = "#28a745"; 
+                    quotaCount.classList.add("cache-hit");
                     
                     const resetEl = document.getElementById("quota-reset");
                     const dateStr = new Date(cachedEntry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     resetEl.textContent = `Generat: ${dateStr}`;
-                    resetEl.style.color = "#666";
+                    resetEl.classList.add("cache-timestamp");
 
                     getPageContent().then(data => {
                         if (data && data.text) {
                             currentSourceText = data.text;
                         }
-                    }).catch(e => console.log("Background context fetch failed:", e));
+                    }).catch(() => { /* background preload failed silently */ });
                     
                     return;
                 }
@@ -361,16 +416,51 @@ document.addEventListener("DOMContentLoaded", () => {
                  pageText = pageText.substring(0, charLimit) + "\n\n[... Text truncated due to model limits ...]";
             }
 
-            // 3. Call Gemini API
+            // 3. Call Gemini API (with Auto-Fallback on Quota Exceeded)
             let lastUpdate = 0;
-            await callGeminiStream(apiKey, modelName, systemPrompt, pageText, signal, (chunkText) => {
-                currentMetadata.summary += chunkText;
-                const now = Date.now();
-                if (now - lastUpdate > 100) {
-                  contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, isBionicEnabled));
-                  lastUpdate = now;
+            const modelsToTry = [...new Set([modelName, ...CURATED_MODELS.map(m => m.id)])];
+            let success = false;
+            let lastError = null;
+
+            for (const tryModel of modelsToTry) {
+                if (signal.aborted) break;
+                try {
+                    currentMetadata.summary = ""; // Reset output text 
+                    await callGeminiStream(apiKey, tryModel, systemPrompt, pageText, signal, (chunkText) => {
+                        currentMetadata.summary += chunkText;
+                        const now = Date.now();
+                        if (now - lastUpdate > 100) {
+                          contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, isBionicEnabled));
+                          lastUpdate = now;
+                        }
+                    });
+                    success = true;
+                    // Update model name to the successful one 
+                    modelName = tryModel; 
+                    
+                    // Automatically update settings UI so it's transparently synced for the user next time
+                    ext.storage.sync.set({ modelName: tryModel });
+                    const dropdown = document.getElementById("model-select");
+                    if (dropdown && dropdown.value !== tryModel) {
+                        dropdown.value = tryModel;
+                    }
+
+                    break; // Request successful
+                } catch (e) {
+                    if (signal.aborted || e.name === 'AbortError') throw e;
+                    const msg = e.message.toLowerCase();
+                    if (msg.includes("429") || msg.includes("quota") || msg.includes("exhausted") || msg.includes("resource has been exhausted") || msg.includes("overloaded")) {
+                        console.warn(`Model ${tryModel} exhausted quota or overloaded. Attempting fallback...`);
+                        lastError = e;
+                        continue;
+                    }
+                    throw e; // Other unexpected errors
                 }
-            });
+            }
+
+            if (!success && lastError && !signal.aborted) {
+                throw new Error("Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
+            }
             
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, isBionicEnabled));
             
@@ -385,7 +475,9 @@ document.addEventListener("DOMContentLoaded", () => {
             await saveSummaryCache(currentMetadata.url, currentMetadata.title, currentMetadata.summary, modelName, inputTokens, outputTokens);
             await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url);
             
-            updateTokenStats(Math.round(inputTokens), Math.round(outputTokens));
+            const requestsToday = await getTodayRequestCount(modelName);  // per model (quota)
+            const totalToday   = await getTotalTodayCount();               // all models (water)
+            updateWaterStats(totalToday, modelName, requestsToday);
 
         } catch (err) {
             if (signal.aborted || err.name === 'AbortError') {
@@ -446,11 +538,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const localData = await ext.storage.local.get(["blockedUntil"]);
             
             const apiKey = syncData.apiKey;
-            const modelName = syncData.modelName || "gemini-1.5-flash-latest";
+            let modelName = syncData.modelName || "gemini-2.0-flash";
             
-            updateTokenStats(0, 0);
+            // Show footer immediately (model select always visible)
+            const footer = document.getElementById("footer-status");
+            if (footer) footer.classList.remove("hidden");
             
-            contentPreload = getPageContent().catch(e => console.log("Speculative load failed:", e));
+            contentPreload = getPageContent().catch(() => null);
 
             if (localData.blockedUntil && Date.now() < localData.blockedUntil) {
                 runCountdownTimer(localData.blockedUntil);
@@ -460,6 +554,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (apiKey) {
                 await loadModels(apiKey, modelName);
+                refreshRemainingOnModelChange(modelSelect.value || modelName);
                 // Active session restoration removed per user request:
                 // We want a clean slate every time the extension is opened or reloaded.
                 await ext.storage.local.remove("currentSession");
@@ -469,30 +564,54 @@ document.addEventListener("DOMContentLoaded", () => {
                 modelSelect.replaceChildren(opt);
                 modelSelect.disabled = true;
                 
-                modelSelect.style.color = "#d70022";
-                modelSelect.style.borderColor = "#d70022";
-                modelSelect.style.backgroundColor = "#fff0f0"; 
-                modelSelect.style.fontWeight = "bold";
+                modelSelect.classList.add("error-state");
 
-                contentDiv.innerHTML = `
-                  <div class="api-key-warning-container">
-                      <div style="margin-bottom: 25px;">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="api-key-icon">
-                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                          </svg>
-                          <p class="api-key-title">Falta configurar l'API Key</p>
-                          <p class="api-key-desc">Necessària per connectar amb Google Gemini.</p>
-                      </div>
-                      <button id="configApiKeyBtn" class="primary api-key-btn-primary">Configurar Ara</button>
-                      <div class="api-key-cta-footer">
-                          <span class="api-key-cta-text">Encara no en tens?</span>
-                          <a id="getApiKeyLink" href="#" class="api-key-cta-link">
-                              Obtenir API Key gratuïta &rarr;
-                          </a>
-                      </div>
-                  </div>
-                `;
+                // Build API key warning with safe DOM manipulation
+                const warningContainer = document.createElement("div");
+                warningContainer.className = "api-key-warning-container";
+
+                const iconWrapper = document.createElement("div");
+                iconWrapper.style.marginBottom = "25px";
+                const lockSvg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="api-key-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>', 'image/svg+xml').documentElement;
+                iconWrapper.appendChild(lockSvg);
+
+                const title = document.createElement("p");
+                title.className = "api-key-title";
+                title.textContent = "Falta configurar l'API Key";
+
+                const desc = document.createElement("p");
+                desc.className = "api-key-desc";
+                desc.textContent = "Necessària per connectar amb Google Gemini.";
+
+                iconWrapper.appendChild(title);
+                iconWrapper.appendChild(desc);
+
+                const configBtn = document.createElement("button");
+                configBtn.id = "configApiKeyBtn";
+                configBtn.className = "primary api-key-btn-primary";
+                configBtn.textContent = "Configurar Ara";
+
+                const ctaFooter = document.createElement("div");
+                ctaFooter.className = "api-key-cta-footer";
+
+                const ctaText = document.createElement("span");
+                ctaText.className = "api-key-cta-text";
+                ctaText.textContent = "Encara no en tens?";
+
+                const ctaLink = document.createElement("a");
+                ctaLink.id = "getApiKeyLink";
+                ctaLink.href = "#";
+                ctaLink.className = "api-key-cta-link";
+                ctaLink.textContent = "Obtenir API Key gratuïta →";
+
+                ctaFooter.appendChild(ctaText);
+                ctaFooter.appendChild(ctaLink);
+
+                warningContainer.appendChild(iconWrapper);
+                warningContainer.appendChild(configBtn);
+                warningContainer.appendChild(ctaFooter);
+
+                contentDiv.replaceChildren(warningContainer);
                 contentDiv.classList.remove("hidden");
                 
                 document.getElementById("configApiKeyBtn").addEventListener("click", () => {

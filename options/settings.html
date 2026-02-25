@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="ca">
   <head>
     <meta charset="utf-8" />
     <title>Resumir contingut - Configuració</title>
@@ -10,28 +10,28 @@
     <div class="sidebar">
       <div class="sidebar-header">Configuració</div>
       <button class="nav-item active" data-tab="general">General</button>
-      <button class="nav-item" data-tab="custom">Personalització</button>
       <button class="nav-item" data-tab="extensions">Plugins</button>
       <button class="nav-item" data-tab="stats">Estadístiques</button>
       <button class="nav-item" data-tab="about">Sobre l'extensió</button>
 
-      <div id="activeExtensionsHeader" class="sidebar-header" style="display:none; margin-top: 20px;">Plugins actius</div>
+      <div
+        id="activeExtensionsHeader"
+        class="sidebar-header"
+        style="display: none; margin-top: 20px"
+      >
+        Plugins actius
+      </div>
       <div id="activeExtensionsList">
-          <!-- Dynamic Links -->
+        <!-- Dynamic Links -->
       </div>
 
       <div class="sidebar-spacer"></div>
-      
     </div>
-
-
 
     <div class="main-content">
       <!-- Tab: General -->
       <div id="tab-general" class="tab-pane active">
         <h1 class="page-title">Configuració general</h1>
-
-
 
         <div class="section">
           <h3>Claus i models</h3>
@@ -69,6 +69,20 @@
         </div>
 
         <div class="section">
+          <h3>Aparença</h3>
+          <div class="form-group">
+            <label for="themeSelect">Tema</label>
+            <select id="themeSelect" class="form-control">
+              <option value="system">Sistema (automàtic)</option>
+              <option value="light">Clar</option>
+              <option value="dark">Fosc</option>
+              <option value="solarized">Solarized (crema)</option>
+              <option value="soft-gray">Gris clar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section">
           <h3>Emmagatzematge i privadesa</h3>
           <div class="form-group">
             <label>Memòria cau local</label>
@@ -97,26 +111,11 @@
         </div>
       </div>
 
-      <!-- Tab: Customization (Theme, System Prompt) -->
-      <div id="tab-custom" class="tab-pane">
-        <h1 class="page-title">Personalització</h1>
+      <!-- Tab: Resum Config -->
+      <div id="tab-resum" class="tab-pane">
+        <h1 class="page-title">Configuració de Resum</h1>
 
         <div class="section">
-          <h3>Aparença</h3>
-          <div class="form-group">
-            <label for="themeSelect">Tema</label>
-            <select id="themeSelect" class="form-control">
-              <option value="system">Sistema (automàtic)</option>
-              <option value="light">Clar</option>
-              <option value="dark">Fosc</option>
-              <option value="solarized">Solarized (crema)</option>
-              <option value="soft-gray">Gris clar</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Comportament</h3>
           <div class="form-group">
             <label for="systemPrompt"
               >Instruccions de l'assistent (System Prompt)</label
@@ -136,271 +135,700 @@
 
         <div class="section-actions">
           <button id="saveCustom" class="btn btn-primary">Desar canvis</button>
+          <button id="resetSystemPrompt" class="btn btn-secondary">Restaurar per defecte</button>
         </div>
       </div>
-
-
 
       <!-- Tab: Extensions List -->
       <div id="tab-extensions" class="tab-pane">
         <h1 class="page-title">Plugins i integracions</h1>
-        <p class="section-desc">Gestiona les funcionalitats addicionals de l'extensió.</p>
+        <p class="section-desc">
+          Gestiona les funcionalitats addicionals de l'extensió.
+        </p>
 
         <div class="extensions-list">
-            <!-- Obsidian -->
-            <div class="extension-item">
-                <div class="extension-icon" style="color: #a855f7;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
-                </div>
-                <div class="extension-info">
-                    <div class="extension-name">Integració Obsidian</div>
-                    <div class="extension-desc">Guarda els resums directament al teu Vault.</div>
-                </div>
-                <div class="extension-actions" data-extension-id="obsidian">
-                    <button class="btn-icon btn-move-up" title="Moure amunt">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                    </button>
-                    <button class="btn-icon btn-move-down" title="Moure avall">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <label class="switch">
-                        <input type="checkbox" id="enableObsidian" />
-                        <span class="slider round"></span>
-                    </label>
-                    <button class="btn-icon" data-target="obsidian" title="Configuració">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
-                </div>
+          <!-- Resum (core, default active) -->
+          <div class="extension-item">
+            <div class="extension-icon" style="color: #0060df">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
             </div>
+            <div class="extension-info">
+              <div class="extension-name">Resum</div>
+              <div class="extension-desc">
+                Genera un resum estructurat de la pàgina actual.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="resum">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableResum" checked />
+                <span class="slider round"></span>
+              </label>
+              <button
+                class="btn-icon"
+                data-target="resum"
+                title="Configuració"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-            <!-- Markdown -->
-            <div class="extension-item">
-                <div class="extension-icon" style="color: #666;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l4 5 4-5v10"/><path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"/></svg>
-                </div>
-                <div class="extension-info">
-                    <div class="extension-name">Exportació Markdown</div>
-                    <div class="extension-desc">Copiar resums al porta-retalls amb format personalitzat.</div>
-                </div>
-                <div class="extension-actions" data-extension-id="markdown">
-                    <button class="btn-icon btn-move-up" title="Moure amunt">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                    </button>
-                    <button class="btn-icon btn-move-down" title="Moure avall">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <label class="switch">
-                        <input type="checkbox" id="enableMarkdown" />
-                        <span class="slider round"></span>
-                    </label>
-                    <button class="btn-icon" data-target="markdown" title="Configuració">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
-                </div>
+          <!-- Scientific Validation -->
+          <div class="extension-item">
+            <div class="extension-icon" style="color: #10b981">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"
+                />
+                <path d="M9 2h6" />
+                <path d="M14 15h-4" />
+                <path d="M16 11h-4" />
+              </svg>
             </div>
+            <div class="extension-info">
+              <div class="extension-name">Validació científica</div>
+              <div class="extension-desc">
+                Verifica afirmacions amb rigor acadèmic.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="science">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableScience" />
+                <span class="slider round"></span>
+              </label>
+              <button
+                class="btn-icon"
+                data-target="science"
+                title="Configuració"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-            <!-- Deep Dive -->
-            <div class="extension-item">
-                <div class="extension-icon" style="color: #0060df;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>
-                </div>
-                <div class="extension-info">
-                    <div class="extension-name">Aprofundiment (Deep Dive)</div>
-                    <div class="extension-desc">Genera una anàlisi detallada i extensa del contingut.</div>
-                </div>
-                <div class="extension-actions" data-extension-id="deepdive">
-                    <button class="btn-icon btn-move-up" title="Moure amunt">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                    </button>
-                    <button class="btn-icon btn-move-down" title="Moure avall">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <label class="switch">
-                        <input type="checkbox" id="enableDeepdive" />
-                        <span class="slider round"></span>
-                    </label>
-                    <button class="btn-icon" data-target="deepdive" title="Configuració">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
-                </div>
+          <!-- Deep Dive -->
+          <div class="extension-item">
+            <div class="extension-icon" style="color: #0060df">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 4v16m8-8H4" />
+              </svg>
             </div>
+            <div class="extension-info">
+              <div class="extension-name">Aprofundiment (Deep Dive)</div>
+              <div class="extension-desc">
+                Genera una anàlisi detallada i extensa del contingut.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="deepdive">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableDeepdive" />
+                <span class="slider round"></span>
+              </label>
+              <button
+                class="btn-icon"
+                data-target="deepdive"
+                title="Configuració"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-            <!-- Bionic Reading -->
-            <div class="extension-item">
-                <div class="extension-icon" style="color: #666;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                </div>
-                <div class="extension-info">
-                    <div class="extension-name">Lectura biònica</div>
-                    <div class="extension-desc">Ressalta l'inici de les paraules per a una lectura més ràpida.</div>
-                </div>
-                <div class="extension-actions" data-extension-id="bionic">
-                    <button class="btn-icon btn-move-up" title="Moure amunt">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                    </button>
-                    <button class="btn-icon btn-move-down" title="Moure avall">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <label class="switch">
-                        <input type="checkbox" id="enableBionic" />
-                        <span class="slider round"></span>
-                    </label>
-                    <!-- No config for Bionic yet, maybe disable button or remove it -->
-                    <button class="btn-icon" data-target="bionic" title="Configuració">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
-                </div>
+          <!-- Obsidian -->
+          <div class="extension-item">
+            <div class="extension-icon" style="color: #a855f7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M6 3h12l4 6-10 13L2 9z" />
+                <path d="M11 3 8 9l4 13 4-13-3-6" />
+                <path d="M2 9h20" />
+              </svg>
             </div>
+            <div class="extension-info">
+              <div class="extension-name">Integració amb Obsidian</div>
+              <div class="extension-desc">
+                Guarda els resums directament al teu Vault.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="obsidian">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableObsidian" />
+                <span class="slider round"></span>
+              </label>
+              <button
+                class="btn-icon"
+                data-target="obsidian"
+                title="Configuració"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-            <!-- Scientific Validation -->
-            <div class="extension-item">
-                <div class="extension-icon" style="color: #10b981;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/><path d="M9 2h6"/><path d="M14 15h-4"/><path d="M16 11h-4"/></svg>
-                </div>
-                <div class="extension-info">
-                    <div class="extension-name">Validació Científica</div>
-                    <div class="extension-desc">Verifica afirmacions amb rigor acadèmic.</div>
-                </div>
-                <div class="extension-actions" data-extension-id="science">
-                    <button class="btn-icon btn-move-up" title="Moure amunt">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                    </button>
-                    <button class="btn-icon btn-move-down" title="Moure avall">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <label class="switch">
-                        <input type="checkbox" id="enableScience" />
-                        <span class="slider round"></span>
-                    </label>
-                    <button class="btn-icon" data-target="science" title="Configuració">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
-                </div>
+          <!-- Markdown -->
+          <div class="extension-item">
+            <div class="extension-icon" style="color: #666">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 17V7l4 5 4-5v10" />
+                <path d="M15 7h2a5 5 0 0 1 0 10h-2V7z" />
+              </svg>
             </div>
-            
-            <div class="section-actions">
-              <button id="saveExtensions" class="btn btn-primary">Desar canvis</button>
+            <div class="extension-info">
+              <div class="extension-name">Exportació a Markdown</div>
+              <div class="extension-desc">
+                Copiar resums al porta-retalls amb format personalitzat.
+              </div>
             </div>
+            <div class="extension-actions" data-extension-id="markdown">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableMarkdown" />
+                <span class="slider round"></span>
+              </label>
+              <button
+                class="btn-icon"
+                data-target="markdown"
+                title="Configuració"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bionic Reading -->
+          <div class="extension-item">
+            <div class="extension-icon" style="color: #666">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </div>
+            <div class="extension-info">
+              <div class="extension-name">Lectura biònica</div>
+              <div class="extension-desc">
+                Ressalta l'inici de les paraules per a una lectura més ràpida.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="bionic">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableBionic" />
+                <span class="slider round"></span>
+              </label>
+              <!-- No config for Bionic yet, maybe disable button or remove it -->
+              <button
+                class="btn-icon"
+                data-target="bionic"
+                title="Configuració"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="section-actions">
+            <button id="saveExtensions" class="btn btn-primary">
+              Desar canvis
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Tab: Obsidian Config -->
       <div id="tab-obsidian" class="tab-pane">
-        <h1 class="page-title">Configuració Obsidian</h1>
-        
+        <h1 class="page-title">Configuració d'Obsidian</h1>
+
         <div class="section">
-             <div class="form-group">
-              <label for="obsidianVault">Nom del Vault</label>
-              <input type="text" id="obsidianVault" class="form-control" placeholder="ex: Obsidian (Per defecte)"/>
-            </div>
+          <div class="form-group">
+            <label for="obsidianVault">Nom del Vault</label>
+            <input
+              type="text"
+              id="obsidianVault"
+              class="form-control"
+              placeholder="ex: Obsidian (Per defecte)"
+            />
+          </div>
 
-            <div class="form-group">
-              <label for="obsidianPath">Ruta de la nota</label>
-              <input type="text" id="obsidianPath" class="form-control" placeholder="ex: [Notes/]YYYY/gggg-Www"/>
-              <div class="field-legend">
-                <span><strong>Camps de data:</strong> <code>YYYY</code>, <code>MM</code>, <code>DD</code>, <code>HH</code>, <code>mm</code>, <code>gggg</code>, <code>ww</code></span>
-              </div>
-              <div class="help-text">Utilitza corxers per a text estàtic: <code>[Notes/]</code>.</div>
+          <div class="form-group">
+            <label for="obsidianPath">Ruta de la nota</label>
+            <input
+              type="text"
+              id="obsidianPath"
+              class="form-control"
+              placeholder="ex: [Notes/]YYYY/gggg-Www"
+            />
+            <div class="field-legend">
+              <span
+                ><strong>Camps de data:</strong> <code>YYYY</code>,
+                <code>MM</code>, <code>DD</code>, <code>HH</code>,
+                <code>mm</code>, <code>gggg</code>, <code>ww</code></span
+              >
             </div>
+            <div class="help-text">
+              Utilitza corxers per a text estàtic: <code>[Notes/]</code>.
+            </div>
+          </div>
 
-            <div class="form-group">
-              <label for="obsidianTemplate">Plantilla Obsidian</label>
-              <textarea id="obsidianTemplate" class="form-control code-editor" rows="6"></textarea>
-              <div class="field-legend">
-                <span><strong>Camps:</strong> <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code>, <code>{{summary}}</code></span>
-              </div>
+          <div class="form-group">
+            <label for="obsidianTemplate">Plantilla Obsidian</label>
+            <textarea
+              id="obsidianTemplate"
+              class="form-control code-editor"
+              rows="6"
+            ></textarea>
+            <div class="field-legend">
+              <span
+                ><strong>Camps:</strong> <code>{{title}}</code>,
+                <code>{{url}}</code>, <code>{{summary_executive}}</code>,
+                <code>{{summary}}</code></span
+              >
             </div>
-             <div class="section-actions">
-              <button id="saveObsidian" class="btn btn-primary">Desar</button>
-              <button id="resetObsidianTemplate" class="btn btn-secondary">Restaurar plantilla</button>
-            </div>
+          </div>
+          <div class="section-actions">
+            <button id="saveObsidian" class="btn btn-primary">Desar</button>
+            <button id="resetObsidianTemplate" class="btn btn-secondary">
+              Restaurar plantilla
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Tab: Markdown Config -->
       <div id="tab-markdown" class="tab-pane">
-        <h1 class="page-title">Configuració Markdown</h1>
+        <h1 class="page-title">Configuració de Markdown</h1>
         <div class="section">
-            <div class="form-group">
-              <label for="markdownTemplate">Plantilla d'exportació</label>
-              <textarea id="markdownTemplate" class="form-control code-editor"></textarea>
-              <div class="field-legend">
-                <span><strong>Camps:</strong> <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code>, <code>{{summary}}</code></span>
-              </div>
+          <div class="form-group">
+            <label for="markdownTemplate">Plantilla d'exportació</label>
+            <textarea
+              id="markdownTemplate"
+              class="form-control code-editor"
+            ></textarea>
+            <div class="field-legend">
+              <span
+                ><strong>Camps:</strong> <code>{{title}}</code>,
+                <code>{{url}}</code>, <code>{{summary_executive}}</code>,
+                <code>{{summary}}</code></span
+              >
             </div>
-            <div class="section-actions">
-              <button id="saveMarkdown" class="btn btn-primary">Desar</button>
-              <button id="resetTemplate" class="btn btn-secondary">Restaurar per defecte</button>
-            </div>
+          </div>
+          <div class="section-actions">
+            <button id="saveMarkdown" class="btn btn-primary">Desar</button>
+            <button id="resetTemplate" class="btn btn-secondary">
+              Restaurar per defecte
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Tab: Deep Dive Config -->
       <div id="tab-deepdive" class="tab-pane">
-          <h1 class="page-title">Configuració Deep Dive</h1>
-          <div class="section">
-              <div class="form-group">
-                <label for="deepDivePrompt">Prompt d'aprofundiment</label>
-                <textarea id="deepDivePrompt" class="form-control" rows="10" placeholder="Actua com un expert analista..."></textarea>
-                <div class="help-text">Instruccions que s'enviaran al model per generar l'anàlisi detallada.</div>
-            </div>
-             <div class="section-actions">
-              <button id="saveDeepDive" class="btn btn-primary">Desar</button>
+        <h1 class="page-title">Configuració de l'aprofundiment</h1>
+        <div class="section">
+          <div class="form-group">
+            <label for="deepDivePrompt">Prompt d'aprofundiment</label>
+            <textarea
+              id="deepDivePrompt"
+              class="form-control"
+              rows="20"
+              placeholder="Actua com un expert analista..."
+            ></textarea>
+            <div class="help-text">
+              Instruccions que s'enviaran al model per generar l'anàlisi
+              detallada.
             </div>
           </div>
+          <div class="section-actions">
+            <button id="saveDeepDive" class="btn btn-primary">Desar</button>
+            <button id="resetDeepDive" class="btn btn-secondary">Restaurar per defecte</button>
+          </div>
+        </div>
       </div>
 
       <!-- Tab: Scientific Validation Config -->
       <div id="tab-science" class="tab-pane">
-          <h1 class="page-title">Configuració Validació Científica</h1>
-          <div class="section">
-              <div class="form-group">
-                <label for="sciencePrompt">Prompt de validació científica</label>
-                <textarea id="sciencePrompt" class="form-control" rows="10" placeholder="Avalua científicament aquest text..."></textarea>
-                <div class="help-text">Instruccions que s'enviaran al model per verificar la informació usant evidència científica enllaçada.</div>
-            </div>
-             <div class="section-actions">
-              <button id="saveScience" class="btn btn-primary">Desar</button>
+        <h1 class="page-title">Configuració de validació científica</h1>
+        <div class="section">
+          <div class="form-group">
+            <label for="sciencePrompt">Prompt de validació científica</label>
+            <textarea
+              id="sciencePrompt"
+              class="form-control"
+              rows="20"
+              placeholder="Ets un científic amb àmplia trajectòria acadèmica..."
+            ></textarea>
+            <div class="help-text">
+              Instruccions que s'enviaran al model per verificar la informació
+              usant evidència científica enllaçada.
             </div>
           </div>
+          <div class="section-actions">
+            <button id="saveScience" class="btn btn-primary">Desar</button>
+            <button id="resetScience" class="btn btn-secondary">Restaurar per defecte</button>
+          </div>
+        </div>
       </div>
- 
+
       <!-- Tab: Bionic Reader Config -->
       <div id="tab-bionic" class="tab-pane">
-          <h1 class="page-title">Configuració de lectura biònica</h1>
-          <div class="section">
-              <div class="form-group">
-                  <label for="bionicFixation">Percentatge de fixació (per a paraules > 3 lletres)</label>
-                  <div style="display: flex; align-items: center; gap: 15px;">
-                      <input type="range" id="bionicFixation" min="20" max="80" step="5" value="45" style="flex-grow: 1;" />
-                      <span id="bionicFixationValue" style="min-width: 40px; font-weight: bold;">45%</span>
-                  </div>
-                  <div class="help-text">Defineix quina part de la paraula es resaltarà en negreta.</div>
-              </div>
- 
-              <div class="form-group">
-                  <label for="bionicFont">Tipografia</label>
-                  <select id="bionicFont" class="form-control">
-                      <option value="sans-serif">Per defecte (Sans-serif)</option>
-                      <option value="'Inter', sans-serif">Inter</option>
-                      <option value="'Helvetica', sans-serif">Helvetica</option>
-                      <option value="'Open Sans', sans-serif">Open Sans</option>
-                  </select>
-              </div>
- 
-              <div class="form-group">
-                  <label for="bionicLineHeight">Interlineat</label>
-                  <select id="bionicLineHeight" class="form-control">
-                      <option value="1.2">Normal (1.2)</option>
-                      <option value="1.5">Espaiat (1.5)</option>
-                      <option value="2.0">Doble (2.0)</option>
-                  </select>
-              </div>
- 
-              <div class="section-actions">
-                  <button id="saveBionic" class="btn btn-primary">Desar</button>
-              </div>
+        <h1 class="page-title">Configuració de lectura biònica</h1>
+        <div class="section">
+          <div class="form-group">
+            <label for="bionicFixation"
+              >Percentatge de fixació (per a paraules > 3 lletres)</label
+            >
+            <div style="display: flex; align-items: center; gap: 15px">
+              <input
+                type="range"
+                id="bionicFixation"
+                min="20"
+                max="80"
+                step="5"
+                value="30"
+                style="flex-grow: 1"
+              />
+              <span
+                id="bionicFixationValue"
+                style="min-width: 40px; font-weight: bold"
+                >30%</span
+              >
+            </div>
+            <div class="help-text">
+              Defineix quina part de la paraula es resaltarà en negreta.
+            </div>
           </div>
+
+          <div class="form-group">
+            <label for="bionicFont">Tipografia</label>
+            <select id="bionicFont" class="form-control">
+              <option value="sans-serif">Per defecte (Sans-serif)</option>
+              <option value="'Inter', sans-serif">Inter</option>
+              <option value="'Helvetica', sans-serif">Helvetica</option>
+              <option value="'Open Sans', sans-serif">Open Sans</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="bionicWeight">Gruix de la negreta</label>
+            <select id="bionicWeight" class="form-control">
+              <option value="400">Normal (400)</option>
+              <option value="600">Semi-negreta (600)</option>
+              <option value="700" selected>Negreta (700)</option>
+              <option value="800">Extra-negreta (800)</option>
+              <option value="900">Màxima (900)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="bionicLineHeight">Interlineat</label>
+            <select id="bionicLineHeight" class="form-control">
+              <option value="1.2">Normal (1.2)</option>
+              <option value="1.5">Espaiat (1.5)</option>
+              <option value="2.0">Doble (2.0)</option>
+            </select>
+          </div>
+
+          <div class="section-actions">
+            <button id="saveBionic" class="btn btn-primary">Desar</button>
+          </div>
+        </div>
       </div>
 
       <!-- Tab: Statistics -->
@@ -413,24 +841,71 @@
             <h3>Activitat global</h3>
             <div class="date-filter">Sempre</div>
           </div>
-          <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
-              <div class="stat-card" style="padding: 20px; text-align: center;">
-                <div class="stat-value" id="statsArticles" style="font-size: 2.5em; color: var(--button-hover-bg);">0</div>
-                <div class="stat-label">Pàgines resumides</div>
+          <div
+            class="stats-grid"
+            style="
+              grid-template-columns: repeat(3, 1fr);
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div class="stat-card" style="padding: 20px; text-align: center">
+              <div
+                class="stat-value"
+                id="statsArticles"
+                style="font-size: 2.5em; color: var(--button-hover-bg)"
+              >
+                0
               </div>
-              <div class="stat-card" style="padding: 20px; text-align: center;">
-                <div class="stat-value" id="kpiTimeSaved" style="font-size: 2.5em; color: #2e7d32;">0h 0m</div>
-                <div class="stat-label">Temps estalviat aprox.</div>
+              <div class="stat-label">Pàgines resumides</div>
+            </div>
+            <div class="stat-card" style="padding: 20px; text-align: center">
+              <div
+                class="stat-value"
+                id="kpiTimeSaved"
+                style="font-size: 2.5em; color: #2e7d32"
+              >
+                0h 0m
               </div>
+              <div class="stat-label">Temps estalviat aprox.</div>
+            </div>
+            <div class="stat-card" style="padding: 20px; text-align: center">
+              <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="#5bb8f5" aria-hidden="true">
+                  <path d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"/>
+                  <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z"/>
+                </svg>
+                <div
+                  class="stat-value"
+                  id="kpiWaterToday"
+                  style="font-size: 2.5em; color: #5bb8f5"
+                >
+                  0 ml
+                </div>
+              </div>
+              <div class="stat-label">Consum d&rsquo;aigua avui</div>
+              <div id="kpiWaterTotal" style="font-size:0.8em; color:#888; margin-top:4px;">Total acumulat: 0 ml</div>
+            </div>
           </div>
         </div>
 
         <!-- Bar Chart -->
         <div class="section">
-           <h3>Resums per dia (últims 7 dies)</h3>
-           <div id="dailyChartContainer" style="height: 150px; display: flex; align-items: flex-end; gap: 10px; margin-top: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
-              <!-- Bars injected by JS -->
-           </div>
+          <h3>Resums per dia (últims 7 dies)</h3>
+          <div
+            id="dailyChartContainer"
+            style="
+              height: 150px;
+              display: flex;
+              align-items: flex-end;
+              gap: 10px;
+              margin-top: 20px;
+              border-bottom: 2px solid var(--border-color);
+              padding-bottom: 10px;
+            "
+          >
+            <!-- Bars injected by JS -->
+          </div>
         </div>
 
         <!-- History Table -->
@@ -440,7 +915,7 @@
             <table class="history-table">
               <thead>
                 <tr>
-                  <th style="width: 20%;">Data</th>
+                  <th style="width: 20%">Data</th>
                   <th>Article</th>
                 </tr>
               </thead>
@@ -449,23 +924,70 @@
               </tbody>
             </table>
           </div>
-          <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-            <div class="pagination-controls" style="display: flex; gap: 10px; align-items: center;">
-              <button id="prevPage" class="btn btn-secondary btn-sm" disabled>&larr; Anterior</button>
-              <span id="pageInfo" style="font-size: 0.9em; color: var(--text-muted);">Pàgina 1</span>
-              <button id="nextPage" class="btn btn-secondary btn-sm" disabled>Següent &rarr;</button>
+          <div
+            class="table-footer"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 15px;
+            "
+          >
+            <div
+              class="pagination-controls"
+              style="display: flex; gap: 10px; align-items: center"
+            >
+              <button id="prevPage" class="btn btn-secondary btn-sm" disabled>
+                &larr; Anterior
+              </button>
+              <span
+                id="pageInfo"
+                style="font-size: 0.9em; color: var(--text-muted)"
+                >Pàgina 1</span
+              >
+              <button id="nextPage" class="btn btn-secondary btn-sm" disabled>
+                Següent &rarr;
+              </button>
             </div>
-            
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <select id="pageSizeSelect" class="form-control" style="width: auto; padding: 4px 8px;">
-                  <option value="20" selected>20 per pàgina</option>
-                  <option value="50">50 per pàgina</option>
-                  <option value="100">100 per pàgina</option>
-                </select>
-                <button id="clearHistory" class="btn btn-secondary btn-sm" style="border-color: #d70022; color: #d70022;">
-                  Esborrar historial
-                </button>
+
+            <div style="display: flex; gap: 15px; align-items: center">
+              <select
+                id="pageSizeSelect"
+                class="form-control"
+                style="width: auto; padding: 4px 8px"
+              >
+                <option value="20" selected>20 per pàgina</option>
+                <option value="50">50 per pàgina</option>
+                <option value="100">100 per pàgina</option>
+              </select>
+              <button
+                id="clearHistory"
+                class="btn btn-secondary btn-sm"
+                style="border-color: #d70022; color: #d70022"
+              >
+                Esborrar historial
+              </button>
             </div>
+          </div>
+        </div>
+
+        <!-- Grouped History Table -->
+        <div class="section">
+          <h3>Resums per model i dia</h3>
+          <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+            <table class="history-table">
+              <thead style="position: sticky; top: 0; background: var(--bg-color); z-index: 1;">
+                <tr>
+                  <th style="width: 25%">Data</th>
+                  <th style="width: 45%">Model</th>
+                  <th style="width: 15%; text-align: right;">Peticions</th>
+                  <th style="width: 15%; text-align: right;">Aigua (ml)</th>
+                </tr>
+              </thead>
+              <tbody id="groupedTableBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -473,7 +995,7 @@
       <!-- Tab: About -->
       <div id="tab-about" class="tab-pane">
         <h1 class="page-title">Sobre l'extensió</h1>
-        
+
         <div class="section about-section">
           <div class="app-info">
             <img src="../icons/icon.svg" width="64" height="64" alt="Logo" />
@@ -492,96 +1014,240 @@
 
         <div class="section">
           <h3>Historial de canvis</h3>
-          <div class="changelog" style="border-left: 2px solid #e0e0e6; padding-left: 20px; margin-left: 10px;">
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+          <div
+            class="changelog"
+            style="
+              border-left: 2px solid #e0e0e6;
+              padding-left: 20px;
+              margin-left: 10px;
+            "
+          >
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v1.1.5
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
-                  Nova mètrica de "Temps Estalviat" i bar chart a les estadístiques.
+                  Nova mètrica de "Temps Estalviat" i bar chart a les
+                  estadístiques.
                 </li>
                 <li>
                   Re-ordenació d'extensions i paginació històrica afegida.
                 </li>
               </ul>
             </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v1.1.4
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
-                  **Fix crític Obsidian**: Solucionat el problema que impedia obrir Obsidian en la versió signada/producció. Ara utilitza `browser.tabs.update`.
+                  <strong>Fix crític Obsidian</strong>: Solucionat el problema que impedia
+                  obrir Obsidian en la versió signada/producció. Ara utilitza
+                  <code>browser.tabs.update</code>.
                 </li>
               </ul>
             </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v1.1.3
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
                   Correcció de l'ID intern per permetre actualitzacions a l'AMO.
                 </li>
               </ul>
             </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v1.1.2
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
-                  Primera correcció de la integració amb Obsidian per millorar el comportament en entorns de producció.
+                  Primera correcció de la integració amb Obsidian per millorar
+                  el comportament en entorns de producció.
                 </li>
               </ul>
             </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v1.0.4
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
-                  Filtre de models a la barra lateral per ocultar variants \"preview\", \"pro-exp\" i d'embeddings.
+                  Filtre de models a la barra lateral per ocultar variants
+                  "preview", "pro-exp" i d'embeddings.
                 </li>
                 <li>
-                  Millores en l'extracció de transcripcions de YouTube per reduir errors de tipus \"Proporcioneu el text\".
+                  Millores en l'extracció de transcripcions de YouTube per
+                  reduir errors de tipus "Proporcioneu el text".
                 </li>
               </ul>
             </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v1.0.0
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
-                  Nou tauler d'estadístiques amb tokens, peticions i velocitat mitjana de resposta.
+                  Nou tauler d'estadístiques amb tokens, peticions i velocitat
+                  mitjana de resposta.
                 </li>
                 <li>
-                  Historial de peticions amb informació de model, URL i cost en tokens.
+                  Historial de peticions amb informació de model, URL i cost en
+                  tokens.
                 </li>
                 <li>
-                  Streaming de resposta i càrrega especulativa per millorar la sensació de velocitat.
+                  Streaming de resposta i càrrega especulativa per millorar la
+                  sensació de velocitat.
                 </li>
                 <li>
-                  Suport especial per a Hacker News i extracció intel·ligent de contingut.
+                  Suport especial per a Hacker News i extracció intel·ligent de
+                  contingut.
                 </li>
               </ul>
             </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+            <div
+              class="version-entry"
+              style="margin-bottom: 25px; position: relative"
+            >
+              <div
+                class="version-title"
+                style="font-weight: bold; margin-bottom: 5px"
+              >
                 v0.1.0
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px;">Febrer 2026</span>
+                <span
+                  class="version-date"
+                  style="
+                    font-weight: normal;
+                    color: #666;
+                    font-size: 13px;
+                    margin-left: 8px;
+                  "
+                  >Febrer 2026</span
+                >
               </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+              <ul
+                class="version-list"
+                style="margin: 5px 0; padding-left: 20px; color: #444"
+              >
                 <li>
-                  Versió interna inicial de prova amb resum bàsic de pàgines web mitjançant Google Gemini.
+                  Versió interna inicial de prova amb resum bàsic de pàgines web
+                  mitjançant Google Gemini.
                 </li>
               </ul>
             </div>
@@ -589,12 +1255,27 @@
         </div>
 
         <div class="section">
-           <div class="about-footer" style="text-align: center; margin-top: 50px; color: #999; font-size: 13px;">
-              <small>Creat per <a id="linkAuthor" href="#" style="color: inherit; text-decoration: none">Sergi Xaudiera</a></small>
-            </div>
+          <div
+            class="about-footer"
+            style="
+              text-align: center;
+              margin-top: 50px;
+              color: #999;
+              font-size: 13px;
+            "
+          >
+            <small
+              >Creat per
+              <a
+                id="linkAuthor"
+                href="#"
+                style="color: inherit; text-decoration: none"
+                >Sergi Xaudiera</a
+              ></small
+            >
+          </div>
         </div>
       </div>
-
     </div>
     <!-- End Main Content -->
 

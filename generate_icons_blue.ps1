@@ -58,7 +58,7 @@ function Draw-Icon($size, $filename) {
     }
 }
 
-$baseDir = "d:/40361989w/Dev/sergi-firefox-resum/icons"
+$baseDir = "d:/40361989w/Dev/sergi-resum-navegador/icons"
 if (-not (Test-Path $baseDir)) { New-Item -ItemType Directory -Force -Path $baseDir }
 
 Draw-Icon 16 "$baseDir/icon-16.png"

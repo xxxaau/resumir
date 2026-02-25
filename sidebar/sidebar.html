@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ca">
 <head>
   <meta charset="utf-8">
   <title>Resumir contingut</title>
@@ -21,23 +21,23 @@
            <path d="M2 9h20"/>
         </svg>
       </button>
-      <button id="bionicBtn" class="icon-btn" title="Lectura biònica" style="display: none;">
-         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor">
+      <button id="bionicBtn" class="icon-btn" title="Lectura biònica" aria-label="Lectura biònica" style="display: none;">
+         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
          </svg>
       </button>
 
       <!-- Deep Dive Button (Hidden by default) -->
-      <button id="deepDiveBtn" class="icon-btn" title="Aprofundiment (Deep Dive)" style="display: none;">
-         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor">
+      <button id="deepDiveBtn" class="icon-btn" title="Aprofundiment" aria-label="Aprofundiment" style="display: none;">
+         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
          </svg>
       </button>
       
       <!-- Scientific Validation Button (Hidden by default) -->
-      <button id="scienceBtn" class="icon-btn" title="Validació científica" style="display: none; color: #10b981;">
-         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor">
+      <button id="scienceBtn" class="icon-btn" title="Validació científica" aria-label="Validació científica" style="display: none; color: #10b981;">
+         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 2h6"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 15h-4"/>
@@ -57,8 +57,8 @@
       </button>
     </div>
     <div id="content" class="hidden"></div>
-    <div id="loading" class="hidden">Generant resum...</div>
-    <div id="error" class="hidden"></div>
+    <div id="loading" class="hidden" role="status" aria-live="polite">Generant resum...</div>
+    <div id="error" class="hidden" role="alert" aria-live="assertive"></div>
   </div>
   
   <div id="footer-status" class="hidden">
@@ -68,9 +68,16 @@
       <span class="separator">|</span>
       <span id="generation-timer">0.0s</span>
       <span class="separator">|</span>
-      <span id="quota-count" style="font-size: 0.9em;">Enviats: 0</span>
+      <span id="water-indicator" style="font-size: 0.9em; display:inline-flex; align-items:center; gap:3px;" title="Consum d'aigua estimat avui (0.26 ml/consulta)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#5bb8f5" aria-hidden="true">
+          <path d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"/>
+          <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z"/>
+        </svg>
+        <span id="water-ml">0.0 ml</span>
+      </span>
       <span class="separator">|</span>
-      <span id="quota-reset" style="font-size: 0.9em;">Rebuts: 0</span>
+      <span id="requests-remaining" style="font-size: 0.9em;" title="Resums estimats disponibles avui amb la quota gratuïta">— resums avui</span>
+  </div>
   <script src="../ext.js"></script>
   <script src="utils.js"></script>
   <script src="api.js"></script>

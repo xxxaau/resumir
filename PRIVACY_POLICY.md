@@ -1,6 +1,6 @@
 # Política de Privadesa - Resumir contingut
 
-**Última actualització:** 12 de Febrer de 2026
+**Última actualització:** 25 de Febrer de 2026
 
 La teva privadesa és important per a nosaltres. Aquesta política explica com l'extensió **Resumir contingut** gestiona les teves dades.
 
@@ -10,11 +10,12 @@ L'extensió **NO** recull, emmagatzema ni comparteix dades personals, de navegac
 
 ### Dades Locals
 
-Les següents dades s'emmagatzemen exclusivament al teu navegador (`browser.storage.local`) i mai surten del teu dispositiu:
+Les següents dades s'emmagatzemen exclusivament al teu navegador (`browser.storage.sync` i `browser.storage.local`) i mai surten del teu dispositiu:
 
 - **API Key de Google Gemini**: Necessària per connectar amb el servei d'IA.
-- **Historial de Resums**: Títol, URL i data dels resums que has generat.
-- **Preferències**: Configuració de model, idioma i tema.
+- **Memòria cau de Resums**: Títol, URL, text del resum, model i data de generació.
+- **Historial d'ús**: Títol, URL, model, tokens consumits i durada de cada petició (pestanya "Estadístiques").
+- **Preferències**: Configuració de model, tema, prompts i extensions actives.
 
 ## 2. Ús de Google Gemini API
 
@@ -22,15 +23,26 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 
 - **Què s'envia**: Únicament el text i títol de la pàgina web activa quan prems el botó "Resumir".
 - **A on s'envia**: Al servei `generativelanguage.googleapis.com` (Google Gemini API).
+- **Com s'envia**: L'API Key s'envia via header HTTP (`x-goog-api-key`), mai a la URL.
 - **Tractament de Google**: L'ús d'aquestes dades es regeix per la [Política de Privadesa de Google](https://policies.google.com/privacy) i els [Termes de Servei de la API de Generative AI](https://ai.google.dev/terms).
 - **No entrenament**: Si fas servir una API Key de pagament o enterprise, Google no utilitza les teves dades per entrenar els seus models. Amb claus gratuïtes, consulta les condicions específiques de Google.
 
-## 3. Permisos Requerits
+## 3. YouTube i contingut de tercers
 
-- **activeTab**: Per llegir el contingut de la pestanya actual només quan actives l'extensió.
-- **storage**: Per guardar la teva API Key i preferències localment.
-- **scripting**: Per netejar el contingut de la pàgina (mòde lectura) abans d'enviar-lo.
+- Quan resums vídeos de **YouTube**, l'extensió accedeix a les dades del reproductor (`ytInitialPlayerResponse`) per obtenir la transcripció automàtica del vídeo. Això requereix executar un petit script en el context de la pàgina (`world: "MAIN"`).
+- L'extensió fa una petició `fetch` als servidors de YouTube per descarregar el text de la transcripció. **No s'envien dades de l'usuari** en aquesta petició.
 
-## 4. Contacte i codi font
+## 4. Permisos Requerits
+
+| Permís | Ús |
+|--------|-----|
+| `activeTab` | Llegir el contingut de la pestanya actual només quan actives l'extensió |
+| `storage` | Guardar la teva API Key, preferències, memòria cau i historial d'ús localment |
+| `scripting` | Injectar el parser de contingut (Readability.js) per extreure text net |
+| `tabs` | Consultar la pestanya activa, obrir links en noves pestanyes i gestionar integracions |
+| `menus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir contingut") |
+| `<all_urls>` (opcional) | Permís host demanat dinàmicament per executar scripts de lectura en qualsevol pàgina |
+
+## 5. Contacte i codi font
 
 Si tens algun dubte sobre aquesta política, pots contactar amb el desenvolupador o consultar el codi font al repositori oficial del projecte (vegeu l'enllaç `homepage_url` al `manifest.json` o al `README.md`).

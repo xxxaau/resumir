@@ -18,7 +18,7 @@ DIRS_TO_INCLUDE = [
     "sidebar"
 ]
 
-OUTPUT_ZIP = "resumir-contingut-v1.1.5.zip"
+OUTPUT_ZIP = "resumir-contingut-v1.1.7.zip"
 
 def create_zip():
     print(f"Starting zip creation for {OUTPUT_ZIP}")

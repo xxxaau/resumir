@@ -2,6 +2,33 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [1.1.7] - 2026-02-25
+
+### Corregit
+
+- **Permisos de host (fix crític)**: `executeScriptSafe` refactoritzat amb estratègia "try first, request if needed". Elimina la comprovació prèvia `permissions.contains()` que retornava falsos negatius en URLs amb query params o hash, causant "Page content empty" en producció.
+- **Manifest AMO**: Afegit camp obligatori `data_collection_permissions` (declara `websiteContent`) i apujat `strict_min_version` a `140.0` per eliminar warnings de l'AMO.
+
+## [1.1.6] - 2026-02-25
+
+### Millorat
+
+- **Seguretat**: API key moguda de URL a header HTTP (`x-goog-api-key`) a totes les crides (sidebar + settings).
+- **Seguretat**: Eliminat tot l'ús de `innerHTML` amb contingut dinàmic. Substituït per manipulació DOM segura (`DOMParser`, `replaceChildren`, `textContent`).
+- **Seguretat**: `host_permissions` canviat a `optional_host_permissions` — permisos demanats dinàmicament.
+- **Seguretat**: Comprovació de permisos (`permissions.contains()`) abans d'injectar scripts, eliminant errors de consola.
+- **Accessibilitat**: Afegit `lang="ca"`, `aria-label` a tots els botons, `aria-hidden` a tots els SVGs decoratius, `aria-live` als elements d'estat.
+- **Privadesa**: `PRIVACY_POLICY.md` actualitzada amb tots els permisos, YouTube/MAIN world i historial.
+- **Codi**: Eliminats tots els `console.log` de producció, corregit typo "Obisidian", selectors CSS segurs amb `CSS.escape()`.
+- **Codi**: Netejada dual key `enableDeepdive`/`enableDeepDive`, eliminat `storage.local.set` redundant.
+- **UX**: Obsidian ara obre en nova pestanya (no substitueix l'activa).
+- **UX**: Tema llegit de `storage.sync` (coherent amb la resta de configuració).
+
+### Afegit
+
+- `THIRD_PARTY.md`: Documentació de codi de tercers (Readability.js, Apache 2.0).
+- Workflow d'auditoria pre-release (`/pre_release_audit`) integrat al procés de publicació.
+
 ## [1.1.5] - 2026-02-23
 
 ### Afegit
@@ -27,7 +54,7 @@ Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
 ### Corregit
 
-- **Validació AMO**: Corregit l'ID de l'extensió al `manifest.json` (`sergi-firefox-resum@example.com`) per coincidir amb el registrat a Mozilla Add-ons, permetent la pujada de noves versions.
+- **Validació AMO**: Corregit l'ID de l'extensió al `manifest.json` (`sergi@xaudiera.xyz`) per coincidir amb el registrat a Mozilla Add-ons, permetent la pujada de noves versions.
 
 ## [1.1.2] - 2026-02-13
 

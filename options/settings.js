@@ -27,6 +27,31 @@ Estructura la resposta amb seccions clares.
 IMPORTANT: Respon directament amb el resultat de l'anàlisi. NO comencis saludant ni incloguis cap introducció de l'estil "Com a analista expert, proporciono...".
 Respon SEMPRE en CATALÀ.`;
 
+const DEFAULT_SCIENCE_PROMPT = `Ets un científic amb àmplia trajectora acadèmica. La teva tasca és validar la veracitat científica del contingut i generar un resum en CATALÀ. Assenyala de forma directa afirmacions dubtoses o desviacions del consens actual.
+
+CRITERIS IMPORTANTS:
+1. Respon SEMPRE en CATALÀ.
+2. NO incloguis cap frase introductòria (ex: "Aquí teniu el resum...", "A continuació...").
+3. NO incloguis el títol "**Resum Executiu**". Comença DIRECTAMENT amb el primer paràgraf del resum.
+4. Tingues sempre una visió crítica
+5. Sigues molt acurat i sobretot estigues segur de la resposta encara que tardis mé temps.
+6. IMPORTANT: Respon ÚNICAMENT amb els punts d'avaluació.
+
+CRITERIS SOBRE LES FONTS
+* Si no trobes la font exacta, digues 'No ho trobo'.
+* No t'inventis cap títol ni autor.
+* Verifica cada enllaç abans de mostrar-lo.
+* Prioritza revistes indexades (Nature, Science, Elsevier, etc.).
+
+Estructura de la resposta:
+[Aquí va directament el paràgraf del resum executiu de màxim 150 paraules, sense cap títol previ]
+
+### Punts Clau
+- [Llista de 5-10 punts essencials]
+
+### Referències
+- [Màxim 5 referències reals altament reputades, incloent els seus respectius enllaços (URL o DOI).]`;
+
 // --- Navigation Logic ---
 
 // Event Delegation for Sidebar Navigation (Static & Dynamic)
@@ -70,6 +95,7 @@ function updateSidebar() {
     list.replaceChildren(); // Clear
 
     const extensions = [
+        { id: "resum", label: "Resum", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>' },
         { id: "obsidian", label: "Obsidian", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>' },
         { id: "markdown", label: "Markdown", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l4 5 4-5v10"/><path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"/></svg>' },
         { id: "deepdive", label: "Aprofundiment", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>' },
@@ -77,10 +103,19 @@ function updateSidebar() {
         { id: "science", label: "Validació científica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/><path d="M9 2h6"/><path d="M14 15h-4"/><path d="M16 11h-4"/></svg>' }
     ];
 
+    const currentOrder = getCurrentExtensionOrder();
+    extensions.sort((a, b) => {
+        const indexA = currentOrder.indexOf(a.id);
+        const indexB = currentOrder.indexOf(b.id);
+        const posA = indexA === -1 ? 999 : indexA;
+        const posB = indexB === -1 ? 999 : indexB;
+        return posA - posB;
+    });
+
     let count = 0;
     extensions.forEach(ext => {
         // Special case for ID construction if needed, but 'enableObsidian', 'enableMarkdown', 'enableDeepdive', 'enableBionic' match
-        const checkboxId = "enable" + ext.id.charAt(0).toUpperCase() + ext.id.slice(1);
+        const checkboxId = ext.id === "resum" ? "enableResum" : "enable" + ext.id.charAt(0).toUpperCase() + ext.id.slice(1);
         const checkbox = document.getElementById(checkboxId);
         
         if (checkbox && checkbox.checked) {
@@ -132,6 +167,7 @@ function saveOptions(e) {
     enableBionic: document.querySelector("#enableBionic").checked,
     bionicFixation: parseInt(document.querySelector("#bionicFixation").value),
     bionicFont: document.querySelector("#bionicFont").value,
+    bionicWeight: document.querySelector("#bionicWeight").value,
     bionicLineHeight: document.querySelector("#bionicLineHeight").value,
 
     enableDeepdive: document.querySelector("#enableDeepdive").checked,
@@ -139,15 +175,16 @@ function saveOptions(e) {
     
     enableScience: document.querySelector("#enableScience").checked,
     sciencePrompt: document.querySelector("#sciencePrompt").value,
-    
+
+    enableResum: document.querySelector("#enableResum").checked,
+
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder()
   };
 
 
   Promise.all([
-      ext.storage.sync.set(settings),
-      ext.storage.local.set(settings)
+      ext.storage.sync.set(settings)
   ]).then(() => {
      showStatus("Configuració guardada correctament!");
      updateSidebar(); 
@@ -161,12 +198,12 @@ function restoreOptions() {
   const configKeys = ["apiKey", "modelName", "theme", "systemPrompt", 
     "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault", 
     "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation", 
-    "bionicFont", "bionicLineHeight", "enableDeepdive", "deepDivePrompt", 
-    "enableScience", "sciencePrompt", "extensionOrder"];
+    "bionicFont", "bionicWeight", "bionicLineHeight", "enableDeepdive", "deepDivePrompt", 
+    "enableScience", "sciencePrompt", "enableResum", "extensionOrder"];
     
   ext.storage.sync.get(configKeys).then((data) => {
     document.querySelector("#apiKey").value = data.apiKey || "";
-    document.querySelector("#modelName").value = data.modelName || "gemini-1.5-flash-latest";
+    document.querySelector("#modelName").value = data.modelName || "gemini-2.5-flash";
     document.querySelector("#themeSelect").value = data.theme || "system";
     document.querySelector("#systemPrompt").value = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     
@@ -179,15 +216,14 @@ function restoreOptions() {
     document.querySelector("#obsidianTemplate").value = data.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
 
     document.querySelector("#enableBionic").checked = data.enableBionic === true;
-    document.querySelector("#bionicFixation").value = data.bionicFixation || 45;
-    document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 45) + "%";
+    document.querySelector("#bionicFixation").value = data.bionicFixation || 30;
+    document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 30) + "%";
     document.querySelector("#bionicFont").value = data.bionicFont || "sans-serif";
+    document.querySelector("#bionicWeight").value = data.bionicWeight || "700";
     document.querySelector("#bionicLineHeight").value = data.bionicLineHeight || "1.5";
 
     // Handle migration/fallback for Deep Dive
-    if (data.enableDeepdive !== undefined) document.querySelector("#enableDeepdive").checked = data.enableDeepdive;
-    else if (data.enableDeepDive !== undefined) document.querySelector("#enableDeepdive").checked = data.enableDeepDive; // Fallback for old key
-    else document.querySelector("#enableDeepdive").checked = false; // Default to false if neither is set
+    document.querySelector("#enableDeepdive").checked = data.enableDeepdive === true;
 
     if (data.deepDivePrompt !== undefined) document.querySelector("#deepDivePrompt").value = data.deepDivePrompt;
     else document.querySelector("#deepDivePrompt").value = DEFAULT_DEEP_DIVE_PROMPT; // Default if not set
@@ -196,7 +232,11 @@ function restoreOptions() {
     else document.querySelector("#enableScience").checked = false; // Default to false if not set
 
     if (data.sciencePrompt !== undefined) document.querySelector("#sciencePrompt").value = data.sciencePrompt;
-    else document.querySelector("#sciencePrompt").value = "Avalua científicament aquest text. IMPORTANT: Respon ÚNICAMENT amb els punts d'avaluació. PROHIBIT fer introduccions o conclusions. Assenyala de forma directa afirmacions dubtoses o desviacions del consens actual. Has de justificar cada punt citant de forma intergrada en el propi text de l'argumentació almenys 3 referències acadèmiques altament reputades, incloent els seus respectius enllaços (URL o DOI).";
+    else document.querySelector("#sciencePrompt").value = DEFAULT_SCIENCE_PROMPT;
+
+    // Resum: actiu per defecte
+    document.querySelector("#enableResum").checked = data.enableResum !== false;
+
     if (data.extensionOrder && Array.isArray(data.extensionOrder)) {
         applyExtensionOrder(data.extensionOrder);
     }
@@ -245,6 +285,18 @@ function resetObsidianTemplate() {
     document.querySelector("#obsidianTemplate").value = DEFAULT_OBSIDIAN_TEMPLATE;
 }
 
+function resetSystemPrompt() {
+    document.querySelector("#systemPrompt").value = DEFAULT_SYSTEM_PROMPT;
+}
+
+function resetDeepDivePrompt() {
+    document.querySelector("#deepDivePrompt").value = DEFAULT_DEEP_DIVE_PROMPT;
+}
+
+function resetSciencePrompt() {
+    document.querySelector("#sciencePrompt").value = DEFAULT_SCIENCE_PROMPT;
+}
+
 function showStatus(text) {
   const status = document.querySelector("#status");
   status.textContent = text;
@@ -255,6 +307,15 @@ function showStatus(text) {
 }
 
 // --- Model Fetching Logic ---
+// Curated model list (mirrored from sidebar/api.js — keep in sync)
+const SETTINGS_CURATED_MODELS = [
+    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",       note: "$1.25/$5.00 · 50 req/dia"    },
+    { id: "gemini-2.0-flash",          label: "Gemini 2.0 Flash",      note: "$0.10/$0.40 · 1500 req/dia"  },
+    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",      note: "$0.30/$2.50 · 500 req/dia"   },
+    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",         note: "$0.15/$0.15 · 2000 req/dia"  },
+    { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite", note: "$0.07/$0.30 · Il·limitat"     },
+];
+
 async function listModels(e) {
   e.preventDefault();
   const apiKey = document.querySelector("#apiKey").value;
@@ -268,29 +329,61 @@ async function listModels(e) {
   
   checkBtn.textContent = "Cercant...";
   modelsList.style.display = "block";
-  modelsList.textContent = "Carregant...";
+  modelsList.replaceChildren();
+
+  // Always show curated models first
+  const curatedHeader = document.createElement("div");
+  curatedHeader.style.cssText = "font-weight:bold; font-size:0.8em; color:#666; padding:4px 0 2px; border-bottom:1px solid #eee; margin-bottom:4px;";
+  curatedHeader.textContent = "✦ Models recomanats";
+  modelsList.appendChild(curatedHeader);
+
+  SETTINGS_CURATED_MODELS.forEach(cm => {
+      const div = document.createElement("div");
+      div.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:4px 0;";
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = cm.label;
+      nameSpan.style.fontWeight = "500";
+      const noteSpan = document.createElement("span");
+      noteSpan.textContent = cm.note;
+      noteSpan.style.cssText = "font-size:0.75em; color:#888;";
+      div.appendChild(nameSpan);
+      div.appendChild(noteSpan);
+      div.style.cursor = "pointer";
+      div.onclick = () => {
+          document.querySelector("#modelName").value = cm.id;
+          modelsList.style.display = "none";
+      };
+      modelsList.appendChild(div);
+  });
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
+        headers: { "x-goog-api-key": apiKey }
+    });
     if (!response.ok) {
         const err = await response.json();
         throw new Error(err.error?.message || response.statusText);
     }
     const data = await response.json();
     
-    // Filter for models that support generateContent
-    const validModels = data.models?.filter(m => 
-        m.supportedGenerationMethods?.includes("generateContent") &&
-        !/embedding|aqa|robotics|vision|image/i.test(m.name)
-    ).map(m => m.name.replace("models/", "")) || [];
+    const curatedIds = new Set(SETTINGS_CURATED_MODELS.map(m => m.id));
+    const otherModels = (data.models || [])
+        .filter(m =>
+            m.supportedGenerationMethods?.includes("generateContent") &&
+            !/embedding|aqa|robotics|vision|image/i.test(m.name)
+        )
+        .map(m => m.name.replace("models/", ""))
+        .filter(id => !curatedIds.has(id));
 
-    if (validModels.length === 0) {
-        modelsList.textContent = "No s'han trobat models compatibles.";
-    } else {
-        modelsList.replaceChildren(); // clear
-        validModels.forEach(model => {
+    if (otherModels.length > 0) {
+        const otherHeader = document.createElement("div");
+        otherHeader.style.cssText = "font-weight:bold; font-size:0.8em; color:#666; padding:8px 0 2px; border-bottom:1px solid #eee; margin-bottom:4px;";
+        otherHeader.textContent = "Altres models disponibles";
+        modelsList.appendChild(otherHeader);
+        otherModels.forEach(model => {
             const div = document.createElement("div");
             div.textContent = model;
+            div.style.cursor = "pointer";
             div.onclick = () => {
                 document.querySelector("#modelName").value = model;
                 modelsList.style.display = "none";
@@ -299,15 +392,15 @@ async function listModels(e) {
         });
     }
   } catch (err) {
-    modelsList.replaceChildren();
     const span = document.createElement("span");
-    span.style.color = "red";
-    span.textContent = `Error: ${err.message}`;
+    span.style.cssText = "color:red; font-size:0.85em;";
+    span.textContent = `Error API: ${err.message}`;
     modelsList.appendChild(span);
   } finally {
     checkBtn.textContent = "Cercar models";
   }
 }
+
 
 // --- Statistics Logic ---
 
@@ -317,9 +410,15 @@ let totalPages = 1;
 
 async function loadStatistics() {
     try {
-        const data = await ext.storage.local.get(["stats", "usageHistory"]);
+        const data = await ext.storage.local.get(["stats", "usageHistory", "pageSize"]);
         const stats = data.stats || { articles: 0, tokens: 0 };
         const history = data.usageHistory || []; // Array of {date, title, url, model, inputTokens, outputTokens, latency}
+
+        if (data.pageSize) {
+            PAGE_SIZE = data.pageSize;
+            const selectEl = document.getElementById("pageSizeSelect");
+            if (selectEl) selectEl.value = PAGE_SIZE.toString();
+        }
 
         // 1. Update KPI Cards
         const elArticles = document.getElementById("statsArticles");
@@ -343,9 +442,36 @@ async function loadStatistics() {
         const minutes = Math.floor((timeSavedSeconds % 3600) / 60);
         if(elTimeSaved) elTimeSaved.textContent = `${hours}h ${minutes}m`;
 
+        // Water consumption stats
+        const WATER_ML = 0.26;
+        const GLASS_ML = 300;
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        const todayCount = history.filter(e => {
+            const ts = e.date || e.timestamp; // cache.js uses 'date'
+            return ts && new Date(ts).toISOString().slice(0, 10) === todayStr;
+        }).length;
+        const totalCount = history.length;
+
+        const todayMl  = todayCount  * WATER_ML;
+        const totalMl  = totalCount  * WATER_ML;
+
+        function fmtWater(ml) {
+            if (ml < 1)    return ml.toFixed(2) + " ml";
+            if (ml < GLASS_ML) return ml.toFixed(1) + " ml";
+            return (ml / GLASS_ML).toFixed(2) + " gots";
+        }
+
+        const elWaterToday = document.getElementById("kpiWaterToday");
+        const elWaterTotal = document.getElementById("kpiWaterTotal");
+        if (elWaterToday) elWaterToday.textContent = fmtWater(todayMl);
+        if (elWaterTotal) elWaterTotal.textContent = `Total acumulat: ${fmtWater(totalMl)}`;
+
         // Render Bar Chart
         renderDailyChart(history);
 
+        // Grouped History Table
+        renderGroupedHistoryTable(history);
 
         // 2. Render History Table with Pagination
         // Sort history by date desc (newest first)
@@ -389,6 +515,23 @@ function getCurrentExtensionOrder() {
 }
 
 function applyExtensionOrder(order) {
+    // Migrate orders that don't include 'resum' yet
+    if (!order.includes("resum")) {
+        order = ["resum", ...order];
+        ext.storage.sync.set({ extensionOrder: order });
+    }
+
+    // Migrate old default orders (pre-resum)
+    const oldDefault1 = JSON.stringify(["resum", "obsidian", "markdown", "deepdive", "bionic", "science"]);
+    const oldDefault2 = JSON.stringify(["resum", "deepdive", "science", "obsidian", "markdown", "bionic"]);
+    const oldDefault3 = JSON.stringify(["resum", "science", "deepdive", "obsidian", "markdown", "bionic"]);
+    const currentOrderStr = JSON.stringify(order);
+    
+    if (currentOrderStr === oldDefault1 || currentOrderStr === oldDefault2 || currentOrderStr === oldDefault3) {
+        order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
+        ext.storage.sync.set({ extensionOrder: order });
+    }
+
     const list = document.querySelector(".extensions-list");
     const items = Array.from(list.querySelectorAll(".extension-item"));
     const itemsMap = new Map();
@@ -433,6 +576,7 @@ function moveExtension(extensionId, direction) {
     }
 
     updateMoveButtonsState();
+    updateSidebar();
 }
 
 function updateMoveButtonsState() {
@@ -537,6 +681,84 @@ function renderDailyChart(history) {
         barWrapper.appendChild(bar);
         barWrapper.appendChild(label);
         container.appendChild(barWrapper);
+    });
+}
+
+function renderGroupedHistoryTable(history) {
+    const tbody = document.getElementById("groupedTableBody");
+    if (!tbody) return;
+    tbody.replaceChildren(); // Clear content
+
+    if (history.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.style.textAlign = "center";
+        td.style.color = "#999";
+        td.textContent = "Encara no hi ha dades d'ús.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    // Agrubar per data (YYYY-MM-DD) i model
+    const groups = {};
+    history.forEach(entry => {
+        const dateObj = new Date(entry.date);
+        const dayKey = dateObj.toLocaleDateString(); // Format local curt
+        // Sort keys need YYYY-MM-DD to sort properly
+        const sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        const model = entry.model || "gemini-1.5-flash"; // Fallback antic
+        
+        const key = `${sortKey}|${dayKey}|${model}`;
+        if (!groups[key]) {
+            groups[key] = { sortKey, dayKey, model, requests: 0 };
+        }
+        groups[key].requests += 1;
+    });
+
+    // Ordenar per data (descendent) i després model (ascendent)
+    const sortedGroups = Object.values(groups).sort((a, b) => {
+        if (a.sortKey !== b.sortKey) {
+            return b.sortKey.localeCompare(a.sortKey);
+        }
+        return a.model.localeCompare(b.model);
+    });
+
+    sortedGroups.forEach(group => {
+        const tr = document.createElement("tr");
+        
+        // Date
+        const tdDate = document.createElement("td");
+        tdDate.textContent = group.dayKey;
+        tr.appendChild(tdDate);
+        
+        // Model
+        const tdModel = document.createElement("td");
+        const code = document.createElement("code");
+        code.style.fontSize = "0.85em";
+        code.style.padding = "2px 4px";
+        code.style.borderRadius = "4px";
+        code.style.backgroundColor = "var(--bg-secondary)";
+        code.textContent = group.model;
+        tdModel.appendChild(code);
+        tr.appendChild(tdModel);
+
+        // Requests
+        const tdReq = document.createElement("td");
+        tdReq.style.textAlign = "right";
+        tdReq.textContent = group.requests;
+        tr.appendChild(tdReq);
+
+        // Water
+        const tdWater = document.createElement("td");
+        tdWater.style.textAlign = "right";
+        tdWater.style.color = "var(--text-muted)";
+        const waterMl = group.requests * 0.26;
+        tdWater.textContent = waterMl.toFixed(2);
+        tr.appendChild(tdWater);
+
+        tbody.appendChild(tr);
     });
 }
 
@@ -652,6 +874,9 @@ saveBtns.forEach(id => {
 
 document.querySelector("#resetTemplate").addEventListener("click", resetTemplate);
 document.querySelector("#resetObsidianTemplate").addEventListener("click", resetObsidianTemplate);
+document.querySelector("#resetSystemPrompt").addEventListener("click", resetSystemPrompt);
+document.querySelector("#resetDeepDive").addEventListener("click", resetDeepDivePrompt);
+document.querySelector("#resetScience").addEventListener("click", resetSciencePrompt);
 document.querySelector("#checkModels").addEventListener("click", listModels);
 document.getElementById("clearHistory").addEventListener("click", clearHistory);
 document.getElementById("clearCache").addEventListener("click", clearCache);
@@ -673,6 +898,7 @@ document.getElementById("nextPage")?.addEventListener("click", () => {
 
 document.getElementById("pageSizeSelect")?.addEventListener("change", (e) => {
     PAGE_SIZE = parseInt(e.target.value, 10);
+    ext.storage.local.set({ pageSize: PAGE_SIZE });
     currentPage = 1;
     loadStatistics();
 });

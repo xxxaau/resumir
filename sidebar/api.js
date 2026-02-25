@@ -1,11 +1,42 @@
 // sidebar/api.js
 // Handles all communication with the Gemini API
 
+const EUR_RATE = 0.92; // USD → EUR fixed conversion rate
+
+// Curated model list: only these 5 are shown, in priority order
+const CURATED_MODELS = [
+    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",       priceIn: 1.25, priceOut: 5.00,  rpd: 50    },
+    { id: "gemini-2.0-flash",          label: "Gemini 2.0 Flash",      priceIn: 0.10, priceOut: 0.40,  rpd: 1500  },
+    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",      priceIn: 0.30, priceOut: 2.50,  rpd: 500   },
+    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",         priceIn: 0.15, priceOut: 0.15,  rpd: 2000  },
+    { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite", priceIn: 0.07, priceOut: 0.30,  rpd: 999999},
+];
+
+/**
+ * Returns curated model info (prices in EUR, rpd) for a given model ID.
+ * Falls back to generic Flash defaults for unknown models.
+ */
+function getCuratedModelInfo(modelId) {
+    const found = CURATED_MODELS.find(m => modelId && (
+        m.id === modelId ||
+        modelId.startsWith(m.id.split("-exp")[0].split("-preview")[0].split("-latest")[0])
+    ));
+    if (found) {
+        return {
+            label:    found.label,
+            priceIn:  found.priceIn  * EUR_RATE,
+            priceOut: found.priceOut * EUR_RATE,
+            rpd:      found.rpd
+        };
+    }
+    return { label: modelId, priceIn: 0.10 * EUR_RATE, priceOut: 0.40 * EUR_RATE, rpd: 1500 };
+}
+
 /**
  * Calls the Gemini API using streaming (Server-Sent Events)
  */
 async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, onChunk) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?key=${apiKey}&alt=sse`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse`;
     
     let body;
 
@@ -32,7 +63,10 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
 
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
       body: JSON.stringify(body),
       signal: signal
     });
@@ -83,7 +117,9 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
 }
 
 /**
- * Loads available models from the Gemini API and populates the select element
+ * Loads available models from the Gemini API and populates the select element.
+ * Fetches from API and filters to only show the 5 curated models (in priority order).
+ * Falls back to static curated list if the API is unreachable.
  */
 async function loadModels(apiKey, currentModel) {
     const modelSelect = document.getElementById("model-select");
@@ -95,68 +131,43 @@ async function loadModels(apiKey, currentModel) {
            modelSelect.appendChild(loadingOpt);
         }
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
+            headers: { "x-goog-api-key": apiKey }
+        });
         if (!response.ok) throw new Error("Failed to fetch models");
         const data = await response.json();
         
-        const validModels = data.models
-            .filter(m => 
-                m.supportedGenerationMethods?.includes("generateContent") &&
-                (m.name.includes("gemini") || m.name.includes("gemma")) &&
-                !/embedding|aqa|robotics|vision|image/i.test(m.name)
-            )
-            .map(m => m.name.replace("models/", ""));
-
-        const preferred = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro", "gemini-2.0-flash-lite-preview-02-05", "gemini-2.0-pro-exp-02-05", "gemma-3-27b-it", "gemini-1.5-flash-latest"];
-        
-        validModels.sort((a, b) => {
-            const idxA = preferred.indexOf(a);
-            const idxB = preferred.indexOf(b);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            return a.localeCompare(b);
-        });
+        // Always show all curated models in fixed priority order
+        // (API call above validates connectivity but doesn't filter the list)
+        const toShow = CURATED_MODELS;
 
         modelSelect.replaceChildren();
-        validModels.forEach(m => {
+        toShow.forEach(cm => {
             const opt = document.createElement("option");
-            opt.value = m;
-            let displayName = m.replace("gemini-", "").replace("gemma-", "gemma ");
-            if (m === "gemini-1.5-flash-latest") displayName = "Gemini 1.5 Flash (Latest)";
-            else if (m === "gemini-2.5-flash") displayName = "Gemini 2.5 Flash";
-            else if (m === "gemini-2.0-flash") displayName = "Gemini 2.0 Flash";
-            else if (m.includes("flash-lite")) displayName = "Gemini 2.0 Flash Lite";
-            else if (m === "gemma-3-27b-it") displayName = "Gemma 3 27B";
-            else displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-            
-            opt.textContent = displayName;
+            opt.value = cm.id;
+            opt.textContent = cm.label;
             modelSelect.appendChild(opt);
         });
-        
-        if (currentModel && !validModels.includes(currentModel)) {
-             const opt = document.createElement("option");
-             opt.value = currentModel;
-             opt.textContent = currentModel;
-             modelSelect.appendChild(opt);
+
+        // Keep saved model even if not in curated list (user preference)
+        if (currentModel && !toShow.find(m => m.id === currentModel)) {
+            const opt = document.createElement("option");
+            opt.value = currentModel;
+            opt.textContent = currentModel;
+            modelSelect.appendChild(opt);
         }
         
         if (currentModel) modelSelect.value = currentModel;
         
     } catch (e) {
         console.error("Error loading models:", e);
+        // Static fallback: show all curated models
         if (modelSelect.options.length <= 1) {
             modelSelect.replaceChildren();
-            const fallbackModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite-preview-02-05", "gemma-3-27b-it"];
-            fallbackModels.forEach(m => {
+            CURATED_MODELS.forEach(cm => {
                 const opt = document.createElement("option");
-                opt.value = m;
-                let name = m;
-                if (m === "gemini-2.5-flash") name = "Gemini 2.5 Flash";
-                else if (m === "gemini-2.0-flash") name = "Gemini 2.0 Flash";
-                else if (m.includes("flash-lite")) name = "Gemini 2.0 Flash Lite";
-                
-                opt.textContent = name;
+                opt.value = cm.id;
+                opt.textContent = cm.label;
                 modelSelect.appendChild(opt);
             });
             if (currentModel) modelSelect.value = currentModel;

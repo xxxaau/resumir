@@ -5,24 +5,30 @@
  * Safely executes a script in the target tab, requesting permissions if necessary.
  */
 async function executeScriptSafe(injection) {
+    // Strategy: try first, request permissions only if needed.
+    // This avoids false negatives from permissions.contains() with complex URLs.
     try {
         return await ext.scripting.executeScript(injection);
     } catch (err) {
-        if (err.message.includes("Missing host permission") || err.message.includes("Missing permissions")) {
-            try {
-                const tabId = injection.target.tabId;
-                const tab = await ext.tabs.get(tabId);
-                const granted = await ext.permissions.request({
-                    origins: [tab.url]
-                });
-                if (granted) {
-                    return await ext.scripting.executeScript(injection);
-                }
-            } catch (permErr) {
-                console.warn("Permission request failed (likely no user gesture):", permErr);
-            }
+        const isPermissionError = err.message.includes("Missing host permission") ||
+                                  err.message.includes("Missing permissions");
+        if (!isPermissionError) throw err;
+
+        // Permission missing — try to request it (requires user gesture)
+        try {
+            const tab = await ext.tabs.get(injection.target.tabId);
+            if (!tab.url) return null;
+
+            const origin = new URL(tab.url).origin + "/*";
+            const granted = await ext.permissions.request({ origins: [origin] });
+            if (!granted) return null;
+
+            // Retry after permission granted
+            return await ext.scripting.executeScript(injection);
+        } catch {
+            // No user gesture, user denied, or privileged page — silently skip
+            return null;
         }
-        throw err;
     }
 }
 
@@ -99,7 +105,6 @@ async function getPageContent() {
             const trackData = playerResponse?.[0]?.result;
 
             if (trackData && trackData.baseUrl) {
-                 console.log(`Found transcript (${trackData.language}):`, trackData.baseUrl);
                  
                  try {
                      const transcriptResponse = await fetch(trackData.baseUrl, { credentials: 'include' });
