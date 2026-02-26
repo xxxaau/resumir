@@ -101,12 +101,22 @@ function New-BuildZip {
         }
     }
 
-    # Create ZIP
-    # Change into the build directory so Compress-Archive uses relative paths correctly
-    # and doesn't get confused by the leading 'build_target\' component
+    # Create ZIP using Python to ensure forward slash '/' separators
+    # (AMO rejects ZIPs with Windows backslash '\' path separators)
     Push-Location -Path $buildDir
     try {
-        Compress-Archive -Path "*" -DestinationPath "..\$zipName" -Force
+        $pyScript = @"
+import os, zipfile
+with zipfile.ZipFile(r'..\$zipName', 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            file_path = os.path.join(root, file)
+            arcname = os.path.relpath(file_path, '.').replace('\\', '/')
+            zf.write(file_path, arcname)
+"@
+        Set-Content -Path "make_zip_temp.py" -Value $pyScript
+        python make_zip_temp.py
+        Remove-Item "make_zip_temp.py" -Force
     }
     finally {
         Pop-Location
