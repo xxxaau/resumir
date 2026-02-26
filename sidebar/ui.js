@@ -456,22 +456,22 @@ function runCountdownTimer(unblockTime) {
         const remainingMs = unblockTime - now;
         const remainingSec = Math.ceil(remainingMs / 1000);
         
-        const resetEl = document.getElementById("quota-reset");
-        const countEl = document.getElementById("quota-count");
+        const remainEl = document.getElementById("requests-remaining");
 
         if (remainingSec <= 0) {
             clearInterval(countdownInterval);
             ext.storage.local.remove("blockedUntil");
             
-            countEl.textContent = "Reintenta-ho"; 
-            countEl.style.color = "#28a745"; 
+            if (remainEl) {
+                remainEl.textContent = "Reintenta-ho"; 
+                remainEl.style.color = "#28a745"; 
+            }
         } else {
-            countEl.textContent = "Límit assolit";
-            countEl.style.color = "#d70022";
-            
-            resetEl.textContent = `Espera: ${remainingSec}s`;
-            resetEl.style.color = "#d70022";
-            resetEl.style.fontWeight = "bold";
+            if (remainEl) {
+                remainEl.textContent = `Límit assolit (${remainingSec}s restants)`;
+                remainEl.style.color = "#d70022";
+                remainEl.style.fontWeight = "bold";
+            }
         }
     };
     

@@ -35,12 +35,13 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 ## 4. Permisos Requerits
 
 | Permís | Ús |
-|--------|-----|
+| --- | --- |
 | `activeTab` | Llegir el contingut de la pestanya actual només quan actives l'extensió |
 | `storage` | Guardar la teva API Key, preferències, memòria cau i historial d'ús localment |
 | `scripting` | Injectar el parser de contingut (Readability.js) per extreure text net |
 | `tabs` | Consultar la pestanya activa, obrir links en noves pestanyes i gestionar integracions |
-| `menus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir contingut") |
+| `menus` / `contextMenus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir contingut") |
+| `sidePanel` | Obrir el panell lateral natiu a navegadors basats en Chromium |
 | `<all_urls>` (opcional) | Permís host demanat dinàmicament per executar scripts de lectura en qualsevol pàgina |
 
 ## 5. Contacte i codi font

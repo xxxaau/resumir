@@ -30,7 +30,7 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 
 ### 3. Milestone 2.0.0 – Versió per navegadors basats en Chromium
 
-- **Estat:** 📝 Planificat (no iniciat)
+- **Estat:** ✅ Completat (v2.0.0)
 - **Objectiu:** portar l'extensió a Chrome/Edge/Brave reutilitzant al màxim la lògica actual.
 - **Navegadors objectiu:** Chrome ≥ 116 (sidePanel API), Edge, Brave, Opera.
 
@@ -38,7 +38,7 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 
 > Crear un manifest MV3 natiu per a Chromium mantenint el de Firefox intacte.
 
-- [ ] Crear `manifest.chromium.json` a l'arrel del projecte, basat en `manifest.json`, amb les diferències següents:
+- [x] Crear `manifest.chromium.json` a l'arrel del projecte, basat en `manifest.json`, amb les diferències següents:
   - **Eliminar** la clau `browser_specific_settings` (específica de Gecko/Firefox).
   - **Eliminar** la clau `sidebar_action` (no existeix a Chromium).
   - **Substituir** `"permissions": ["menus"]` per `"permissions": ["contextMenus"]` (Firefox usa `menus`, Chromium usa `contextMenus`).
@@ -46,55 +46,55 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
   - **Afegir** la clau `"side_panel"` amb `{ "default_path": "sidebar/sidebar.html" }`.
   - **Substituir** `"background": { "scripts": ["ext.js", "background.js"] }` per `"background": { "service_worker": "background.bundle.js", "type": "module" }` (Chromium no admet `scripts` array, cal un sol service worker).
   - **Canviar** `optional_host_permissions` a `host_permissions` si cal (revisar compatibilitat).
-- [ ] Validar el manifest resultant amb `chrome://extensions` en mode desenvolupador.
+- [x] Validar el manifest resultant amb `chrome://extensions` en mode desenvolupador.
 
 #### Fase B — Completar `ext.js` per a sidePanel
 
 > El wrapper `ext.js` ja gestiona `menus` vs `contextMenus`. Cal completar-lo per cobrir `sidePanel`.
 
-- [ ] Implementar `ext.sidebar.open()` per a Chromium: cridar `chrome.sidePanel.open({ windowId })` (disponible Chrome 116+).
-- [ ] Implementar `ext.sidebar.close()` per a Chromium: no existeix `sidePanel.close()` natiu; documentar la limitació o usar workaround amb `sidePanel.setOptions({ enabled: false })`.
-- [ ] Adaptar `ext.sidebar.getViews()`: a Chromium `extension.getViews({ type: "sidebar" })` no funciona. Alternativa: mantenir estat intern (variable `isPanelOpen`) o usar `chrome.runtime.getContexts()` (Chrome 116+).
-- [ ] Afegir a `ext.sidebar` la funció `setPanelBehavior()` per cridar `chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })`.
+- [x] Implementar `ext.sidebar.open()` per a Chromium: cridar `chrome.sidePanel.open({ windowId })` (disponible Chrome 116+).
+- [x] Implementar `ext.sidebar.close()` per a Chromium: no existeix `sidePanel.close()` natiu; documentar la limitació o usar workaround amb `sidePanel.setOptions({ enabled: false })`.
+- [x] Adaptar `ext.sidebar.getViews()`: a Chromium `extension.getViews({ type: "sidebar" })` no funciona. Alternativa: mantenir estat intern (variable `isPanelOpen`) o usar `chrome.runtime.getContexts()` (Chrome 116+).
+- [x] Afegir a `ext.sidebar` la funció `setPanelBehavior()` per cridar `chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })`.
 
 #### Fase C — Background: migrar a Service Worker
 
 > Firefox permet `"background.scripts"` (persistent), Chromium exigeix un únic `service_worker` (event-driven).
 
-- [ ] Crear `background.bundle.js` (o usar un bundler senzill) que importi `ext.js` + `background.js` en un sol fitxer. Alternativa: usar ES modules amb `import` si el manifest usa `"type": "module"`.
-- [ ] Revisar `background.js` per assegurar que la lògica és compatible amb service workers (no persistent):
+- [x] Crear `background.bundle.js` (o usar un bundler senzill) que importi `ext.js` + `background.js` en un sol fitxer. Alternativa: usar ES modules amb `import` si el manifest usa `"type": "module"`.
+- [x] Revisar `background.js` per assegurar que la lògica és compatible amb service workers (no persistent):
   - No hi ha estat global mutable que es perdi entre despertades → ✅ (el codi actual ja és event-driven amb listeners).
   - Les API utilitzades (`ext.menus.create`, `ext.storage.local.set`, `ext.runtime.sendMessage`) són compatibles amb service workers.
-- [ ] Registrar el `sidePanel` a `ext.runtime.onInstalled`: cridar `ext.sidebar.setPanelBehavior()` perquè el clic a l'acció obri el side panel.
-- [ ] Afegir `chrome.sidePanel.setOptions({ path: "sidebar/sidebar.html" })` al listener `onInstalled` si cal.
+- [x] Registrar el `sidePanel` a `ext.runtime.onInstalled`: cridar `ext.sidebar.setPanelBehavior()` perquè el clic a l'acció obri el side panel.
+- [x] Afegir `chrome.sidePanel.setOptions({ path: "sidebar/sidebar.html" })` al listener `onInstalled` si cal.
 
 #### Fase D — Build i empaquetament multi-navegador
 
 > Automatitzar la generació de paquets separats per Firefox i Chromium.
 
-- [ ] Crear un script de build (`build.ps1` o `build.js`) que:
+- [x] Crear un script de build (`build.ps1` o `build.js`) que:
 
   1. Llegeixi un paràmetre `--target firefox|chromium|all`.
   2. Per a **Firefox**: copiï `manifest.json` i empaqueti el ZIP com fa `make_zip_v4.py` actual.
   3. Per a **Chromium**: copiï `manifest.chromium.json` com `manifest.json`, generi `background.bundle.js` (concatenació o bundling de `ext.js` + `background.js`), i empaqueti el ZIP resultant.
   4. Generi ZIPs amb nomenclatura clara: `resumir-contingut-vX.Y.Z-firefox.zip` i `resumir-contingut-vX.Y.Z-chromium.zip`.
 
-- [ ] Actualitzar `make_zip_v4.py` o substituir-lo pel nou script unificat.
-- [ ] Actualitzar `.gitignore` per incloure els artefactes de build Chromium (`background.bundle.js`, ZIPs Chromium).
+- [x] Actualitzar `make_zip_v4.py` o substituir-lo pel nou script unificat.
+- [x] Actualitzar `.gitignore` per incloure els artefactes de build Chromium (`background.bundle.js`, ZIPs Chromium).
 
 #### Fase E — Actualitzar tooling de desenvolupament
 
 > Adaptar els scripts auxiliars perquè funcionin amb ambdós targets.
 
-- [ ] Actualitzar `set_dev_mode.ps1`:
+- [x] Actualitzar `set_dev_mode.ps1`:
   - Afegir suport per a `manifest.chromium.json` (la línia `$json.browser_specific_settings.gecko.id` falla si la clau no existeix).
   - Acceptar un paràmetre `-Target firefox|chromium` per aplicar la transformació al manifest correcte.
-- [ ] Actualitzar el workflow `.agent/workflows/work_procedure.md` per documentar com carregar l'extensió a Chrome (`chrome://extensions → Load unpacked`) a més de Firefox.
-- [ ] Actualitzar el workflow `.agent/workflows/release_procedure.md` per incloure els passos de publicació a Chrome Web Store (CWS).
+- [x] Actualitzar el workflow `.agent/workflows/work_procedure.md` per documentar com carregar l'extensió a Chrome (`chrome://extensions → Load unpacked`) a més de Firefox.
+- [x] Actualitzar el workflow `.agent/workflows/release_procedure.md` per incloure els passos de publicació a Chrome Web Store (CWS).
 
 #### Fase F — Proves, validació i publicació CWS
 
-- [ ] Provar manualment a Chrome: carregar l'extensió sense empaquetar, verificar:
+- [x] Provar manualment a Chrome: carregar l'extensió sense empaquetar, verificar:
   - Obertura del side panel des del botó d'acció (toolbar).
   - Menú contextual ("Resumir text seleccionat", "Resumir contingut").
   - Generació de resums (API Gemini/Gemma).
@@ -103,12 +103,13 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
   - Exportació a Obsidian.
   - Plugins (reordenació, visibilitat).
   - Estadístiques d'ús.
-- [ ] Provar a Edge i Brave (Chromium-based) per confirmar compatibilitat.
-- [ ] Executar els tests existents a `tests/test.html` verificant que la lògica compartida continua passant.
+- [x] Incorporar els tests (unitats i e2e) a l'auditoria de la versió Chromium. S'han d'aplicar totes les perspectives establertes per a Firefox.
+- [x] Provar a Edge i Brave (Chromium-based) per confirmar compatibilitat.
+- [x] Executar els tests existents a `tests/test.html` verificant que la lògica compartida continua passant a Chromium.
 - [ ] Crear un compte de desenvolupador a Chrome Web Store (si no existeix).
 - [ ] Preparar les captures de pantalla, descripció i privadesa per a la fitxa CWS.
 - [ ] Publicar la primera versió Chromium a CWS.
-- [ ] Actualitzar `README.md` amb instal·lacions per a Firefox **i** Chromium.
+- [x] Actualitzar `README.md` amb instal·lacions per a Firefox **i** Chromium.
 
 > **Nota de compatibilitat:** Tot el codi de la sidebar (`sidebar.js`, `api.js`, `cache.js`, `content.js`, `ui.js`, `utils.js`), la pàgina de configuració (`settings.js`) i `theme.js` ja utilitzen l'abstracció `ext.*` o la detecció `browser`/`chrome` pròpia — **no necessiten canvis** per funcionar a Chromium.
 
@@ -139,6 +140,29 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 
 - **Estat:** ✅ Implementat (v1.1.7)
 - **Detalls:** S'ha completat la convergència del 100% l'opcions globals d'usuari a `storage.sync` (temes, habilitació de botons específics).
+
+### Detecció Global Multi-Navegador i Wrapper (ext.js)
+
+- **Estat:** ✅ Implementat (v2.0.0)
+- **Detalls:** Wrapper homogeni preparat pel 100% del flux principal (emmagatzematge, formularis, menús contextuals, side panel, runtime events) entre Chrome i Firefox.
+
+### Lògica Integre d'Ús de Cache per a Seleccions i Pàgines senceres
+
+- **Estat:** ✅ Implementat (v2.0.0)
+- **Detalls:** Solucionat l'error que desdoblava ID de memòria interna en peticions a pàgines grans pre-seleccionades, diferenciant seleccions arbitràries pel prefix `seleccio:`.
+
+### Neteja UI d'Iconografia de Dev Mode
+
+- **Estat:** ✅ Implementat (v2.0.0)
+- **Detalls:** Eliminades les icones lletges de l'entorn de dev (només en Firefox) al crear els botons del menú contextual (`menus.create()`), assegurant un espai net equivalent a les guies humanes i per evitar discrepàncies en Chrome.
+
+## Principis Clau
+
+- **Minimalisme**: Interfície neta i centrada en el text, sense distraccions.
+- **Rendiment**: Ús de `Readability.js` al client per obtenir la versió neta de l'article ràpidament. L'extensió ha de ser molt ràpida.
+- **Transparència**: Ús de l'API de Gemini (directament de Google) per evitar intermediaris i mantenir la privacitat (dins de les polítiques de Google API).
+- **Accessibilitat**: Ús de lectura biònica com a opció per facilitar la lectura a persones amb dificultats. I preparat per a lectors de pantalla i navegació per teclat.
+- **Compatibilitat Multi-Navegador**: **Tota nova funcionalitat s'ha d'implementar i testar de forma obligatòria per a Firefox i per a l'ecosistema Chromium.**
 
 ### Validació d'Evidència Científica
 

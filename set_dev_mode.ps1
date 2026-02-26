@@ -3,21 +3,33 @@ param (
 )
 
 $manifestPath = "d:/40361989w/Dev/sergi-resum-navegador/manifest.json"
+$manifestChromiumPath = "d:/40361989w/Dev/sergi-resum-navegador/manifest.chromium.json"
 $iconsDir = "d:/40361989w/Dev/sergi-resum-navegador/icons"
 
-# Read Manifest
+# Read Firefox Manifest
 $json = Get-Content -Path $manifestPath -Raw | ConvertFrom-Json
+
+# Read Chromium Manifest (if exists)
+$hasChromium = Test-Path $manifestChromiumPath
+if ($hasChromium) {
+    $jsonChromium = Get-Content -Path $manifestChromiumPath -Raw | ConvertFrom-Json
+}
 
 if ($Mode -eq "dev") {
     Write-Host "Switching to DEVELOPMENT mode..."
     
-    # Update Manifest
+    # Update Firefox Manifest
     $json.name = "Resumir contingut (DEV)"
     $json.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz"
-    
-    # Save Manifest
     $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
-    Write-Host "Manifest updated with DEV ID (using PROD UUID for compatibility)."
+    Write-Host "Manifest (Firefox) updated with DEV ID."
+
+    # Update Chromium Manifest
+    if ($hasChromium) {
+        $jsonChromium.name = "Resumir contingut (DEV)"
+        $jsonChromium | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestChromiumPath -Encoding UTF8
+        Write-Host "Manifest (Chromium) updated with DEV name."
+    }
 
     # Generate DEV Icons (Orange/Red)
     Add-Type -AssemblyName System.Drawing
@@ -61,13 +73,18 @@ if ($Mode -eq "dev") {
 elseif ($Mode -eq "prod") {
     Write-Host "Switching to PRODUCTION mode..."
     
-    # Restore Manifest
+    # Restore Firefox Manifest
     $json.name = "Resumir contingut"
     $json.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
-    
-    # Save Manifest
     $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
-    Write-Host "Manifest restored to PROD ID."
+    Write-Host "Manifest (Firefox) restored to PROD ID."
+
+    # Restore Chromium Manifest
+    if ($hasChromium) {
+        $jsonChromium.name = "Resumir contingut"
+        $jsonChromium | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestChromiumPath -Encoding UTF8
+        Write-Host "Manifest (Chromium) restored to PROD name."
+    }
     
     # Regenerate Original Icons
     & "d:/40361989w/Dev/sergi-resum-navegador/generate_icons_blue.ps1"

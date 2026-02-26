@@ -118,14 +118,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     }
                 }
 
-                const quotaCount = document.getElementById("quota-count");
-                quotaCount.textContent = "MEMÒRIA CAU";
-                quotaCount.classList.add("cache-hit");
-                
-                const resetEl = document.getElementById("quota-reset");
-                const dateStr = new Date(cachedEntry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                resetEl.textContent = `Generat: ${dateStr}`;
-                resetEl.classList.add("cache-timestamp");
+                const remainEl = document.getElementById("requests-remaining");
+                if (remainEl) {
+                    const dateStr = new Date(cachedEntry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    remainEl.textContent = `Memòria cau (${dateStr})`;
+                    remainEl.style.color = "#28a745";
+                }
 
                 getPageContent().then(data => {
                     if (data && data.text) {
@@ -166,7 +164,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         currentMetadata.title = pageData.title;
-        currentMetadata.url = pageData.url;
+        // Mark selection URLs uniquely so they don't conflict with the full page cache logic
+        currentMetadata.url = overrideText ? "seleccio:" + pageData.url : pageData.url;
         currentMetadata.summary = ""; 
         currentMetadata.fromCache = false; 
         

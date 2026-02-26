@@ -2,6 +2,25 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [2.0.0] - 2026-02-26
+
+Milestone 2.0.0: Versió amb suport natiu per a l'ecosistema Chromium.
+
+### Afegit
+
+- **Suport Chromium**: Compatibilitat completa amb navegadors basats en Chromium (Google Chrome, Edge, Brave, etc.) gràcies al nou wrapper `ext.js` que abstreu la crida correcta a `browser` o `chrome`.
+- **Build Multi-Target**: Scripts de generació actualitzats per empaquetar de forma simultània l'arxiu `.zip` per Firefox i el `.zip` per Chromium alhora.
+- **Side Panel Natiu**: Integració amb l'API de `chrome.sidePanel` per a entorns Google garantint que el panell lateral o l'action de l'extensió funcionen previsiblement.
+
+### Millorat
+
+- **Auditories i procediments**: Obligatorietat de testejar tant el branch Firefox com el Chromium de qualsevol canvi futur. Millores a l'eina automàtica de release per eliminar paquets o extrets `.zip` antics i carpetes un-packed.
+
+### Corregit
+
+- **Problema Caching Selecció vs Web Completa**: Solucionat error fatal (*"Cannot set properties of null"*) a l'hora de canviar de resumir un text pre-seleccionat i seguidament una pàgina completa. Ara les seleccions tenen un identificador únic (prefixat amb `seleccio:`).
+- **UX Menú Contextual**: S'han retirat les icones lletges de l'entorn dev als menús contextuals de Firefox i Chrome per tal que només aparegui el text net, igualant el look & feel de sistema.
+
 ## [1.2.1] - 2026-02-26
 
 ### Millorat

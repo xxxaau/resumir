@@ -219,10 +219,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Context Menu / Message Handling ---
 
-    const boundTrigger = (data) => handleTrigger(
-        (text, dd, sc, ui) => doSummary(text, dd, sc, ui),
-        data
-    );
+    let lastTriggerTime = 0;
+    
+    const boundTrigger = (data) => {
+        // Deduplicate triggers (prevent double summary if both message and storage events fire)
+        const now = Date.now();
+        if (now - lastTriggerTime < 500) {
+            console.log("Ignoring duplicate trigger", data);
+            return;
+        }
+        lastTriggerTime = now;
+        
+        handleTrigger((text, dd, sc, ui) => doSummary(text, dd, sc, ui), data);
+    };
 
     ext.runtime.onMessage.addListener((message) => {
         if (message.action === "trigger_summary") {
@@ -230,9 +239,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Check for pending summary on load (context menu while sidebar was closed)
     ext.storage.local.get("pendingSummary").then(data => {
         if (data.pendingSummary) {
             boundTrigger(data.pendingSummary);
+            ext.storage.local.remove("pendingSummary");
+        }
+    });
+
+    // Watch for pendingSummary changes (reliable fallback for Chrome sidePanel timing)
+    ext.storage.onChanged.addListener((changes, area) => {
+        if (area === "local" && changes.pendingSummary && changes.pendingSummary.newValue) {
+            boundTrigger(changes.pendingSummary.newValue);
             ext.storage.local.remove("pendingSummary");
         }
     });

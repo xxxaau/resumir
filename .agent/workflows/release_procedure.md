@@ -66,30 +66,44 @@ Executar l'auditoria completa que cobreix:
 ## 2. Actualització de Versió
 
 1. **Llista de models de Gemini**: Revisar i actualitzar els models disponibles (`sidebar/api.js` i `options/settings.js`) si s'han llançat noves versions (ex: Gemini 2.5 Flash).
-2. Editar `manifest.json` i incrementar la versió (ex: 1.1.4 -> 1.1.5).
-3. Editar `make_zip_v4.py` i actualitzar el nom del fitxer ZIP.
+2. Editar `manifest.json` **i** `manifest.chromium.json` i incrementar la versió.
+3. Editar `make_zip_v4.py` i actualitzar el nom del fitxer ZIP (si s'usa).
 
 ## 3. Documentació
 
-1. Actualitzar `CHANGELOG.md`:
+> [!IMPORTANT]
+> **Obligatori a cada release:**
+> 1. Actualitzar `CHANGELOG.md` amb una nova secció `## [x.y.z] - YYYY-MM-DD` i llistar tots els canvis (Afegit, Corregit, Millorat, Canviat).
+> 2. Actualitzar `ROADMAP.md` movent items completats a la secció corresponent.
+
+1. **`CHANGELOG.md`** (OBLIGATORI):
    - Afegir nova secció `## [x.y.z] - YYYY-MM-DD`.
-   - Llistar canvis (Afegit, Corregit, Millorat).
-2. Actualitzar `options/settings.html`:
-   - Afegir entrada a la llista de canvis visual (pestanya "Sobre l'extensió").
+   - Llistar canvis agrupats per: **Afegit**, **Corregit**, **Millorat**, **Canviat**.
+2. **`ROADMAP.md`**:
+   - Moure items completats i actualitzar estats.
 3. Revisar documentació principal:
    - Verificar que el `README.md` continua sent correcte (instal·lació, configuració, noves funcionalitats).
    - Si hi ha canvis en dades o permisos, revisar/actualitzar `PRIVACY_POLICY.md`.
 
 ## 4. Generació del Paquet
 
-1. Generar el ZIP final signat:
+1. **Neteja prèvia**: Eliminar antigues carpetes de proves i paquets antics.
 
-```bash
-// turbo
-python make_zip_v4.py
+```powershell
+// turbo-all
+Remove-Item -Path d:\40361989w\Dev\sergi-resum-navegador\chromium-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path d:\40361989w\Dev\sergi-resum-navegador\firefox-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path d:\40361989w\Dev\sergi-resum-navegador\*.zip -Force -ErrorAction SilentlyContinue
 ```
 
-- [ ] Verificar que s'ha creat el fitxer `.zip` amb la versió correcta.
+1. Generar els ZIPs finals amb el build multi-target:
+
+```powershell
+// turbo
+.\build.ps1 -Target all
+```
+
+- [ ] Verificar que s'han creat `resumir-contingut-vX.Y.Z-firefox.zip` i `resumir-contingut-vX.Y.Z-chromium.zip`.
 
 ## 5. Publicació i Repositori
 

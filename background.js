@@ -21,30 +21,30 @@ ext.runtime.onInstalled.addListener(() => {
   // Create context menu items
   ext.menus.create({
     id: "summarize-selection",
-    title: "Resumir text seleccionat amb Gemini",
+    title: "Resumir text seleccionat",
     contexts: ["selection"]
   });
 
   ext.menus.create({
     id: "summarize-page",
     title: "Resumir contingut",
-    contexts: ["page", "all"], // 'all' covers cases where page context might be ambiguous
-    icons: {
-       "16": "icons/icon-16.png"
-    }
+    contexts: ["page", "all"]
   });
 });
 
 ext.menus.onClicked.addListener(async (info, tab) => {
+  // 1. Open Sidebar IMMEDIATELY to preserve user gesture token
+  // Awaiting anything before calling open() invalidates the token in Chrome.
+  const openPromise = ext.sidebar.open(tab.windowId);
+
   if (info.menuItemId === "summarize-selection") {
       const text = info.selectionText;
       if (!text) return;
 
-      // 1. Store text for sidebar to pick up if it opens
+      // 2. Store text for sidebar to pick up if it opens
       await ext.storage.local.set({ pendingSummary: { type: 'selection', content: text } });
-
-      // 2. Open Sidebar (if not open)
-      await ext.sidebar.open();
+      
+      await openPromise;
 
       // 3. Send message (if already open)
       try {
@@ -57,11 +57,10 @@ ext.menus.onClicked.addListener(async (info, tab) => {
       }
 
   } else if (info.menuItemId === "summarize-page") {
-      // 1. Store action
+      // 2. Store action
       await ext.storage.local.set({ pendingSummary: { type: 'page', url: tab.url } });
       
-      // 2. Open Sidebar
-      await ext.sidebar.open();
+      await openPromise;
 
       // 3. Send Message
       try {
