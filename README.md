@@ -4,7 +4,7 @@
 
 [![Mozilla License](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE)
 [![Firefox](https://img.shields.io/badge/Firefox-MV3-ff7139?logo=firefox-browser)](https://www.mozilla.org/firefox/)
-[![Chromium](https://img.shields.io/badge/Chromium-pendent-lightgrey?logo=googlechrome)](#compatibilitat)
+[![Chromium](https://img.shields.io/badge/Chromium-Natiu-4285F4?logo=googlechrome)](#compatibilitat)
 
 ---
 
@@ -34,7 +34,7 @@
 
 ## Requisits
 
-- **Navegador**: Firefox 115+ (Chromium proper)
+- **Navegador**: Firefox 115+ o qualsevol navegador basat en Chromium (Chrome, Edge, Brave, Vivaldi, etc.)
 - **API Key**: Google Gemini (gratuïta) → [Obtenir-la a Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ---
@@ -111,7 +111,7 @@
 | Navegador | Estat | Notes |
 | --- | --- | --- |
 | Firefox 115+ | ✅ Funcional | `sidebar_action`, `menus`, `background.scripts` |
-| Chrome/Edge 116+ | 🔜 Planificat | Codi JS preparat, falta `manifest.chromium.json` + build |
+| Chrome/Edge/Brave 116+ | ✅ Funcional | `sidePanel`, `contextMenus`, `service_worker` (`manifest.chromium.json`) |
 
 ### Abstracció cross-browser (`ext.js`)
 
@@ -125,11 +125,9 @@ L'extensió utilitza un wrapper `ext.*` que encapsula les diferències entre nav
 | Detectar sidebar | `extension.getViews({ type: "sidebar" })` | `[]` (fallback a open) |
 | Registrar panel | (natiu) | `sidePanel.setPanelBehavior()` |
 
-### Bloquejos restants per a Chromium
+### Empaquetatge Dual
 
-- `manifest.json` → cal crear `manifest.chromium.json` (Fase A del 2.0.0)
-- `background.scripts` (array) → `service_worker` (Fase C del 2.0.0)
-- Build multi-target → nou script de build (Fase D del 2.0.0)
+L'script de build (`build.ps1`) genera automàticament els paquets `.zip` independents per a Firefox i per a Chromium a partir de la mateixa base de codi compartida.
 
 ---
 
