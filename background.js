@@ -15,6 +15,9 @@ ext.action.onClicked.addListener(async (tab) => {
 // --- Context Menus ---
 
 ext.runtime.onInstalled.addListener(() => {
+  // Chromium: register side panel to open on action click
+  ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
+
   // Create context menu items
   ext.menus.create({
     id: "summarize-selection",

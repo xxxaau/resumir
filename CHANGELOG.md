@@ -2,6 +2,21 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [1.2.1] - 2026-02-26
+
+### Millorat
+
+- **Refactorització sidebar.js**: Reduït de 632 a 230 línies. Extreta la lògica de generació a `summary.js`, quota/estadístiques a `stats.js`, i avís API key a `ui.js`.
+- **Missatges d'error**: Nova funció `classifyError()` que mostra missatges clars i en català per errors d'API key (401/403), quota excedida (429), permisos denegats, i contingut buit.
+- **Contingut buit**: Substituït l'error tècnic "Page content empty" per un missatge clar indicant que cal recarregar la pestanya.
+- **ext.js cross-browser**: Completat el wrapper amb suport sidePanel per a Chromium (open, close, getViews, setPanelBehavior). Firefox no afectat.
+
+### Afegit
+
+- `sidebar/stats.js`: Mòdul de seguiment de quota diària i consum d'aigua.
+- `sidebar/summary.js`: Mòdul amb la lògica principal de generació (`startSummary`), classificació d'errors (`classifyError`), i gestió de triggers.
+- Tests nous (15 → 23): `estimateTokens` edge cases, `getCuratedModelInfo`, `classifyError`, `formatObsidianPath` amb tokens de temps.
+
 ## [1.1.7] - 2026-02-25
 
 ### Corregit

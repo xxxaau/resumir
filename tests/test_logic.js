@@ -154,6 +154,58 @@ test("estimateTokens - Rounding up", () => {
     assertEquals(estimateTokens(text), 2, "Should round up 1.25 to 2");
 });
 
+test("estimateTokens - Null input", () => {
+    assertEquals(estimateTokens(null), 0, "null should return 0");
+});
+
+test("estimateTokens - Empty string", () => {
+    assertEquals(estimateTokens(""), 0, "Empty string should return 0");
+});
+
+test("estimateTokens - Long text", () => {
+    const text = "a".repeat(4000); // 4000 chars
+    assertEquals(estimateTokens(text), 1000, "Should be 1000 tokens for 4000 chars");
+});
+
+// 6. getCuratedModelInfo
+test("getCuratedModelInfo - Known model", () => {
+    const info = getCuratedModelInfo("gemini-2.0-flash");
+    assertEquals(info.label, "Gemini 2.0 Flash", "Should return correct label");
+    assert(info.rpd === 1500, "Should have 1500 rpd");
+    assert(info.priceIn > 0, "Price should be positive");
+});
+
+test("getCuratedModelInfo - Unknown model fallback", () => {
+    const info = getCuratedModelInfo("some-unknown-model-xyz");
+    assertEquals(info.label, "some-unknown-model-xyz", "Should use model ID as label");
+    assertEquals(info.rpd, 1500, "Should fallback to 1500 rpd");
+});
+
+test("getCuratedModelInfo - Model with suffix variant", () => {
+    const info = getCuratedModelInfo("gemini-2.5-flash-latest");
+    assertEquals(info.label, "Gemini 2.5 Flash", "Should match base model despite -latest suffix");
+});
+
+// 7. formatObsidianPath - Time tokens
+test("formatObsidianPath - Time tokens HH:mm", () => {
+    const date = new Date("2026-02-13T14:30:00");
+    const template = "Notes/YYYY-MM-DD_HH-mm";
+    const result = formatObsidianPath(template, date);
+    assertEquals(result, "Notes/2026-02-13_14-30", "Time tokens should be replaced");
+});
+
+// 8. classifyError
+test("classifyError - Invalid API key (401)", () => {
+    const result = classifyError(new Error("Error API (401): API key not valid"));
+    assert(result.showConfig === true, "Should show config button for 401");
+    assert(result.message.includes("clau API"), "Should mention API key in Catalan");
+});
+
+test("classifyError - Permission denied", () => {
+    const result = classifyError(new Error("Permission denied"));
+    assert(result.showConfig === true, "Should show config for permission errors");
+    assert(result.message.includes("permisos"), "Should mention permissions");
+});
 
 // --- Test Runner ---
 (async function runTests() {

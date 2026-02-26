@@ -203,7 +203,7 @@ async function getPageContent() {
         if (scriptResults?.[0]?.result) text = scriptResults[0].result;
     }
 
-    if (!text || text.trim() === "") throw new Error("Page content empty");
+    if (!text || text.trim() === "") throw new Error("No s'ha pogut extreure el contingut d'aquesta pàgina. Recarrega la pestanya (F5) i torna-ho a provar.");
     
     return { title: tabTitle, url: tabUrl, text: text };
 }

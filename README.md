@@ -83,10 +83,12 @@
 ├── sidebar/               # Barra lateral principal
 │   ├── sidebar.html       #   Layout + toolbar
 │   ├── sidebar.css        #   Estils (5 temes, CSS custom properties)
-│   ├── sidebar.js         #   Controlador principal
+│   ├── sidebar.js         #   Orquestrador (init, events, wiring)
+│   ├── summary.js         #   Lògica de generació + gestió d'errors
 │   ├── api.js             #   Client Gemini (streaming SSE)
 │   ├── content.js         #   Extracció de text (YouTube, HN, Readability)
 │   ├── cache.js           #   Memòria cau local + estadístiques
+│   ├── stats.js           #   Seguiment de quota diària + consum d'aigua
 │   ├── ui.js              #   Renderitzador DOM + visibilitat de plugins
 │   └── utils.js           #   Helpers (Obsidian path, Markdown, tokens)
 │
@@ -97,7 +99,7 @@
 │
 ├── tests/                 # Tests
 │   ├── test.html          #   Runner HTML
-│   └── test_logic.js      #   Tests unitaris (utils.js)
+│   └── test_logic.js      #   Tests unitaris (utils.js, api.js, summary.js)
 │
 └── icons/                 # Icones (16–128px)
 ```
@@ -109,14 +111,25 @@
 | Navegador | Estat | Notes |
 | --- | --- | --- |
 | Firefox 115+ | ✅ Funcional | `sidebar_action`, `menus`, `background.scripts` |
-| Chrome/Edge | 🔜 Planificat | Requereix `side_panel`, `service_worker`, `contextMenus` |
+| Chrome/Edge 116+ | 🔜 Planificat | Codi JS preparat, falta `manifest.chromium.json` + build |
 
-### Bloquejos coneguts per a Chromium
+### Abstracció cross-browser (`ext.js`)
 
-- `sidebar_action` → `side_panel`
-- `background.scripts` (array) → `service_worker` (únic punt d'entrada)
-- `menus` (permís) → `contextMenus`
-- `theme.js` referencia `browser.storage` directament — cal usar `ext.js`
+L'extensió utilitza un wrapper `ext.*` que encapsula les diferències entre navegadors:
+
+| API | Firefox | Chromium |
+| --- | --- | --- |
+| Menú contextual | `browser.menus` | `chrome.contextMenus` |
+| Obrir sidebar | `sidebarAction.open()` | `sidePanel.open({ windowId })` |
+| Tancar sidebar | `sidebarAction.close()` | `sidePanel.setOptions({ enabled: false })` ⚠️ |
+| Detectar sidebar | `extension.getViews({ type: "sidebar" })` | `[]` (fallback a open) |
+| Registrar panel | (natiu) | `sidePanel.setPanelBehavior()` |
+
+### Bloquejos restants per a Chromium
+
+- `manifest.json` → cal crear `manifest.chromium.json` (Fase A del 2.0.0)
+- `background.scripts` (array) → `service_worker` (Fase C del 2.0.0)
+- Build multi-target → nou script de build (Fase D del 2.0.0)
 
 ---
 

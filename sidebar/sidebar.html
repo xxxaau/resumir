@@ -1,89 +1,249 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ca">
-<head>
-  <meta charset="utf-8">
-  <title>Resumir contingut</title>
-  <link rel="stylesheet" href="sidebar.css">
-  <script src="../theme.js"></script>
-</head>
-<body>
-  <div id="container">
-    <div class="toolbar">
-      <button id="summarizeBtn" class="action-btn primary" title="Resumir pàgina" aria-label="Resumir">
-        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-      </button>
-      <button id="obsidianBtn" class="action-btn secondary" title="Guardar a Obsidian" aria-label="Guardar a Obsidian" style="color: #a855f7;" disabled>
-        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-           <path d="M6 3h12l4 6-10 13L2 9z"/>
-           <path d="M11 3 8 9l4 13 4-13-3-6"/>
-           <path d="M2 9h20"/>
-        </svg>
-      </button>
-      <button id="bionicBtn" class="icon-btn" title="Lectura biònica" aria-label="Lectura biònica" style="display: none;">
-         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-         </svg>
-      </button>
+  <head>
+    <meta charset="utf-8" />
+    <title>Resumir contingut</title>
+    <link rel="stylesheet" href="sidebar.css" />
+    <script src="../theme.js"></script>
+  </head>
+  <body>
+    <div id="container">
+      <div class="toolbar">
+        <button
+          id="summarizeBtn"
+          class="action-btn primary"
+          title="Resumir pàgina"
+          aria-label="Resumir"
+        >
+          <svg
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+        <button
+          id="obsidianBtn"
+          class="action-btn secondary"
+          title="Guardar a Obsidian"
+          aria-label="Guardar a Obsidian"
+          style="color: #a855f7"
+          disabled
+        >
+          <svg
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 3h12l4 6-10 13L2 9z" />
+            <path d="M11 3 8 9l4 13 4-13-3-6" />
+            <path d="M2 9h20" />
+          </svg>
+        </button>
+        <button
+          id="bionicBtn"
+          class="icon-btn"
+          title="Lectura biònica"
+          aria-label="Lectura biònica"
+          style="display: none"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            class="icon"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+            />
+          </svg>
+        </button>
 
-      <!-- Deep Dive Button (Hidden by default) -->
-      <button id="deepDiveBtn" class="icon-btn" title="Aprofundiment" aria-label="Aprofundiment" style="display: none;">
-         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-         </svg>
-      </button>
-      
-      <!-- Scientific Validation Button (Hidden by default) -->
-      <button id="scienceBtn" class="icon-btn" title="Validació científica" aria-label="Validació científica" style="display: none; color: #10b981;">
-         <svg viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 2h6"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 15h-4"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11h-4"/>
-         </svg>
-      </button>
-      <button id="copyBtn" class="icon-btn" title="Copiar text Markdown" aria-label="Copiar Markdown" disabled>
-        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 17V7l4 5 4-5v10"></path>
-          <path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"></path>
-        </svg>
-      </button>
-      <button id="settingsBtn" class="action-btn secondary" title="Configuració" aria-label="Configuració">
-        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-        </svg>
-      </button>
+        <!-- Deep Dive Button (Hidden by default) -->
+        <button
+          id="deepDiveBtn"
+          class="icon-btn"
+          title="Aprofundiment"
+          aria-label="Aprofundiment"
+          style="display: none"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            class="icon"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+        </button>
+
+        <!-- Scientific Validation Button (Hidden by default) -->
+        <button
+          id="scienceBtn"
+          class="icon-btn"
+          title="Validació científica"
+          aria-label="Validació científica"
+          style="display: none; color: #10b981"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            class="icon"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 2h6"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M14 15h-4"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 11h-4"
+            />
+          </svg>
+        </button>
+        <button
+          id="copyBtn"
+          class="icon-btn"
+          title="Copiar text Markdown"
+          aria-label="Copiar Markdown"
+          disabled
+        >
+          <svg
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 17V7l4 5 4-5v10"></path>
+            <path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"></path>
+          </svg>
+        </button>
+        <button
+          id="settingsBtn"
+          class="action-btn secondary"
+          title="Configuració"
+          aria-label="Configuració"
+        >
+          <svg
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="none"
+          >
+            <path
+              d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
+            />
+          </svg>
+        </button>
+      </div>
+      <div id="content" class="hidden"></div>
+      <div id="loading" class="hidden" role="status" aria-live="polite">
+        Generant resum...
+      </div>
+      <div id="error" class="hidden" role="alert" aria-live="assertive"></div>
     </div>
-    <div id="content" class="hidden"></div>
-    <div id="loading" class="hidden" role="status" aria-live="polite">Generant resum...</div>
-    <div id="error" class="hidden" role="alert" aria-live="assertive"></div>
-  </div>
-  
-  <div id="footer-status" class="hidden">
+
+    <div id="footer-status" class="hidden">
       <select id="model-select" aria-label="Selecciona model">
-          <!-- Options populated by JS -->
+        <!-- Options populated by JS -->
       </select>
       <span class="separator">|</span>
       <span id="generation-timer">0.0s</span>
       <span class="separator">|</span>
-      <span id="water-indicator" style="font-size: 0.9em; display:inline-flex; align-items:center; gap:3px;" title="Consum d'aigua estimat avui (0.26 ml/consulta)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="#5bb8f5" aria-hidden="true">
-          <path d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"/>
-          <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z"/>
+      <span
+        id="water-indicator"
+        style="
+          font-size: 0.9em;
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+        "
+        title="Consum d'aigua estimat avui (0.26 ml/consulta)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="12"
+          height="12"
+          fill="#5bb8f5"
+          aria-hidden="true"
+        >
+          <path
+            d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"
+          />
+          <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z" />
         </svg>
         <span id="water-ml">0.0 ml</span>
       </span>
       <span class="separator">|</span>
-      <span id="requests-remaining" style="font-size: 0.9em;" title="Resums estimats disponibles avui amb la quota gratuïta">— resums avui</span>
-  </div>
-  <script src="../ext.js"></script>
-  <script src="utils.js"></script>
-  <script src="api.js"></script>
-  <script src="content.js"></script>
-  <script src="cache.js"></script>
-  <script src="ui.js"></script>
-  <script src="sidebar.js"></script>
-</body>
+      <span
+        id="requests-remaining"
+        style="font-size: 0.9em"
+        title="Resums estimats disponibles avui amb la quota gratuïta"
+        >— resums avui</span
+      >
+    </div>
+    <script src="../ext.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="content.js"></script>
+    <script src="cache.js"></script>
+    <script src="stats.js"></script>
+    <script src="ui.js"></script>
+    <script src="summary.js"></script>
+    <script src="sidebar.js"></script>
+  </body>
 </html>

@@ -478,3 +478,72 @@ function runCountdownTimer(unblockTime) {
     updateTimer(); 
     countdownInterval = setInterval(updateTimer, 1000);
 }
+
+/**
+ * Renders the API key missing warning screen with configuration buttons.
+ */
+function renderApiKeyWarning(contentDiv) {
+    const modelSelect = document.getElementById("model-select");
+    const opt = document.createElement("option");
+    opt.textContent = "Falta API Key";
+    modelSelect.replaceChildren(opt);
+    modelSelect.disabled = true;
+    modelSelect.classList.add("error-state");
+
+    // Build API key warning with safe DOM manipulation
+    const warningContainer = document.createElement("div");
+    warningContainer.className = "api-key-warning-container";
+
+    const iconWrapper = document.createElement("div");
+    iconWrapper.style.marginBottom = "25px";
+    const lockSvg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="api-key-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>', 'image/svg+xml').documentElement;
+    iconWrapper.appendChild(lockSvg);
+
+    const title = document.createElement("p");
+    title.className = "api-key-title";
+    title.textContent = "Falta configurar l'API Key";
+
+    const desc = document.createElement("p");
+    desc.className = "api-key-desc";
+    desc.textContent = "Necessària per connectar amb Google Gemini.";
+
+    iconWrapper.appendChild(title);
+    iconWrapper.appendChild(desc);
+
+    const configBtn = document.createElement("button");
+    configBtn.id = "configApiKeyBtn";
+    configBtn.className = "primary api-key-btn-primary";
+    configBtn.textContent = "Configurar Ara";
+
+    const ctaFooter = document.createElement("div");
+    ctaFooter.className = "api-key-cta-footer";
+
+    const ctaText = document.createElement("span");
+    ctaText.className = "api-key-cta-text";
+    ctaText.textContent = "Encara no en tens?";
+
+    const ctaLink = document.createElement("a");
+    ctaLink.id = "getApiKeyLink";
+    ctaLink.href = "#";
+    ctaLink.className = "api-key-cta-link";
+    ctaLink.textContent = "Obtenir API Key gratuïta →";
+
+    ctaFooter.appendChild(ctaText);
+    ctaFooter.appendChild(ctaLink);
+
+    warningContainer.appendChild(iconWrapper);
+    warningContainer.appendChild(configBtn);
+    warningContainer.appendChild(ctaFooter);
+
+    contentDiv.replaceChildren(warningContainer);
+    contentDiv.classList.remove("hidden");
+    
+    document.getElementById("configApiKeyBtn").addEventListener("click", () => {
+        ext.runtime.openOptionsPage();
+    });
+
+    document.getElementById("getApiKeyLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        ext.tabs.create({ url: "https://aistudio.google.com/app/apikey" });
+    });
+}
