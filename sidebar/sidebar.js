@@ -76,8 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ext.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync') {
-            if (changes.apiKey) {
-                window.location.reload();
+            if (changes.apiKey && changes.apiKey.newValue !== changes.apiKey.oldValue) {
+                // Only reload if API key actually changed (to avoid wiping summary on font change)
+                if (changes.apiKey.newValue) {
+                    window.location.reload();
+                } else {
+                    // If removed, we need to show the warning
+                    window.location.reload();
+                }
             }
             if (changes.modelName) {
                 if (modelSelect && modelSelect.value !== changes.modelName.newValue && changes.modelName.newValue) {
@@ -95,7 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (config.extensionOrder) {
                         applyExtensionOrder(config.extensionOrder);
                     }
-                    if (isBionicEnabled && (changes.bionicFont || changes.bionicWeight || changes.bionicLineHeight || changes.bionicFixation)) {
+                    if (changes.bionicFont || changes.bionicWeight || changes.bionicLineHeight || changes.bionicFixation) {
+                        if (!isBionicEnabled) {
+                            isBionicEnabled = true;
+                            if (bionicBtn) {
+                                bionicBtn.style.color = "var(--primary-color)";
+                                bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
+                            }
+                        }
                         applyBionicToContent(config);
                     }
                 });
@@ -185,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     bionicBtn.addEventListener("click", async () => {
         isBionicEnabled = !isBionicEnabled;
+        ext.storage.local.set({ isBionicActive: isBionicEnabled });
         if (isBionicEnabled) {
             bionicBtn.style.color = "var(--primary-color)";
             bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
@@ -259,10 +273,18 @@ document.addEventListener("DOMContentLoaded", () => {
     (async () => {
         try {
             const syncData = await ext.storage.sync.get(["apiKey", "modelName"]);
-            const localData = await ext.storage.local.get(["blockedUntil"]);
+            const localData = await ext.storage.local.get(["blockedUntil", "isBionicActive"]);
             
             const apiKey = syncData.apiKey;
             let modelName = syncData.modelName || "gemini-2.0-flash";
+            
+            if (localData.isBionicActive === true) {
+                isBionicEnabled = true;
+                if (bionicBtn) {
+                    bionicBtn.style.color = "var(--primary-color)";
+                    bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
+                }
+            }
             
             // Show footer immediately (model select always visible)
             const footer = document.getElementById("footer-status");

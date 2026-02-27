@@ -77,10 +77,10 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
             const errorData = await response.json();
             errorMsg = errorData.error?.message || errorMsg;
         } catch(e) {}
-        throw new Error(`Error API (${response.status}): ${errorMsg}`);
+        throw new Error(`[007] Error API (${response.status}): ${errorMsg}`);
     }
 
-    if (!response.body) throw new Error("ReadableStream not supported");
+    if (!response.body) throw new Error("[008] ReadableStream not supported");
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
@@ -134,7 +134,7 @@ async function loadModels(apiKey, currentModel) {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
             headers: { "x-goog-api-key": apiKey }
         });
-        if (!response.ok) throw new Error("Failed to fetch models");
+        if (!response.ok) throw new Error("[009] Failed to fetch models");
         const data = await response.json();
         
         // Always show all curated models in fixed priority order

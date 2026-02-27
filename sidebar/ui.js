@@ -138,7 +138,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
             activeBtn.title = "Aturar Generació";
         }
         
-        const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn", "bionicBtn"];
+        const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn"];
         for (const btnId of allActionBtns) {
             if (btnId !== currentActiveBtnId) {
                 const btn = document.getElementById(btnId);
@@ -167,7 +167,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         const obsidianBtn = document.getElementById("obsidianBtn");
         if (obsidianBtn) obsidianBtn.disabled = !hasContent;
         const bionicBtn = document.getElementById("bionicBtn");
-        if (bionicBtn) bionicBtn.disabled = !hasContent;
+        if (bionicBtn) bionicBtn.disabled = false;
         
         const deepDiveBtn = document.getElementById("deepDiveBtn");
         if (deepDiveBtn) deepDiveBtn.disabled = false;
@@ -195,7 +195,7 @@ function resetUI(hasContent, config = null) {
     const obsidianBtn = document.getElementById("obsidianBtn");
     if (obsidianBtn) obsidianBtn.disabled = !hasContent;
     const bionicBtn = document.getElementById("bionicBtn");
-    if (bionicBtn) bionicBtn.disabled = !hasContent;
+    if (bionicBtn) bionicBtn.disabled = false;
     const deepDiveBtn = document.getElementById("deepDiveBtn");
     if (deepDiveBtn) deepDiveBtn.disabled = false;
     const scienceBtn = document.getElementById("scienceBtn");

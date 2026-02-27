@@ -38,7 +38,7 @@ async function executeScriptSafe(injection) {
  */
 async function getPageContent() {
     const tabs = await ext.tabs.query({active: true, currentWindow: true});
-    if (tabs.length === 0) throw new Error("No active tab found");
+    if (tabs.length === 0) throw new Error("[004] No active tab found");
     const tabId = tabs[0].id;
     const tabUrl = tabs[0].url;
     const tabTitle = tabs[0].title;
@@ -108,7 +108,7 @@ async function getPageContent() {
                  
                  try {
                      const transcriptResponse = await fetch(trackData.baseUrl, { credentials: 'include' });
-                     if (!transcriptResponse.ok) throw new Error("Fetch failed");
+                     if (!transcriptResponse.ok) throw new Error("[005] Fetch failed");
                      const transcriptXml = await transcriptResponse.text();
                      
                      if (transcriptXml) {
@@ -203,7 +203,7 @@ async function getPageContent() {
         if (scriptResults?.[0]?.result) text = scriptResults[0].result;
     }
 
-    if (!text || text.trim() === "") throw new Error("No s'ha pogut extreure el contingut d'aquesta pàgina. Recarrega la pestanya (F5) i torna-ho a provar.");
+    if (!text || text.trim() === "") throw new Error("[006] No s'ha pogut extreure el contingut d'aquesta pàgina. Recarrega la pestanya (F5) i torna-ho a provar.");
     
     return { title: tabTitle, url: tabUrl, text: text };
 }

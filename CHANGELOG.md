@@ -2,6 +2,19 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [2.0.1] - 2026-02-27
+
+### Millorat
+
+- **Bionic Reader (UI/UX)**: El botó d'activació ara està sempre disponible de forma incondicional al faldó de l'aplicació en comptes de requerir un resum completat.
+- **Bionic Reader (Configuració)**: El filtre tipogràfic als ajustaments amaga intel·ligentment les fonts que no pertanyen al sistema operatiu (`macOS` o `Windows`) reduint el soroll visual de la llista desplegable. A més, canviar la font, interlineat o pes biònic des de les opcions reflectirà els canvis a l'instant al Sidebar de darrere.
+- **Bionic Reader (Persistència)**: L'estat triat (actiu/inactiu) es guarda permanentment entre sessions gràcies a l'emmagatzematge local de l'extensió. De la mateixa manera, si deixes l'efecte encès i resumeixes una altra pàgina, el nou text adoptarà automàticament l'estil i formatatge preservats.
+- **Traçabilitat d'errors**: S'han assignat identificadors numèrics (`[001]` a `[010]`) a cadascun dels missatges d'excepció (quotes esgotades, llocs invàlids, fallades de l'API o d'extracció) per optimitzar-ne el procés de diagnòstic de suport tècnic.
+
+### Corregit
+
+- **Bug del Recarregar necessari (F5)**: Solventat el problema d'extracció que exigia refrescar la finestra al moure's entre pestanyes amb la sidebar tancada. S'ha migrat l'accés web universal d'`optional_host_permissions` a l'assignació estàtica de Chromium i Firefox, consolidant la recollida de dades sense pèrdua de gest d'usuari (user gesture limits).
+
 ## [2.0.0] - 2026-02-26
 
 Milestone 2.0.0: Versió amb suport natiu per a l'ecosistema Chromium.

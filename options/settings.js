@@ -218,7 +218,12 @@ function restoreOptions() {
     document.querySelector("#enableBionic").checked = data.enableBionic === true;
     document.querySelector("#bionicFixation").value = data.bionicFixation || 30;
     document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 30) + "%";
-    document.querySelector("#bionicFont").value = data.bionicFont || "sans-serif";
+    let savedFont = data.bionicFont || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    const fontSelect = document.querySelector("#bionicFont");
+    if (!Array.from(fontSelect.options).some(opt => opt.value === savedFont)) {
+        savedFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    }
+    fontSelect.value = savedFont;
     document.querySelector("#bionicWeight").value = data.bionicWeight || "700";
     document.querySelector("#bionicLineHeight").value = data.bionicLineHeight || "1.5";
 
@@ -249,6 +254,14 @@ function restoreOptions() {
 
   const manifest = ext.runtime.getManifest();
   document.getElementById("appVersion").textContent = manifest.version;
+
+  // Filtrar tipografies de Lectura Biònica segons SO
+  const isMac = navigator.userAgent.toLowerCase().includes('mac');
+  const osClassToHide = isMac ? '.os-windows' : '.os-mac';
+  document.querySelectorAll(`#bionicFont ${osClassToHide}`).forEach(el => {
+      el.style.display = 'none';
+      el.disabled = true; // Prevé que es seleccioni accidentalment l'opció
+  });
 }
  
 // Real-time fixation value update
@@ -362,7 +375,7 @@ async function listModels(e) {
     });
     if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.error?.message || response.statusText);
+        throw new Error(`[010] ${err.error?.message || response.statusText}`);
     }
     const data = await response.json();
     

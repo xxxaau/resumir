@@ -77,7 +77,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         if (!apiKey) {
-            throw new Error("No s'ha configurat la API Key. Ves a la pàgina d'opcions de l'extensió.");
+            throw new Error("[001] No s'ha configurat la API Key. Ves a la pàgina d'opcions de l'extensió.");
         }
 
         if (signal.aborted) return abortController;
@@ -85,7 +85,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // 2. Get Page Text & Check Cache
         let pageData = null;
         const tabs = await ext.tabs.query({active: true, currentWindow: true});
-        if (tabs.length === 0) throw new Error("No s'ha trobat cap pestanya activa.");
+        if (tabs.length === 0) throw new Error("[002] No s'ha trobat cap pestanya activa.");
         const currentUrl = tabs[0].url;
 
         const isRefresh = (currentMetadata.url === currentUrl && currentMetadata.fromCache);
@@ -100,6 +100,17 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
                 contentDiv.replaceChildren(formatTextToFragment(cachedEntry.summary));
                 contentDiv.classList.remove("hidden");
+                
+                
+                if (ctx.isBionicEnabled()) {
+                    const cfg = ctx.getGlobalConfig() || {};
+                    contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
+                    contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
+                    contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "700");
+                } else {
+                    contentDiv.style.fontFamily = "";
+                    contentDiv.style.lineHeight = "";
+                }
                 
                 setGeneratingState(false, true);
                 
@@ -226,10 +237,20 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         if (!success && lastError && !signal.aborted) {
-            throw new Error("Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
+            throw new Error("[003] Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
         }
         
         contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
+        
+        if (bionicEnabled) {
+             const cfg = ctx.getGlobalConfig() || {};
+             contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
+             contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
+             contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "700");
+        } else {
+             contentDiv.style.fontFamily = "";
+             contentDiv.style.lineHeight = "";
+        }
         
         setGeneratingState(false, true);
         contentDiv.classList.remove("hidden");

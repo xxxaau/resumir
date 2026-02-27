@@ -20,7 +20,7 @@ Aquest workflow defineix els passos estàndard per publicar una nova versió.
 
 ```bash
 // turbo
-explorer d:\40361989w\Dev\sergi-firefox-resum\tests\test.html
+explorer .\tests\test.html
 ```
 
 - [ ] Verificar que tots els tests estan en VERD.
@@ -91,9 +91,9 @@ Executar l'auditoria completa que cobreix:
 
 ```powershell
 // turbo-all
-Remove-Item -Path d:\40361989w\Dev\sergi-resum-navegador\chromium-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path d:\40361989w\Dev\sergi-resum-navegador\firefox-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path d:\40361989w\Dev\sergi-resum-navegador\*.zip -Force -ErrorAction SilentlyContinue
+Remove-Item -Path .\chromium-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path .\firefox-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path .\*.zip -Force -ErrorAction SilentlyContinue
 ```
 
 1. Generar els ZIPs finals amb el build multi-target:

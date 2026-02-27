@@ -108,26 +108,9 @@ Cada ítem ha de ser ✅. Si hi ha ⚠️ o 🔴, documentar-los i corregir-los 
 
 Comprovar que els IDs dels 5 models curats a `sidebar/api.js` i `options/settings.js` existeixen i suporten `generateContent` a l'API de Google.
 
-```bash
-# Substitueix AIZA_... per la API key real (no commitada)
-curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=AIZA_..." \
-  | python -c "
-import sys, json
-data = json.load(sys.stdin)
-ids = {m['name'].replace('models/','') for m in data.get('models',[]) if 'generateContent' in m.get('supportedGenerationMethods',[])}
-curated = [
-  'gemini-2.5-pro',
-  'gemini-2.0-flash',
-  'gemini-2.5-flash',
-  'gemma-3-27b-it',
-  'gemini-2.0-flash-lite',
-]
-print('=== Verificació models curats ===')
-for m in curated:
-    status = '✅' if m in ids else '❌ NO TROBAT'
-    print(f'  {status}  {m}')
-print(f'\nTotal models disponibles a l\'API: {len(ids)}')
-"
+```powershell
+# Assegura't de tenir GEMINI_API_KEY com a variable d'entorn existent previament
+python test_models.py
 ```
 
 - [ ] Tots els 5 models mostren ✅
