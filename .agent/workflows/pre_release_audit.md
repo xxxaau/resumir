@@ -20,11 +20,30 @@ Checklist exhaustiva a passar **cada vegada que es tanca una nova versió** de l
   - Font original documentada
   - Versió especificada
   - Llicència indicada (Apache 2.0)
-- [ ] **Manifest correcte**:
-  - `name` sense `(DEV)`
-  - `gecko.id` de producció
-  - `version` incrementada respecte l'anterior
-  - Tots els camps obligatoris presents
+- [ ] **Manifests correctes**:
+  - `manifest.json` (Firefox):
+    - `name` sense `(DEV)`
+    - `gecko.id` de producció
+    - `version` incrementada respecte l'anterior
+    - Tots els camps obligatoris presents
+  - `manifest.chromium.json` (Chromium):
+    - `name` sense `(DEV)`
+    - Mateixa `version` que `manifest.json`
+    - Tots els camps obligatoris presents
+- [ ] **Sincronització de manifests**: Verificar que ambdós manifests tenen la mateixa versió, nom, description, icons, i permissions equivalents
+
+## 1.5. Compatibilitat Multi-Navegador
+
+- [ ] **Build Firefox** — Generar i descomprimir `resumir-contingut-vX.Y.Z-firefox.zip`:
+  - Verificar que conté `manifest.json`, `ext.js`, `background.js`
+  - Verificar que `manifest.json` té `sidebar_action` i `menus`
+  - Verificar que **no** conté `background.bundle.js`
+- [ ] **Build Chromium** — Generar i descomprimir `resumir-contingut-vX.Y.Z-chromium.zip`:
+  - Verificar que conté `manifest.json` (copiat de `manifest.chromium.json`), `background.bundle.js`
+  - Verificar que el manifest té `side_panel` i `contextMenus`
+  - Verificar que `background.bundle.js` conté tant el contingut d'`ext.js` com de `background.js`
+- [ ] **Provar en Firefox** — Instal·lar temporalment el ZIP de Firefox i verificar funcionalitat bàsica
+- [ ] **Provar en Chrome/Edge** — Instal·lar temporalment el ZIP de Chromium i verificar funcionalitat bàsica
 
 ## 2. Seguretat
 
@@ -68,18 +87,21 @@ Checklist exhaustiva a passar **cada vegada que es tanca una nova versió** de l
 
 ## 6. Funcionalitat Core
 
-- [ ] **Resum de pàgina estàndard** — Generar resum d'un article
-- [ ] **Resum de text seleccionat** — Via menú contextual
-- [ ] **YouTube** — Generar resum d'un vídeo amb transcripció
-- [ ] **Hacker News** — Generar resum d'un fil de discussió
-- [ ] **Deep Dive** — Generar anàlisi profunda
-- [ ] **Validació Científica** — Generar validació i verificar links clicables
-- [ ] **Memòria cau** — Verificar que un segon resum de la mateixa pàgina ve de cache
-- [ ] **Streaming** — Verificar que el text apareix progressivament
-- [ ] **Aturar generació** — Verificar botó de pausa
-- [ ] **Copiar Markdown** — Verificar portapapers
-- [ ] **Lectura biònica** — Verificar toggle i format
-- [ ] **Estadístiques** — Verificar que es registren peticions i tokens
+**Provar en ambdós navegadors (Firefox i Chromium):**
+
+- [ ] **Resum de pàgina estàndard** — Generar resum d'un article (Firefox + Chromium)
+- [ ] **Resum de text seleccionat** — Via menú contextual (Firefox: "menus" + Chromium: "contextMenus")
+- [ ] **YouTube** — Generar resum d'un vídeo amb transcripció (Firefox + Chromium)
+- [ ] **Hacker News** — Generar resum d'un fil de discussió (Firefox + Chromium)
+- [ ] **Deep Dive** — Generar anàlisi profunda (Firefox + Chromium)
+- [ ] **Validació Científica** — Generar validació i verificar links clicables (Firefox + Chromium)
+- [ ] **Memòria cau** — Verificar que un segon resum de la mateixa pàgina ve de cache (Firefox + Chromium)
+- [ ] **Streaming** — Verificar que el text apareix progressivament (Firefox + Chromium)
+- [ ] **Aturar generació** — Verificar botó de pausa (Firefox + Chromium)
+- [ ] **Copiar Markdown** — Verificar portapapers (Firefox + Chromium)
+- [ ] **Lectura biònica** — Verificar toggle i format (Firefox + Chromium)
+- [ ] **Estadístiques** — Verificar que es registren peticions i tokens (Firefox + Chromium)
+- [ ] **Sidebar/Side Panel** — Verificar que s'obre i tanca correctament (Firefox: `Ctrl+Shift+Y`, Chromium: icona action)
 
 ## 7. Privadesa
 
@@ -101,6 +123,13 @@ Checklist exhaustiva a passar **cada vegada que es tanca una nova versió** de l
 ## Resultat esperat
 
 Cada ítem ha de ser ✅. Si hi ha ⚠️ o 🔴, documentar-los i corregir-los **abans de generar el ZIP**.
+
+**Verificació crítica abans de publicar:**
+- Tots dos ZIPs (Firefox i Chromium) generats correctament
+- Provat en Firefox amb funcionalitat completa ✅
+- Provat almenys en Chrome o Edge amb funcionalitat completa ✅
+- Manifests sincronitzats (versió, nom, descripció)
+- Documentació (`CHANGELOG.md`, `README.md`) actualitzada
 
 ---
 
@@ -128,3 +157,24 @@ python test_models.py
 > | `gemini-2.5-flash` | Gemini 2.5 Flash |
 > | `gemma-3-27b-it` | Gemma 3 (27B) |
 > | `gemini-2.0-flash-lite` | Gemini 2.0 Flash Lite |
+
+---
+
+## 10. Verificació Final Multi-Navegador
+
+**Proves d'integració en navegadors reals:**
+
+- [ ] **Firefox**: Carregar `resumir-contingut-vX.Y.Z-firefox.zip` a `about:debugging` i executar test complet
+  - Sidebar funciona
+  - Menú contextual funciona
+  - API key es desa correctament
+  - Temes funcionen
+  - Configuració es desa
+- [ ] **Chrome**: Carregar `resumir-contingut-vX.Y.Z-chromium.zip` a `chrome://extensions` i executar test complet
+  - Side panel funciona
+  - Menú contextual funciona
+  - API key es desa correctament
+  - Temes funcionen
+  - Configuració es desa
+- [ ] **Edge**: Carregar `resumir-contingut-vX.Y.Z-chromium.zip` a `edge://extensions` i verificar funcionalitat bàsica
+- [ ] **Compatibilitat de storage**: Verificar que les dades es desen correctament en els dos navegadors (ús de `browser.storage.local`)
