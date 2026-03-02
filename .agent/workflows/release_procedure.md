@@ -66,8 +66,15 @@ Executar l'auditoria completa que cobreix:
 ## 2. Actualització de Versió
 
 1. **Llista de models de Gemini**: Revisar i actualitzar els models disponibles (`sidebar/api.js` i `options/settings.js`) si s'han llançat noves versions (ex: Gemini 2.5 Flash).
-2. Editar `manifest.json` **i** `manifest.chromium.json` i incrementar la versió.
+2. **Sincronitzar manifests**: Editar **AMBDÓS** `manifest.json` **i** `manifest.chromium.json` amb:
+   - Incrementar la versió (ha de ser **idèntica** en ambdós)
+   - Actualitzar el nom (eliminar "(DEV)" en ambdós)
+   - Verificar que `description` és la mateixa
+   - Verificar que `icons` són idèntiques
 3. Editar `make_zip_v4.py` i actualitzar el nom del fitxer ZIP (si s'usa).
+
+> [!WARNING]
+> **CRÍTIC**: Els dos manifests han d'estar sincronitzats en versió. Una diferència pot causar confusió en els usuaris que usen diferents navegadors.
 
 ## 3. Documentació
 
@@ -96,7 +103,7 @@ Remove-Item -Path .\firefox-unpacked* -Recurse -Force -ErrorAction SilentlyConti
 Remove-Item -Path .\*.zip -Force -ErrorAction SilentlyContinue
 ```
 
-1. Generar els ZIPs finals amb el build multi-target:
+2. Generar els ZIPs finals amb el build multi-target:
 
 ```powershell
 // turbo
@@ -105,7 +112,17 @@ Remove-Item -Path .\*.zip -Force -ErrorAction SilentlyContinue
 
 - [ ] Verificar que s'han creat `resumir-contingut-vX.Y.Z-firefox.zip` i `resumir-contingut-vX.Y.Z-chromium.zip`.
 
-## 5. Publicació i Repositori
+3. **Verificació de contingut dels ZIPs**:
+   - **Firefox ZIP**: Ha de contenir `manifest.json`, `ext.js`, `background.js` (NO `background.bundle.js`)
+   - **Chromium ZIP**: Ha de contenir `manifest.json` (generat des de `manifest.chromium.json`), `background.bundle.js`
+
+4. **Prova final**: Instal·lar temporalment ambdós ZIPs i verificar funcionalitat bàsica:
+   - Firefox: `about:debugging` → "Load Temporary Add-on"
+   - Chrome: `chrome://extensions` → "Load unpacked" (descomprimir el ZIP primer)
+
+## 5. Publicació Multi-Plataforma
+
+### 5.1. Repositori Git
 
 1. Actualitzar `ROADMAP.md` (moure items a "Implementat").
 2. Fer commit i push:
@@ -123,12 +140,47 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-4. Pujar el ZIP a [Mozilla Add-ons Developer Hub](https://addons.mozilla.org/en-US/developers/).
+### 5.2. Mozilla Add-ons (Firefox)
 
-5. (Quan el repositori sigui públic / open source) Crear un **GitHub Release**:
+4. Pujar `resumir-contingut-vX.Y.Z-firefox.zip` al [Mozilla Add-ons Developer Hub](https://addons.mozilla.org/en-US/developers/).
+   - Seleccionar "Upload New Version"
+   - Adjuntar el ZIP de Firefox
+   - Completar notes de versió (copiar des de `CHANGELOG.md`)
+   - Enviar per revisió
+
+- [ ] ZIP de Firefox pujat a AMO
+- [ ] Notes de versió afegides
+
+### 5.3. Chrome Web Store (Chromium)
+
+5. Pujar `resumir-contingut-vX.Y.Z-chromium.zip` al [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole/).
+   - Anar a la pàgina de l'extensió
+   - Clicar "Package" → "Upload new package"
+   - Adjuntar el ZIP de Chromium
+   - Actualitzar "Store listing" si cal (captures, descripció)
+   - Completar notes de versió
+   - Enviar per revisió
+
+- [ ] ZIP de Chromium pujat a Chrome Web Store
+- [ ] Notes de versió afegides
+- [ ] Store listing revisat
+
+> [!NOTE]
+> El mateix paquet de Chromium funciona per **Chrome**, **Edge**, **Opera**, **Brave** i altres navegadors basats en Chromium. Només cal publicar-lo a Chrome Web Store per arribar a tots aquests navegadors.
+
+### 5.4. Edge Add-ons (Opcional)
+
+6. (Opcional) Pujar també a [Microsoft Edge Add-ons](https://partner.microsoft.com/en-us/dashboard/microsoftedge/):
+   - Mateix procés que Chrome Web Store
+   - Utilitza el mateix ZIP de Chromium
+   - Millora la descoberta per usuaris d'Edge
+
+### 5.5. GitHub Release
+
+7. (Quan el repositori sigui públic / open source) Crear un **GitHub Release**:
    - Utilitzar l'etiqueta `vX.Y.Z`.
    - Copiar el resum de canvis des de `CHANGELOG.md`.
-   - Adjuntar el mateix ZIP generat (`make_zip_v4.py`) com a asset del release.
+   - Adjuntar **ambdós ZIPs** (Firefox i Chromium) com a assets del release.
 
 ---
 
@@ -139,7 +191,25 @@ Quan el projecte sigui públic (p. ex. a GitHub), es pot automatitzar part del p
 - Executar tests i lints automàticament en cada **pull request**.
 - A cada **tag `vX.Y.Z`**:
   - Executar tests.
-  - Generar automàticament el ZIP equivalent a `make_zip_v4.py`.
-  - Crear/actualitzar un GitHub Release amb el ZIP com a asset.
+  - Generar automàticament **ambdós ZIPs** (Firefox i Chromium) amb `build.ps1`.
+  - Crear/actualitzar un GitHub Release amb els dos ZIPs com a assets.
+  - (Opcional) Publicar automàticament a les stores amb APIs corresponents.
 
 Aquest pas no substitueix les comprovacions manuals d'UX (HN, YouTube, Obsidian), però ajuda a garantir la qualitat mínima abans de qualsevol publicació.
+
+---
+
+## 7. Checklist Final de Publicació
+
+- [ ] Versió incrementada en **ambdós** manifests (idèntica)
+- [ ] Mode producció activat (`set_dev_mode.ps1 prod`)
+- [ ] Auditoria pre-release completada (✅ tots els ítems)
+- [ ] `CHANGELOG.md` actualitzat
+- [ ] `ROADMAP.md` actualitzat
+- [ ] Ambdós ZIPs generats correctament
+- [ ] Provat en Firefox amb funcionalitat completa
+- [ ] Provat en Chrome/Edge amb funcionalitat completa
+- [ ] Git commit i tag creat
+- [ ] Publicat a Mozilla Add-ons (Firefox)
+- [ ] Publicat a Chrome Web Store (Chromium)
+- [ ] (Opcional) GitHub Release creat amb ambdós ZIPs
