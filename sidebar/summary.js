@@ -349,3 +349,8 @@ function handleTrigger(startSummaryFn, data) {
         setTimeout(() => startSummaryFn(null, false, false, true), 100);
     }
 }
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { classifyError };
+}

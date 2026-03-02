@@ -19,7 +19,9 @@ const CURATED_MODELS = [
 function getCuratedModelInfo(modelId) {
     const found = CURATED_MODELS.find(m => modelId && (
         m.id === modelId ||
-        modelId.startsWith(m.id.split("-exp")[0].split("-preview")[0].split("-latest")[0])
+        modelId === m.id + "-exp" ||
+        modelId === m.id + "-preview" ||
+        modelId === m.id + "-latest"
     ));
     if (found) {
         return {
@@ -114,6 +116,11 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
             }
         }
     }
+}
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { getCuratedModelInfo, CURATED_MODELS };
 }
 
 /**
