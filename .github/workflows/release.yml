@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    name: Build i publicar release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instal·lar dependències de dev
+        run: npm ci
+
+      - name: Tests unitaris
+        run: npm test
+
+      # pwsh (PowerShell Core) ve preinstal·lat a ubuntu-latest
+      - name: Build Firefox i Chromium ZIPs
+        shell: pwsh
+        run: ./build.ps1 -Target all
+
+      - name: Crear GitHub Release amb els ZIPs
+        uses: softprops/action-gh-release@v2
+        with:
+          files: resumir-contingut-*.zip
+          generate_release_notes: true
