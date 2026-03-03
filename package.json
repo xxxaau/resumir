@@ -10,7 +10,9 @@
     "build:firefox": "pwsh ./build.ps1 -Target firefox",
     "build:chromium": "pwsh ./build.ps1 -Target chromium",
     "dev": "pwsh ./set_dev_mode.ps1 dev",
-    "prod": "pwsh ./set_dev_mode.ps1 prod"
+    "prod": "pwsh ./set_dev_mode.ps1 prod",
+    "version:sync": "node scripts/bump-version.mjs",
+    "postversion": "node scripts/bump-version.mjs && git add manifest.json manifest.chromium.json"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
