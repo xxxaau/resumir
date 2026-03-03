@@ -76,3 +76,8 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
         return null;
     }
 }
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats };
+}
