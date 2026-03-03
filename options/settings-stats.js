@@ -1,0 +1,324 @@
+// options/settings-stats.js
+// Estadístiques d'us, gràfics i taula d'historial
+// --- Statistics Logic ---
+
+let PAGE_SIZE = 20;
+let currentPage = 1;
+let totalPages = 1;
+
+async function loadStatistics() {
+    try {
+        const data = await ext.storage.local.get(["usageHistory", "pageSize"]);
+        const history = data.usageHistory || []; // Array of {date, title, url, model, inputTokens, outputTokens, latency}
+
+        if (data.pageSize) {
+            PAGE_SIZE = data.pageSize;
+            const selectEl = document.getElementById("pageSizeSelect");
+            if (selectEl) selectEl.value = PAGE_SIZE.toString();
+        }
+
+        // 1. Update KPI Cards
+        const elArticles = document.getElementById("statsArticles");
+        const elTimeSaved = document.getElementById("kpiTimeSaved");
+
+        if(elArticles) elArticles.textContent = history.length;
+        
+        // Calculate Time Saved (Estimated reading time - wait time)
+        // Assume 1 token ~ 0.75 words, Average reading speed = 250 wpm.
+        // Therefore, 1 token takes ~0.18 seconds to read. We use 0.2s for simplicity.
+        let timeSavedSeconds = 0;
+        if (history.length > 0) {
+            timeSavedSeconds = history.reduce((acc, curr) => {
+                const readSecs = (curr.inputTokens || 0) * 0.2;
+                const waitSecs = (curr.latency || 0) / 1000;
+                return acc + Math.max(0, readSecs - waitSecs);
+            }, 0);
+        }
+        
+        const hours = Math.floor(timeSavedSeconds / 3600);
+        const minutes = Math.floor((timeSavedSeconds % 3600) / 60);
+        if(elTimeSaved) elTimeSaved.textContent = `${hours}h ${minutes}m`;
+
+        // Water consumption stats
+        const WATER_ML = 0.26;
+        const GLASS_ML = 300;
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        const todayCount = history.filter(e => {
+            const ts = e.date || e.timestamp; // cache.js uses 'date'
+            return ts && new Date(ts).toISOString().slice(0, 10) === todayStr;
+        }).length;
+        const totalCount = history.length;
+
+        const todayMl  = todayCount  * WATER_ML;
+        const totalMl  = totalCount  * WATER_ML;
+
+        function fmtWater(ml) {
+            if (ml < 1)    return ml.toFixed(2) + " ml";
+            if (ml < GLASS_ML) return ml.toFixed(1) + " ml";
+            return (ml / GLASS_ML).toFixed(2) + " gots";
+        }
+
+        const elWaterToday = document.getElementById("kpiWaterToday");
+        const elWaterTotal = document.getElementById("kpiWaterTotal");
+        if (elWaterToday) elWaterToday.textContent = fmtWater(todayMl);
+        if (elWaterTotal) elWaterTotal.textContent = `Total acumulat: ${fmtWater(totalMl)}`;
+
+        // Render Bar Chart
+        renderDailyChart(history);
+
+        // Grouped History Table
+        renderGroupedHistoryTable(history);
+
+        // 2. Render History Table with Pagination
+        // Sort history by date desc (newest first)
+        const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        totalPages = Math.ceil(sortedHistory.length / PAGE_SIZE) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const endIndex = startIndex + PAGE_SIZE;
+        const visibleHistory = sortedHistory.slice(startIndex, endIndex);
+        
+        renderHistoryTable(visibleHistory);
+
+        // 3. Manage Pagination UI
+        const prevBtn = document.getElementById("prevPage");
+        const nextBtn = document.getElementById("nextPage");
+        const pageInfo = document.getElementById("pageInfo");
+
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+        if (pageInfo) pageInfo.textContent = `Pàgina ${currentPage} de ${totalPages}`;
+
+    } catch (e) {
+        console.error("Error loading stats:", e);
+    }
+}
+
+
+function getRelativeTime(dateInput) {
+    const date = new Date(dateInput);
+    const now = new Date();
+    
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+
+    if (diffMins < 1) return "fa uns segons";
+    if (diffMins < 60) return `fa ${diffMins} minuts`;
+    if (diffHours < 24 && now.getDate() === date.getDate()) {
+        if (diffHours === 1) return "fa 1 hora";
+        return `fa ${diffHours} hores`;
+    }
+    
+    // For days, calculate calendar day difference
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const inputDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.round((today - inputDay) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "ahir";
+    return `fa ${diffDays} dies`;
+}
+
+function renderDailyChart(history) {
+    const container = document.getElementById("dailyChartContainer");
+    if (!container) return;
+    container.replaceChildren();
+
+    // Initialize last 7 days count
+    const days = {};
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    // Build array of keys from 6 days ago to today
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        days[d.toLocaleDateString('ca-ES', { weekday: 'short' })] = 0;
+    }
+
+    // Count history in those days
+    history.forEach(entry => {
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0,0,0,0);
+        const diffTime = today - entryDate;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); 
+        if (diffDays <= 6 && diffDays >= 0) {
+             const key = entryDate.toLocaleDateString('ca-ES', { weekday: 'short' });
+             if(days[key] !== undefined) days[key]++;
+        }
+    });
+
+    const maxCount = Math.max(...Object.values(days), 1);
+
+    // Draw bars
+    Object.entries(days).forEach(([dayLabel, count]) => {
+        const barWrapper = document.createElement("div");
+        barWrapper.style.display = "flex";
+        barWrapper.style.flexDirection = "column";
+        barWrapper.style.alignItems = "center";
+        barWrapper.style.flex = "1";
+        barWrapper.style.height = "100%";
+        barWrapper.style.justifyContent = "flex-end";
+        
+        const bar = document.createElement("div");
+        const heightPct = (count / maxCount) * 80; // max 80% height for visual padding
+        bar.style.height = Math.max(heightPct, 2) + "%"; 
+        bar.style.width = "70%";
+        bar.style.backgroundColor = "var(--button-hover-bg)";
+        bar.style.borderRadius = "4px 4px 0 0";
+        bar.style.transition = "height 0.3s";
+        
+        if (count === 1) {
+            bar.title = `1 article resumit`;
+        } else {
+            bar.title = `${count} articles resumits`;
+        }
+
+        const label = document.createElement("div");
+        label.textContent = dayLabel;
+        label.style.fontSize = "12px";
+        label.style.marginTop = "5px";
+        label.style.color = "var(--text-muted)";
+        label.style.textTransform = "capitalize";
+
+        barWrapper.appendChild(bar);
+        barWrapper.appendChild(label);
+        container.appendChild(barWrapper);
+    });
+}
+
+function renderGroupedHistoryTable(history) {
+    const tbody = document.getElementById("groupedTableBody");
+    if (!tbody) return;
+    tbody.replaceChildren(); // Clear content
+
+    if (history.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.style.textAlign = "center";
+        td.style.color = "#999";
+        td.textContent = "Encara no hi ha dades d'ús.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    // Agrubar per data (YYYY-MM-DD) i model
+    const groups = {};
+    history.forEach(entry => {
+        const dateObj = new Date(entry.date);
+        const dayKey = dateObj.toLocaleDateString(); // Format local curt
+        // Sort keys need YYYY-MM-DD to sort properly
+        const sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        const model = entry.model || "gemini-1.5-flash"; // Fallback antic
+        
+        const key = `${sortKey}|${dayKey}|${model}`;
+        if (!groups[key]) {
+            groups[key] = { sortKey, dayKey, model, requests: 0 };
+        }
+        groups[key].requests += 1;
+    });
+
+    // Ordenar per data (descendent) i després model (ascendent)
+    const sortedGroups = Object.values(groups).sort((a, b) => {
+        if (a.sortKey !== b.sortKey) {
+            return b.sortKey.localeCompare(a.sortKey);
+        }
+        return a.model.localeCompare(b.model);
+    });
+
+    sortedGroups.forEach(group => {
+        const tr = document.createElement("tr");
+        
+        // Date
+        const tdDate = document.createElement("td");
+        tdDate.textContent = group.dayKey;
+        tr.appendChild(tdDate);
+        
+        // Model
+        const tdModel = document.createElement("td");
+        const code = document.createElement("code");
+        code.style.fontSize = "0.85em";
+        code.style.padding = "2px 4px";
+        code.style.borderRadius = "4px";
+        code.style.backgroundColor = "var(--bg-secondary)";
+        code.textContent = group.model;
+        tdModel.appendChild(code);
+        tr.appendChild(tdModel);
+
+        // Requests
+        const tdReq = document.createElement("td");
+        tdReq.style.textAlign = "right";
+        tdReq.textContent = group.requests;
+        tr.appendChild(tdReq);
+
+        // Water
+        const tdWater = document.createElement("td");
+        tdWater.style.textAlign = "right";
+        tdWater.style.color = "var(--text-muted)";
+        const waterMl = group.requests * 0.26;
+        tdWater.textContent = waterMl.toFixed(2);
+        tr.appendChild(tdWater);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function renderHistoryTable(history) {
+    const tbody = document.getElementById("historyTableBody");
+    tbody.replaceChildren(); // Clear content
+
+    if (history.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 2;
+        td.style.textAlign = "center";
+        td.style.color = "#999";
+        td.textContent = "Encara no hi ha dades d'ús.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    history.forEach(entry => {
+        const tr = document.createElement("tr");
+        
+        // Date
+        const tdDate = document.createElement("td");
+        const dateObj = new Date(entry.date);
+        tdDate.textContent = getRelativeTime(dateObj);
+        tdDate.title = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        tr.appendChild(tdDate);
+        
+        // Title/Url
+        const tdTitle = document.createElement("td");
+        let prefix = entry.type === "deep" ? "+ " : "";
+        
+        if (entry.url) {
+            const a = document.createElement("a");
+            a.href = entry.url;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = prefix + (entry.title || "Sense títol");
+            tdTitle.appendChild(a);
+        } else {
+            tdTitle.textContent = prefix + (entry.title || "Sense títol");
+        }
+        tr.appendChild(tdTitle);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function clearHistory() {
+    if (confirm("Estàs segur que vols esborrar l'historial de peticions?")) {
+        ext.storage.local.set({ usageHistory: [] }).then(() => {
+            currentPage = 1; // Reset pagination
+            loadStatistics();
+            showStatus("Historial esborrat.");
+        });
+    }
+}
