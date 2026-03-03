@@ -3,8 +3,8 @@
     Multi-target build script for the extension.
 .DESCRIPTION
     Generates separate ZIP packages for Firefox and Chromium.
-    For Chromium: copies manifest.chromium.json as manifest.json,
-    concatenates ext.js + background.js into background.bundle.js.
+    Manifests are generated from manifest.base.json + manifest.<target>.patch.json.
+    For Chromium: bundles ext.js + background.js into background.bundle.js via esbuild.
 .PARAMETER Target
     Build target: firefox, chromium, or all (default: all)
 .EXAMPLE
@@ -20,8 +20,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Read version from manifest.json
-$manifest = Get-Content "manifest.json" -Raw | ConvertFrom-Json
+# Read version from manifest.base.json (source of truth)
+$manifest = Get-Content "manifest.base.json" -Raw | ConvertFrom-Json
 $version = $manifest.version
 
 Write-Host "Building v$version for target: $Target" -ForegroundColor Cyan
@@ -44,7 +44,7 @@ $commonDirs = @(
 function New-BuildZip {
     param(
         [string]$TargetName,
-        [string]$ManifestFile,
+        [string]$ManifestTarget,
         [string[]]$ExtraFiles,
         [string[]]$ExcludeFiles
     )
@@ -61,8 +61,9 @@ function New-BuildZip {
     if (Test-Path $buildDir) { Remove-Item $buildDir -Recurse -Force }
     New-Item -ItemType Directory -Path $buildDir | Out-Null
 
-    # Copy manifest
-    Copy-Item $ManifestFile "$buildDir\manifest.json"
+    # Generate manifest from base + patch
+    node scripts/merge-manifest.mjs $ManifestTarget "$buildDir\manifest.json"
+    Write-Host "  Generated manifest.json (from $ManifestTarget patch)" -ForegroundColor DarkGray
 
     # Copy common files
     foreach ($file in $commonFiles) {
@@ -122,7 +123,7 @@ with zipfile.ZipFile(r'..\$zipName', 'w', zipfile.ZIP_DEFLATED) as zf:
     finally {
         Pop-Location
     }
-    
+
     # Clean up
     Remove-Item $buildDir -Recurse -Force
 
@@ -133,9 +134,9 @@ with zipfile.ZipFile(r'..\$zipName', 'w', zipfile.ZIP_DEFLATED) as zf:
 # --- Firefox Build ---
 if ($Target -eq "firefox" -or $Target -eq "all") {
     Write-Host "`nBuilding Firefox package..." -ForegroundColor Blue
-    
+
     New-BuildZip -TargetName "firefox" `
-        -ManifestFile "manifest.json" `
+        -ManifestTarget "firefox" `
         -ExtraFiles @("ext.js", "background.js") `
         -ExcludeFiles @()
 }
@@ -144,22 +145,12 @@ if ($Target -eq "firefox" -or $Target -eq "all") {
 if ($Target -eq "chromium" -or $Target -eq "all") {
     Write-Host "`nBuilding Chromium package..." -ForegroundColor Blue
 
-    # Generate background.bundle.js (concatenate ext.js + background.js)
-    $header = @"
-// background.bundle.js - Auto-generated for Chromium service worker
-// DO NOT EDIT - edit ext.js and background.js instead
-
-"@
-    $extContent = Get-Content "ext.js" -Raw
-    $bgContent = Get-Content "background.js" -Raw
-    $bundleContent = $header + $extContent + "`r`n`r`n// --- background.js ---`r`n`r`n" + $bgContent
-    
-    Set-Content "background.bundle.js" $bundleContent -NoNewline
-
-    Write-Host "  Generated background.bundle.js" -ForegroundColor DarkGray
+    # Generate background.bundle.js via esbuild
+    node scripts/build-chromium-bundle.mjs
+    Write-Host "  Generated background.bundle.js (via esbuild)" -ForegroundColor DarkGray
 
     New-BuildZip -TargetName "chromium" `
-        -ManifestFile "manifest.chromium.json" `
+        -ManifestTarget "chromium" `
         -ExtraFiles @("background.bundle.js", "ext.js") `
         -ExcludeFiles @()
 }

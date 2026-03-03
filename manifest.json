@@ -1,59 +1,57 @@
-﻿{
-    "manifest_version":  3,
-    "name":  "Resumir contingut",
-    "version":  "2.0.1",
-    "author":  "Sergi Xaudiera",
-    "homepage_url":  "https://github.com/xxxaau/extensio-resumir-contingut",
-    "description":  "Resumeix text seleccionat amb Gemini.",
-    "permissions":  [
-                        "storage",
-                        "activeTab",
-                        "scripting",
-                        "tabs",
-                        "menus"
-                    ],
-    "host_permissions":  [
-                             "\u003call_urls\u003e"
-                         ],
-    "browser_specific_settings":  {
-                                      "gecko":  {
-                                                    "id":  "sergi@xaudiera.xyz",
-                                                    "strict_min_version":  "142.0",
-                                                    "data_collection_permissions":  {
-                                                                                        "required":  [
-                                                                                                         "websiteContent"
-                                                                                                     ],
-                                                                                        "optional":  [
-
-                                                                                                     ]
-                                                                                    }
-                                                }
-                                  },
-    "sidebar_action":  {
-                           "default_panel":  "sidebar/sidebar.html",
-                           "default_title":  "Resumir contingut",
-                           "default_icon":  "icons/icon-96.png"
-                       },
-    "action":  {
-                   "default_title":  "Obre Resumir contingut",
-                   "default_icon":  "icons/icon-96.png"
-               },
-    "icons":  {
-                  "16":  "icons/icon-16.png",
-                  "32":  "icons/icon-32.png",
-                  "48":  "icons/icon-48.png",
-                  "64":  "icons/icon-64.png",
-                  "96":  "icons/icon-96.png",
-                  "128":  "icons/icon-128.png"
-              },
-    "background":  {
-                       "scripts":  [
-                                       "ext.js",
-                                       "background.js"
-                                   ]
-                   },
-    "options_ui":  {
-                       "page":  "options/settings.html",
-                       "open_in_tab":  true
-                   }
+{
+    "manifest_version": 3,
+    "name": "Resumir contingut",
+    "version": "2.0.1",
+    "author": "Sergi Xaudiera",
+    "homepage_url": "https://github.com/xxxaau/extensio-resumir-contingut",
+    "description": "Resumeix text seleccionat amb Gemini.",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting",
+        "tabs",
+        "menus"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_title": "Obre Resumir contingut",
+        "default_icon": "icons/icon-96.png"
+    },
+    "icons": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png",
+        "64": "icons/icon-64.png",
+        "96": "icons/icon-96.png",
+        "128": "icons/icon-128.png"
+    },
+    "options_ui": {
+        "page": "options/settings.html",
+        "open_in_tab": true
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "sergi@xaudiera.xyz",
+            "strict_min_version": "142.0",
+            "data_collection_permissions": {
+                "required": [
+                    "websiteContent"
+                ],
+                "optional": []
+            }
+        }
+    },
+    "sidebar_action": {
+        "default_panel": "sidebar/sidebar.html",
+        "default_title": "Resumir contingut",
+        "default_icon": "icons/icon-96.png"
+    },
+    "background": {
+        "scripts": [
+            "ext.js",
+            "background.js"
+        ]
+    }
 }

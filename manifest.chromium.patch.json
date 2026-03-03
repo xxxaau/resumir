@@ -1,0 +1,13 @@
+{
+    "permissions": [
+        "contextMenus",
+        "sidePanel"
+    ],
+    "side_panel": {
+        "default_path": "sidebar/sidebar.html"
+    },
+    "background": {
+        "service_worker": "background.bundle.js",
+        "type": "module"
+    }
+}
