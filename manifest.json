@@ -13,8 +13,8 @@
                         "menus"
                     ],
     "host_permissions":  [
-                                      "<all_urls>"
-                                  ],
+                             "\u003call_urls\u003e"
+                         ],
     "browser_specific_settings":  {
                                       "gecko":  {
                                                     "id":  "sergi@xaudiera.xyz",

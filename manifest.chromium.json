@@ -14,7 +14,7 @@
                         "sidePanel"
                     ],
     "host_permissions":  [
-                             "<all_urls>"
+                             "\u003call_urls\u003e"
                          ],
     "side_panel":  {
                        "default_path":  "sidebar/sidebar.html"
