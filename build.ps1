@@ -62,7 +62,7 @@ function New-BuildZip {
     New-Item -ItemType Directory -Path $buildDir | Out-Null
 
     # Generate manifest from base + patch
-    node scripts/merge-manifest.mjs $ManifestTarget "$buildDir\manifest.json"
+    node scripts/merge-manifest.mjs $ManifestTarget "$buildDir/manifest.json"
     Write-Host "  Generated manifest.json (from $ManifestTarget patch)" -ForegroundColor DarkGray
 
     # Copy common files
@@ -109,7 +109,7 @@ function New-BuildZip {
     try {
         $pyScript = @"
 import os, zipfile
-with zipfile.ZipFile(r'..\$zipName', 'w', zipfile.ZIP_DEFLATED) as zf:
+with zipfile.ZipFile('../$zipName', 'w', zipfile.ZIP_DEFLATED) as zf:
     for root, dirs, files in os.walk('.'):
         for file in files:
             file_path = os.path.join(root, file)
