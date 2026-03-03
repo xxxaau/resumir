@@ -103,32 +103,11 @@ function New-BuildZip {
         }
     }
 
-    # Create ZIP using Python to ensure forward slash '/' separators
-    # (AMO rejects ZIPs with Windows backslash '\' path separators)
-    Push-Location -Path $buildDir
-    try {
-        $pyScript = @"
-import os, zipfile
-with zipfile.ZipFile('../$zipName', 'w', zipfile.ZIP_DEFLATED) as zf:
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            file_path = os.path.join(root, file)
-            arcname = os.path.relpath(file_path, '.').replace('\\', '/')
-            zf.write(file_path, arcname)
-"@
-        Set-Content -Path "make_zip_temp.py" -Value $pyScript
-        python make_zip_temp.py
-        Remove-Item "make_zip_temp.py" -Force
-    }
-    finally {
-        Pop-Location
-    }
+    # Create ZIP via Node.js (ensures '/' separators, AMO-compliant, no Python needed)
+    node scripts/make-zip.mjs $buildDir $zipName
 
     # Clean up
     Remove-Item $buildDir -Recurse -Force
-
-    $size = (Get-Item $zipName).Length / 1KB
-    Write-Host "  Created $zipName ($([math]::Round($size, 1)) KB)" -ForegroundColor Green
 }
 
 # --- Firefox Build ---
