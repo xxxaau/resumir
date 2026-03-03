@@ -17,7 +17,7 @@ const extensionGlobals = {
     formatObsidianContent: "readonly",
     formatMarkdownContent: "readonly",
     estimateTokens: "readonly",
-    // sidebar/api.js
+    // shared/models.js
     CURATED_MODELS: "readonly",
     getCuratedModelInfo: "readonly",
     callGeminiStream: "readonly",
@@ -68,8 +68,8 @@ export default [
         ],
     },
     {
-        // Fitxers de l'extensió (sidebar/, options/, arrel)
-        files: ["sidebar/**/*.js", "options/**/*.js", "*.js"],
+        // Fitxers de l'extensió (sidebar/, options/, shared/, arrel)
+        files: ["sidebar/**/*.js", "options/**/*.js", "shared/**/*.js", "*.js"],
         languageOptions: {
             ecmaVersion: 2022,
             globals: {

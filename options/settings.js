@@ -320,14 +320,12 @@ function showStatus(text) {
 }
 
 // --- Model Fetching Logic ---
-// Curated model list (mirrored from sidebar/api.js — keep in sync)
-const SETTINGS_CURATED_MODELS = [
-    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",       note: "$1.25/$5.00 · 50 req/dia"    },
-    { id: "gemini-2.0-flash",          label: "Gemini 2.0 Flash",      note: "$0.10/$0.40 · 1500 req/dia"  },
-    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",      note: "$0.30/$2.50 · 500 req/dia"   },
-    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",         note: "$0.15/$0.15 · 2000 req/dia"  },
-    { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite", note: "$0.07/$0.30 · Il·limitat"     },
-];
+// CURATED_MODELS ve de shared/models.js (carregat abans d'aquest fitxer)
+
+function modelNote(cm) {
+    const rpd = cm.rpd === 999999 ? "Il·limitat" : `${cm.rpd} req/dia`;
+    return `$${cm.priceIn}/$${cm.priceOut} · ${rpd}`;
+}
 
 async function listModels(e) {
   e.preventDefault();
@@ -350,14 +348,14 @@ async function listModels(e) {
   curatedHeader.textContent = "✦ Models recomanats";
   modelsList.appendChild(curatedHeader);
 
-  SETTINGS_CURATED_MODELS.forEach(cm => {
+  CURATED_MODELS.forEach(cm => {
       const div = document.createElement("div");
       div.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:4px 0;";
       const nameSpan = document.createElement("span");
       nameSpan.textContent = cm.label;
       nameSpan.style.fontWeight = "500";
       const noteSpan = document.createElement("span");
-      noteSpan.textContent = cm.note;
+      noteSpan.textContent = modelNote(cm);
       noteSpan.style.cssText = "font-size:0.75em; color:#888;";
       div.appendChild(nameSpan);
       div.appendChild(noteSpan);
@@ -379,7 +377,7 @@ async function listModels(e) {
     }
     const data = await response.json();
     
-    const curatedIds = new Set(SETTINGS_CURATED_MODELS.map(m => m.id));
+    const curatedIds = new Set(CURATED_MODELS.map(m => m.id));
     const otherModels = (data.models || [])
         .filter(m =>
             m.supportedGenerationMethods?.includes("generateContent") &&
