@@ -37,6 +37,7 @@ $commonFiles = @(
 $commonDirs = @(
     "icons",
     "options",
+    "shared",
     "sidebar"
 )
 

@@ -105,8 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (!isBionicEnabled) {
                             isBionicEnabled = true;
                             if (bionicBtn) {
-                                bionicBtn.style.color = "var(--primary-color)";
-                                bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
+                                bionicBtn.classList.add("active");
                             }
                         }
                         applyBionicToContent(config);
@@ -200,12 +199,10 @@ document.addEventListener("DOMContentLoaded", () => {
         isBionicEnabled = !isBionicEnabled;
         ext.storage.local.set({ isBionicActive: isBionicEnabled });
         if (isBionicEnabled) {
-            bionicBtn.style.color = "var(--primary-color)";
-            bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
+            bionicBtn.classList.add("active");
             applyBionicToContent();
         } else {
-            bionicBtn.style.color = "";
-            bionicBtn.style.backgroundColor = "";
+            bionicBtn.classList.remove("active");
             contentDiv.style.fontFamily = "";
             contentDiv.style.lineHeight = "";
             if (currentMetadata.summary) {
@@ -281,8 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (localData.isBionicActive === true) {
                 isBionicEnabled = true;
                 if (bionicBtn) {
-                    bionicBtn.style.color = "var(--primary-color)";
-                    bionicBtn.style.backgroundColor = "rgba(0,0,0,0.05)";
+                    bionicBtn.classList.add("active");
                 }
             }
             

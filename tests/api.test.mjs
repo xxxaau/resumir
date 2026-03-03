@@ -9,7 +9,11 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { getCuratedModelInfo, CURATED_MODELS } = require("../sidebar/api.js");
+// Carregar shared/models.js primer i exposar com a global
+// (simula l'ordre de <script> al navegador: models.js → api.js)
+const { CURATED_MODELS } = require("../shared/models.js");
+global.CURATED_MODELS = CURATED_MODELS;
+const { getCuratedModelInfo } = require("../sidebar/api.js");
 
 // ---------------------------------------------------------------------------
 // getCuratedModelInfo

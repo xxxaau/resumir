@@ -17,7 +17,7 @@ const extensionGlobals = {
     formatObsidianContent: "readonly",
     formatMarkdownContent: "readonly",
     estimateTokens: "readonly",
-    // sidebar/api.js
+    // shared/models.js
     CURATED_MODELS: "readonly",
     getCuratedModelInfo: "readonly",
     callGeminiStream: "readonly",
@@ -56,6 +56,49 @@ const extensionGlobals = {
     getPageContent: "readonly",
 };
 
+/** Globals cross-file específics de la pàgina d'opcions (settings-*.js) */
+const settingsGlobals = {
+    // settings-defaults.js
+    DEFAULT_MARKDOWN_TEMPLATE: "readonly",
+    DEFAULT_SYSTEM_PROMPT: "readonly",
+    DEFAULT_OBSIDIAN_TEMPLATE: "readonly",
+    DEFAULT_DEEP_DIVE_PROMPT: "readonly",
+    DEFAULT_SCIENCE_PROMPT: "readonly",
+    // settings-order.js
+    getCurrentExtensionOrder: "readonly",
+    applyExtensionOrder: "readonly",
+    moveExtension: "readonly",
+    updateMoveButtonsState: "readonly",
+    // settings-cache.js
+    updateCacheInfo: "readonly",
+    clearCache: "readonly",
+    // settings-stats.js
+    PAGE_SIZE: "writable",
+    currentPage: "writable",
+    totalPages: "writable",
+    loadStatistics: "readonly",
+    getRelativeTime: "readonly",
+    renderDailyChart: "readonly",
+    renderGroupedHistoryTable: "readonly",
+    renderHistoryTable: "readonly",
+    clearHistory: "readonly",
+    // settings-models.js
+    modelNote: "readonly",
+    listModels: "readonly",
+    // settings-options.js
+    saveOptions: "readonly",
+    restoreOptions: "readonly",
+    resetTemplate: "readonly",
+    resetObsidianTemplate: "readonly",
+    resetSystemPrompt: "readonly",
+    resetDeepDivePrompt: "readonly",
+    resetSciencePrompt: "readonly",
+    showStatus: "readonly",
+    // settings-sidebar.js
+    navigateToTab: "readonly",
+    updateSidebar: "readonly",
+};
+
 export default [
     js.configs.recommended,
     {
@@ -68,8 +111,8 @@ export default [
         ],
     },
     {
-        // Fitxers de l'extensió (sidebar/, options/, arrel)
-        files: ["sidebar/**/*.js", "options/**/*.js", "*.js"],
+        // Fitxers de l'extensió (sidebar/, options/, shared/, arrel)
+        files: ["sidebar/**/*.js", "options/**/*.js", "shared/**/*.js", "*.js"],
         languageOptions: {
             ecmaVersion: 2022,
             globals: {
@@ -77,6 +120,21 @@ export default [
                 ...extensionGlobals,
                 // Globals de Node.js per als fitxers amb module.exports condicional
                 module: "writable",
+            },
+        },
+        rules: {
+            // Funcions cross-file: definides en un <script> i usades en un altre (globals)
+            "no-unused-vars": ["warn", { argsIgnorePattern: "^_", caughtErrors: "none" }],
+            // Permetre catch buits: catch {} és un patró vàlid en extensions
+            "no-empty": ["error", { allowEmptyCatch: true }],
+        },
+    },
+    {
+        // Globals addicionals per als mòduls de la pàgina d'opcions
+        files: ["options/**/*.js"],
+        languageOptions: {
+            globals: {
+                ...settingsGlobals,
             },
         },
         rules: {

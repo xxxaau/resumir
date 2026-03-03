@@ -1,95 +1,51 @@
 param (
-    [string]$Mode = "dev" # "dev" or "prod"
+    [ValidateSet("dev", "prod")]
+    [string]$Mode = "dev"
 )
 
-$manifestPath = "d:/40361989w/Dev/sergi-resum-navegador/manifest.json"
-$manifestChromiumPath = "d:/40361989w/Dev/sergi-resum-navegador/manifest.chromium.json"
-$iconsDir = "d:/40361989w/Dev/sergi-resum-navegador/icons"
+$ErrorActionPreference = "Stop"
 
-# Read Firefox Manifest
-$json = Get-Content -Path $manifestPath -Raw | ConvertFrom-Json
+$root             = $PSScriptRoot
+$manifestPath     = Join-Path $root "manifest.json"
+$manifestChromium = Join-Path $root "manifest.chromium.json"
+$iconsDir         = Join-Path $root "icons"
+$imgSrcDir        = Join-Path $root "img\$Mode"
 
-# Read Chromium Manifest (if exists)
-$hasChromium = Test-Path $manifestChromiumPath
+if (-not (Test-Path $imgSrcDir)) {
+    Write-Error "No s'ha trobat '$imgSrcDir'."
+    exit 1
+}
+
+$json = Get-Content $manifestPath -Raw | ConvertFrom-Json
+$hasChromium = Test-Path $manifestChromium
 if ($hasChromium) {
-    $jsonChromium = Get-Content -Path $manifestChromiumPath -Raw | ConvertFrom-Json
+    $jsonChromium = Get-Content $manifestChromium -Raw | ConvertFrom-Json
 }
 
 if ($Mode -eq "dev") {
-    Write-Host "Switching to DEVELOPMENT mode..."
-    
-    # Update Firefox Manifest
+    Write-Host "Canviant a mode DESENVOLUPAMENT..." -ForegroundColor DarkYellow
     $json.name = "Resumir contingut (DEV)"
     $json.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz"
-    $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
-    Write-Host "Manifest (Firefox) updated with DEV ID."
-
-    # Update Chromium Manifest
-    if ($hasChromium) {
-        $jsonChromium.name = "Resumir contingut (DEV)"
-        $jsonChromium | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestChromiumPath -Encoding UTF8
-        Write-Host "Manifest (Chromium) updated with DEV name."
-    }
-
-    # Generate DEV Icons (Orange/Red)
-    Add-Type -AssemblyName System.Drawing
-    
-    function Draw-Dev-Icon($size, $filename) {
-        $bmp = New-Object System.Drawing.Bitmap([int]$size, [int]$size)
-        $g = [System.Drawing.Graphics]::FromImage($bmp)
-        $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-        $g.Clear([System.Drawing.Color]::Transparent)
-        $scale = $size / 48.0
-        
-        # Draw Orange/Red Rounded Rect for DEV
-        $brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 140, 0)) # Dark Orange
-        $g.FillEllipse($brush, 0, 0, $size, $size)
-        
-        # Text "DEV"
-        $fontSize = 14 * $scale
-        $font = New-Object System.Drawing.Font("Arial", $fontSize, [System.Drawing.FontStyle]::Bold)
-        $textBrush = [System.Drawing.Brushes]::White
-        $stringFormat = New-Object System.Drawing.StringFormat
-        $stringFormat.Alignment = [System.Drawing.StringAlignment]::Center
-        $stringFormat.LineAlignment = [System.Drawing.StringAlignment]::Center
-        
-        $g.DrawString("DEV", $font, $textBrush, [float]($size / 2), [float]($size / 2), $stringFormat)
-        
-        $bmp.Save($filename, [System.Drawing.Imaging.ImageFormat]::Png)
-        $g.Dispose(); $bmp.Dispose(); $font.Dispose()
-    }
-    
-    Draw-Dev-Icon 48 "$iconsDir/icon-48.png"
-    Draw-Dev-Icon 96 "$iconsDir/icon-96.png"
-    # Copy for others
-    Copy-Item "$iconsDir/icon-48.png" "$iconsDir/icon-16.png" -Force
-    Copy-Item "$iconsDir/icon-48.png" "$iconsDir/icon-32.png" -Force
-    Copy-Item "$iconsDir/icon-96.png" "$iconsDir/icon-64.png" -Force
-    Copy-Item "$iconsDir/icon-96.png" "$iconsDir/icon-128.png" -Force
-    
-    Write-Host "Icons updated to DEV style."
-
+    if ($hasChromium) { $jsonChromium.name = "Resumir contingut (DEV)" }
 }
 elseif ($Mode -eq "prod") {
-    Write-Host "Switching to PRODUCTION mode..."
-    
-    # Restore Firefox Manifest
+    Write-Host "Canviant a mode PRODUCCIO..." -ForegroundColor Cyan
     $json.name = "Resumir contingut"
     $json.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
-    $json | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath -Encoding UTF8
-    Write-Host "Manifest (Firefox) restored to PROD ID."
+    if ($hasChromium) { $jsonChromium.name = "Resumir contingut" }
+}
 
-    # Restore Chromium Manifest
-    if ($hasChromium) {
-        $jsonChromium.name = "Resumir contingut"
-        $jsonChromium | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestChromiumPath -Encoding UTF8
-        Write-Host "Manifest (Chromium) restored to PROD name."
-    }
-    
-    # Regenerate Original Icons
-    & "d:/40361989w/Dev/sergi-resum-navegador/generate_icons_blue.ps1"
-    Write-Host "Icons restored to PROD style."
+$json | ConvertTo-Json -Depth 10 | Set-Content $manifestPath -Encoding UTF8
+if ($hasChromium) {
+    $jsonChromium | ConvertTo-Json -Depth 10 | Set-Content $manifestChromium -Encoding UTF8
 }
-else {
-    Write-Host "Invalid mode. Use 'dev' or 'prod'."
+Write-Host "  Manifests actualitzats." -ForegroundColor DarkGray
+
+$sizes = @(16, 32, 48, 64, 96, 128)
+foreach ($sz in $sizes) {
+    $src = Join-Path $imgSrcDir "icon-$sz.png"
+    $dst = Join-Path $iconsDir  "icon-$sz.png"
+    Copy-Item $src $dst -Force
 }
+Write-Host "  Icones copiades des de img/$Mode/." -ForegroundColor DarkGray
+Write-Host "Fet! Mode: $($Mode.ToUpper())" -ForegroundColor Green

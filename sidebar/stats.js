@@ -47,3 +47,8 @@ async function refreshRemainingOnModelChange(modelId) {
   const totalAll = await getTotalTodayCount();
   updateWaterStats(totalAll, modelId, usedModel);
 }
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { getTodayRequestCount, getTotalTodayCount };
+}

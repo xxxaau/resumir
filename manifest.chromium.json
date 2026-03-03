@@ -1,6 +1,6 @@
 ﻿{
     "manifest_version":  3,
-    "name":  "Resumir contingut (DEV)",
+    "name":  "Resumir contingut",
     "version":  "2.0.1",
     "author":  "Sergi Xaudiera",
     "homepage_url":  "https://github.com/xxxaau/extensio-resumir-contingut",
@@ -14,7 +14,7 @@
                         "sidePanel"
                     ],
     "host_permissions":  [
-                             "<all_urls>"
+                             "\u003call_urls\u003e"
                          ],
     "side_panel":  {
                        "default_path":  "sidebar/sidebar.html"
