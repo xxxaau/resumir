@@ -35,6 +35,30 @@
 
         <div class="section">
           <h3>Claus i models</h3>
+
+          <div class="form-group">
+            <label for="modelName">Model de resum</label>
+            <div class="model-input-group">
+              <input
+                type="text"
+                id="modelName"
+                class="form-control"
+                placeholder="gemini-1.5-flash"
+              />
+              <button id="checkModels" class="btn btn-secondary">
+                Seleccionar
+              </button>
+              <button id="refreshModels" class="btn btn-secondary" title="Consulta l'API de Google i actualitza la llista de models disponibles al sidebar">
+                Actualitzar
+              </button>
+            </div>
+            <div id="modelsList"></div>
+            <div id="refreshModelsStatus" class="help-text" style="display:none;"></div>
+            <div class="help-text">
+              El model utilitzat per generar els resums.
+            </div>
+          </div>
+
           <div class="form-group">
             <label for="apiKey">Google Gemini API Key</label>
             <input
@@ -47,25 +71,6 @@
               Necessària per connectar amb els serveis de Google AI.
             </div>
           </div>
-
-          <div class="form-group">
-            <label for="modelName">Model de resum</label>
-            <div class="model-input-group">
-              <input
-                type="text"
-                id="modelName"
-                class="form-control"
-                placeholder="gemini-1.5-flash"
-              />
-              <button id="checkModels" class="btn btn-secondary">
-                Cercar models
-              </button>
-            </div>
-            <div id="modelsList"></div>
-            <div class="help-text">
-              El model utilitzat per generar els resums.
-            </div>
-          </div>
         </div>
 
         <div class="section">
@@ -76,7 +81,7 @@
               <option value="system">Sistema (automàtic)</option>
               <option value="light">Clar</option>
               <option value="dark">Fosc</option>
-              <option value="solarized">Solarized (crema)</option>
+              <option value="solarized">Crema</option>
               <option value="soft-gray">Gris clar</option>
             </select>
           </div>

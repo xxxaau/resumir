@@ -43,6 +43,7 @@ document.querySelector("#resetSystemPrompt").addEventListener("click", resetSyst
 document.querySelector("#resetDeepDive").addEventListener("click", resetDeepDivePrompt);
 document.querySelector("#resetScience").addEventListener("click", resetSciencePrompt);
 document.querySelector("#checkModels").addEventListener("click", listModels);
+document.querySelector("#refreshModels").addEventListener("click", refreshModels);
 document.getElementById("clearHistory").addEventListener("click", clearHistory);
 document.getElementById("clearCache").addEventListener("click", clearCache);
 

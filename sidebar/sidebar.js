@@ -93,6 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     globalConfigCache.modelName = changes.modelName.newValue;
                 }
             }
+            // Recarregar el select si els favorits canvien des de settings
+            if (changes.favoriteModels) {
+                const currentVal = modelSelect.value;
+                loadModels(null, currentVal);
+            }
             const configChanged = CONFIG_KEYS.some(key => changes[key]);
             if (configChanged) {
                 ext.storage.sync.get(CONFIG_KEYS).then(config => {
@@ -224,6 +229,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     modelSelect.addEventListener("change", async (e) => {
+        if (e.target.value === "__open_settings__") {
+            // Revertir al model anterior i obrir configuració
+            const saved = await ext.storage.sync.get({ modelName: "gemini-2.0-flash" });
+            modelSelect.value = saved.modelName;
+            ext.runtime.openOptionsPage();
+            return;
+        }
         await ext.storage.sync.set({ modelName: e.target.value });
         refreshRemainingOnModelChange(e.target.value);
     });
@@ -235,10 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const boundTrigger = (data) => {
         // Deduplicate triggers (prevent double summary if both message and storage events fire)
         const now = Date.now();
-        if (now - lastTriggerTime < 500) {
-            console.log("Ignoring duplicate trigger", data);
-            return;
-        }
+        if (now - lastTriggerTime < 500) return;
         lastTriggerTime = now;
         
         handleTrigger((text, dd, sc, ui) => doSummary(text, dd, sc, ui), data);

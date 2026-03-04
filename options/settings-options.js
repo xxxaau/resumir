@@ -120,32 +120,6 @@ function restoreOptions() {
       el.disabled = true; // Prevé que es seleccioni accidentalment l'opció
   });
 }
- 
-// Real-time fixation value update
-document.getElementById("bionicFixation").addEventListener("input", (e) => {
-    document.getElementById("bionicFixationValue").textContent = e.target.value + "%";
-});
-
-// Handle "Configure" buttons in extension list
-document.querySelectorAll('.btn-icon[data-target]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const target = e.currentTarget.getAttribute('data-target');
-        navigateToTab(target);
-    });
-});
-
-// Handle "Live" Toggles in extension list
-// Nota: només actualitza la UI de la barra lateral de configuració;
-// la persistència real es fa quan l'usuari prem un botó de "Desar" explícit.
-const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic"];
-extensionToggles.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('change', () => {
-        updateSidebar();
-    });
-});
-
 
 function resetTemplate() {
     document.querySelector("#markdownTemplate").value = DEFAULT_MARKDOWN_TEMPLATE;

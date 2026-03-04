@@ -58,19 +58,17 @@ function formatObsidianPath(template, dateObj = new Date()) {
 // Alias for compatibility
 const parseObsidianPath = formatObsidianPath;
 
+/**
+ * Extreu el resum executiu (text abans del primer encapçalament markdown).
+ */
+function extractExecutiveSummary(summary) {
+    if (!summary) return "";
+    const headerMatch = summary.match(/^(###|\*\*|##)/m);
+    return headerMatch ? summary.substring(0, headerMatch.index).trim() : summary;
+}
+
 function formatObsidianContent(template, metadata) {
-    // Extract Executive Summary (Text before first Header)
-    let execSummary = metadata.summary || "";
-    // Regex: Start of string until first markdown header (###), bold header (**), or list item (-)
-    // We want to capture everything BEFORE the first structural element that signifies "Key Points"
-    // Valid separators:
-    // 1. ### (Standard Markdown Header)
-    // 2. ** (Bold Header)
-    // 3. ## (Level 2 Header)
-    const headerMatch = execSummary.match(/^(###|\*\*|##)/m);
-    if (headerMatch) {
-        execSummary = execSummary.substring(0, headerMatch.index).trim();
-    }
+    const execSummary = extractExecutiveSummary(metadata.summary);
     
     return template
         .replace(/{{title}}/g, metadata.title || "")
@@ -80,12 +78,7 @@ function formatObsidianContent(template, metadata) {
 }
 
 function formatMarkdownContent(template, metadata) {
-    let execSummary = metadata.summary || "";
-    // Same improved regex for consistent behavior
-    const headerMatch = execSummary.match(/^(###|\*\*|##)/m);
-    if (headerMatch) {
-        execSummary = execSummary.substring(0, headerMatch.index).trim();
-    }
+    const execSummary = extractExecutiveSummary(metadata.summary);
 
     return template
         .replace(/{{title}}/g, metadata.title || "")
@@ -108,6 +101,7 @@ if (typeof module !== 'undefined' && module.exports) {
         parseObsidianPath,
         formatObsidianContent,
         formatMarkdownContent,
+        extractExecutiveSummary,
         estimateTokens
     };
 }

@@ -11,6 +11,19 @@ const CURATED_MODELS = [
     { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite",priceIn: 0.07, priceOut: 0.30,  rpd: 999999 },
 ];
 
+/**
+ * Assegura que favoriteModels existeix a storage.sync.
+ * Si no existeix (primer ús), l'inicialitza amb els models curats.
+ * Retorna l'array de IDs favorits.
+ */
+async function ensureFavoriteModels() {
+    const data = await ext.storage.sync.get({ favoriteModels: null });
+    if (data.favoriteModels) return data.favoriteModels;
+    const defaults = CURATED_MODELS.map(m => m.id);
+    await ext.storage.sync.set({ favoriteModels: defaults });
+    return defaults;
+}
+
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
     module.exports = { CURATED_MODELS };

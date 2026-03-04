@@ -116,9 +116,10 @@ if (typeof module !== "undefined" && module.exports) {
 }
 
 /**
- * Loads available models from the Gemini API and populates the select element.
- * Fetches from API and filters to only show the 5 curated models (in priority order).
- * Falls back to static curated list if the API is unreachable.
+ * Loads favorite models into the sidebar select.
+ * Shows only user favorites (from storage.sync.favoriteModels).
+ * If no favorites, falls back to CURATED_MODELS.
+ * Always adds "Triar més models..." as last option to open settings.
  */
 async function loadModels(apiKey, currentModel) {
     const modelSelect = document.getElementById("model-select");
@@ -130,32 +131,49 @@ async function loadModels(apiKey, currentModel) {
            modelSelect.appendChild(loadingOpt);
         }
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
-            headers: { "x-goog-api-key": apiKey }
-        });
-        if (!response.ok) throw new Error("[009] Failed to fetch models");
-        const data = await response.json();
-        
-        // Always show all curated models in fixed priority order
-        // (API call above validates connectivity but doesn't filter the list)
-        const toShow = CURATED_MODELS;
+        // Load favorites and cached model list
+        const [favoriteIds, localData] = await Promise.all([
+            ensureFavoriteModels(),
+            ext.storage.local.get(["availableModels"])
+        ]);
+
+        const cachedModels = (localData.availableModels && localData.availableModels.length > 0)
+            ? localData.availableModels
+            : CURATED_MODELS.map(cm => ({ id: cm.id, label: cm.label, curated: true }));
 
         modelSelect.replaceChildren();
-        toShow.forEach(cm => {
+
+        // Mostrar només els favorits de l'usuari
+        const modelsToShow = favoriteIds
+            .map(id => cachedModels.find(m => m.id === id))
+            .filter(Boolean);
+
+        modelsToShow.forEach(m => {
             const opt = document.createElement("option");
-            opt.value = cm.id;
-            opt.textContent = cm.label;
+            opt.value = m.id;
+            opt.textContent = m.label || m.id;
             modelSelect.appendChild(opt);
         });
 
-        // Keep saved model even if not in curated list (user preference)
-        if (currentModel && !toShow.find(m => m.id === currentModel)) {
+        // Keep saved model even if not in the list (user preference)
+        if (currentModel && !modelsToShow.find(m => m.id === currentModel)) {
             const opt = document.createElement("option");
             opt.value = currentModel;
             opt.textContent = currentModel;
-            modelSelect.appendChild(opt);
+            modelSelect.insertBefore(opt, modelSelect.firstChild);
         }
-        
+
+        // "Triar més models..." — opens settings page
+        const sep = document.createElement("option");
+        sep.disabled = true;
+        sep.textContent = "──────────";
+        modelSelect.appendChild(sep);
+
+        const moreOpt = document.createElement("option");
+        moreOpt.value = "__open_settings__";
+        moreOpt.textContent = "Triar més models…";
+        modelSelect.appendChild(moreOpt);
+
         if (currentModel) modelSelect.value = currentModel;
         
     } catch (e) {
