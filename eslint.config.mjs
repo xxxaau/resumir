@@ -19,6 +19,7 @@ const extensionGlobals = {
     estimateTokens: "readonly",
     // shared/models.js
     CURATED_MODELS: "readonly",
+    ensureFavoriteModels: "readonly",
     getCuratedModelInfo: "readonly",
     callGeminiStream: "readonly",
     loadModels: "readonly",
@@ -85,6 +86,7 @@ const settingsGlobals = {
     // settings-models.js
     modelNote: "readonly",
     listModels: "readonly",
+    refreshModels: "readonly",
     // settings-options.js
     saveOptions: "readonly",
     restoreOptions: "readonly",

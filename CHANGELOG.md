@@ -2,6 +2,25 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [2.1.0] - 2026-03-04
+
+### Afegit
+
+- **Selector de models amb favorits**: Nova interfície amb estrelles per marcar/desmarcar models favorits des de la pàgina d'ajustaments. Els models seleccionats es sincronitzen automàticament amb el sidebar.
+- **Botó "Actualitzar"**: Connecta amb l'API de Google per obtenir la llista completa de models Gemini disponibles i emmagatzema-la en cache local.
+- **Botó "Seleccionar"**: Obre el llistat de models (cache local + curats) per gestionar favorits sense necessitat de connexió a l'API.
+- **Opció "Triar més models…"**: El desplegable del sidebar inclou un enllaç directe als ajustaments quan l'usuari vol afegir nous models.
+
+### Millorat
+
+- **Build multi-target**: Nou sistema de build amb `manifest.base.json` + patches per Firefox/Chromium, bundle esbuild per Chromium, i generació de ZIPs via Node.js (eliminada dependència de Python).
+- **Codi consolidat**: Extreta funció `ensureFavoriteModels()` a `shared/models.js` i `extractExecutiveSummary()` a `utils.js` per eliminar duplicació.
+- **Neteja de producció**: Eliminats fitxers obsolets (`make_zip_v4.py`, `generate_icons_blue.ps1`, `test_models.py`) i `console.log` innecessari.
+
+### Corregit
+
+- **SyntaxError a la pàgina d'ajustaments**: Solucionada declaració duplicada de `extensionToggles` entre `settings-options.js` i `settings.js` que impedia carregar la pàgina.
+
 ## [2.0.1] - 2026-02-27
 
 ### Millorat

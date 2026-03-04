@@ -1,6 +1,6 @@
 {
   "name": "resumir-contingut",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Browser extension to summarize web content using Gemini AI",
   "private": true,
   "scripts": {
