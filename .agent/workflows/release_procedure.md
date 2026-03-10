@@ -20,10 +20,10 @@ Aquest workflow defineix els passos estàndard per publicar una nova versió.
 
 ```bash
 // turbo
-explorer .\tests\test.html
+npm test
 ```
 
-- [ ] Verificar que tots els tests estan en VERD.
+- [ ] Verificar que tots els tests passen en VERD (0 failures).
 
 3. **IMPORTANT: Activar Mode Producció**
 
@@ -66,12 +66,15 @@ Executar l'auditoria completa que cobreix:
 ## 2. Actualització de Versió
 
 1. **Llista de models de Gemini**: Revisar i actualitzar els models disponibles (`sidebar/api.js` i `options/settings.js`) si s'han llançat noves versions (ex: Gemini 2.5 Flash).
-2. **Sincronitzar manifests**: Editar **AMBDÓS** `manifest.json` **i** `manifest.chromium.json` amb:
-   - Incrementar la versió (ha de ser **idèntica** en ambdós)
-   - Actualitzar el nom (eliminar "(DEV)" en ambdós)
-   - Verificar que `description` és la mateixa
-   - Verificar que `icons` són idèntiques
-3. Editar `make_zip_v4.py` i actualitzar el nom del fitxer ZIP (si s'usa).
+2. **Sincronitzar manifests**: Editar **únicament** `manifest.base.json` (font de veritat):
+   - Incrementar la versió
+   - Verificar que `name` és "Resumir contingut" (sense "(DEV)")
+   - Regenerar els manifests derivats:
+   ```powershell
+   npm run manifests:gen
+   ```
+   > [!WARNING]
+   > **Mai editar directament** `manifest.json` ni `manifest.chromium.json` — es generen automàticament des de `manifest.base.json` + patches i qualsevol canvi manual es sobreescriurà.
 
 > [!WARNING]
 > **CRÍTIC**: Els dos manifests han d'estar sincronitzats en versió. Una diferència pot causar confusió en els usuaris que usen diferents navegadors.
@@ -94,14 +97,15 @@ Executar l'auditoria completa que cobreix:
 
 ## 4. Generació del Paquet
 
-1. **Neteja prèvia**: Eliminar antigues carpetes de proves i paquets antics.
+1. **Neteja prèvia**: Eliminar paquets ZIP antics.
 
 ```powershell
 // turbo-all
-Remove-Item -Path .\chromium-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path .\firefox-unpacked* -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path .\*.zip -Force -ErrorAction SilentlyContinue
 ```
+
+> [!NOTE]
+> Les carpetes temporals de build (`build_firefox`, `build_chromium`) les neteja automàticament `build.ps1`.
 
 2. Generar els ZIPs finals amb el build multi-target:
 

@@ -6,6 +6,33 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 
 - (Cap error crític conegut actualment)
 
+## 🔧 Deute Tècnic i Infraestructura
+
+> Objectiu: producció lleugera, àgil i fàcil de mantenir.
+
+### Sprint A — Reparar el que ja es va trencar ✅ (v2.2.0)
+
+- [x] **A1** — Purgar references mortes dels workflows (`test_models.py`, `make_zip_v4.py`, dirs legacy, instrucció manifest incorrecta)
+- [x] **A2** — Guard de mode dev al `build.ps1`: abort si el manifest conté `(DEV)`
+- [x] **A3** — Activar `--minify` al build de Chromium en producció
+
+### Sprint B — Tests unificats ✅ (v2.2.0)
+
+- [x] **B1** — Eliminar `tests/test_logic.js` i `tests/test.html`; tots els tests consolidats a `*.test.mjs` (Node, 56 tests)
+- [x] **B2** — Afegit cobertura completa de `classifyError`: 429/quota, `exhausted`, `missing host permission`, `access denied`, API key faltant
+
+### Sprint C — Lleugeresa de producció (v2.3.x)
+
+- [ ] **C1** — Bundle de sidebar amb esbuild: substituir 9 `<script>` per 1 `sidebar.bundle.js` en mode build
+- [ ] **C2** — Unificar les dues lectures de stats en una sola funció `getDailyStats(modelId)`
+
+### Sprint D — Workflow de manteniment àgil (v2.4.x)
+
+- [ ] **D1** — Script `scripts/pre-release-check.mjs` que automatitzi les comprovacions trivials de l'auditoria pre-release
+- [ ] **D2** — Simplificar `release_procedure.md` a 3 seccions: Preparar → Empaquetar → Publicar
+
+---
+
 ## 🛡️ Millores Tècniques i Manteniment
 
 ### 1. Sèrie 1.2.x – Refinament versió Firefox

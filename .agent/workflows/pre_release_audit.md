@@ -135,17 +135,17 @@ Cada ítem ha de ser ✅. Si hi ha ⚠️ o 🔴, documentar-los i corregir-los 
 
 ## 9. Verificació de Models de l'API
 
-Comprovar que els IDs dels 5 models curats a `sidebar/api.js` i `options/settings.js` existeixen i suporten `generateContent` a l'API de Google.
+Comprovar manualment que els IDs dels models curats a `shared/models.js` existeixen i funcionen.
 
 ```powershell
-# Assegura't de tenir GEMINI_API_KEY com a variable d'entorn existent previament
-python test_models.py
+# Executar els tests automatitzats (cobreix lògica de models)
+npm test
 ```
 
-- [ ] Tots els 5 models mostren ✅
-- [ ] Cap model mostra ❌
-- [ ] Si algun falla → actualitzar l'ID a `sidebar/api.js` i `options/settings.js` **abans de publicar**
-- [ ] **Prioritat de Fallback**: Verificar que l'ordre en què estan definits els models a `CURATED_MODELS` (`sidebar/api.js`) és l'ordre prioritari desitjat per al salt automàtic quan s'esgoti la quota (del més prioritari al menys).
+- [ ] Tots els tests de `npm test` passen en verd
+- [ ] Verificar manualment que cada model de `CURATED_MODELS` (`shared/models.js`) respon correctament: obrir la sidebar, seleccionar cada model i generar un resum de prova
+- [ ] Si algun model falla (canvi d'ID a l'API de Google) → actualitzar `shared/models.js` **abans de publicar**
+- [ ] **Prioritat de Fallback**: Verificar que l'ordre de `CURATED_MODELS` és el desitjat per al salt automàtic quan s'esgota la quota (del més prioritari al menys)
 
 > [!TIP]
 > Models curats actuals (`sidebar/api.js` → `CURATED_MODELS`):

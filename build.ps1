@@ -24,6 +24,12 @@ $ErrorActionPreference = "Stop"
 $manifest = Get-Content "manifest.base.json" -Raw | ConvertFrom-Json
 $version = $manifest.version
 
+# Guard: abort if still in dev mode
+if ($manifest.name -like "*(DEV)*") {
+    Write-Error "ERROR: El manifest esta en mode DEV ('$($manifest.name)'). Executa primer: .\set_dev_mode.ps1 prod"
+    exit 1
+}
+
 Write-Host "Building v$version for target: $Target" -ForegroundColor Cyan
 
 # Common files and directories
@@ -124,9 +130,9 @@ if ($Target -eq "firefox" -or $Target -eq "all") {
 if ($Target -eq "chromium" -or $Target -eq "all") {
     Write-Host "`nBuilding Chromium package..." -ForegroundColor Blue
 
-    # Generate background.bundle.js via esbuild
-    node scripts/build-chromium-bundle.mjs
-    Write-Host "  Generated background.bundle.js (via esbuild)" -ForegroundColor DarkGray
+    # Generate background.bundle.js via esbuild (minified for production)
+    node scripts/build-chromium-bundle.mjs --minify
+    Write-Host "  Generated background.bundle.js (via esbuild, minified)" -ForegroundColor DarkGray
 
     New-BuildZip -TargetName "chromium" `
         -ManifestTarget "chromium" `
