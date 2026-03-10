@@ -109,6 +109,18 @@ function New-BuildZip {
         }
     }
 
+    # Generate sidebar bundle and patch sidebar.html
+    $sidebarBundleOut = Join-Path $buildDir "sidebar\sidebar.bundle.js"
+    $sidebarHtml      = Join-Path $buildDir "sidebar\sidebar.html"
+    node scripts/build-sidebar-bundle.mjs --minify "--out=$sidebarBundleOut" "--html=$sidebarHtml"
+
+    # Remove individual sidebar JS files (replaced by sidebar.bundle.js)
+    $sidebarJsFiles = @("utils.js","api.js","content.js","cache.js","stats.js","ui.js","summary.js","sidebar.js")
+    foreach ($f in $sidebarJsFiles) {
+        $p = Join-Path $buildDir "sidebar\$f"
+        if (Test-Path $p) { Remove-Item $p -Force }
+    }
+
     # Create ZIP via Node.js (ensures '/' separators, AMO-compliant, no Python needed)
     node scripts/make-zip.mjs $buildDir $zipName
 
