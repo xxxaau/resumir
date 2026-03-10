@@ -33,8 +33,36 @@ test("classifyError - error 403 classificat igual que 401", () => {
     assert.ok(result.message.includes("clau API"));
 });
 
-test("classifyError - error genèric retorna missatge original", () => {
+test("classifyError - quota esgotada (429) sense botó de config", () => {
+    const result = classifyError(new Error("Error API (429): quota exceeded"));
+    assert.equal(result.showConfig, false);
+    assert.ok(result.message.includes("429") || result.message.toLowerCase().includes("quota"));
+});
+
+test("classifyError - quota esgotada per paraula 'exhausted'", () => {
+    const result = classifyError(new Error("[003] Resource has been exhausted"));
+    assert.equal(result.showConfig, false);
+});
+
+test("classifyError - 'missing host permission' classificat com a permís", () => {
+    const result = classifyError(new Error("Missing host permission for https://example.com"));
+    assert.equal(result.showConfig, true);
+    assert.ok(result.message.includes("permisos"));
+});
+
+test("classifyError - 'access denied' classificat com a permís", () => {
+    const result = classifyError(new Error("Access denied to tab content"));
+    assert.equal(result.showConfig, true);
+    assert.ok(result.message.includes("permisos"));
+});
+
+test("classifyError - API key faltant (missatge [001]) mostra config", () => {
+    const result = classifyError(new Error("[001] No s'ha configurat la API Key."));
+    assert.equal(result.showConfig, true);
+});
+
+test("classifyError - error genèric retorna missatge original sense config", () => {
     const result = classifyError(new Error("Unexpected network failure"));
-    assert.ok(typeof result.message === "string");
-    assert.ok(result.message.length > 0);
+    assert.equal(result.showConfig, false);
+    assert.equal(result.message, "Unexpected network failure");
 });
