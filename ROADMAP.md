@@ -21,10 +21,10 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 - [x] **B1** — Eliminar `tests/test_logic.js` i `tests/test.html`; tots els tests consolidats a `*.test.mjs` (Node, 56 tests)
 - [x] **B2** — Afegit cobertura completa de `classifyError`: 429/quota, `exhausted`, `missing host permission`, `access denied`, API key faltant
 
-### Sprint C — Lleugeresa de producció (v2.3.x)
+### Sprint C — Lleugeresa de producció ✅ (v2.2.0)
 
-- [ ] **C1** — Bundle de sidebar amb esbuild: substituir 9 `<script>` per 1 `sidebar.bundle.js` en mode build
-- [ ] **C2** — Unificar les dues lectures de stats en una sola funció `getDailyStats(modelId)`
+- [x] **C1** — Bundle de sidebar amb esbuild: `scripts/build-sidebar-bundle.mjs` integrat al build; el ZIP de producció té 1 fitxer `sidebar.bundle.js` (35KB minificat) en lloc de 8 scripts individuals
+- [x] **C2** — `getDailyStats(modelId)` unifica dues lectures de storage en una; `getTodayRequestCount`/`getTotalTodayCount` reimplementades com a wrappers; 3 nous tests
 
 ### Sprint D — Workflow de manteniment àgil (v2.4.x)
 

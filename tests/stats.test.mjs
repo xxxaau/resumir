@@ -31,7 +31,7 @@ function createStorageMock() {
 const storageMock = createStorageMock();
 global.ext = { storage: { local: storageMock } };
 
-const { getTodayRequestCount, getTotalTodayCount } = require("../sidebar/stats.js");
+const { getDailyStats, getTodayRequestCount, getTotalTodayCount } = require("../sidebar/stats.js");
 
 // Helpers
 const TODAY = new Date().toISOString();
@@ -144,4 +144,39 @@ test("getTotalTodayCount - retorna 0 si totes les entrades són d'ahir", async (
     ]);
     const count = await getTotalTodayCount();
     assert.equal(count, 0);
+});
+
+// ---------------------------------------------------------------------------
+// getDailyStats
+// ---------------------------------------------------------------------------
+
+test("getDailyStats - retorna byModel i total amb una sola crida", async () => {
+    clearStorage();
+    storageMock._setHistory([
+        makeEntry("gemini-2.0-flash"),
+        makeEntry("gemini-2.0-flash"),
+        makeEntry("gemini-2.5-pro"),
+        makeEntry("gemini-2.0-flash", YESTERDAY),
+    ]);
+    const { byModel, total } = await getDailyStats("gemini-2.0-flash");
+    assert.equal(byModel, 2, "byModel ha de ser 2 (ignora ahir)");
+    assert.equal(total, 3, "total ha de ser 3 (tots els models d'avui)");
+});
+
+test("getDailyStats - historial buit retorna zeros", async () => {
+    clearStorage();
+    const { byModel, total } = await getDailyStats("gemini-2.0-flash");
+    assert.equal(byModel, 0);
+    assert.equal(total, 0);
+});
+
+test("getDailyStats - model diferent: byModel 0, total correcte", async () => {
+    clearStorage();
+    storageMock._setHistory([
+        makeEntry("gemini-2.5-pro"),
+        makeEntry("gemini-2.5-pro"),
+    ]);
+    const { byModel, total } = await getDailyStats("gemini-2.0-flash");
+    assert.equal(byModel, 0);
+    assert.equal(total, 2);
 });

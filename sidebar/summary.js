@@ -262,9 +262,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         await saveSummaryCache(currentMetadata.url, currentMetadata.title, currentMetadata.summary, modelName, inputTokens, outputTokens);
         await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url);
         
-        const requestsToday = await getTodayRequestCount(modelName);  // per model (quota)
-        const totalToday   = await getTotalTodayCount();               // all models (water)
-        updateWaterStats(totalToday, modelName, requestsToday);
+        const { byModel, total } = await getDailyStats(modelName);
+        updateWaterStats(total, modelName, byModel);
 
     } catch (err) {
         if (signal.aborted || err.name === 'AbortError') {
