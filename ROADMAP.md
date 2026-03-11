@@ -26,10 +26,10 @@ Aquest document recull propostes per optimitzar l'extensió (Eficiència, Veloci
 - [x] **C1** — Bundle de sidebar amb esbuild: `scripts/build-sidebar-bundle.mjs` integrat al build; el ZIP de producció té 1 fitxer `sidebar.bundle.js` (35KB minificat) en lloc de 8 scripts individuals
 - [x] **C2** — `getDailyStats(modelId)` unifica dues lectures de storage en una; `getTodayRequestCount`/`getTotalTodayCount` reimplementades com a wrappers; 3 nous tests
 
-### Sprint D — Workflow de manteniment àgil (v2.4.x)
+### Sprint D — Workflow de manteniment àgil ✅ (v2.2.0)
 
-- [ ] **D1** — Script `scripts/pre-release-check.mjs` que automatitzi les comprovacions trivials de l'auditoria pre-release
-- [ ] **D2** — Simplificar `release_procedure.md` a 3 seccions: Preparar → Empaquetar → Publicar
+- [x] **D1** — Script `scripts/pre-release-check.mjs` que automatitzi les comprovacions trivials de l'auditoria pre-release
+- [x] **D2** — Simplificar `release_procedure.md` a 3 seccions: Preparar → Empaquetar → Publicar
 
 ---
 

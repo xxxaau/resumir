@@ -13,7 +13,8 @@
     "prod": "pwsh ./set_dev_mode.ps1 prod",
     "manifests:gen": "node scripts/merge-manifest.mjs firefox manifest.json && node scripts/merge-manifest.mjs chromium manifest.chromium.json",
     "version:sync": "node scripts/bump-version.mjs",
-    "postversion": "node scripts/bump-version.mjs && git add manifest.base.json manifest.json manifest.chromium.json"
+    "postversion": "node scripts/bump-version.mjs && git add manifest.base.json manifest.json manifest.chromium.json",
+    "prerelease": "node scripts/pre-release-check.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
