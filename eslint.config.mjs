@@ -50,6 +50,7 @@ const extensionGlobals = {
     saveSummaryCache: "readonly",
     saveUsageStats: "readonly",
     // sidebar/stats.js
+    getDailyStats: "readonly",
     getTodayRequestCount: "readonly",
     getTotalTodayCount: "readonly",
     refreshRemainingOnModelChange: "readonly",
