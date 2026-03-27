@@ -213,6 +213,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         // 3. Call Gemini API (with Auto-Fallback on Quota Exceeded)
+        contentDiv.classList.remove("hidden");
         let lastUpdate = 0;
         const modelsToTry = buildFallbackList(modelName, config.favoriteModels || []);
         let success = false;
