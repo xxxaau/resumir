@@ -539,3 +539,8 @@ function renderApiKeyWarning(contentDiv) {
         ext.tabs.create({ url: "https://aistudio.google.com/app/apikey" });
     });
 }
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { formatTextToFragment, formatBionicText };
+}
