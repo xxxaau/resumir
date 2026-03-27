@@ -71,14 +71,14 @@ Usa `storage.local.get(null)` per obtenir tots els keys i filtra els que comence
 
 - **`openHistoryPanel()`** — crida `listCachedSummaries`, renderitza el panell, amaga `#content`/`#loading`/`#error`, mostra `#history-panel`. Si no hi ha entrades, mostra missatge "Sense historial disponible".
 - **`closeHistoryPanel()`** — amaga `#history-panel`, restaura la visibilitat de l'element que era visible just abans d'obrir el panell. `openHistoryPanel` ha de capturar quin element estava visible (`#content`, `#error` o cap) en una variable de mòdul (`_previousVisible`) per poder-lo restaurar. Si cap element era visible, no restaura res.
-- **`loadHistoryEntry(entry)`** — llegeix la preferència biònica actual de `storage.sync` (`bionicReading: false` per defecte), crida `formatTextToFragment(entry.summary, bionicEnabled)`, insereix el resultat a `#content`, i fa `closeHistoryPanel()`.
+- **`loadHistoryEntry(entry)`** — llegeix l'estat biònic de `storage.local` (`isBionicActive: false` per defecte) i, si és actiu, el `bionicFixation` de `storage.sync` (per defecte 30 → ratio 0.30). Crida `formatTextToFragment(entry.summary, bionicEnabled, fixation)`, insereix el resultat a `#content`, i fa `closeHistoryPanel()`.
 
 ### `sidebar.html` — canvis
 
 ```html
-<!-- A #footer-status, al principi: -->
-<button id="historyBtn" title="Historial" aria-label="Historial">🕐</button>
+<!-- A #footer-status, al final (costat dret): -->
 <span class="separator">|</span>
+<button id="historyBtn" title="Historial" aria-label="Historial">🕐</button>
 
 <!-- A #container, germà de #content: -->
 <div id="history-panel" class="hidden"></div>
