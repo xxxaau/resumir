@@ -53,10 +53,12 @@ if (changes.apiKey.newValue) {
 }
 ```
 
-**Solució:** Eliminar el condicional, deixar una sola crida a `window.location.reload()`.
+El comentari de la branca `else` diu "If removed, we need to show the warning", cosa que suggereix que originalment es volia mostrar una UI diferent quan la clau s'elimina. Cal confirmar si aquest comportament diferencial és intentat o abandonat abans de simplificar.
 
-**Dificultat:** Trivial (eliminar 4 línies)
-**Risc:** Cap
+**Solució:** Confirmar que mostrar un avís específic al treure la clau no és un requisit actiu, i llavors eliminar el condicional deixant una sola crida a `window.location.reload()`. Si l'avís diferencial és desitjat, implementar la branca `else` correctament en lloc de fer reload.
+
+**Dificultat:** Trivial
+**Risc:** Cap si es confirma que el comportament diferencial no és un requisit
 
 ---
 
@@ -72,15 +74,12 @@ if (changes.apiKey.newValue) {
 
 ---
 
-### B4 — `background.bundle.js` commitejat al repositori
+### B4 — ~~`background.bundle.js` commitejat al repositori~~ — JA RESOLT
 
-**Fitxer:** `background.bundle.js` (arrel), `.gitignore`
-**Problema:** Fitxer generat per esbuild present al repo. Causa diffs espuris en cada build, infla l'historial de git.
+**Fitxer:** `.gitignore:18`
+**Estat:** Verificat: `background.bundle.js` i `sidebar.bundle.js` ja estan correctament al `.gitignore` i no estan tracked per git. El fitxer existeix al disc com a artefacte local de build, que és el comportament correcte.
 
-**Solució:** Afegir `background.bundle.js` al `.gitignore`. Verificar que el CI el genera correctament abans de fer el ZIP.
-
-**Dificultat:** Trivial (1 línia al .gitignore)
-**Risc:** Cal confirmar que el CI fa el build abans de l'empaquetament
+**Acció:** Cap. Ítem tancat.
 
 ---
 
@@ -107,7 +106,7 @@ const modelsToTry = [...new Set([modelName, ...CURATED_MODELS.map(m => m.id)])];
 ```
 Quan s'esgota la quota, l'extensió prova tots els models curats en ordre, incloent `gemini-2.5-pro` (50 RPD/dia, tarifa de pagament). L'usuari pot consumir quota cara sense saber-ho.
 
-**Solució:** Construir `modelsToTry` a partir dels favorits de l'usuari, filtrats per un criteri de "model de fallback" (ex: models amb `rpd > 500` o models marcats explícitament com a fallback a `CURATED_MODELS`). Afegir un camp `fallback: true` als models aptes per a fallback automàtic.
+**Solució:** Construir `modelsToTry` a partir dels favorits de l'usuari, filtrats per un criteri de "model de fallback" (ex: models amb `rpd >= 500` o models marcats explícitament com a fallback a `CURATED_MODELS`). Afegir un camp `fallback: true` als models aptes per a fallback automàtic. Nota: `gemini-2.5-flash` té exactament `rpd: 500`, per tant el llindar ha de ser `>= 500` (inclusiu) per no excloure'l.
 
 **Dificultat:** Mitjana — cal modificar `CURATED_MODELS`, la lògica de fallback i els tests associats
 **Risc:** Pot canviar el comportament quan tots els favorits estan exhaurits
@@ -132,7 +131,7 @@ Quan s'esgota la quota, l'extensió prova tots els models curats en ordre, inclo
 
 ### A3 — Re-parse complet del DOM a cada chunk de streaming
 
-**Fitxer:** `ui.js:253`, cridat des de `summary.js:211`
+**Fitxer:** `summary.js:211` (`formatTextToFragment` definida a `ui.js:253`)
 **Problema:** Durant el streaming, `formatTextToFragment(currentMetadata.summary, ...)` re-parseja i re-renderitza el DOM complet del text acumulat cada 100ms. Per resums llargs (>5KB), el cost creix linealment amb cada chunk rebut.
 
 **Solució:** Separar la fase de streaming de la fase de renderitzat final:
@@ -227,7 +226,7 @@ Crear compte CWS, preparar captures, descripció i política de privadesa adapta
 | B1  | Model per defecte inconsistent            | Alta     | Trivial    |
 | B2  | Codi duplicat reload API key              | Alta     | Trivial    |
 | B3  | Token limit 8000 massa conservador        | Alta     | Fàcil      |
-| B4  | background.bundle.js al repo              | Alta     | Trivial    |
+| B4  | ~~background.bundle.js al repo~~ (resolt) | —        | —          |
 | B5  | EUR_RATE hardcoded                        | Alta     | Fàcil      |
 | A1  | Fallback quota usa models cars            | Alta     | Mitjana    |
 | A2  | Caché sense expiració                     | Alta     | Mitjana    |
