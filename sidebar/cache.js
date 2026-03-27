@@ -72,6 +72,37 @@ async function purgeStaleCacheEntries() {
 }
 
 /**
+ * Retorna totes les entrades de caché vàlides (amb timestamp i dins TTL),
+ * ordenades per data descendent (més recent primer).
+ * @returns {Array<{url, title, model, timestamp, summary}>}
+ */
+async function listCachedSummaries() {
+    try {
+        const allData = await ext.storage.local.get(null);
+        const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+        const entries = [];
+        for (const [key, value] of Object.entries(allData)) {
+            if (!key.startsWith("summary_cache:")) continue;
+            if (!value?.timestamp) continue;
+            const ts = new Date(value.timestamp).getTime();
+            if (ts < cutoff) continue;
+            entries.push({
+                url: value.url,
+                title: value.title,
+                model: value.model,
+                timestamp: value.timestamp,
+                summary: value.summary,
+            });
+        }
+        entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        return entries;
+    } catch (e) {
+        console.error("Error listing cached summaries:", e);
+        return [];
+    }
+}
+
+/**
  * Saves usage statistics and history for a generated summary.
  */
 async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, latency, title, url) {
@@ -112,5 +143,5 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries };
+    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, listCachedSummaries };
 }
