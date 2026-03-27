@@ -9,7 +9,12 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { classifyError } = require("../sidebar/summary.js");
+// Carregar CURATED_MODELS com a global ABANS de carregar summary.js
+// (summary.js accedeix a CURATED_MODELS com a global en buildFallbackList)
+const { CURATED_MODELS } = require("../shared/models.js");
+global.CURATED_MODELS = CURATED_MODELS;
+
+const { classifyError, buildFallbackList } = require("../sidebar/summary.js");
 
 // ---------------------------------------------------------------------------
 // classifyError
@@ -65,4 +70,31 @@ test("classifyError - error genèric retorna missatge original sense config", ()
     const result = classifyError(new Error("Unexpected network failure"));
     assert.equal(result.showConfig, false);
     assert.equal(result.message, "Unexpected network failure");
+});
+
+// ---------------------------------------------------------------------------
+// buildFallbackList
+// ---------------------------------------------------------------------------
+
+test("buildFallbackList - el model preferit va primer", () => {
+    const list = buildFallbackList("gemini-2.5-pro", ["gemini-2.0-flash", "gemini-2.5-flash"]);
+    assert.equal(list[0], "gemini-2.5-pro");
+});
+
+test("buildFallbackList - no duplica el model preferit", () => {
+    const list = buildFallbackList("gemini-2.0-flash", ["gemini-2.0-flash", "gemini-2.5-flash"]);
+    const occurrences = list.filter(m => m === "gemini-2.0-flash").length;
+    assert.equal(occurrences, 1, "El model preferit no ha d'aparèixer duplicat");
+});
+
+test("buildFallbackList - no inclou models sense fallback:true", () => {
+    const list = buildFallbackList("gemini-2.0-flash", ["gemini-2.0-flash"]);
+    assert.ok(!list.includes("gemini-2.5-pro"), "gemini-2.5-pro no ha d'estar al fallback");
+});
+
+test("buildFallbackList - inclou models de CURATED_MODELS amb fallback:true com a darrer recurs", () => {
+    // Si l'únic favorit és gemini-2.5-pro, els fallbacks de CURATED_MODELS s'afegeixen
+    const list = buildFallbackList("gemini-2.5-pro", ["gemini-2.5-pro"]);
+    assert.ok(list.includes("gemini-2.0-flash"), "Ha d'incloure flash com a fallback de CURATED_MODELS");
+    assert.ok(list.includes("gemini-2.0-flash-lite"), "Ha d'incloure flash-lite com a fallback");
 });

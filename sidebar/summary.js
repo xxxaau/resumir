@@ -8,8 +8,24 @@ const DEFAULT_DEEP_DIVE_PROMPT = "Actua com un expert analista. Proporciona una 
 const DEFAULT_SCIENCE_PROMPT = "Ets un científic amb àmplia trajectòria acadèmica. Valida la veracitat científica. Respon en CATALÀ.";
 
 /**
+ * Construeix la llista de models a provar en cas de quota esgotada.
+ * Prova primer els favorits de l'usuari, després els models de CURATED_MODELS amb fallback:true.
+ * Mai duplica models.
+ *
+ * @param {string} preferredModel - Model triat per l'usuari
+ * @param {string[]} favoriteIds - IDs dels models favorits de l'usuari
+ * @returns {string[]} Llista ordenada de models a provar
+ */
+function buildFallbackList(preferredModel, favoriteIds) {
+    const globalFallbacks = CURATED_MODELS
+        .filter(m => m.fallback === true)
+        .map(m => m.id);
+    return [...new Set([preferredModel, ...favoriteIds, ...globalFallbacks])];
+}
+
+/**
  * Main summary generation function.
- * 
+ *
  * @param {Object} ctx - Context object with DOM references and state
  * @param {HTMLElement} ctx.contentDiv - Main content display area
  * @param {HTMLElement} ctx.errorDiv - Error display area
@@ -198,7 +214,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         // 3. Call Gemini API (with Auto-Fallback on Quota Exceeded)
         let lastUpdate = 0;
-        const modelsToTry = [...new Set([modelName, ...CURATED_MODELS.map(m => m.id)])];
+        const { favoriteModels: favoriteIds = [] } = await ext.storage.sync.get({ favoriteModels: [] });
+        const modelsToTry = buildFallbackList(modelName, favoriteIds);
         let success = false;
         let lastError = null;
         const bionicEnabled = ctx.isBionicEnabled();
@@ -354,5 +371,5 @@ function handleTrigger(startSummaryFn, data) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { classifyError };
+    module.exports = { classifyError, buildFallbackList };
 }
