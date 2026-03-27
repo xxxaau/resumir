@@ -36,10 +36,11 @@ test("formatBionicText - retorna un fragment no buit per a text vàlid", () => {
     assert.ok(frag.childNodes.length > 0, "El fragment ha de tenir fills");
 });
 
-test("formatBionicText - el primer caràcter de cada paraula va en negreta", () => {
+test("formatBionicText - paraula de 4 caràcters en negreta els 2 primers (ceil(4*0.45)=2)", () => {
     const frag = formatBionicText("Test");
-    const bold = frag.querySelector ? frag.querySelector("b") : frag.childNodes[0];
+    const bold = frag.querySelector("b");
     assert.ok(bold, "Ha d'haver-hi un element <b>");
+    assert.equal(bold.textContent, "Te", "La fixació biònica ha de cobrir els primers 2 caràcters");
 });
 
 test("formatBionicText - text d'un sol caràcter resulta en un <b> amb el caràcter", () => {
