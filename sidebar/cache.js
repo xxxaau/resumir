@@ -12,11 +12,10 @@ async function getSummaryCache(url) {
         const cachedData = await ext.storage.local.get(cacheKey);
         const entry = cachedData[cacheKey];
         if (!entry) return null;
-        // Verificar TTL
-        if (entry.timestamp) {
-            const ageMs = Date.now() - new Date(entry.timestamp).getTime();
-            if (ageMs > CACHE_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
-        }
+        // Verificar TTL — entrades sense timestamp es consideren expirades (igual que purgeStaleCacheEntries)
+        if (!entry.timestamp) return null;
+        const ageMs = Date.now() - new Date(entry.timestamp).getTime();
+        if (ageMs > CACHE_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
         return entry;
     } catch (e) {
         console.error("Cache check failed:", e);

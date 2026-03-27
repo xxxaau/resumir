@@ -217,14 +217,14 @@ test("purgeStaleCacheEntries - retorna 0 si no hi ha entrades a purgar", async (
     assert.equal(removed, 0);
 });
 
-test("getSummaryCache - retorna l'entrada si no té timestamp (entrada legacy)", async () => {
+test("getSummaryCache - retorna null per entrades sense timestamp (considerades expirades)", async () => {
     clearStorage();
     const url = "https://no-ts.com";
     await storageMock.set({
         [`summary_cache:${url}`]: { url, title: "No TS", summary: "X" }
     });
     const result = await getSummaryCache(url);
-    assert.ok(result !== null, "Ha de retornar l'entrada sense timestamp");
+    assert.equal(result, null, "Ha de retornar null per entrades sense timestamp");
 });
 
 test("purgeStaleCacheEntries - elimina entrades sense timestamp (considerades expirades)", async () => {

@@ -19,6 +19,8 @@ const extensionGlobals = {
     estimateTokens: "readonly",
     // shared/models.js
     CURATED_MODELS: "readonly",
+    DEFAULT_MODEL_ID: "readonly",
+    EUR_RATE: "readonly",
     ensureFavoriteModels: "readonly",
     getCuratedModelInfo: "readonly",
     callGeminiStream: "readonly",
@@ -49,6 +51,7 @@ const extensionGlobals = {
     getSummaryCache: "readonly",
     saveSummaryCache: "readonly",
     saveUsageStats: "readonly",
+    purgeStaleCacheEntries: "readonly",
     // sidebar/stats.js
     getDailyStats: "readonly",
     getTodayRequestCount: "readonly",
