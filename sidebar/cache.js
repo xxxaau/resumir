@@ -43,9 +43,10 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
  */
 async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, latency, title, url) {
     try {
-        const stats = await ext.storage.local.get("stats");
-        const currentStats = stats.stats || { articles: 0, tokens: 0 };
-        
+        // Read stats and history in a single call
+        const data = await ext.storage.local.get(["stats", "usageHistory"]);
+        const currentStats = data.stats || { articles: 0, tokens: 0 };
+
         const newStats = {
             articles: currentStats.articles + 1,
             tokens: Math.round(currentStats.tokens + inputTokens + outputTokens)
@@ -61,14 +62,13 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
             type: (isDeepDive || modelName.includes("pro")) ? "deep" : "lite",
             latency: latency
         };
-        
-        const historyData = await ext.storage.local.get("usageHistory");
-        const history = historyData.usageHistory || [];
+
+        const history = data.usageHistory || [];
         history.unshift(historyEntry);
-        
+
         // Keep last 100 entries
         if (history.length > 100) history.pop();
-        
+
         await ext.storage.local.set({ stats: newStats, usageHistory: history });
         return newStats;
     } catch (e) {
