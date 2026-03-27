@@ -53,20 +53,12 @@ function applyExtensionVisibility(config) {
 function applyExtensionOrder(order) {
     if (!order || !Array.isArray(order) || order.length === 0) return;
 
-    // Migrate old default orders to new default order
-    const oldDefault1 = JSON.stringify(["obsidian", "markdown", "deepdive", "bionic", "science"]);
-    const oldDefault2 = JSON.stringify(["deepdive", "science", "obsidian", "markdown", "bionic"]);
-    const oldDefault3 = JSON.stringify(["science", "deepdive", "obsidian", "markdown", "bionic"]);
-    const currentOrderStr = JSON.stringify(order);
-    
-    if (currentOrderStr === oldDefault1 || currentOrderStr === oldDefault2 || currentOrderStr === oldDefault3) {
+    // Migrar ordres antics: si no conté 'resum', reinicialitzar a l'ordre canònic.
+    // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
+    // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
+    if (!order.includes("resum")) {
         order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
         ext.storage.sync.set({ extensionOrder: order });
-    }
-    
-    // Ensure 'resum' is present
-    if (!order.includes("resum")) {
-        order = ["resum", ...order];
     }
 
     const toolbar = document.querySelector(".toolbar");
