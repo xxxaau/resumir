@@ -271,6 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- On Load Init ---
     (async () => {
+        // Purgar caché expirada en segon pla (no bloquejant)
+        purgeStaleCacheEntries().catch(() => {});
         try {
             const syncData = await ext.storage.sync.get(["apiKey", "modelName"]);
             const localData = await ext.storage.local.get(["blockedUntil", "isBionicActive"]);

@@ -1,6 +1,8 @@
 // sidebar/cache.js
 // Handles local storage operations for summaries, sessions, and statistics
 
+const CACHE_TTL_DAYS = 30;
+
 /**
  * Checks local storage for a cached summary of the given URL.
  */
@@ -8,7 +10,14 @@ async function getSummaryCache(url) {
     try {
         const cacheKey = `summary_cache:${url}`;
         const cachedData = await ext.storage.local.get(cacheKey);
-        return cachedData[cacheKey] || null;
+        const entry = cachedData[cacheKey];
+        if (!entry) return null;
+        // Verificar TTL
+        if (entry.timestamp) {
+            const ageMs = Date.now() - new Date(entry.timestamp).getTime();
+            if (ageMs > CACHE_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
+        }
+        return entry;
     } catch (e) {
         console.error("Cache check failed:", e);
         return null;
@@ -35,6 +44,31 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
     } catch (e) {
         console.error("Error saving to cache:", e);
         return false;
+    }
+}
+
+/**
+ * Elimina les entrades de caché més velles que CACHE_TTL_DAYS.
+ * Usa storage.local.get(null) per enumerar totes les claus.
+ * @returns {number} Nombre d'entrades eliminades.
+ */
+async function purgeStaleCacheEntries() {
+    try {
+        const allData = await ext.storage.local.get(null);
+        const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+        const keysToRemove = [];
+        for (const [key, value] of Object.entries(allData)) {
+            if (!key.startsWith("summary_cache:")) continue;
+            const ts = value?.timestamp ? new Date(value.timestamp).getTime() : 0;
+            if (ts < cutoff) keysToRemove.push(key);
+        }
+        if (keysToRemove.length > 0) {
+            await ext.storage.local.remove(keysToRemove);
+        }
+        return keysToRemove.length;
+    } catch (e) {
+        console.error("Error purging stale cache:", e);
+        return 0;
     }
 }
 
@@ -79,5 +113,5 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats };
+    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries };
 }

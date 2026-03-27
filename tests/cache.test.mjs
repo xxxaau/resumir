@@ -34,7 +34,7 @@ function createStorageMock() {
 const storageMock = createStorageMock();
 global.ext = { storage: { local: storageMock } };
 
-const { getSummaryCache, saveSummaryCache, saveUsageStats } = require("../sidebar/cache.js");
+const { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries } = require("../sidebar/cache.js");
 
 // Neteja la memòria entre tests
 function clearStorage() { storageMock._clear(); }
@@ -167,4 +167,52 @@ test("saveUsageStats - l'entrada més recent va primer (unshift)", async () => {
     const data = await storageMock.get("usageHistory");
     assert.equal(data.usageHistory[0].title, "Segon");
     assert.equal(data.usageHistory[1].title, "Primer");
+});
+
+// ---------------------------------------------------------------------------
+// TTL i purgeStaleCacheEntries
+// ---------------------------------------------------------------------------
+
+test("getSummaryCache - retorna null per a entrades més velles que el TTL", async () => {
+    clearStorage();
+    const url = "https://old-article.com";
+    // Desar una entrada amb timestamp de fa 31 dies
+    const oldTimestamp = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
+    await storageMock.set({
+        [`summary_cache:${url}`]: { url, title: "Vell", summary: "Antic", timestamp: oldTimestamp, version: "1.0", stats: {} }
+    });
+    const result = await getSummaryCache(url);
+    assert.equal(result, null, "Ha de retornar null per entrades expirades");
+});
+
+test("getSummaryCache - retorna l'entrada si és dins el TTL", async () => {
+    clearStorage();
+    const url = "https://fresh-article.com";
+    await saveSummaryCache(url, "Fresc", "Resum fresc", "model", 10, 5);
+    const result = await getSummaryCache(url);
+    assert.ok(result !== null, "Ha de retornar l'entrada fresca");
+});
+
+test("purgeStaleCacheEntries - elimina entrades antigues i retorna el nombre eliminat", async () => {
+    clearStorage();
+    const oldTs = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
+    const freshTs = new Date().toISOString();
+    await storageMock.set({
+        "summary_cache:https://old.com": { url: "https://old.com", title: "Vell", summary: "X", timestamp: oldTs, version: "1.0", stats: {} },
+        "summary_cache:https://fresh.com": { url: "https://fresh.com", title: "Fresc", summary: "Y", timestamp: freshTs, version: "1.0", stats: {} },
+        "stats": { articles: 5, tokens: 1000 }, // no és caché, no s'ha d'eliminar
+    });
+    const removed = await purgeStaleCacheEntries();
+    assert.equal(removed, 1, "Ha d'eliminar 1 entrada expirada");
+    const old = await getSummaryCache("https://old.com");
+    assert.equal(old, null, "L'entrada vella ha de ser eliminada");
+    const fresh = await getSummaryCache("https://fresh.com");
+    assert.ok(fresh !== null, "L'entrada fresca ha de continuar");
+});
+
+test("purgeStaleCacheEntries - retorna 0 si no hi ha entrades a purgar", async () => {
+    clearStorage();
+    await saveSummaryCache("https://new.com", "Nou", "Resum", "model", 10, 5);
+    const removed = await purgeStaleCacheEntries();
+    assert.equal(removed, 0);
 });
