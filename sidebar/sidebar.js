@@ -77,13 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ext.storage.onChanged.addListener((changes, area) => {
         if (area === 'sync') {
             if (changes.apiKey && changes.apiKey.newValue !== changes.apiKey.oldValue) {
-                // Only reload if API key actually changed (to avoid wiping summary on font change)
-                if (changes.apiKey.newValue) {
-                    window.location.reload();
-                } else {
-                    // If removed, we need to show the warning
-                    window.location.reload();
-                }
+                window.location.reload();
             }
             if (changes.modelName) {
                 if (modelSelect && modelSelect.value !== changes.modelName.newValue && changes.modelName.newValue) {
