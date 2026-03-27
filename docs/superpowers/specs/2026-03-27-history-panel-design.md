@@ -28,7 +28,8 @@ Permetre a l'usuari navegar pels resums passats que es troben a la caché local,
 | `sidebar/sidebar.html` | Botó `#historyBtn` al footer + div `#history-panel` |
 | `sidebar/sidebar.css` | Estils del panell i les seves entrades |
 | `sidebar/sidebar.js` | Wiring del botó `historyBtn` |
-| `eslint.config.mjs` | Globals nous: `openHistoryPanel`, `closeHistoryPanel`, `listCachedSummaries` |
+| `scripts/build-sidebar-bundle.mjs` | Afegir `sidebar/history.js` a la llista de fitxers del bundle (Chromium), **després de `ui.js` i `cache.js`, i abans de `sidebar.js`** |
+| `eslint.config.mjs` | Globals nous: `openHistoryPanel`, `closeHistoryPanel`, `loadHistoryEntry`, `listCachedSummaries` |
 | `tests/history.test.mjs` | **Nou fitxer** — tests unitaris de `listCachedSummaries` |
 
 ### Flux de dades
@@ -69,8 +70,8 @@ Usa `storage.local.get(null)` per obtenir tots els keys i filtra els que comence
 ### `history.js` — funcions públiques
 
 - **`openHistoryPanel()`** — crida `listCachedSummaries`, renderitza el panell, amaga `#content`/`#loading`/`#error`, mostra `#history-panel`. Si no hi ha entrades, mostra missatge "Sense historial disponible".
-- **`closeHistoryPanel()`** — amaga `#history-panel`, restaura la visibilitat de `#content` (o `#error` si hi havia error previ).
-- **`loadHistoryEntry(entry)`** — renderitza `entry.summary` via `formatTextToFragment`, l'insereix a `#content`, fa `closeHistoryPanel()`.
+- **`closeHistoryPanel()`** — amaga `#history-panel`, restaura la visibilitat de l'element que era visible just abans d'obrir el panell. `openHistoryPanel` ha de capturar quin element estava visible (`#content`, `#error` o cap) en una variable de mòdul (`_previousVisible`) per poder-lo restaurar. Si cap element era visible, no restaura res.
+- **`loadHistoryEntry(entry)`** — llegeix la preferència biònica actual de `storage.sync` (`bionicReading: false` per defecte), crida `formatTextToFragment(entry.summary, bionicEnabled)`, insereix el resultat a `#content`, i fa `closeHistoryPanel()`.
 
 ### `sidebar.html` — canvis
 
@@ -82,6 +83,8 @@ Usa `storage.local.get(null)` per obtenir tots els keys i filtra els que comence
 <!-- A #container, germà de #content: -->
 <div id="history-panel" class="hidden"></div>
 ```
+
+L'ordre dels `<script>` ha de ser: `cache.js` → `ui.js` → `history.js` → `sidebar.js` (ja és l'ordre natural del fitxer existent; `history.js` s'insereix just abans de `sidebar.js`).
 
 ### `sidebar.js` — wiring
 
@@ -111,8 +114,13 @@ Fitxer: `tests/history.test.mjs`
 | 2 | `listCachedSummaries` descarta entrades caducades (>30 dies) |
 | 3 | `listCachedSummaries` retorna les entrades vàlides ordenades per data desc |
 | 4 | `listCachedSummaries` retorna array buit si no hi ha caché vàlida |
+| 5 | `listCachedSummaries` retorna array buit (no llança) si `storage.local.get` falla |
 
 Els tests de DOM (renderització del panell) no s'inclouen perquè la lògica de `formatTextToFragment` ja està coberta a `tests/ui.test.mjs`.
+
+## Comportament en casos límit
+
+- **Generació en curs quan s'obre l'historial**: si `#loading` és visible quan l'usuari fa clic a `historyBtn`, `openHistoryPanel` l'amaga igualment però `_previousVisible` serà `null`. En tancar el panell, no es restaura cap element (la generació continuarà en segon pla i mostrarà el resultat quan acabi, ja que `summary.js` usa `#content` directament). Aquest cas no es gestiona específicament: és un comportament acceptable.
 
 ## Fora d'abast
 
