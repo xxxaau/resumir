@@ -62,7 +62,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // 1. Get Configuration
         const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder"]);
         const apiKey = config.apiKey;
-        let modelName = config.modelName || "gemini-2.5-flash";
+        let modelName = config.modelName || DEFAULT_MODEL_ID;
         
         let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
         if (isDeepDive) {

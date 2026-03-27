@@ -11,7 +11,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 // Carregar shared/models.js primer i exposar com a global
 // (simula l'ordre de <script> al navegador: models.js → api.js)
-const { CURATED_MODELS } = require("../shared/models.js");
+const { CURATED_MODELS, DEFAULT_MODEL_ID } = require("../shared/models.js");
 global.CURATED_MODELS = CURATED_MODELS;
 const { getCuratedModelInfo } = require("../sidebar/api.js");
 
@@ -68,4 +68,19 @@ test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
 
 test("CURATED_MODELS - el primer model és el de major qualitat (gemini-2.5-pro)", () => {
     assert.equal(CURATED_MODELS[0].id, "gemini-2.5-pro");
+});
+
+// ---------------------------------------------------------------------------
+// DEFAULT_MODEL_ID
+// ---------------------------------------------------------------------------
+
+test("DEFAULT_MODEL_ID és un ID vàlid dins CURATED_MODELS", () => {
+    assert.ok(
+        CURATED_MODELS.some(m => m.id === DEFAULT_MODEL_ID),
+        `DEFAULT_MODEL_ID '${DEFAULT_MODEL_ID}' no és a CURATED_MODELS`
+    );
+});
+
+test("DEFAULT_MODEL_ID és un string no buit", () => {
+    assert.ok(typeof DEFAULT_MODEL_ID === "string" && DEFAULT_MODEL_ID.length > 0);
 });

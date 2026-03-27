@@ -280,9 +280,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const syncData = await ext.storage.sync.get(["apiKey", "modelName"]);
             const localData = await ext.storage.local.get(["blockedUntil", "isBionicActive"]);
-            
+
             const apiKey = syncData.apiKey;
-            let modelName = syncData.modelName || "gemini-2.0-flash";
+            let modelName = syncData.modelName || DEFAULT_MODEL_ID;
             
             if (localData.isBionicActive === true) {
                 isBionicEnabled = true;

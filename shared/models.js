@@ -11,6 +11,9 @@ const CURATED_MODELS = [
     { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite",priceIn: 0.07, priceOut: 0.30,  rpd: 999999 },
 ];
 
+/** Model usat per defecte si l'usuari no n'ha triat cap. */
+const DEFAULT_MODEL_ID = "gemini-2.0-flash";
+
 /**
  * Assegura que favoriteModels existeix a storage.sync.
  * Si no existeix (primer ús), l'inicialitza amb els models curats.
@@ -26,5 +29,5 @@ async function ensureFavoriteModels() {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { CURATED_MODELS };
+    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID };
 }
