@@ -52,6 +52,11 @@ const extensionGlobals = {
     saveSummaryCache: "readonly",
     saveUsageStats: "readonly",
     purgeStaleCacheEntries: "readonly",
+    listCachedSummaries: "readonly",
+    // sidebar/history.js
+    openHistoryPanel: "readonly",
+    closeHistoryPanel: "readonly",
+    loadHistoryEntry: "readonly",
     // sidebar/stats.js
     getDailyStats: "readonly",
     getTodayRequestCount: "readonly",

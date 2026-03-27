@@ -37,6 +37,7 @@ const files = [
     resolve(root, "sidebar/stats.js"),
     resolve(root, "sidebar/ui.js"),
     resolve(root, "sidebar/summary.js"),
+    resolve(root, "sidebar/history.js"),
     resolve(root, "sidebar/sidebar.js"),
 ];
 

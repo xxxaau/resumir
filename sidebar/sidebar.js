@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bionicBtn = document.getElementById("bionicBtn");
     const deepDiveBtn = document.getElementById("deepDiveBtn");
     const scienceBtn = document.getElementById("scienceBtn");
+    const historyBtn = document.getElementById("historyBtn");
     const modelSelect = document.getElementById("model-select");
 
     let isGenerating = false;
@@ -217,6 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
     scienceBtn.addEventListener("click", () => {
         doSummary(null, false, true, true);
     });
+
+    if (historyBtn) historyBtn.addEventListener("click", openHistoryPanel);
 
     settingsBtn.addEventListener("click", () => {
         ext.runtime.openOptionsPage();
