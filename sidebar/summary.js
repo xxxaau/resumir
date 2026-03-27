@@ -222,13 +222,14 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         for (const tryModel of modelsToTry) {
             if (signal.aborted) break;
             try {
-                currentMetadata.summary = ""; // Reset output text 
+                currentMetadata.summary = ""; // Reset output text
                 await callGeminiStream(apiKey, tryModel, systemPrompt, pageText, signal, (chunkText) => {
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
                     if (now - lastUpdate > 100) {
-                      contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
-                      lastUpdate = now;
+                        // Text pla durant el streaming (ràpid, sense parse)
+                        contentDiv.textContent = currentMetadata.summary;
+                        lastUpdate = now;
                     }
                 });
                 success = true;
