@@ -1,8 +1,7 @@
 // sidebar/api.js
 // Handles all communication with the Gemini API
 // CURATED_MODELS is defined in shared/models.js (loaded before this file)
-
-const EUR_RATE = 0.92; // USD → EUR fixed conversion rate
+// EUR_RATE is defined in shared/models.js (loaded before this file)
 
 /**
  * Returns curated model info (prices in EUR, rpd) for a given model ID.

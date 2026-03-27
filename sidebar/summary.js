@@ -184,13 +184,16 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         ctx.setSourceText(pageText);
 
         if (signal.aborted) return abortController;
-        
-        // Token Limit handling
-        const safeLimit = 8000;
+
+        // Token Limit handling — usar contextWindow del model triat (deixant 20% de marge)
+        // Nota: s'usa CURATED_MODELS.find() directament per evitar dep. creuada amb api.js en tests.
+        // El ratio chars/token canvia de 3.5 (original) a 4 per aproximació més precisa per Gemini.
+        const modelEntry = CURATED_MODELS.find(m => m.id === modelName);
+        const safeLimit = Math.floor(((modelEntry && modelEntry.contextWindow) || 200_000) * 0.8);
         const estimatedTokens = estimateTokens(pageText);
         if (estimatedTokens > safeLimit) {
-             const charLimit = safeLimit * 3.5;
-             pageText = pageText.substring(0, charLimit) + "\n\n[... Text truncated due to model limits ...]";
+            const charLimit = safeLimit * 4; // ~4 chars/token (abans era 3.5 — intencionadament canviat)
+            pageText = pageText.substring(0, charLimit) + "\n\n[... Text truncated due to model limits ...]";
         }
 
         // 3. Call Gemini API (with Auto-Fallback on Quota Exceeded)

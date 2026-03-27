@@ -11,8 +11,9 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 // Carregar shared/models.js primer i exposar com a global
 // (simula l'ordre de <script> al navegador: models.js → api.js)
-const { CURATED_MODELS, DEFAULT_MODEL_ID } = require("../shared/models.js");
+const { CURATED_MODELS, DEFAULT_MODEL_ID, EUR_RATE } = require("../shared/models.js");
 global.CURATED_MODELS = CURATED_MODELS;
+global.EUR_RATE = EUR_RATE;
 const { getCuratedModelInfo } = require("../sidebar/api.js");
 
 // ---------------------------------------------------------------------------
@@ -83,4 +84,18 @@ test("DEFAULT_MODEL_ID és un ID vàlid dins CURATED_MODELS", () => {
 
 test("DEFAULT_MODEL_ID és un string no buit", () => {
     assert.ok(typeof DEFAULT_MODEL_ID === "string" && DEFAULT_MODEL_ID.length > 0);
+});
+
+test("CURATED_MODELS - tots els models tenen contextWindow (número positiu)", () => {
+    for (const model of CURATED_MODELS) {
+        assert.ok(
+            typeof model.contextWindow === "number" && model.contextWindow > 0,
+            `Model ${model.id} no té contextWindow`
+        );
+    }
+});
+
+test("EUR_RATE és exportada des de shared/models.js i és un número entre 0.5 i 1.5", () => {
+    assert.ok(typeof EUR_RATE === "number", "EUR_RATE ha de ser número");
+    assert.ok(EUR_RATE > 0.5 && EUR_RATE < 1.5, `EUR_RATE fora de rang: ${EUR_RATE}`);
 });
