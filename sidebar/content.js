@@ -207,3 +207,8 @@ async function getPageContent() {
     
     return { title: tabTitle, url: tabUrl, text: text };
 }
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { executeScriptSafe, getPageContent };
+}

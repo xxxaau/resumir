@@ -59,6 +59,7 @@ const extensionGlobals = {
     refreshRemainingOnModelChange: "readonly",
     // sidebar/content.js
     getPageContent: "readonly",
+    executeScriptSafe: "readonly",
 };
 
 /** Globals cross-file específics de la pàgina d'opcions (settings-*.js) */
