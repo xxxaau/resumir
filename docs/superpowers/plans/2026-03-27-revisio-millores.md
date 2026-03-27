@@ -289,12 +289,13 @@ if (estimatedTokens > safeLimit) {
 Substituir per:
 ```js
 // Token Limit handling — usar contextWindow del model triat (deixant 20% de marge)
-// Nota: s'usa CURATED_MODELS.find() directament per evitar dep. creuada amb api.js en tests
+// Nota: s'usa CURATED_MODELS.find() directament per evitar dep. creuada amb api.js en tests.
+// El ratio chars/token canvia de 3.5 (original) a 4 per aproximació més precisa per Gemini.
 const modelEntry = CURATED_MODELS.find(m => m.id === modelName);
 const safeLimit = Math.floor(((modelEntry && modelEntry.contextWindow) || 200_000) * 0.8);
 const estimatedTokens = estimateTokens(pageText);
 if (estimatedTokens > safeLimit) {
-    const charLimit = safeLimit * 4; // ~4 chars/token
+    const charLimit = safeLimit * 4; // ~4 chars/token (abans era 3.5 — intencionadament canviat)
     pageText = pageText.substring(0, charLimit) + "\n\n[... Text truncated due to model limits ...]";
 }
 ```
@@ -644,6 +645,8 @@ module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStale
 
 El background service worker no té accés a `purgeStaleCacheEntries` (definida al bundle de la sidebar). La solució correcta: cridar-la des de `sidebar/sidebar.js` en carregar, on el mòdul ja és disponible.
 
+`purgeStaleCacheEntries` és global en el context de la sidebar perquè `sidebar.html` carrega `cache.js` via `<script>` abans de `sidebar.js` — igual que `DEFAULT_MODEL_ID` a Task 1.
+
 A `sidebar/sidebar.js`, dins l'IIFE d'inicialització (línia ~279, just abans del `try {`), afegir:
 ```js
 // Purgar caché expirada en segon pla (no bloquejant)
@@ -749,30 +752,39 @@ git commit -m "perf(summary): text pla durant streaming, Markdown complet al fin
 
 - [ ] **Step 1: Modificar `applyExtensionOrder` a `sidebar/ui.js`**
 
-Substituir el bloc de migració hardcoded (línies ~57-65):
-```js
-// Migrate old default orders to new default order
-const oldDefault1 = JSON.stringify(["obsidian", "markdown", "deepdive", "bionic", "science"]);
-const oldDefault2 = JSON.stringify(["deepdive", "science", "obsidian", "markdown", "bionic"]);
-const oldDefault3 = JSON.stringify(["science", "deepdive", "obsidian", "markdown", "bionic"]);
-const currentOrderStr = JSON.stringify(order);
+El fitxer actual té **dos blocs consecutius** a les línies 56–70. Cal substituir-los tots dos per un de sol:
 
-if (currentOrderStr === oldDefault1 || currentOrderStr === oldDefault2 || currentOrderStr === oldDefault3) {
-    order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
-    ext.storage.sync.set({ extensionOrder: order });
-}
+**Codi actual a eliminar (línies 56–70, ambdós blocs):**
+```js
+    // Migrate old default orders to new default order
+    const oldDefault1 = JSON.stringify(["obsidian", "markdown", "deepdive", "bionic", "science"]);
+    const oldDefault2 = JSON.stringify(["deepdive", "science", "obsidian", "markdown", "bionic"]);
+    const oldDefault3 = JSON.stringify(["science", "deepdive", "obsidian", "markdown", "bionic"]);
+    const currentOrderStr = JSON.stringify(order);
+
+    if (currentOrderStr === oldDefault1 || currentOrderStr === oldDefault2 || currentOrderStr === oldDefault3) {
+        order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
+        ext.storage.sync.set({ extensionOrder: order });
+    }
+
+    // Ensure 'resum' is present
+    if (!order.includes("resum")) {
+        order = ["resum", ...order];
+    }
 ```
 
-Per:
+**Substituir per (un sol bloc unificat):**
 ```js
-// Migrar ordres antics a l'ordre per defecte actual.
-// Si l'ordre no conté 'resum', és d'una versió anterior a v2.1 — reinicialitzar.
-// Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
-if (!order.includes("resum")) {
-    order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
-    ext.storage.sync.set({ extensionOrder: order });
-}
+    // Migrar ordres antics: si no conté 'resum', reinicialitzar a l'ordre canònic.
+    // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
+    // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
+    if (!order.includes("resum")) {
+        order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
+        ext.storage.sync.set({ extensionOrder: order });
+    }
 ```
+
+**Nota:** El segon bloc original (`order = ["resum", ...order]`) només afegia "resum" al davant sense resetar l'ordre; el nou bloc unificat fa el reset complet al default canònic, que és el comportament correcte per qualsevol ordre llegat.
 
 - [ ] **Step 2: Verificar tots els tests**
 
