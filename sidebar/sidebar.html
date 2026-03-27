@@ -194,6 +194,7 @@
         Generant resum...
       </div>
       <div id="error" class="hidden" role="alert" aria-live="assertive"></div>
+      <div id="history-panel" class="hidden"></div>
     </div>
 
     <div id="footer-status" class="hidden">
@@ -235,6 +236,13 @@
         title="Resums estimats disponibles avui amb la quota gratuïta"
         >— resums avui</span
       >
+      <span class="separator">|</span>
+      <button
+        id="historyBtn"
+        title="Historial"
+        aria-label="Historial"
+        style="background:none;border:none;cursor:pointer;padding:0 2px;font-size:1em;color:var(--footer-text);line-height:1"
+      >🕐</button>
     </div>
     <script src="../ext.js"></script>
     <script src="../shared/models.js"></script>
@@ -245,6 +253,7 @@
     <script src="stats.js"></script>
     <script src="ui.js"></script>
     <script src="summary.js"></script>
+    <script src="history.js"></script>
     <script src="sidebar.js"></script>
   </body>
 </html>
