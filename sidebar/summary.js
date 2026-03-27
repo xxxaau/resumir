@@ -76,7 +76,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
     try {
         // 1. Get Configuration
-        const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder"]);
+        const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder", "favoriteModels"]);
         const apiKey = config.apiKey;
         let modelName = config.modelName || DEFAULT_MODEL_ID;
         
@@ -214,8 +214,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         // 3. Call Gemini API (with Auto-Fallback on Quota Exceeded)
         let lastUpdate = 0;
-        const { favoriteModels: favoriteIds = [] } = await ext.storage.sync.get({ favoriteModels: [] });
-        const modelsToTry = buildFallbackList(modelName, favoriteIds);
+        const modelsToTry = buildFallbackList(modelName, config.favoriteModels || []);
         let success = false;
         let lastError = null;
         const bionicEnabled = ctx.isBionicEnabled();
