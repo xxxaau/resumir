@@ -436,6 +436,7 @@ body {
 #history-panel {
   overflow-y: auto;
   padding: 4px 0;
+  max-height: calc(100vh - 100px);
 }
 
 .history-header {
