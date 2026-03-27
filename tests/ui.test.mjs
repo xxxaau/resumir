@@ -112,13 +112,18 @@ test("formatTextToFragment - link Markdown [text](url) genera <a>", () => {
     assert.equal(a.textContent, "Exemple");
 });
 
-test("formatTextToFragment - URL bare genera <a>", () => {
-    // Nota: el regex exclou punts de URLs bare per evitar falsos positius en frases.
-    // Usem localhost (sense punt) per validar que sí es genera l'<a>.
-    const frag = formatTextToFragment("Visita https://localhost/ruta avui");
+test("formatTextToFragment - URL bare genera <a> (domini amb punt)", () => {
+    const frag = formatTextToFragment("Visita https://example.com avui");
     const a = frag.querySelector("a");
     assert.ok(a, "Ha de generar <a> per URL bare");
-    assert.ok(a.href.startsWith("https://localhost"));
+    assert.equal(a.href, "https://example.com/");
+});
+
+test("formatTextToFragment - URL bare no inclou el punt final d'una frase", () => {
+    const frag = formatTextToFragment("Llegeix https://example.com.");
+    const a = frag.querySelector("a");
+    assert.ok(a, "Ha de generar <a>");
+    assert.equal(a.href, "https://example.com/", "El punt final no ha de formar part de la URL");
 });
 
 test("formatTextToFragment - mode biònic actiu afegeix <b> a les paraules", () => {

@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modelSelect.addEventListener("change", async (e) => {
         if (e.target.value === "__open_settings__") {
             // Revertir al model anterior i obrir configuració
-            const saved = await ext.storage.sync.get({ modelName: "gemini-2.0-flash" });
+            const saved = await ext.storage.sync.get({ modelName: DEFAULT_MODEL_ID });
             modelSelect.value = saved.modelName;
             ext.runtime.openOptionsPage();
             return;

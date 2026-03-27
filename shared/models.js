@@ -4,7 +4,7 @@
 // Importat via require() en els tests Node.
 
 /** Taxa de conversió USD → EUR. Font: referència editorial, actualitzar cada any. */
-const EUR_RATE = 0.92; // 2025-Q1
+const EUR_RATE = 0.92; // 2026-Q1 (font: ECB)
 
 const CURATED_MODELS = [
     { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",       priceIn: 1.25, priceOut: 5.00,  rpd: 50,     contextWindow: 1_000_000, fallback: false },

@@ -252,7 +252,7 @@ function formatTextToFragment(text, bionic = false, fixation = 0.45) {
     const parseTextWithLinks = (str) => {
         const frag = document.createDocumentFragment();
         // Detects markdown links [text](url), bare https:// URLs, and DOIs
-        const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s,;.!?<>"')\]]+)|\b(?:doi\.org\/|doi:\s*|DOI:\s*)(10\.\d+\/[^\s,;.!?<>"')\]]+)/g;
+        const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>"')\]]*[^\s<>"')\].,;!?])|\b(?:doi\.org\/|doi:\s*|DOI:\s*)(10\.\d+\/[^\s,;.!?<>"')\]]+)/g;
         let lastIndex = 0;
         let match;
         while ((match = linkRegex.exec(str)) !== null) {

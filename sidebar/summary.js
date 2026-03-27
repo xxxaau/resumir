@@ -274,7 +274,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
         
         setGeneratingState(false, true);
-        contentDiv.classList.remove("hidden");
         
         // 4. Update Stats & Cache
         const inputTokens = pageText.length / 4;

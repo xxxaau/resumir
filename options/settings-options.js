@@ -60,7 +60,7 @@ function restoreOptions() {
     
   ext.storage.sync.get(configKeys).then((data) => {
     document.querySelector("#apiKey").value = data.apiKey || "";
-    document.querySelector("#modelName").value = data.modelName || "gemini-2.5-flash";
+    document.querySelector("#modelName").value = data.modelName || DEFAULT_MODEL_ID;
     document.querySelector("#themeSelect").value = data.theme || "system";
     document.querySelector("#systemPrompt").value = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     
