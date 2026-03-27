@@ -64,6 +64,7 @@ test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
         assert.ok(typeof model.priceIn === "number", `priceIn no és número: ${model.id}`);
         assert.ok(typeof model.priceOut === "number", `priceOut no és número: ${model.id}`);
         assert.ok(typeof model.rpd === "number", `rpd no és número: ${model.id}`);
+        assert.ok(typeof model.fallback === "boolean", `fallback no és booleà: ${model.id}`);
     }
 });
 

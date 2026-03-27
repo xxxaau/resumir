@@ -16,10 +16,11 @@ function getCuratedModelInfo(modelId) {
     ));
     if (found) {
         return {
-            label:    found.label,
-            priceIn:  found.priceIn  * EUR_RATE,
-            priceOut: found.priceOut * EUR_RATE,
-            rpd:      found.rpd
+            label:         found.label,
+            priceIn:       found.priceIn  * EUR_RATE,
+            priceOut:      found.priceOut * EUR_RATE,
+            rpd:           found.rpd,
+            contextWindow: found.contextWindow
         };
     }
     return { label: modelId, priceIn: 0.10 * EUR_RATE, priceOut: 0.40 * EUR_RATE, rpd: 1500 };
