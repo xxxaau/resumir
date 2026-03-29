@@ -53,8 +53,8 @@ test("getCuratedModelInfo - gemini-2.0-flash-lite té RPD pràcticament il·limi
 // CURATED_MODELS (estructura de dades)
 // ---------------------------------------------------------------------------
 
-test("CURATED_MODELS conté exactament 5 models", () => {
-    assert.equal(CURATED_MODELS.length, 5);
+test("CURATED_MODELS conté exactament 6 models", () => {
+    assert.equal(CURATED_MODELS.length, 6);
 });
 
 test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
@@ -68,8 +68,8 @@ test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
     }
 });
 
-test("CURATED_MODELS - el primer model és el de major qualitat (gemini-2.5-pro)", () => {
-    assert.equal(CURATED_MODELS[0].id, "gemini-2.5-pro");
+test("CURATED_MODELS - el primer model és el model per defecte (gemini-3-flash-preview)", () => {
+    assert.equal(CURATED_MODELS[0].id, "gemini-3-flash-preview");
 });
 
 // ---------------------------------------------------------------------------
