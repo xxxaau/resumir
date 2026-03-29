@@ -9,10 +9,16 @@ let _previousVisible = null;
  * Hides current content areas, loads cached summaries, renders the list.
  */
 async function openHistoryPanel() {
-    const historyPanel = document.getElementById("history-panel");
-    const contentDiv   = document.getElementById("content");
-    const loadingDiv   = document.getElementById("loading");
-    const errorDiv     = document.getElementById("error");
+    const historyPanel  = document.getElementById("history-panel");
+    const contentDiv    = document.getElementById("content");
+    const loadingDiv    = document.getElementById("loading");
+    const errorDiv      = document.getElementById("error");
+    const backBar       = document.getElementById("history-back-bar");
+
+    // Hide back bar (in case we're returning from detail view)
+    if (backBar) backBar.classList.add("hidden");
+    const titleStrip = document.getElementById("page-title-strip");
+    if (titleStrip) titleStrip.classList.add("hidden");
 
     // Snapshot visible element (content or error) for restoration on close
     _previousVisible = null;
@@ -59,7 +65,22 @@ async function loadHistoryEntry(entry) {
     }
     contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
     contentDiv.classList.remove("hidden");
-    closeHistoryPanel();
+
+    // Hide history panel without restoring previous state
+    const historyPanel = document.getElementById("history-panel");
+    historyPanel.classList.add("hidden");
+    historyPanel.innerHTML = "";
+
+    // Show back bar so user can return to history list
+    const backBar = document.getElementById("history-back-bar");
+    if (backBar) backBar.classList.remove("hidden");
+    const titleStrip = document.getElementById("page-title-strip");
+    const titleLink  = document.getElementById("page-title-link");
+    if (titleStrip && titleLink) {
+        titleLink.textContent = entry.title || entry.url || "";
+        titleLink.href = entry.url || "#";
+        titleStrip.classList.remove("hidden");
+    }
 }
 
 /**
