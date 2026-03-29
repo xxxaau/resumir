@@ -432,7 +432,38 @@ body {
   font-weight: var(--bionic-weight, 700);
 }
 
+/* ── Page Title Strip ──────────────────────────────────────── */
+#page-title-strip {
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#page-title-link {
+  display: block;
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+#page-title-link:hover {
+  text-decoration: underline;
+}
+
 /* ── History panel ─────────────────────────────────────────── */
+#history-back-bar {
+  padding: 4px 0 8px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 4px;
+}
+
 #history-panel {
   overflow-y: auto;
   padding: 4px 0;
