@@ -787,13 +787,13 @@
                 min="20"
                 max="80"
                 step="5"
-                value="30"
+                value="35"
                 style="flex-grow: 1"
               />
               <span
                 id="bionicFixationValue"
                 style="min-width: 40px; font-weight: bold"
-                >30%</span
+                >35%</span
               >
             </div>
             <div class="help-text">
@@ -818,12 +818,26 @@
             <label for="bionicWeight">Gruix de la negreta</label>
             <select id="bionicWeight" class="form-control">
               <option value="400">Normal (400)</option>
+              <option value="500" selected>Mitjana (500)</option>
               <option value="600">Semi-negreta (600)</option>
-              <option value="700" selected>Negreta (700)</option>
+              <option value="700">Negreta (700)</option>
               <option value="800">Extra-negreta (800)</option>
               <option value="900">Màxima (900)</option>
             </select>
           </div>
+          <div class="form-group">
+            <label for="bionicFontSize">Mida de la lletra</label>
+            <select id="bionicFontSize" class="form-control">
+              <option value="0.85em">Molt petit (0.85em)</option>
+              <option value="0.9em">Petit (0.9em)</option>
+              <option value="1em" selected>Normal (1em)</option>
+              <option value="1.1em">Gran (1.1em)</option>
+              <option value="1.2em">Molt gran (1.2em)</option>
+              <option value="1.4em">Extra gran (1.4em)</option>
+              <option value="1.6em">Màxim (1.6em)</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label for="bionicLineHeight">Interlineat</label>
             <select id="bionicLineHeight" class="form-control">
@@ -1030,270 +1044,201 @@
               margin-left: 10px;
             "
           >
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <!-- CHANGELOG_START -->
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.1.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Març 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Selector de models amb favorits</strong>: Nova interfície amb estrelles per marcar/desmarcar models favorits des de la pàgina d'ajustaments. Els models seleccionats es sincronitzen automàticament amb el sidebar.</li>
+                <li><strong>Botó "Actualitzar"</strong>: Connecta amb l'API de Google per obtenir la llista completa de models Gemini disponibles i emmagatzema-la en cache local.</li>
+                <li><strong>Botó "Seleccionar"</strong>: Obre el llistat de models (cache local + curats) per gestionar favorits sense necessitat de connexió a l'API.</li>
+                <li><strong>Opció "Triar més models…"</strong>: El desplegable del sidebar inclou un enllaç directe als ajustaments quan l'usuari vol afegir nous models.</li>
+                <li><strong>Build multi-target</strong>: Nou sistema de build amb <code>manifest.base.json</code> + patches per Firefox/Chromium, bundle esbuild per Chromium, i generació de ZIPs via Node.js (eliminada dependència de Python).</li>
+                <li><strong>Codi consolidat</strong>: Extreta funció <code>ensureFavoriteModels()</code> a <code>shared/models.js</code> i <code>extractExecutiveSummary()</code> a <code>utils.js</code> per eliminar duplicació.</li>
+                <li><strong>Neteja de producció</strong>: Eliminats fitxers obsolets (<code>make_zip_v4.py</code>, <code>generate_icons_blue.ps1</code>, <code>test_models.py</code>) i <code>console.log</code> innecessari.</li>
+                <li><strong>SyntaxError a la pàgina d'ajustaments</strong>: Solucionada declaració duplicada de <code>extensionToggles</code> entre <code>settings-options.js</code> i <code>settings.js</code> que impedia carregar la pàgina.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.0.1
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Bionic Reader (UI/UX)</strong>: El botó d'activació ara està sempre disponible de forma incondicional al faldó de l'aplicació en comptes de requerir un resum completat.</li>
+                <li><strong>Bionic Reader (Configuració)</strong>: El filtre tipogràfic als ajustaments amaga intel·ligentment les fonts que no pertanyen al sistema operatiu (<code>macOS</code> o <code>Windows</code>) reduint el soroll visual de la llista desplegable. A més, canviar la font, interlineat o pes biònic des de les opcions reflectirà els canvis a l'instant al Sidebar de darrere.</li>
+                <li><strong>Bionic Reader (Persistència)</strong>: L'estat triat (actiu/inactiu) es guarda permanentment entre sessions gràcies a l'emmagatzematge local de l'extensió. De la mateixa manera, si deixes l'efecte encès i resumeixes una altra pàgina, el nou text adoptarà automàticament l'estil i formatatge preservats.</li>
+                <li><strong>Traçabilitat d'errors</strong>: S'han assignat identificadors numèrics (<code>[001]</code> a <code>[010]</code>) a cadascun dels missatges d'excepció (quotes esgotades, llocs invàlids, fallades de l'API o d'extracció) per optimitzar-ne el procés de diagnòstic de suport tècnic.</li>
+                <li><strong>Bug del Recarregar necessari (F5)</strong>: Solventat el problema d'extracció que exigia refrescar la finestra al moure's entre pestanyes amb la sidebar tancada. S'ha migrat l'accés web universal d'<code>optional_host_permissions</code> a l'assignació estàtica de Chromium i Firefox, consolidant la recollida de dades sense pèrdua de gest d'usuari (user gesture limits).</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.0.0
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  <strong>Suport natiu ecosistema Chromium</strong>.
-                </li>
-                <li>
-                  Resolt error de pèrdua de memòria (<em>Cannot set properties of null</em>) al creuar seleccions i webs extenses.
-                </li>
-                <li>
-                  Desplegament del panell lateral (Side Panel) en entorns Google i neteja general de menús.
-                </li>
+              <p style="margin: 4px 0 6px; color: #555; font-size: 0.9em">Milestone 2.0.0: Versió amb suport natiu per a l'ecosistema Chromium.</p>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Suport Chromium</strong>: Compatibilitat completa amb navegadors basats en Chromium (Google Chrome, Edge, Brave, etc.) gràcies al nou wrapper <code>ext.js</code> que abstreu la crida correcta a <code>browser</code> o <code>chrome</code>.</li>
+                <li><strong>Build Multi-Target</strong>: Scripts de generació actualitzats per empaquetar de forma simultània l'arxiu <code>.zip</code> per Firefox i el <code>.zip</code> per Chromium alhora.</li>
+                <li><strong>Side Panel Natiu</strong>: Integració amb l'API de <code>chrome.sidePanel</code> per a entorns Google garantint que el panell lateral o l'action de l'extensió funcionen previsiblement.</li>
+                <li><strong>Auditories i procediments</strong>: Obligatorietat de testejar tant el branch Firefox com el Chromium de qualsevol canvi futur. Millores a l'eina automàtica de release per eliminar paquets o extrets <code>.zip</code> antics i carpetes un-packed.</li>
+                <li><strong>Problema Caching Selecció vs Web Completa</strong>: Solucionat error fatal (<em>"Cannot set properties of null"</em>) a l'hora de canviar de resumir un text pre-seleccionat i seguidament una pàgina completa. Ara les seleccions tenen un identificador únic (prefixat amb <code>seleccio:</code>).</li>
+                <li><strong>UX Menú Contextual</strong>: S'han retirat les icones lletges de l'entorn dev als menús contextuals de Firefox i Chrome per tal que només aparegui el text net, igualant el look & feel de sistema.</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.2.1
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Refactorització sidebar.js</strong>: Reduït de 632 a 230 línies. Extreta la lògica de generació a <code>summary.js</code>, quota/estadístiques a <code>stats.js</code>, i avís API key a <code>ui.js</code>.</li>
+                <li><strong>Missatges d'error</strong>: Nova funció <code>classifyError()</code> que mostra missatges clars i en català per errors d'API key (401/403), quota excedida (429), permisos denegats, i contingut buit.</li>
+                <li><strong>Contingut buit</strong>: Substituït l'error tècnic "Page content empty" per un missatge clar indicant que cal recarregar la pestanya.</li>
+                <li><strong>ext.js cross-browser</strong>: Completat el wrapper amb suport sidePanel per a Chromium (open, close, getViews, setPanelBehavior). Firefox no afectat.</li>
+                <li><code>sidebar/stats.js</code>: Mòdul de seguiment de quota diària i consum d'aigua.</li>
+                <li><code>sidebar/summary.js</code>: Mòdul amb la lògica principal de generació (<code>startSummary</code>), classificació d'errors (<code>classifyError</code>), i gestió de triggers.</li>
+                <li>Tests nous (15 → 23): <code>estimateTokens</code> edge cases, <code>getCuratedModelInfo</code>, <code>classifyError</code>, <code>formatObsidianPath</code> amb tokens de temps.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.7
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Permisos de host (fix crític)</strong>: <code>executeScriptSafe</code> refactoritzat amb estratègia "try first, request if needed". Elimina la comprovació prèvia <code>permissions.contains()</code> que retornava falsos negatius en URLs amb query params o hash, causant "Page content empty" en producció.</li>
+                <li><strong>Manifest AMO</strong>: Afegit camp obligatori <code>data_collection_permissions</code> (declara <code>websiteContent</code>) i apujat <code>strict_min_version</code> a <code>140.0</code> per eliminar warnings de l'AMO.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.6
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Seguretat</strong>: API key moguda de URL a header HTTP (<code>x-goog-api-key</code>) a totes les crides (sidebar + settings).</li>
+                <li><strong>Seguretat</strong>: Eliminat tot l'ús de <code>innerHTML</code> amb contingut dinàmic. Substituït per manipulació DOM segura (<code>DOMParser</code>, <code>replaceChildren</code>, <code>textContent</code>).</li>
+                <li><strong>Seguretat</strong>: <code>host_permissions</code> canviat a <code>optional_host_permissions</code> — permisos demanats dinàmicament.</li>
+                <li><strong>Seguretat</strong>: Comprovació de permisos (<code>permissions.contains()</code>) abans d'injectar scripts, eliminant errors de consola.</li>
+                <li><strong>Accessibilitat</strong>: Afegit <code>lang="ca"</code>, <code>aria-label</code> a tots els botons, <code>aria-hidden</code> a tots els SVGs decoratius, <code>aria-live</code> als elements d'estat.</li>
+                <li><strong>Privadesa</strong>: <code>PRIVACY_POLICY.md</code> actualitzada amb tots els permisos, YouTube/MAIN world i historial.</li>
+                <li><strong>Codi</strong>: Eliminats tots els <code>console.log</code> de producció, corregit typo "Obisidian", selectors CSS segurs amb <code>CSS.escape()</code>.</li>
+                <li><strong>Codi</strong>: Netejada dual key <code>enableDeepdive</code>/<code>enableDeepDive</code>, eliminat <code>storage.local.set</code> redundant.</li>
+                <li><strong>UX</strong>: Obsidian ara obre en nova pestanya (no substitueix l'activa).</li>
+                <li><strong>UX</strong>: Tema llegit de <code>storage.sync</code> (coherent amb la resta de configuració).</li>
+                <li><code>THIRD_PARTY.md</code>: Documentació de codi de tercers (Readability.js, Apache 2.0).</li>
+                <li>Workflow d'auditoria pre-release (<code>/pre_release_audit</code>) integrat al procés de publicació.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.1.5
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  Nova mètrica de "Temps Estalviat" i bar chart a les
-                  estadístiques.
-                </li>
-                <li>
-                  Re-ordenació d'extensions i paginació històrica afegida.
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Reordenació de Plugins</strong>: Funcionalitat per moure amunt i avall l'ordre dels plugins/extensions des de la configuració i el panell lateral.</li>
+                <li><strong>Gràfic i Nou KPI</strong>: Afegit un gràfic de barres d'activitat dels últims 7 dies i la nova mètrica "Temps Estalviat Aprox" a les Estadístiques.</li>
+                <li><strong>Paginació a l'historial</strong>: Selector de quantitat de resultats (20, 50, 100) i paginació real a la llista d'historial de peticions.</li>
+                <li><strong>Data relativa</strong>: Les entrades de referència a l'historial informatiu de peticions ara figuren en "fa X temps" de forma orgànica enlloc d'estricta, amb una lògica calculada amb el calendari actual humà (hores, minuts i "ahir"). </li>
+                <li><strong>Sentence Case UI</strong>: Tots els títols de funcions, tabulacions i botons s'han re-estandarditzat en format català acadèmic deixant de banda el Title Case anglès innecessari.</li>
+                <li><strong>Plugins</strong>: Reanomenat oficial del terme "Extensions" integrades per "Plugins".</li>
+                <li><strong>Tema Solarized</strong>: S'ha rellevat i integrat manualment el perfil i els matisos de la variant de previsualització de color sèpia "Sepia" pel sistema "Solarized".</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.1.4
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  <strong>Fix crític Obsidian</strong>: Solucionat el problema que impedia
-                  obrir Obsidian en la versió signada/producció. Ara utilitza
-                  <code>browser.tabs.update</code>.
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Integració Obsidian (Fix Final)</strong>: Canvi d'estratègia tècnica. Substituït <code>window.open</code> per <code>browser.tabs.update</code> per evitar bloquejos de CSP en producció i garantir que l'URI <code>obsidian://</code> s'obre correctament.</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.1.3
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  Correcció de l'ID intern per permetre actualitzacions a l'AMO.
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Validació AMO</strong>: Corregit l'ID de l'extensió al <code>manifest.json</code> (<code>sergi@xaudiera.xyz</code>) per coincidir amb el registrat a Mozilla Add-ons, permetent la pujada de noves versions.</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.1.2
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  Primera correcció de la integració amb Obsidian per millorar
-                  el comportament en entorns de producció.
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Integració Obsidian</strong>: Primera temptativa de solucionar l'error en producció eliminant l'<code>iframe</code> ocult i utilitzant <code>window.open</code> amb <code>_self</code>.</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.0.4
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  Filtre de models a la barra lateral per ocultar variants
-                  "preview", "pro-exp" i d'embeddings.
-                </li>
-                <li>
-                  Millores en l'extracció de transcripcions de YouTube per
-                  reduir errors de tipus "Proporcioneu el text".
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Filtre de Models (Sidebar)</strong>: Ara la barra lateral oculta correctament els models "preview", "pro-exp" i "embedding", alineant-se amb la configuració.</li>
+                <li><strong>Resum de YouTube</strong>: Millora en l'extracció de transcripcions (YouTube Transcript) per evitar l'error "Proporcioneu el text".</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v1.0.0
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  Nou tauler d'estadístiques amb tokens, peticions i velocitat
-                  mitjana de resposta.
-                </li>
-                <li>
-                  Historial de peticions amb informació de model, URL i cost en
-                  tokens.
-                </li>
-                <li>
-                  Streaming de resposta i càrrega especulativa per millorar la
-                  sensació de velocitat.
-                </li>
-                <li>
-                  Suport especial per a Hacker News i extracció intel·ligent de
-                  contingut.
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Tauler d'Estadístiques</strong>: Nova pestanya a la configuració per monitorar l'ús de l'API (peticions, tokens, velocitat).</li>
+                <li><strong>Historial de Peticions</strong>: Registre detallat de les últimes 100 peticions, incloent títol, URL, model i cost en tokens.</li>
+                <li><strong>Extracció Intel·ligent</strong>: Suport especial per a Hacker News (<code>news.ycombinator.com</code>), incloent els 15 millors comentaris al resum.</li>
+                <li><strong>Càrrega Especulativa</strong>: Inici de l'extracció de text en segon pla només obrir la barra lateral per un inici instantani.</li>
+                <li><strong>Streaming Real</strong>: Respostes text-a-text en temps real (Server-Sent Events) per millorar la percepció de velocitat.</li>
+                <li>Optimització del rendiment de la interfície durant la generació de text (throttling a 10fps).</li>
+                <li>Reducció del consum de tokens eliminant elements de navegació innecessaris.</li>
               </ul>
             </div>
-            <div
-              class="version-entry"
-              style="margin-bottom: 25px; position: relative"
-            >
-              <div
-                class="version-title"
-                style="font-weight: bold; margin-bottom: 5px"
-              >
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.2.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>Nou disseny de la pàgina de configuració ("Web Clipper" style).</li>
+                <li>Configuració en pàgina completa (tab) per millorar la usabilitat.</li>
+                <li>Suggeriment automàtic de models alternatius quan s'excedeix la quota.</li>
+                <li>Límit de tokens intel·ligent per a models Gemma per evitar errors.</li>
+                <li>Actualitzat el prompt de sistema per defecte amb instruccions més detallades i estructurades.</li>
+                <li>Reorganitzat el menú de configuració per a més claredat.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v1.1.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>Selector de models dinàmic al peu de la barra lateral.</li>
+                <li>Capacitat de personalitzar la plantilla d'exportació Markdown.</li>
+                <li>Suport complet per als models Gemma 3 i Gemini 2.0 Flash.</li>
+                <li>Errors en la selecció del model per defecte.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v0.1.0
-                <span
-                  class="version-date"
-                  style="
-                    font-weight: normal;
-                    color: #666;
-                    font-size: 13px;
-                    margin-left: 8px;
-                  "
-                  >Febrer 2026</span
-                >
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <ul
-                class="version-list"
-                style="margin: 5px 0; padding-left: 20px; color: #444"
-              >
-                <li>
-                  Versió interna inicial de prova amb resum bàsic de pàgines web
-                  mitjançant Google Gemini.
-                </li>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>Versió inicial de l'extensió Resumir contingut.</li>
+                <li>Resum de pàgines web amb Google Gemini API.</li>
+                <li>Barra lateral integrada.</li>
               </ul>
             </div>
+            <!-- CHANGELOG_END -->
           </div>
         </div>
 

@@ -25,6 +25,7 @@ function saveOptions(e) {
     bionicFixation: parseInt(document.querySelector("#bionicFixation").value),
     bionicFont: document.querySelector("#bionicFont").value,
     bionicWeight: document.querySelector("#bionicWeight").value,
+    bionicFontSize: document.querySelector("#bionicFontSize").value,
     bionicLineHeight: document.querySelector("#bionicLineHeight").value,
 
     enableDeepdive: document.querySelector("#enableDeepdive").checked,
@@ -55,7 +56,7 @@ function restoreOptions() {
   const configKeys = ["apiKey", "modelName", "theme", "systemPrompt", 
     "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault", 
     "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation", 
-    "bionicFont", "bionicWeight", "bionicLineHeight", "enableDeepdive", "deepDivePrompt", 
+    "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "enableDeepdive", "deepDivePrompt",
     "enableScience", "sciencePrompt", "enableResum", "extensionOrder"];
     
   ext.storage.sync.get(configKeys).then((data) => {
@@ -73,15 +74,16 @@ function restoreOptions() {
     document.querySelector("#obsidianTemplate").value = data.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
 
     document.querySelector("#enableBionic").checked = data.enableBionic === true;
-    document.querySelector("#bionicFixation").value = data.bionicFixation || 30;
-    document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 30) + "%";
+    document.querySelector("#bionicFixation").value = data.bionicFixation || 35;
+    document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 35) + "%";
     let savedFont = data.bionicFont || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     const fontSelect = document.querySelector("#bionicFont");
     if (!Array.from(fontSelect.options).some(opt => opt.value === savedFont)) {
         savedFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     }
     fontSelect.value = savedFont;
-    document.querySelector("#bionicWeight").value = data.bionicWeight || "700";
+    document.querySelector("#bionicWeight").value = data.bionicWeight || "500";
+    document.querySelector("#bionicFontSize").value = data.bionicFontSize || "1em";
     document.querySelector("#bionicLineHeight").value = data.bionicLineHeight || "1.5";
 
     // Handle migration/fallback for Deep Dive
