@@ -5,7 +5,7 @@
 // These are only used if storage has never been written (fresh install, first run).
 const DEFAULT_SYSTEM_PROMPT = "Ets un assistent expert en resumir contingut web. Respon SEMPRE en CATALÀ.";
 const DEFAULT_DEEP_DIVE_PROMPT = "Actua com un expert analista. Proporciona una anàlisi profunda. Respon en CATALÀ.";
-const DEFAULT_SCIENCE_PROMPT = "Ets un científic amb àmplia trajectòria acadèmica. Valida la veracitat científica. Respon en CATALÀ.";
+const DEFAULT_SCIENCE_PROMPT = "Actua com un auditor acadèmic i científic d'alt nivell. Revisa críticament el contingut basant-te en evidència científica validada. Assenyala desviacions del consens. Respon ÚNICAMENT en CATALÀ. NO incloguis cap introducció. Estructura: síntesi crítica (màx 150 paraules), Punts Clau (5-10), Referències Verificades (màx 5 amb DOI o URL).";
 
 /**
  * Construeix la llista de models a provar en cas de quota esgotada.
@@ -114,6 +114,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 currentMetadata.summary = cachedEntry.summary;
                 currentMetadata.fromCache = true;
 
+                if (ctx.onPageIdentified) {
+                    ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
+                }
+
                 contentDiv.replaceChildren(formatTextToFragment(cachedEntry.summary));
                 contentDiv.classList.remove("hidden");
                 
@@ -193,9 +197,13 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         currentMetadata.title = pageData.title;
         // Mark selection URLs uniquely so they don't conflict with the full page cache logic
         currentMetadata.url = overrideText ? "seleccio:" + pageData.url : pageData.url;
-        currentMetadata.summary = ""; 
-        currentMetadata.fromCache = false; 
-        
+        currentMetadata.summary = "";
+        currentMetadata.fromCache = false;
+
+        if (ctx.onPageIdentified) {
+            ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
+        }
+
         let pageText = pageData.text;
         ctx.setSourceText(pageText);
 
