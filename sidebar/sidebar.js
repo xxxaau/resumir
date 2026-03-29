@@ -19,6 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let isBionicEnabled = false;
     let globalConfigCache = {};
 
+    function showPageTitleStrip(title, url) {
+        const strip = document.getElementById("page-title-strip");
+        const link  = document.getElementById("page-title-link");
+        if (!strip || !link) return;
+        link.textContent = title || url;
+        link.href = url || "#";
+        strip.classList.remove("hidden");
+    }
+
+    function hidePageTitleStrip() {
+        const strip = document.getElementById("page-title-strip");
+        if (strip) strip.classList.add("hidden");
+    }
+
     // --- Context object for summary.js ---
     const ctx = {
         contentDiv,
@@ -29,7 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
         setSourceText: (t) => { currentSourceText = t; },
         getContentPreload: () => contentPreload,
         isBionicEnabled: () => isBionicEnabled,
-        getGlobalConfig: () => globalConfigCache
+        getGlobalConfig: () => globalConfigCache,
+        onPageIdentified: (title, url) => showPageTitleStrip(title, url)
     };
 
     // Bound summary starter (partially applied with ctx)
@@ -61,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicLineHeight", "bionicFixation"];
+    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
 
     ext.storage.sync
       .get(CONFIG_KEYS)
@@ -101,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (config.extensionOrder) {
                         applyExtensionOrder(config.extensionOrder);
                     }
-                    if (changes.bionicFont || changes.bionicWeight || changes.bionicLineHeight || changes.bionicFixation) {
+                    if (changes.bionicFont || changes.bionicWeight || changes.bionicFontSize || changes.bionicLineHeight || changes.bionicFixation) {
                         if (!isBionicEnabled) {
                             isBionicEnabled = true;
                             if (bionicBtn) {
@@ -187,9 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function applyBionicToContent(config) {
         const cfg = config || globalConfigCache;
         contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
+        contentDiv.style.fontSize = cfg.bionicFontSize || "inherit";
         contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
-        contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "700");
-        const fixation = (cfg.bionicFixation || 30) / 100;
+        contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "500");
+        const fixation = (cfg.bionicFixation || 35) / 100;
         if (currentMetadata.summary) {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
         }
@@ -204,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             bionicBtn.classList.remove("active");
             contentDiv.style.fontFamily = "";
+            contentDiv.style.fontSize = "";
             contentDiv.style.lineHeight = "";
             if (currentMetadata.summary) {
                contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
@@ -220,6 +237,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (historyBtn) historyBtn.addEventListener("click", openHistoryPanel);
+    const historyBackBtn = document.getElementById("historyBackBtn");
+    if (historyBackBtn) historyBackBtn.addEventListener("click", openHistoryPanel);
 
     settingsBtn.addEventListener("click", () => {
         ext.runtime.openOptionsPage();
