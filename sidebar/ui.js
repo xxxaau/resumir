@@ -367,15 +367,14 @@ function updateWaterStats(totalTodayAll, modelId, requestsByModel) {
     const remainEl = document.getElementById("requests-remaining");
 
     // --- Water consumption: ALL queries today (all models) ---
-    const totalMl = totalTodayAll * WATER_ML_PER_QUERY;
+    const gots = (totalTodayAll * WATER_ML_PER_QUERY) / WATER_ML_PER_GLASS;
     let waterStr;
-    if (totalMl < 1) {
-        waterStr = totalMl.toFixed(2) + " ml";
-    } else if (totalMl < WATER_ML_PER_GLASS) {
-        waterStr = totalMl.toFixed(1) + " ml";
-    } else {
-        const gots = totalMl / WATER_ML_PER_GLASS;
+    if (gots < 0.01) {
+        waterStr = gots.toFixed(3) + " gots";
+    } else if (gots < 1) {
         waterStr = gots.toFixed(2) + " gots";
+    } else {
+        waterStr = gots.toFixed(1) + " gots";
     }
     if (waterEl) waterEl.textContent = waterStr;
 
