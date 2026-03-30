@@ -98,6 +98,42 @@ async function loadStatistics() {
 }
 
 
+/**
+ * Retorna el Date del dilluns de la setmana de la data donada (ISO 8601, setmana inicia dilluns).
+ * @param {Date|string} date
+ * @returns {Date}
+ */
+function getMondayOfWeek(date) {
+    const d = new Date(date);
+    d.setHours(12, 0, 0, 0); // migdia per evitar rollover UTC en zones horàries +N
+    const day = d.getDay(); // 0=dg, 1=dl, ..., 6=ds
+    const diff = day === 0 ? -6 : 1 - day; // dg: -6 dies; altres: cap enrere fins dl
+    d.setDate(d.getDate() + diff);
+    return d;
+}
+
+/**
+ * Filtra l'historial d'ús per retornar només les entrades dins el període indicat.
+ * Les entrades amb data invàlida es descarten.
+ * @param {Array} history
+ * @param {"7d"|"30d"|"6m"|"1a"} period
+ * @returns {Array}
+ */
+function filterHistoryByPeriod(history, period) {
+    const cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
+    switch (period) {
+        case "30d": cutoff.setDate(cutoff.getDate() - 29);        break;
+        case "6m":  cutoff.setMonth(cutoff.getMonth() - 6);       break;
+        case "1a":  cutoff.setFullYear(cutoff.getFullYear() - 1); break;
+        default:    cutoff.setDate(cutoff.getDate() - 6);         break; // "7d"
+    }
+    return history.filter(entry => {
+        const d = new Date(entry.date);
+        return !isNaN(d.getTime()) && d >= cutoff;
+    });
+}
+
 function getRelativeTime(dateInput) {
     const date = new Date(dateInput);
     const now = new Date();
@@ -357,4 +393,9 @@ function clearHistory() {
             showStatus("Historial esborrat.");
         });
     }
+}
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { getMondayOfWeek, filterHistoryByPeriod };
 }
