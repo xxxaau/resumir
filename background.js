@@ -73,3 +73,10 @@ ext.menus.onClicked.addListener(async (info, tab) => {
       }
   }
 });
+
+// Obrir la sidebar quan la pàgina de stats demana carregar un resum en caché
+ext.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.pendingCacheLoad?.newValue) {
+        ext.sidebar.open();
+    }
+});
