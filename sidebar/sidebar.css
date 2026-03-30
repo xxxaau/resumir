@@ -536,3 +536,7 @@ body {
   color: var(--footer-text);
   white-space: nowrap;
 }
+
+#cache-badge[data-clickable="true"] {
+  cursor: pointer;
+}

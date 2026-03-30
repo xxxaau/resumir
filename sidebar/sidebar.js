@@ -244,9 +244,30 @@ document.addEventListener("DOMContentLoaded", () => {
     async function updateCacheBadge(url) {
         const badge = document.getElementById("cache-badge");
         if (!badge) return;
-        if (!url) { badge.style.visibility = "hidden"; return; }
+        if (!url) {
+            badge.style.visibility = "hidden";
+            badge.removeAttribute("data-clickable");
+            return;
+        }
         const cached = await getSummaryCache(url);
-        badge.style.visibility = cached ? "visible" : "hidden";
+        if (cached) {
+            badge.style.visibility = "visible";
+            badge.dataset.clickable = "true";
+        } else {
+            badge.style.visibility = "hidden";
+            badge.removeAttribute("data-clickable");
+        }
+    }
+
+    const cacheBadge = document.getElementById("cache-badge");
+    if (cacheBadge) {
+        cacheBadge.addEventListener("click", async () => {
+            if (cacheBadge.dataset.clickable !== "true") return;
+            const tabs = await ext.tabs.query({ active: true, currentWindow: true });
+            if (!tabs[0]?.url) return;
+            const entry = await getSummaryCache(tabs[0].url);
+            if (entry) loadHistoryEntry(entry);
+        });
     }
 
     ext.tabs.onActivated.addListener(async (activeInfo) => {
