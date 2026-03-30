@@ -105,7 +105,7 @@ async function listCachedSummaries() {
 /**
  * Saves usage statistics and history for a generated summary.
  */
-async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, latency, title, url) {
+async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, latency, title, url, cacheTokens = 0) {
     try {
         // Read stats and history in a single call
         const data = await ext.storage.local.get(["stats", "usageHistory"]);
@@ -123,6 +123,7 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
             model: modelName,
             inputTokens: Math.round(inputTokens),
             outputTokens: Math.round(outputTokens),
+            cacheTokens: Math.round(cacheTokens),
             type: (isDeepDive || modelName.includes("pro")) ? "deep" : "lite",
             latency: latency
         };

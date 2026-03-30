@@ -141,6 +141,7 @@ test("saveUsageStats - l'entrada de l'historial té els camps correctes", async 
     assert.equal(entry.latency, 3000);
     assert.equal(entry.title, "Titular");
     assert.equal(entry.url, "https://pro.com");
+    assert.equal(entry.cacheTokens, 0); // default quan no es passa
 });
 
 test("saveUsageStats - l'entrada és 'lite' per a models no-pro sense isDeepDive", async () => {
@@ -234,4 +235,11 @@ test("purgeStaleCacheEntries - elimina entrades sense timestamp (considerades ex
     });
     const removed = await purgeStaleCacheEntries();
     assert.equal(removed, 1, "Ha d'eliminar l'entrada sense timestamp");
+});
+
+test("saveUsageStats - cacheTokens es guarda correctament", async () => {
+    clearStorage();
+    await saveUsageStats(100, 50, false, "gemini-2.0-flash", 1000, "T", "https://t.com", 25);
+    const data = await storageMock.get("usageHistory");
+    assert.equal(data.usageHistory[0].cacheTokens, 25);
 });
