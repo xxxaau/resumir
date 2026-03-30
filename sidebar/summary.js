@@ -285,6 +285,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         setGeneratingState(false, true);
         
         // 4. Update Stats & Cache
+        // apiUsage is null if the stream failed mid-flight or the API returned no usageMetadata.
+        // Fall back to character-based estimates in those cases.
         const inputTokens  = apiUsage?.inputTokens  ?? pageText.length / 4;
         const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
         const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
