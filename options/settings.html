@@ -857,11 +857,19 @@
       <div id="tab-stats" class="tab-pane">
         <h1 class="page-title">Estadístiques d'ús</h1>
 
+        <!-- Period Selector -->
+        <div class="period-selector">
+          <button class="period-btn active" data-period="7d">7d</button>
+          <button class="period-btn" data-period="30d">30d</button>
+          <button class="period-btn" data-period="6m">6m</button>
+          <button class="period-btn" data-period="1a">1a</button>
+        </div>
+
         <!-- KPI Cards -->
         <div class="section">
           <div class="section-header">
             <h3>Activitat global</h3>
-            <div class="date-filter">Sempre</div>
+            <div class="date-filter" id="kpiDateFilter">Sempre</div>
           </div>
           <div
             class="stats-grid"

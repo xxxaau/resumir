@@ -5,6 +5,7 @@
 let PAGE_SIZE = 20;
 let currentPage = 1;
 let totalPages = 1;
+let currentPeriod = "7d";
 
 async function loadStatistics() {
     try {
@@ -17,44 +18,52 @@ async function loadStatistics() {
             if (selectEl) selectEl.value = PAGE_SIZE.toString();
         }
 
+        // Filtrar historial pel període actiu
+        const filtered = filterHistoryByPeriod(history, currentPeriod);
+
+        // Actualitzar label del filtre
+        const periodLabels = { "7d": "7 dies", "30d": "30 dies", "6m": "6 mesos", "1a": "1 any" };
+        const kpiDateFilterEl = document.getElementById("kpiDateFilter");
+        if (kpiDateFilterEl) kpiDateFilterEl.textContent = periodLabels[currentPeriod] || currentPeriod;
+
         // 1. Update KPI Cards
         const elArticles = document.getElementById("statsArticles");
         const elTimeSaved = document.getElementById("kpiTimeSaved");
 
-        if(elArticles) elArticles.textContent = history.length;
-        
-        // Calculate Time Saved (Estimated reading time - wait time)
-        // Assume 1 token ~ 0.75 words, Average reading speed = 250 wpm.
-        // Therefore, 1 token takes ~0.18 seconds to read. We use 0.2s for simplicity.
+        if (elArticles) elArticles.textContent = filtered.length;
+
+        // Temps estalviat: calculat de les entrades del període
         let timeSavedSeconds = 0;
-        if (history.length > 0) {
-            timeSavedSeconds = history.reduce((acc, curr) => {
+        if (filtered.length > 0) {
+            timeSavedSeconds = filtered.reduce((acc, curr) => {
                 const readSecs = (curr.inputTokens || 0) * 0.2;
                 const waitSecs = (curr.latency || 0) / 1000;
                 return acc + Math.max(0, readSecs - waitSecs);
             }, 0);
         }
-        
+
         const hours = Math.floor(timeSavedSeconds / 3600);
         const minutes = Math.floor((timeSavedSeconds % 3600) / 60);
-        if(elTimeSaved) elTimeSaved.textContent = `${hours}h ${minutes}m`;
+        if (elTimeSaved) elTimeSaved.textContent = `${hours}h ${minutes}m`;
 
         // Water consumption stats
         const WATER_ML = 0.26;
         const GLASS_ML = 300;
         const todayStr = new Date().toISOString().slice(0, 10);
 
+        // kpiWaterToday: sempre avui (historial sencer, independent del període)
         const todayCount = history.filter(e => {
-            const ts = e.date || e.timestamp; // cache.js uses 'date'
+            const ts = e.date || e.timestamp;
             return ts && new Date(ts).toISOString().slice(0, 10) === todayStr;
         }).length;
-        const totalCount = history.length;
+        // kpiWaterTotal: del període filtrat
+        const periodCount = filtered.length;
 
         const todayMl  = todayCount  * WATER_ML;
-        const totalMl  = totalCount  * WATER_ML;
+        const periodMl = periodCount * WATER_ML;
 
         function fmtWater(ml) {
-            if (ml < 1)    return ml.toFixed(2) + " ml";
+            if (ml < 1)        return ml.toFixed(2) + " ml";
             if (ml < GLASS_ML) return ml.toFixed(1) + " ml";
             return (ml / GLASS_ML).toFixed(2) + " gots";
         }
@@ -62,13 +71,13 @@ async function loadStatistics() {
         const elWaterToday = document.getElementById("kpiWaterToday");
         const elWaterTotal = document.getElementById("kpiWaterTotal");
         if (elWaterToday) elWaterToday.textContent = fmtWater(todayMl);
-        if (elWaterTotal) elWaterTotal.textContent = `Total acumulat: ${fmtWater(totalMl)}`;
+        if (elWaterTotal) elWaterTotal.textContent = `Consum del període: ${fmtWater(periodMl)}`;
 
-        // Render Bar Chart
-        renderDailyChart(history);
+        // Render Bar Chart (amb període)
+        renderDailyChart(filtered, currentPeriod);
 
-        // Grouped History Table
-        renderGroupedHistoryTable(history);
+        // Grouped History Table (amb període)
+        renderGroupedHistoryTable(filtered, currentPeriod);
 
         // 2. Render History Table with Pagination
         // Sort history by date desc (newest first)

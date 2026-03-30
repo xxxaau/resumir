@@ -102,3 +102,15 @@ ext.storage.onChanged.addListener((changes, area) => {
         }
     }
 });
+
+// Period selector
+document.querySelectorAll(".period-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        currentPeriod = btn.dataset.period;
+        document.querySelectorAll(".period-btn").forEach(b =>
+            b.classList.toggle("active", b === btn)
+        );
+        currentPage = 1; // Reset paginació quan canvia el període
+        loadStatistics();
+    });
+});

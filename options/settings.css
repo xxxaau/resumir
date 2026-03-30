@@ -835,3 +835,32 @@ input:checked + .slider:before {
 .nav-item.dynamic-extension.active svg {
     opacity: 1;
 }
+
+/* ── Period Selector ─────────────────────────────────────── */
+.period-selector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.period-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.period-btn:hover {
+  background-color: var(--nav-hover);
+  color: var(--primary-color);
+}
+
+.period-btn.active {
+  background-color: var(--button-color);
+  color: #fff;
+  border-color: var(--button-color);
+}
