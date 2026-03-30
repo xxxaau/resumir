@@ -79,28 +79,32 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
+    let lastUsageMeta = null;
 
     while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        
+
         const lines = buffer.split("\n");
-        buffer = lines.pop(); 
-        
+        buffer = lines.pop();
+
         for (const line of lines) {
             if (line.trim() === "") continue;
             if (line.startsWith("data: ")) {
                 const jsonStr = line.slice(6);
                 if (jsonStr === "[DONE]") continue;
-                
+
                 try {
                     const data = JSON.parse(jsonStr);
                     const part = data.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (part) {
                         onChunk(part);
+                    }
+                    if (data.usageMetadata) {
+                        lastUsageMeta = data.usageMetadata;
                     }
                 } catch (e) {
                     console.warn("Error parsing stream JSON", e);
@@ -108,6 +112,12 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
             }
         }
     }
+
+    return {
+        inputTokens:  lastUsageMeta?.promptTokenCount           ?? 0,
+        outputTokens: lastUsageMeta?.candidatesTokenCount        ?? 0,
+        cacheTokens:  lastUsageMeta?.cachedContentTokenCount     ?? 0,
+    };
 }
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
