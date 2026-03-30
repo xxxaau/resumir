@@ -442,12 +442,23 @@ function renderHistoryTable(history) {
         let prefix = entry.type === "deep" ? "+ " : "";
         
         if (entry.url) {
-            const a = document.createElement("a");
-            a.href = entry.url;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.textContent = prefix + (entry.title || "Sense títol");
-            tdTitle.appendChild(a);
+            const titleSpan = document.createElement("span");
+            titleSpan.style.cssText = "cursor:pointer;color:var(--primary-color);text-decoration:underline;";
+            titleSpan.textContent = prefix + (entry.title || "Sense títol");
+            titleSpan.addEventListener("click", async () => {
+                const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+                const cacheKey = `summary_cache:${entry.url}`;
+                const data = await ext.storage.local.get(cacheKey);
+                const cached = data[cacheKey];
+                const isCached = cached && cached.timestamp &&
+                    (Date.now() - new Date(cached.timestamp).getTime()) < CACHE_TTL_MS;
+                if (isCached) {
+                    await ext.storage.local.set({ pendingCacheLoad: entry.url });
+                } else {
+                    window.open(entry.url, "_blank");
+                }
+            });
+            tdTitle.appendChild(titleSpan);
         } else {
             tdTitle.textContent = prefix + (entry.title || "Sense títol");
         }
