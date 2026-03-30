@@ -210,6 +210,7 @@ function renderGroupedHistoryTable(history) {
     const groups = {};
     history.forEach(entry => {
         const dateObj = new Date(entry.date);
+        if (isNaN(dateObj.getTime())) return; // skip malformed entries
         const dayKey = dateObj.toLocaleDateString();
         const sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
         const model = entry.model || "gemini-1.5-flash";
@@ -268,20 +269,20 @@ function renderGroupedHistoryTable(history) {
         // In tok
         const tdIn = document.createElement("td");
         tdIn.style.textAlign = "right";
-        tdIn.textContent = group.inputTokens;
+        tdIn.textContent = group.inputTokens.toLocaleString();
         tr.appendChild(tdIn);
 
         // Out tok
         const tdOut = document.createElement("td");
         tdOut.style.textAlign = "right";
-        tdOut.textContent = group.outputTokens;
+        tdOut.textContent = group.outputTokens.toLocaleString();
         tr.appendChild(tdOut);
 
         // Caché
         const tdCache = document.createElement("td");
         tdCache.style.textAlign = "right";
         tdCache.style.color = group.cacheTokens > 0 ? "inherit" : "var(--text-muted)";
-        tdCache.textContent = group.cacheTokens;
+        tdCache.textContent = group.cacheTokens.toLocaleString();
         tr.appendChild(tdCache);
 
         // ms∅
