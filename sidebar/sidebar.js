@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }).finally(() => {
             isGenerating = false;
             abortController = null;
+            if (currentMetadata.url) updateCacheBadge(currentMetadata.url);
         });
     };
 
@@ -240,6 +241,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const historyBackBtn = document.getElementById("historyBackBtn");
     if (historyBackBtn) historyBackBtn.addEventListener("click", openHistoryPanel);
 
+    async function updateCacheBadge(url) {
+        const badge = document.getElementById("cache-badge");
+        if (!badge || !url) return;
+        const cached = await getSummaryCache(url);
+        badge.classList.toggle("hidden", !cached);
+    }
+
+    ext.tabs.onActivated.addListener(async (activeInfo) => {
+        try {
+            const tab = await ext.tabs.get(activeInfo.tabId);
+            updateCacheBadge(tab.url);
+        } catch (e) {}
+    });
+
+    ext.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        if (changeInfo.url && tab.active) updateCacheBadge(tab.url);
+    });
+
     settingsBtn.addEventListener("click", () => {
         ext.runtime.openOptionsPage();
     });
@@ -295,6 +314,10 @@ document.addEventListener("DOMContentLoaded", () => {
     (async () => {
         // Purgar caché expirada en segon pla (no bloquejant)
         purgeStaleCacheEntries().catch(() => {});
+        // Inicialitzar badge de caché per a la URL del tab actiu
+        ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+            if (tabs[0]?.url) updateCacheBadge(tabs[0].url);
+        }).catch(() => {});
         try {
             const syncData = await ext.storage.sync.get(["apiKey", "modelName"]);
             const localData = await ext.storage.local.get(["blockedUntil", "isBionicActive"]);
