@@ -243,9 +243,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function updateCacheBadge(url) {
         const badge = document.getElementById("cache-badge");
-        if (!badge || !url) return;
+        if (!badge) return;
+        if (!url) { badge.style.visibility = "hidden"; return; }
         const cached = await getSummaryCache(url);
-        badge.classList.toggle("hidden", !cached);
+        badge.style.visibility = cached ? "visible" : "hidden";
     }
 
     ext.tabs.onActivated.addListener(async (activeInfo) => {
