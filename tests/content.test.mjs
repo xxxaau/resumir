@@ -129,8 +129,6 @@ test("getPageContent - llança [006] quan no s'extreu cap text", async () => {
 
 test("getPageContent - HN retorna discussió sense article quan articleUrl és null", async () => {
     const hnTab = { id: 2, url: "https://news.ycombinator.com/item?id=12345", title: "HN Thread" };
-    global.Readability = class { parse() { return null; } };
-    global.fetch = async () => ({ ok: true, text: async () => "" });
     global.ext = makeExt({
         tabs: [hnTab],
         scriptResult: { title: "Article Title", articleUrl: null, comments: "- Un comentari interessant" },
@@ -171,6 +169,19 @@ test("getPageContent - HN degrada gracefully quan el fetch de l'article falla", 
     assert.ok(result.text.includes("Top Discussion Comments"), "Ha de mostrar discussió sola si fetch falla");
     assert.ok(result.text.includes("Comentari de fallback"), "Ha d'incloure els comentaris");
     assert.ok(!result.text.includes("ARTICLE:"), "No ha d'incloure secció ARTICLE si fetch falla");
+});
+
+test("getPageContent - HN degrada gracefully quan l'article retorna error HTTP", async () => {
+    const hnTab = { id: 2, url: "https://news.ycombinator.com/item?id=12345", title: "HN Thread" };
+    global.fetch = async () => ({ ok: false, status: 404, text: async () => "" });
+    global.Readability = class { parse() { return null; } };
+    global.ext = makeExt({
+        tabs: [hnTab],
+        scriptResult: { title: "Article Title", articleUrl: "https://example.com/article", comments: "- Comentari HTTP error" },
+    });
+    const result = await getPageContent();
+    assert.ok(result.text.includes("Top Discussion Comments"), "Ha de mostrar discussió sola si HTTP error");
+    assert.ok(!result.text.includes("ARTICLE:"), "No ha d'incloure secció ARTICLE si HTTP error");
 });
 
 // ---------------------------------------------------------------------------

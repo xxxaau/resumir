@@ -68,6 +68,7 @@ async function getPageContent() {
                 if (hn.articleUrl && !hn.articleUrl.includes("ycombinator.com")) {
                     try {
                         const resp = await fetch(hn.articleUrl);
+                        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                         const html = await resp.text();
                         const doc = new DOMParser().parseFromString(html, "text/html");
                         const base = doc.createElement("base");
