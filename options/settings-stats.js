@@ -279,10 +279,16 @@ function renderDailyChart(history, period = "7d") {
     });
 }
 
-function renderGroupedHistoryTable(history) {
+function renderGroupedHistoryTable(history, period = "7d") {
     const tbody = document.getElementById("groupedTableBody");
     if (!tbody) return;
     tbody.replaceChildren();
+
+    // Actualitzar capçalera de la columna de data
+    const dateHeaderEl = document.getElementById("groupedTableDateHeader");
+    if (dateHeaderEl) {
+        dateHeaderEl.textContent = period === "6m" ? "Setmana" : period === "1a" ? "Mes" : "Data";
+    }
 
     if (history.length === 0) {
         const tr = document.createElement("tr");
@@ -296,23 +302,35 @@ function renderGroupedHistoryTable(history) {
         return;
     }
 
-    // Agrupar per data (YYYY-MM-DD) i model
+    // Agrupar per clau depenent del període
     const groups = {};
     history.forEach(entry => {
         const dateObj = new Date(entry.date);
-        if (isNaN(dateObj.getTime())) return; // skip malformed entries
-        const dayKey = dateObj.toLocaleDateString();
-        const sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        const model = entry.model || "gemini-1.5-flash";
+        if (isNaN(dateObj.getTime())) return;
 
+        let sortKey, dayKey;
+        if (period === "6m") {
+            const monday = getMondayOfWeek(dateObj);
+            sortKey = monday.toISOString().slice(0, 10);
+            dayKey  = monday.toLocaleDateString("ca-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
+        } else if (period === "1a") {
+            sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, "0")}`;
+            dayKey  = dateObj.toLocaleDateString("ca-ES", { month: "long", year: "numeric" });
+        } else {
+            // "7d" i "30d": agrupació diària
+            sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, "0")}-${String(dateObj.getDate()).padStart(2, "0")}`;
+            dayKey  = dateObj.toLocaleDateString();
+        }
+
+        const model = entry.model || "gemini-1.5-flash";
         const key = `${sortKey}|${dayKey}|${model}`;
         if (!groups[key]) {
             groups[key] = { sortKey, dayKey, model, requests: 0, inputTokens: 0, outputTokens: 0, cacheTokens: 0, totalLatency: 0, latencyCount: 0 };
         }
-        groups[key].requests      += 1;
-        groups[key].inputTokens   += entry.inputTokens  || 0;
-        groups[key].outputTokens  += entry.outputTokens || 0;
-        groups[key].cacheTokens   += entry.cacheTokens  || 0;
+        groups[key].requests     += 1;
+        groups[key].inputTokens  += entry.inputTokens  || 0;
+        groups[key].outputTokens += entry.outputTokens || 0;
+        groups[key].cacheTokens  += entry.cacheTokens  || 0;
         if (entry.latency) {
             groups[key].totalLatency += entry.latency;
             groups[key].latencyCount += 1;
@@ -325,7 +343,6 @@ function renderGroupedHistoryTable(history) {
         return avg < 1000 ? avg + "ms" : (avg / 1000).toFixed(1) + "s";
     }
 
-    // Ordenar per data (descendent) i model (ascendent)
     const sortedGroups = Object.values(groups).sort((a, b) => {
         if (a.sortKey !== b.sortKey) return b.sortKey.localeCompare(a.sortKey);
         return a.model.localeCompare(b.model);
@@ -334,12 +351,10 @@ function renderGroupedHistoryTable(history) {
     sortedGroups.forEach(group => {
         const tr = document.createElement("tr");
 
-        // Data
         const tdDate = document.createElement("td");
         tdDate.textContent = group.dayKey;
         tr.appendChild(tdDate);
 
-        // Model
         const tdModel = document.createElement("td");
         const code = document.createElement("code");
         code.style.fontSize = "0.85em";
@@ -350,39 +365,33 @@ function renderGroupedHistoryTable(history) {
         tdModel.appendChild(code);
         tr.appendChild(tdModel);
 
-        // Peticions
         const tdReq = document.createElement("td");
         tdReq.style.textAlign = "right";
         tdReq.textContent = group.requests;
         tr.appendChild(tdReq);
 
-        // In tok
         const tdIn = document.createElement("td");
         tdIn.style.textAlign = "right";
         tdIn.textContent = group.inputTokens.toLocaleString();
         tr.appendChild(tdIn);
 
-        // Out tok
         const tdOut = document.createElement("td");
         tdOut.style.textAlign = "right";
         tdOut.textContent = group.outputTokens.toLocaleString();
         tr.appendChild(tdOut);
 
-        // Caché
         const tdCache = document.createElement("td");
         tdCache.style.textAlign = "right";
         tdCache.style.color = group.cacheTokens > 0 ? "inherit" : "var(--text-muted)";
         tdCache.textContent = group.cacheTokens.toLocaleString();
         tr.appendChild(tdCache);
 
-        // ms∅
         const tdLat = document.createElement("td");
         tdLat.style.textAlign = "right";
         tdLat.style.color = "var(--text-muted)";
         tdLat.textContent = fmtLatency(group.totalLatency, group.latencyCount);
         tr.appendChild(tdLat);
 
-        // Aigua
         const tdWater = document.createElement("td");
         tdWater.style.textAlign = "right";
         tdWater.style.color = "var(--text-muted)";
