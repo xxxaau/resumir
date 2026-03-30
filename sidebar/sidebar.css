@@ -329,6 +329,10 @@ body {
   margin-bottom: 0.8em;
 }
 
+#content > :first-child {
+  margin-top: 0;
+}
+
 #content pre,
 #content code {
   white-space: pre-wrap;
@@ -434,7 +438,7 @@ body {
 
 /* ── Page Title Strip ──────────────────────────────────────── */
 #page-title-strip {
-  padding: 5px 12px;
+  padding: 5px 0;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-color);
   position: sticky;
@@ -524,4 +528,13 @@ body {
   color: var(--text-muted);
   text-align: center;
   padding: 24px 0;
+}
+
+/* ── Cache badge ──────────────────────────────────────────── */
+#cache-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  align-self: center;
+  white-space: nowrap;
+  margin-right: 4px;
 }
