@@ -530,11 +530,9 @@ body {
   padding: 24px 0;
 }
 
-/* ── Cache badge ──────────────────────────────────────────── */
+/* ── Cache badge (footer) ─────────────────────────────────── */
 #cache-badge {
   font-size: 11px;
-  color: var(--text-muted);
-  align-self: center;
+  color: var(--footer-text);
   white-space: nowrap;
-  margin-right: 4px;
 }
