@@ -227,12 +227,13 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         let success = false;
         let lastError = null;
         const bionicEnabled = ctx.isBionicEnabled();
+        let apiUsage = null;
 
         for (const tryModel of modelsToTry) {
             if (signal.aborted) break;
             try {
                 currentMetadata.summary = ""; // Reset output text
-                await callGeminiStream(apiKey, tryModel, systemPrompt, pageText, signal, (chunkText) => {
+                apiUsage = await callGeminiStream(apiKey, tryModel, systemPrompt, pageText, signal, (chunkText) => {
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
                     if (now - lastUpdate > 100) {
@@ -284,11 +285,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         setGeneratingState(false, true);
         
         // 4. Update Stats & Cache
-        const inputTokens = pageText.length / 4;
-        const outputTokens = currentMetadata.summary.length / 4;
+        const inputTokens  = apiUsage?.inputTokens  ?? pageText.length / 4;
+        const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
+        const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
         
         await saveSummaryCache(currentMetadata.url, currentMetadata.title, currentMetadata.summary, modelName, inputTokens, outputTokens);
-        await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url);
+        await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
         
         const { byModel, total } = await getDailyStats(modelName);
         updateWaterStats(total, modelName, byModel);
