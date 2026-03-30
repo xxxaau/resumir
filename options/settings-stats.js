@@ -192,12 +192,12 @@ function renderDailyChart(history) {
 function renderGroupedHistoryTable(history) {
     const tbody = document.getElementById("groupedTableBody");
     if (!tbody) return;
-    tbody.replaceChildren(); // Clear content
+    tbody.replaceChildren();
 
     if (history.length === 0) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 4;
+        td.colSpan = 8;
         td.style.textAlign = "center";
         td.style.color = "#999";
         td.textContent = "Encara no hi ha dades d'ús.";
@@ -206,38 +206,48 @@ function renderGroupedHistoryTable(history) {
         return;
     }
 
-    // Agrubar per data (YYYY-MM-DD) i model
+    // Agrupar per data (YYYY-MM-DD) i model
     const groups = {};
     history.forEach(entry => {
         const dateObj = new Date(entry.date);
-        const dayKey = dateObj.toLocaleDateString(); // Format local curt
-        // Sort keys need YYYY-MM-DD to sort properly
+        const dayKey = dateObj.toLocaleDateString();
         const sortKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        const model = entry.model || "gemini-1.5-flash"; // Fallback antic
-        
+        const model = entry.model || "gemini-1.5-flash";
+
         const key = `${sortKey}|${dayKey}|${model}`;
         if (!groups[key]) {
-            groups[key] = { sortKey, dayKey, model, requests: 0 };
+            groups[key] = { sortKey, dayKey, model, requests: 0, inputTokens: 0, outputTokens: 0, cacheTokens: 0, totalLatency: 0, latencyCount: 0 };
         }
-        groups[key].requests += 1;
+        groups[key].requests      += 1;
+        groups[key].inputTokens   += entry.inputTokens  || 0;
+        groups[key].outputTokens  += entry.outputTokens || 0;
+        groups[key].cacheTokens   += entry.cacheTokens  || 0;
+        if (entry.latency) {
+            groups[key].totalLatency += entry.latency;
+            groups[key].latencyCount += 1;
+        }
     });
 
-    // Ordenar per data (descendent) i després model (ascendent)
+    function fmtLatency(totalMs, count) {
+        if (count === 0) return "—";
+        const avg = Math.round(totalMs / count);
+        return avg < 1000 ? avg + "ms" : (avg / 1000).toFixed(1) + "s";
+    }
+
+    // Ordenar per data (descendent) i model (ascendent)
     const sortedGroups = Object.values(groups).sort((a, b) => {
-        if (a.sortKey !== b.sortKey) {
-            return b.sortKey.localeCompare(a.sortKey);
-        }
+        if (a.sortKey !== b.sortKey) return b.sortKey.localeCompare(a.sortKey);
         return a.model.localeCompare(b.model);
     });
 
     sortedGroups.forEach(group => {
         const tr = document.createElement("tr");
-        
-        // Date
+
+        // Data
         const tdDate = document.createElement("td");
         tdDate.textContent = group.dayKey;
         tr.appendChild(tdDate);
-        
+
         // Model
         const tdModel = document.createElement("td");
         const code = document.createElement("code");
@@ -249,18 +259,43 @@ function renderGroupedHistoryTable(history) {
         tdModel.appendChild(code);
         tr.appendChild(tdModel);
 
-        // Requests
+        // Peticions
         const tdReq = document.createElement("td");
         tdReq.style.textAlign = "right";
         tdReq.textContent = group.requests;
         tr.appendChild(tdReq);
 
-        // Water
+        // In tok
+        const tdIn = document.createElement("td");
+        tdIn.style.textAlign = "right";
+        tdIn.textContent = group.inputTokens;
+        tr.appendChild(tdIn);
+
+        // Out tok
+        const tdOut = document.createElement("td");
+        tdOut.style.textAlign = "right";
+        tdOut.textContent = group.outputTokens;
+        tr.appendChild(tdOut);
+
+        // Caché
+        const tdCache = document.createElement("td");
+        tdCache.style.textAlign = "right";
+        tdCache.style.color = group.cacheTokens > 0 ? "inherit" : "var(--text-muted)";
+        tdCache.textContent = group.cacheTokens;
+        tr.appendChild(tdCache);
+
+        // ms∅
+        const tdLat = document.createElement("td");
+        tdLat.style.textAlign = "right";
+        tdLat.style.color = "var(--text-muted)";
+        tdLat.textContent = fmtLatency(group.totalLatency, group.latencyCount);
+        tr.appendChild(tdLat);
+
+        // Aigua
         const tdWater = document.createElement("td");
         tdWater.style.textAlign = "right";
         tdWater.style.color = "var(--text-muted)";
-        const waterMl = group.requests * 0.26;
-        tdWater.textContent = waterMl.toFixed(2);
+        tdWater.textContent = (group.requests * 0.26).toFixed(2);
         tr.appendChild(tdWater);
 
         tbody.appendChild(tr);
