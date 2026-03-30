@@ -258,34 +258,44 @@ function renderDailyChart(history, period = "7d") {
 
     const maxCount = Math.max(...buckets.map(b => b.count), 1);
     const gapMap = { "7d": "10px", "30d": "3px", "6m": "4px", "1a": "6px" };
-    container.style.gap = gapMap[period] || "10px";
+    const gap = gapMap[period] || "10px";
+
+    // Dues files separades: barres alineades a la base + etiquetes sota l'eix
+    const barsRow = document.createElement("div");
+    barsRow.style.cssText = `display:flex;flex-direction:row;align-items:flex-end;flex:1;gap:${gap};border-bottom:2px solid var(--border-color);`;
+
+    const labelsRow = document.createElement("div");
+    labelsRow.style.cssText = `display:flex;flex-direction:row;gap:${gap};margin-top:4px;`;
+
+    const labelFontSize = period === "7d" ? "12px" : "10px";
 
     buckets.forEach(bucket => {
-        const barWrapper = document.createElement("div");
-        barWrapper.style.cssText = "display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;min-width:0;";
-
         const bar = document.createElement("div");
-        const heightPct = (bucket.count / maxCount) * 80;
+        const heightPct = (bucket.count / maxCount) * 90;
         bar.style.height = Math.max(heightPct, 2) + "%";
-        bar.style.width = "70%";
+        bar.style.flex = "1";
+        bar.style.minWidth = "0";
         bar.style.backgroundColor = "var(--button-hover-bg)";
         bar.style.borderRadius = "4px 4px 0 0";
         bar.style.transition = "height 0.3s";
         bar.title = bucket.count === 1 ? "1 article resumit" : `${bucket.count} articles resumits`;
+        barsRow.appendChild(bar);
 
         const label = document.createElement("div");
         label.textContent = bucket.showLabel ? bucket.label : "";
-        label.style.fontSize = period === "7d" ? "12px" : "10px";
-        label.style.marginTop = "5px";
+        label.style.flex = "1";
+        label.style.minWidth = "0";
+        label.style.fontSize = labelFontSize;
         label.style.color = "var(--text-muted)";
         label.style.textTransform = "capitalize";
+        label.style.textAlign = "center";
         label.style.overflow = "hidden";
         label.style.whiteSpace = "nowrap";
-
-        barWrapper.appendChild(bar);
-        barWrapper.appendChild(label);
-        container.appendChild(barWrapper);
+        labelsRow.appendChild(label);
     });
+
+    container.appendChild(barsRow);
+    container.appendChild(labelsRow);
 }
 
 function renderGroupedHistoryTable(history, period = "7d") {
