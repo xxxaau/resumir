@@ -302,11 +302,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Watch for pendingSummary changes (reliable fallback for Chrome sidePanel timing)
+    // Check for pending cache load on init (settings page wrote key while sidebar was closed)
+    ext.storage.local.get("pendingCacheLoad").then(data => {
+        if (data.pendingCacheLoad) {
+            const url = data.pendingCacheLoad;
+            ext.storage.local.remove("pendingCacheLoad");
+            getSummaryCache(url).then(entry => {
+                if (entry) loadHistoryEntry(entry);
+            });
+        }
+    });
+
+    // Watch for pendingSummary and pendingCacheLoad (reliable fallback for Chrome sidePanel timing)
     ext.storage.onChanged.addListener((changes, area) => {
         if (area === "local" && changes.pendingSummary && changes.pendingSummary.newValue) {
             boundTrigger(changes.pendingSummary.newValue);
             ext.storage.local.remove("pendingSummary");
+        }
+        if (area === "local" && changes.pendingCacheLoad?.newValue) {
+            const url = changes.pendingCacheLoad.newValue;
+            ext.storage.local.remove("pendingCacheLoad");
+            getSummaryCache(url).then(entry => {
+                if (entry) loadHistoryEntry(entry);
+            });
         }
     });
 
