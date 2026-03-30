@@ -158,66 +158,120 @@ function getRelativeTime(dateInput) {
     return `fa ${diffDays} dies`;
 }
 
-function renderDailyChart(history) {
+function renderDailyChart(history, period = "7d") {
     const container = document.getElementById("dailyChartContainer");
     if (!container) return;
     container.replaceChildren();
 
-    // Initialize last 7 days count
-    const days = {};
+    // Actualitzar títol
+    const chartTitles = {
+        "7d":  "Resums per dia (últims 7 dies)",
+        "30d": "Resums per dia (últims 30 dies)",
+        "6m":  "Resums per setmana (últims 6 mesos)",
+        "1a":  "Resums per mes (últim any)"
+    };
+    const titleEl = document.getElementById("chartTitle");
+    if (titleEl) titleEl.textContent = chartTitles[period] || chartTitles["7d"];
+
     const today = new Date();
-    today.setHours(0,0,0,0);
-    // Build array of keys from 6 days ago to today
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        days[d.toLocaleDateString('ca-ES', { weekday: 'short' })] = 0;
+    today.setHours(0, 0, 0, 0);
+
+    // Construir buckets
+    const buckets = [];
+
+    if (period === "7d") {
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            buckets.push({
+                key: d.toISOString().slice(0, 10),
+                label: d.toLocaleDateString("ca-ES", { weekday: "short" }),
+                count: 0,
+                showLabel: true
+            });
+        }
+    } else if (period === "30d") {
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            const isMonday = d.getDay() === 1;
+            const isToday  = i === 0;
+            buckets.push({
+                key: d.toISOString().slice(0, 10),
+                label: d.toLocaleDateString("ca-ES", { day: "2-digit", month: "2-digit" }),
+                count: 0,
+                showLabel: isMonday || isToday
+            });
+        }
+    } else if (period === "6m") {
+        const thisMonday = getMondayOfWeek(today);
+        for (let i = 25; i >= 0; i--) {
+            const monday = new Date(thisMonday);
+            monday.setDate(monday.getDate() - i * 7);
+            buckets.push({
+                key: monday.toISOString().slice(0, 10),
+                label: monday.toLocaleDateString("ca-ES", { day: "2-digit", month: "2-digit" }),
+                count: 0,
+                showLabel: i % 4 === 0 || i === 0
+            });
+        }
+    } else { // "1a"
+        const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        for (let i = 11; i >= 0; i--) {
+            const m = new Date(thisMonth);
+            m.setMonth(m.getMonth() - i);
+            buckets.push({
+                key: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`,
+                label: m.toLocaleDateString("ca-ES", { month: "short" }),
+                count: 0,
+                showLabel: true
+            });
+        }
     }
 
-    // Count history in those days
+    // Comptar entrades per bucket
     history.forEach(entry => {
-        const entryDate = new Date(entry.date);
-        entryDate.setHours(0,0,0,0);
-        const diffTime = today - entryDate;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); 
-        if (diffDays <= 6 && diffDays >= 0) {
-             const key = entryDate.toLocaleDateString('ca-ES', { weekday: 'short' });
-             if(days[key] !== undefined) days[key]++;
+        const d = new Date(entry.date);
+        if (isNaN(d.getTime())) return;
+        d.setHours(0, 0, 0, 0);
+
+        let key;
+        if (period === "6m") {
+            key = getMondayOfWeek(d).toISOString().slice(0, 10);
+        } else if (period === "1a") {
+            key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        } else {
+            key = d.toISOString().slice(0, 10);
         }
+        const bucket = buckets.find(b => b.key === key);
+        if (bucket) bucket.count++;
     });
 
-    const maxCount = Math.max(...Object.values(days), 1);
+    const maxCount = Math.max(...buckets.map(b => b.count), 1);
+    const gapMap = { "7d": "10px", "30d": "3px", "6m": "4px", "1a": "6px" };
+    container.style.gap = gapMap[period] || "10px";
 
-    // Draw bars
-    Object.entries(days).forEach(([dayLabel, count]) => {
+    buckets.forEach(bucket => {
         const barWrapper = document.createElement("div");
-        barWrapper.style.display = "flex";
-        barWrapper.style.flexDirection = "column";
-        barWrapper.style.alignItems = "center";
-        barWrapper.style.flex = "1";
-        barWrapper.style.height = "100%";
-        barWrapper.style.justifyContent = "flex-end";
-        
+        barWrapper.style.cssText = "display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;min-width:0;";
+
         const bar = document.createElement("div");
-        const heightPct = (count / maxCount) * 80; // max 80% height for visual padding
-        bar.style.height = Math.max(heightPct, 2) + "%"; 
+        const heightPct = (bucket.count / maxCount) * 80;
+        bar.style.height = Math.max(heightPct, 2) + "%";
         bar.style.width = "70%";
         bar.style.backgroundColor = "var(--button-hover-bg)";
         bar.style.borderRadius = "4px 4px 0 0";
         bar.style.transition = "height 0.3s";
-        
-        if (count === 1) {
-            bar.title = `1 article resumit`;
-        } else {
-            bar.title = `${count} articles resumits`;
-        }
+        bar.title = bucket.count === 1 ? "1 article resumit" : `${bucket.count} articles resumits`;
 
         const label = document.createElement("div");
-        label.textContent = dayLabel;
-        label.style.fontSize = "12px";
+        label.textContent = bucket.showLabel ? bucket.label : "";
+        label.style.fontSize = period === "7d" ? "12px" : "10px";
         label.style.marginTop = "5px";
         label.style.color = "var(--text-muted)";
         label.style.textTransform = "capitalize";
+        label.style.overflow = "hidden";
+        label.style.whiteSpace = "nowrap";
 
         barWrapper.appendChild(bar);
         barWrapper.appendChild(label);
