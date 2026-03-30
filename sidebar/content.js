@@ -48,21 +48,47 @@ async function getPageContent() {
     // HACKER NEWS SPECIAL LOGIC
     if (tabUrl.includes("news.ycombinator.com/item")) {
         try {
-            const scriptResults = await executeScriptSafe({
-               target: {tabId: tabId},
-               func: () => {
-                   const titleEl = document.querySelector(".titleline a");
-                   const title = titleEl ? titleEl.innerText : document.title;
-                   const comments = Array.from(document.querySelectorAll(".commtext"));
-                   const topComments = comments.slice(0, 15).map(c => "- " + c.innerText.replace(/\s+/g, " ").trim()).join("\n");
-                   return `Title: ${title}\n\nTop Discussion Comments:\n${topComments}`;
-               }
+            const hnResult = await executeScriptSafe({
+                target: { tabId: tabId },
+                func: () => {
+                    const titleEl = document.querySelector(".titleline a");
+                    const comments = Array.from(document.querySelectorAll(".commtext"))
+                        .map(c => "- " + c.innerText.replace(/\s+/g, " ").trim())
+                        .join("\n");
+                    return {
+                        title: titleEl?.innerText || document.title,
+                        articleUrl: titleEl?.href || null,
+                        comments
+                    };
+                }
             });
-            if (scriptResults?.[0]?.result) text = scriptResults[0].result;
+            const hn = hnResult?.[0]?.result;
+            if (hn) {
+                let articleText = "";
+                if (hn.articleUrl && !hn.articleUrl.includes("ycombinator.com")) {
+                    try {
+                        const resp = await fetch(hn.articleUrl);
+                        const html = await resp.text();
+                        const doc = new DOMParser().parseFromString(html, "text/html");
+                        const base = doc.createElement("base");
+                        base.href = hn.articleUrl;
+                        doc.head.insertBefore(base, doc.head.firstChild);
+                        const article = new Readability(doc).parse();
+                        if (article?.textContent?.trim().length > 200) {
+                            articleText = article.textContent.trim();
+                        }
+                    } catch (e) {
+                        console.warn("HN article fetch failed", e);
+                    }
+                }
+                text = articleText
+                    ? `Title: ${hn.title}\n\nARTICLE:\n${articleText}\n\nHACKER NEWS DISCUSSION:\n${hn.comments}`
+                    : `Title: ${hn.title}\n\nTop Discussion Comments:\n${hn.comments}`;
+            }
         } catch (e) {
             console.warn("HN extraction failed", e);
         }
-    } 
+    }
     
     // YOUTUBE SPECIAL LOGIC
     else if (tabUrl.includes("youtube.com/watch")) {
