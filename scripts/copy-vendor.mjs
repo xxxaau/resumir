@@ -3,13 +3,16 @@
  * scripts/copy-vendor.mjs
  * Copia el bundle UMD de defuddle a l'arrel de l'extensió.
  * Actualitzar: npm update defuddle && npm run vendor:update
+ *
+ * S'usa index.full.js (571KB) perquè inclou turndown i retorna
+ * contentMarkdown. index.js (173KB) no inclou la conversió a Markdown.
  */
 import { copyFileSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const src = resolve(root, "node_modules/defuddle/dist/index.js");
+const src = resolve(root, "node_modules/defuddle/dist/index.full.js");
 const dest = resolve(root, "defuddle.js");
 
 if (!existsSync(src)) {
@@ -18,4 +21,4 @@ if (!existsSync(src)) {
 }
 
 copyFileSync(src, dest);
-console.log(`defuddle.js actualitzat des de node_modules/defuddle/dist/index.js`);
+console.log(`defuddle.js actualitzat des de node_modules/defuddle/dist/index.full.js`);
