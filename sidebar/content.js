@@ -34,7 +34,7 @@ async function executeScriptSafe(injection) {
 
 /**
  * Extracts and returns the relevant text content from the active tab.
- * Includes specific heuristics for HackerNews, YouTube, and fallback to Readability.
+ * Includes specific heuristics for HackerNews, YouTube, Twitter/X, and fallback to Readability.
  */
 async function getPageContent() {
     const tabs = await ext.tabs.query({active: true, currentWindow: true});
@@ -205,6 +205,51 @@ async function getPageContent() {
         }
     }
     
+    // TWITTER / X SPECIAL LOGIC
+    else if (tabUrl.includes("twitter.com") || tabUrl.includes("x.com")) {
+        try {
+            // Inject Defuddle to extract clean content from the React-rendered page
+            await executeScriptSafe({
+                target: { tabId: tabId },
+                files: ["defuddle.js"]
+            });
+
+            const defuddleResult = await executeScriptSafe({
+                target: { tabId: tabId },
+                func: () => {
+                    if (typeof Defuddle === "undefined") return null;
+                    try {
+                        const parsed = new Defuddle(document, { url: window.location.href }).parse();
+                        return parsed?.markdown || null;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+            });
+
+            const defuddleText = defuddleResult?.[0]?.result;
+            if (defuddleText && defuddleText.trim().length > 50) {
+                text = defuddleText;
+            }
+
+            // Fallback: scrape tweet text directly from DOM
+            if (!text) {
+                const scrapeResult = await executeScriptSafe({
+                    target: { tabId: tabId },
+                    func: () => {
+                        const tweetEls = document.querySelectorAll('[data-testid="tweetText"]');
+                        if (tweetEls.length === 0) return null;
+                        return Array.from(tweetEls).map(el => el.innerText).join("\n\n---\n\n");
+                    }
+                });
+                const scraped = scrapeResult?.[0]?.result;
+                if (scraped && scraped.trim().length > 0) text = scraped;
+            }
+        } catch (e) {
+            console.warn("Twitter/X extraction failed", e);
+        }
+    }
+
     // FALLBACK / STANDARD LOGIC
     if (!text) {
         try {
