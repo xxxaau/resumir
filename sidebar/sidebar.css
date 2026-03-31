@@ -439,6 +439,7 @@ body {
 /* ── Page Title Strip ──────────────────────────────────────── */
 #page-title-strip {
   padding: 5px 0;
+  margin-bottom: 8px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-color);
   position: sticky;
@@ -468,10 +469,19 @@ body {
   margin-bottom: 4px;
 }
 
-#history-panel {
+#history-panel, #source-panel {
   overflow-y: auto;
   padding: 4px 0;
   max-height: calc(100vh - 100px);
+}
+
+#source-panel pre {
+  white-space: pre-wrap;
+  font-size: 12px;
+  margin: 0;
+  padding: 4px 0;
+  color: var(--text-color);
+  word-break: break-word;
 }
 
 .history-header {
