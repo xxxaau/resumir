@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const deepDiveBtn = document.getElementById("deepDiveBtn");
     const scienceBtn = document.getElementById("scienceBtn");
     const historyBtn = document.getElementById("historyBtn");
+    const sourceTextBtn = document.getElementById("sourceTextBtn");
     const modelSelect = document.getElementById("model-select");
 
     let isGenerating = false;
@@ -33,6 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (strip) strip.classList.add("hidden");
     }
 
+    function updateSourceBtn() {
+        if (sourceTextBtn) sourceTextBtn.disabled = !currentSourceText;
+    }
+
     // --- Context object for summary.js ---
     const ctx = {
         contentDiv,
@@ -40,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modelSelect,
         currentMetadata,
         getSourceText: () => currentSourceText,
-        setSourceText: (t) => { currentSourceText = t; },
+        setSourceText: (t) => { currentSourceText = t; updateSourceBtn(); },
         getContentPreload: () => contentPreload,
         isBionicEnabled: () => isBionicEnabled,
         getGlobalConfig: () => globalConfigCache,
@@ -238,6 +243,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (historyBtn) historyBtn.addEventListener("click", openHistoryPanel);
+    if (sourceTextBtn) sourceTextBtn.addEventListener("click", () => {
+        if (!currentSourceText) return;
+        openSourcePanel(currentSourceText);
+    });
     const historyBackBtn = document.getElementById("historyBackBtn");
     if (historyBackBtn) historyBackBtn.addEventListener("click", openHistoryPanel);
 
