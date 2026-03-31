@@ -39,54 +39,77 @@ The button starts `disabled`. It is enabled when `currentSourceText` is set.
 
 ## 2. CSS — `sidebar/sidebar.css`
 
-**`#source-panel`** — mirrors `#history-panel`:
+**`#source-panel`** — group with existing `#history-panel` selector (no new block):
 ```css
-#source-panel {
+#history-panel, #source-panel {
   overflow-y: auto;
   padding: 4px 0;
   max-height: calc(100vh - 100px);
 }
 ```
 
-**Source text display element** (`.source-text-content`):
+**Panel header** — the header div uses `class="history-header"` directly in the DOM. No new CSS class needed.
+
+**Source text display** — a `<pre>` inside `#source-panel`. Only new rule needed:
 ```css
-.source-text-content {
+#source-panel pre {
   white-space: pre-wrap;
-  font-family: monospace;
   font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-color);
+  margin: 0;
   padding: 4px 0;
+  color: var(--text-color);
+  word-break: break-word;
 }
 ```
-
-**Panel header** (`.source-panel-header`) — same style as `.history-header`.
+`font-family: monospace` and `line-height` are browser defaults for `<pre>` — no need to declare them.
 
 ---
 
 ## 3. JS — `sidebar/history.js`
 
-Two new exported functions, following the exact same open/close pattern as `openHistoryPanel` / `closeHistoryPanel`.
+### New private helper: `_closePanel(panelEl)`
+
+`closeHistoryPanel` and `closeSourcePanel` share identical logic. Extract it:
+
+```js
+function _closePanel(panelEl) {
+    panelEl.classList.add("hidden");
+    panelEl.innerHTML = "";
+    if (_previousVisible) {
+        _previousVisible.classList.remove("hidden");
+        _previousVisible = null;
+    }
+}
+```
+
+**Refactor `closeHistoryPanel`** to delegate:
+```js
+function closeHistoryPanel() {
+    _closePanel(document.getElementById("history-panel"));
+}
+```
 
 ### `openSourcePanel(text)`
 
-1. Hides `#history-panel` directly (clears innerHTML, no state restoration) — prevents overlap if history was open
+1. Hides `#history-panel` directly (`classList.add("hidden")`, clears `innerHTML`) — prevents overlap if history was open, without triggering `closeHistoryPanel` (which would restore state)
 2. Hides `contentDiv`, `loadingDiv`, `errorDiv`, `page-title-strip`
 3. Hides `history-back-bar` (in case it was visible)
 4. Snapshots `_previousVisible` for restoration
 5. Renders `#source-panel` with:
-   - A header div (`.source-panel-header`) containing:
-     - `← Tornar` button (`.history-back-btn`) → calls `closeSourcePanel()`
+   - A header div (`class="history-header"`) containing:
+     - `← Tornar` button (`class="history-back-btn"`) → calls `closeSourcePanel()`
      - A `<span>` label: `"Text enviat a resumir"`
-   - A `<pre class="source-text-content">` with the raw text
+   - A `<pre>` with the raw text
 6. Shows `#source-panel`
 
 ### `closeSourcePanel()`
 
-1. Hides `#source-panel`, clears its innerHTML
-2. Restores `_previousVisible`
-
-Both functions reuse the existing `_previousVisible` module-level variable in `history.js`.
+Delegates to `_closePanel`:
+```js
+function closeSourcePanel() {
+    _closePanel(document.getElementById("source-panel"));
+}
+```
 
 **Exports** — add `openSourcePanel` and `closeSourcePanel` to the `module.exports` block.
 
@@ -150,8 +173,8 @@ SVG icon: a simple document/file icon (outline style, consistent with other tool
 | File | Change |
 |------|--------|
 | `sidebar/sidebar.html` | New `#sourceTextBtn` button + `#source-panel` div |
-| `sidebar/sidebar.css` | `#source-panel`, `.source-panel-header`, `.source-text-content` |
-| `sidebar/history.js` | `openSourcePanel(text)`, `closeSourcePanel()` |
+| `sidebar/sidebar.css` | Group `#source-panel` amb `#history-panel`; nova regla `#source-panel pre` |
+| `sidebar/history.js` | Nou `_closePanel(panelEl)` helper; refactor `closeHistoryPanel`; `openSourcePanel(text)`, `closeSourcePanel()` |
 | `sidebar/sidebar.js` | Wire button, `updateSourceBtn()`, update `ctx.setSourceText` |
 
 No new files. No tests required (pure DOM rendering, no logic to unit-test beyond what's already covered by history panel patterns).
