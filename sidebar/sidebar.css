@@ -475,6 +475,12 @@ body {
   max-height: calc(100vh - 100px);
 }
 
+.source-panel-label {
+  margin-left: 8px;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
 #source-panel pre {
   white-space: pre-wrap;
   font-size: 12px;

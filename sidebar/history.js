@@ -195,7 +195,7 @@ function openSourcePanel(text) {
     backBtn.addEventListener("click", closeSourcePanel);
 
     const label = document.createElement("span");
-    label.style.cssText = "margin-left:8px;font-size:0.85em;color:var(--text-muted);";
+    label.className = "source-panel-label";
     label.textContent = "Text enviat a resumir";
 
     header.appendChild(backBtn);
