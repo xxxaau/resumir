@@ -37,16 +37,23 @@ async function openHistoryPanel() {
 }
 
 /**
- * Closes the history panel and restores the previously visible element.
+ * Closes a panel element and restores the previously visible element.
+ * @param {HTMLElement} panelEl
  */
-function closeHistoryPanel() {
-    const historyPanel = document.getElementById("history-panel");
-    historyPanel.classList.add("hidden");
-    historyPanel.innerHTML = "";
+function _closePanel(panelEl) {
+    panelEl.classList.add("hidden");
+    panelEl.innerHTML = "";
     if (_previousVisible) {
         _previousVisible.classList.remove("hidden");
         _previousVisible = null;
     }
+}
+
+/**
+ * Closes the history panel and restores the previously visible element.
+ */
+function closeHistoryPanel() {
+    _closePanel(document.getElementById("history-panel"));
 }
 
 /**
@@ -147,7 +154,69 @@ function _relativeTime(isoString) {
     return `fa ${diffD} dies`;
 }
 
+/**
+ * Obre el panell de text planer enviat a resumir.
+ * @param {string} text - Text planer a mostrar
+ */
+function openSourcePanel(text) {
+    const sourcePanel  = document.getElementById("source-panel");
+    const historyPanel = document.getElementById("history-panel");
+    const contentDiv   = document.getElementById("content");
+    const loadingDiv   = document.getElementById("loading");
+    const errorDiv     = document.getElementById("error");
+    const backBar      = document.getElementById("history-back-bar");
+    const titleStrip   = document.getElementById("page-title-strip");
+
+    // Tancar history panel si estava obert (sense restaurar estat)
+    historyPanel.classList.add("hidden");
+    historyPanel.innerHTML = "";
+
+    if (backBar)    backBar.classList.add("hidden");
+    if (titleStrip) titleStrip.classList.add("hidden");
+
+    // Capturar element visible per a restauració
+    _previousVisible = null;
+    if (!contentDiv.classList.contains("hidden")) _previousVisible = contentDiv;
+    else if (!errorDiv.classList.contains("hidden")) _previousVisible = errorDiv;
+
+    contentDiv.classList.add("hidden");
+    loadingDiv.classList.add("hidden");
+    errorDiv.classList.add("hidden");
+
+    // Construir panell
+    sourcePanel.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.className = "history-header";
+
+    const backBtn = document.createElement("button");
+    backBtn.className = "history-back-btn";
+    backBtn.textContent = "\u2190 Tornar";
+    backBtn.addEventListener("click", closeSourcePanel);
+
+    const label = document.createElement("span");
+    label.style.cssText = "margin-left:8px;font-size:0.85em;color:var(--text-muted);";
+    label.textContent = "Text enviat a resumir";
+
+    header.appendChild(backBtn);
+    header.appendChild(label);
+    sourcePanel.appendChild(header);
+
+    const pre = document.createElement("pre");
+    pre.textContent = text;
+    sourcePanel.appendChild(pre);
+
+    sourcePanel.classList.remove("hidden");
+}
+
+/**
+ * Tanca el panell de text planer i restaura la vista anterior.
+ */
+function closeSourcePanel() {
+    _closePanel(document.getElementById("source-panel"));
+}
+
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { openHistoryPanel, closeHistoryPanel, loadHistoryEntry };
+    module.exports = { openHistoryPanel, closeHistoryPanel, loadHistoryEntry, openSourcePanel, closeSourcePanel };
 }
