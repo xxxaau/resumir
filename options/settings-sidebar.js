@@ -3,24 +3,43 @@
 
 // --- Navigation Logic ---
 
-// Event Delegation for Sidebar Navigation (Static & Dynamic)
-document.querySelector('.sidebar').addEventListener('click', (e) => {
-    // Traverse up to find .nav-item
-    const item = e.target.closest('.nav-item');
-    if (!item) return;
-
-    // Remove active class from all
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
-
-    // Add to current
-    item.classList.add('active');
-    const tabId = item.getAttribute('data-tab');
-    const tab = document.getElementById(`tab-${tabId}`);
-    if (tab) {
-        tab.classList.add('active');
+// Initialize sidebar navigation and event delegation
+function initializeSidebarNavigation() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) {
+        console.error('Sidebar element not found');
+        return;
     }
-});
+
+    sidebar.addEventListener('click', (e) => {
+        // Get the actual clicked element
+        let target = e.target;
+        
+        // If clicked on SVG or text inside, traverse up
+        if (target.tagName === 'svg' || target.tagName === 'SVG') {
+            target = target.closest('button.nav-item');
+        } else if (target.tagName !== 'BUTTON') {
+            // If it's text or other element, traverse up to button
+            const btn = target.closest('button.nav-item');
+            if (btn) target = btn;
+        }
+        
+        // Check if we're on a nav-item button
+        if (!target || !target.classList.contains('nav-item')) return;
+
+        // Remove active class from all
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+
+        // Add to current
+        target.classList.add('active');
+        const tabId = target.getAttribute('data-tab');
+        const tab = document.getElementById(`tab-${tabId}`);
+        if (tab) {
+            tab.classList.add('active');
+        }
+    });
+}
 
 // Navigate to tab helper
 function navigateToTab(tabId) {
@@ -33,7 +52,8 @@ function navigateToTab(tabId) {
     } else {
         // Fallback for sub-tabs not in sidebar (shouldn't happen with new design, but safety)
         document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
-        document.getElementById(`tab-${tabId}`).classList.add('active');
+        const tab = document.getElementById(`tab-${tabId}`);
+        if (tab) tab.classList.add('active');
     }
 }
 
@@ -72,10 +92,14 @@ function updateSidebar() {
             const btn = document.createElement("button");
             btn.className = "nav-item dynamic-extension";
             btn.setAttribute("data-tab", ext.id);
-            
+
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(ext.icon, "image/svg+xml");
-            btn.appendChild(svgDoc.documentElement);
+            const svgEl = svgDoc.documentElement;
+            if (ext.color) {
+                svgEl.style.color = ext.color;
+            }
+            btn.appendChild(svgEl);
             btn.appendChild(document.createTextNode(ext.label));
             
             if (document.getElementById(`tab-${ext.id}`)?.classList.contains('active')) {

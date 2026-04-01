@@ -2,6 +2,7 @@
 <html lang="ca">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resumir contingut</title>
     <link rel="stylesheet" href="sidebar.css" />
     <script src="../theme.js"></script>
@@ -34,7 +35,6 @@
           class="action-btn secondary"
           title="Guardar a Obsidian"
           aria-label="Guardar a Obsidian"
-          style="color: #a855f7"
           disabled
         >
           <svg
@@ -58,7 +58,6 @@
           class="icon-btn"
           title="Lectura biònica"
           aria-label="Lectura biònica"
-          style="display: none"
         >
           <svg
             viewBox="0 0 24 24"
@@ -88,7 +87,6 @@
           class="icon-btn"
           title="Aprofundiment"
           aria-label="Aprofundiment"
-          style="display: none"
         >
           <svg
             viewBox="0 0 24 24"
@@ -112,7 +110,6 @@
           class="icon-btn"
           title="Validació científica"
           aria-label="Validació científica"
-          style="display: none; color: #10b981"
         >
           <svg
             viewBox="0 0 24 24"
@@ -190,7 +187,7 @@
         </button>
       </div>
       <div id="page-title-strip" class="hidden">
-        <a id="page-title-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+        <a id="page-title-link" href="#" target="_blank" rel="noopener noreferrer" title="Anar a la pàgina original" aria-label="Anar a la pàgina original">Pàgina original</a>
       </div>
       <div id="history-back-bar" class="hidden">
         <button id="historyBackBtn" class="history-back-btn">&#8592; Tornar a l'historial</button>
@@ -205,69 +202,70 @@
     </div>
 
     <div id="footer-status" class="hidden">
-      <select id="model-select" aria-label="Selecciona model">
-        <!-- Options populated by JS -->
-      </select>
-      <span class="separator">|</span>
-      <span id="generation-timer">0.0s</span>
-      <span class="separator">|</span>
-      <span
-        id="water-indicator"
-        style="
-          font-size: 0.9em;
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-        "
-        title="Consum d'aigua estimat avui (1 got = 300 ml, 0.26 ml/consulta)"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="12"
-          height="12"
-          fill="#5bb8f5"
-          aria-hidden="true"
+      <div class="footer-section footer-section-left">
+        <select id="model-select" aria-label="Selecciona model">
+          <!-- Options populated by JS -->
+        </select>
+      </div>
+
+      <div class="footer-section footer-section-middle">
+        <span id="generation-timer" title="Temps de resposta">0.0s</span>
+        <span class="section-divider">·</span>
+        <span
+          id="tokens-indicator"
+          title="Tokens entrada/sortida"
         >
-          <path
-            d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"
-          />
-          <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z" />
-        </svg>
-        <span id="water-ml">0.0 ml</span>
-      </span>
-      <span class="separator">|</span>
-      <span
-        id="requests-remaining"
-        style="font-size: 0.9em"
-        title="Resums estimats disponibles avui amb la quota gratuïta"
-        >— resums avui</span
-      >
-      <span class="separator">|</span>
-      <span id="history-cache-group" style="display:inline-flex;align-items:center;gap:4px;">
-        <span id="cache-badge" style="visibility:hidden;" title="Resum en caché">⚡</span>
-        <button
-          id="sourceTextBtn"
-          title="Veure text enviat a resumir"
-          aria-label="Veure text enviat a resumir"
-          disabled
-          style="background:none;border:none;cursor:pointer;padding:0 2px;font-size:1em;color:var(--footer-text);line-height:1"
+          <span id="tokens-in">↓ <span id="tokens-in-count">0.0</span></span>
+          <span id="tokens-out">↑ <span id="tokens-out-count">0.0</span></span>
+        </span>
+        <span class="section-divider">·</span>
+        <span
+          id="water-indicator"
+          title="Consum d'aigua estimat avui (1 got = 300 ml, 0.26 ml/consulta)"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <line x1="10" y1="9" x2="8" y2="9"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="12"
+            height="12"
+            fill="#5bb8f5"
+            aria-hidden="true"
+          >
+            <path
+              d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"
+            />
+            <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z" />
           </svg>
-        </button>
-        <button
-          id="historyBtn"
-          title="Historial"
-          aria-label="Historial"
-          style="background:none;border:none;cursor:pointer;padding:0 2px;font-size:1em;color:var(--footer-text);line-height:1"
-        >🕐</button>
-      </span>
+          <span id="water-ml">0.0 gots</span>
+        </span>
+      </div>
+
+      <div class="footer-section footer-section-right">
+        <span id="history-cache-group">
+          <span id="cache-badge" title="Resum en caché">⚡</span>
+          <button
+            id="sourceTextBtn"
+            title="Veure text enviat a resumir"
+            aria-label="Veure text enviat a resumir"
+            disabled
+            class="footer-btn"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+          </button>
+          <button
+            id="historyBtn"
+            title="Historial"
+            aria-label="Historial"
+            class="footer-btn"
+          >🕐</button>
+        </span>
+      </div>
     </div>
     <script src="../Readability.js"></script>
     <script src="../ext.js"></script>

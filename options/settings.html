@@ -2,6 +2,7 @@
 <html lang="ca">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resumir contingut - Configuració</title>
     <link rel="stylesheet" href="settings.css" />
     <script src="../theme.js"></script>
@@ -16,8 +17,7 @@
 
       <div
         id="activeExtensionsHeader"
-        class="sidebar-header"
-        style="display: none; margin-top: 20px"
+        class="sidebar-header sidebar-header-hidden"
       >
         Plugins actius
       </div>
@@ -53,7 +53,7 @@
               </button>
             </div>
             <div id="modelsList"></div>
-            <div id="refreshModelsStatus" class="help-text" style="display:none;"></div>
+            <div id="refreshModelsStatus" class="help-text hidden"></div>
             <div class="help-text">
               El model utilitzat per generar els resums.
             </div>
@@ -91,20 +91,19 @@
           <h3>Emmagatzematge i privadesa</h3>
           <div class="form-group">
             <label>Memòria cau local</label>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px">
+            <p class="text-muted-small">
               L'extensió guarda còpies locals dels resums per estalviar costos i
               millorar la velocitat. Aquesta informació no surt mai del teu
               ordinador.
             </p>
-            <div style="display: flex; align-items: center; gap: 15px">
+            <div class="flex-row-gap">
               <button
                 id="clearCache"
-                class="btn btn-secondary"
-                style="border-color: #d70022; color: #d70022"
+                class="btn btn-secondary error-button"
               >
                 Buidar memòria cau
               </button>
-              <span id="cacheStatus" style="font-size: 0.9em; color: #666"
+              <span id="cacheStatus" class="text-small-muted"
                 >Calculant...</span
               >
             </div>
@@ -154,7 +153,7 @@
         <div class="extensions-list">
           <!-- Resum (core, default active) -->
           <div class="extension-item">
-            <div class="extension-icon" style="color: #0060df">
+            <div class="extension-icon icon-blue">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -190,6 +189,7 @@
                 <input type="checkbox" id="enableResum" checked />
                 <span class="slider round"></span>
               </label>
+              <span class="sr-only">Resum</span>
               <button
                 class="btn-icon"
                 data-target="resum"
@@ -205,7 +205,7 @@
 
           <!-- Scientific Validation -->
           <div class="extension-item">
-            <div class="extension-icon" style="color: #10b981">
+            <div class="extension-icon icon-green">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -266,6 +266,7 @@
                 <input type="checkbox" id="enableScience" />
                 <span class="slider round"></span>
               </label>
+              <span class="sr-only">Validació científica</span>
               <button
                 class="btn-icon"
                 data-target="science"
@@ -293,7 +294,7 @@
 
           <!-- Deep Dive -->
           <div class="extension-item">
-            <div class="extension-icon" style="color: #0060df">
+            <div class="extension-icon icon-blue">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -349,6 +350,7 @@
                 <input type="checkbox" id="enableDeepdive" />
                 <span class="slider round"></span>
               </label>
+              <span class="sr-only">Deep Dive</span>
               <button
                 class="btn-icon"
                 data-target="deepdive"
@@ -376,7 +378,7 @@
 
           <!-- Obsidian -->
           <div class="extension-item">
-            <div class="extension-icon" style="color: #a855f7">
+            <div class="extension-icon icon-purple">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -461,7 +463,7 @@
 
           <!-- Markdown -->
           <div class="extension-item">
-            <div class="extension-icon" style="color: #666">
+            <div class="extension-icon icon-gray">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -545,7 +547,7 @@
 
           <!-- Bionic Reading -->
           <div class="extension-item">
-            <div class="extension-icon" style="color: #666">
+            <div class="extension-icon icon-gray">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -780,7 +782,7 @@
             <label for="bionicFixation"
               >Percentatge de fixació (per a paraules > 3 lletres)</label
             >
-            <div style="display: flex; align-items: center; gap: 15px">
+            <div class="flex-row-gap">
               <input
                 type="range"
                 id="bionicFixation"
@@ -788,11 +790,11 @@
                 max="80"
                 step="5"
                 value="35"
-                style="flex-grow: 1"
+                class="flex-grow"
               />
               <span
                 id="bionicFixationValue"
-                style="min-width: 40px; font-weight: bold"
+                class="input-label-bold"
                 >35%</span
               >
             </div>
@@ -871,50 +873,40 @@
             <h3>Activitat global</h3>
             <div class="date-filter" id="kpiDateFilter">Sempre</div>
           </div>
-          <div
-            class="stats-grid"
-            style="
-              grid-template-columns: repeat(3, 1fr);
-              gap: 15px;
-              margin-top: 15px;
-            "
-          >
-            <div class="stat-card" style="padding: 20px; text-align: center">
+          <div class="stats-grid">
+            <div class="stat-card stat-icon-blue">
               <div
                 class="stat-value"
                 id="statsArticles"
-                style="font-size: 2.5em; color: var(--button-hover-bg)"
               >
                 0
               </div>
               <div class="stat-label">Pàgines resumides</div>
             </div>
-            <div class="stat-card" style="padding: 20px; text-align: center">
+            <div class="stat-card stat-icon-green">
               <div
                 class="stat-value"
                 id="kpiTimeSaved"
-                style="font-size: 2.5em; color: #2e7d32"
               >
                 0h 0m
               </div>
               <div class="stat-label">Temps estalviat aprox.</div>
             </div>
-            <div class="stat-card" style="padding: 20px; text-align: center">
-              <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+            <div class="stat-card">
+              <div class="flex-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="#5bb8f5" aria-hidden="true">
                   <path d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"/>
                   <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z"/>
                 </svg>
                 <div
-                  class="stat-value"
+                  class="stat-value stat-icon-light-blue"
                   id="kpiWaterToday"
-                  style="font-size: 2.5em; color: #5bb8f5"
                 >
                   0 ml
                 </div>
               </div>
               <div class="stat-label">Consum d&rsquo;aigua avui</div>
-              <div id="kpiWaterTotal" style="font-size:0.8em; color:#888; margin-top:4px;">Total acumulat: 0 ml</div>
+              <div id="kpiWaterTotal" class="kpi-water-total">Total acumulat: 0 ml</div>
             </div>
           </div>
         </div>
@@ -922,15 +914,7 @@
         <!-- Bar Chart -->
         <div class="section">
           <h3 id="chartTitle">Resums per dia (últims 7 dies)</h3>
-          <div
-            id="dailyChartContainer"
-            style="
-              height: 150px;
-              display: flex;
-              flex-direction: column;
-              margin-top: 20px;
-            "
-          >
+          <div id="dailyChartContainer">
             <!-- Bars injected by JS -->
           </div>
         </div>
@@ -942,7 +926,7 @@
             <table class="history-table">
               <thead>
                 <tr>
-                  <th style="width: 20%">Data</th>
+                  <th class="table-col-date">Data</th>
                   <th>Article</th>
                 </tr>
               </thead>
@@ -951,46 +935,26 @@
               </tbody>
             </table>
           </div>
-          <div
-            class="table-footer"
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-top: 15px;
-            "
-          >
-            <div
-              class="pagination-controls"
-              style="display: flex; gap: 10px; align-items: center"
-            >
+          <div class="table-footer">
+            <div class="pagination-controls">
               <button id="prevPage" class="btn btn-secondary btn-sm" disabled>
                 &larr; Anterior
               </button>
-              <span
-                id="pageInfo"
-                style="font-size: 0.9em; color: var(--text-muted)"
-                >Pàgina 1</span
-              >
+              <span id="pageInfo">Pàgina 1</span>
               <button id="nextPage" class="btn btn-secondary btn-sm" disabled>
                 Següent &rarr;
               </button>
             </div>
 
-            <div style="display: flex; gap: 15px; align-items: center">
-              <select
-                id="pageSizeSelect"
-                class="form-control"
-                style="width: auto; padding: 4px 8px"
-              >
+            <div class="table-footer-right">
+              <select id="pageSizeSelect" class="form-control">
                 <option value="20" selected>20 per pàgina</option>
                 <option value="50">50 per pàgina</option>
                 <option value="100">100 per pàgina</option>
               </select>
               <button
                 id="clearHistory"
-                class="btn btn-secondary btn-sm"
-                style="border-color: #d70022; color: #d70022"
+                class="btn btn-secondary btn-sm error-button"
               >
                 Esborrar historial
               </button>
@@ -1001,18 +965,18 @@
         <!-- Grouped History Table -->
         <div class="section">
           <h3>Resums per model i dia</h3>
-          <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+          <div class="table-container">
             <table class="history-table">
-              <thead style="position: sticky; top: 0; background: var(--bg-color); z-index: 1;">
+              <thead class="table-sticky-header">
                 <tr>
-                  <th id="groupedTableDateHeader">Data</th>
+                  <th id="groupedTableDateHeader" class="text-right">Data</th>
                   <th>Model</th>
-                  <th style="text-align: right;">Peticions</th>
-                  <th style="text-align: right;" title="Tokens d'entrada (suma)">In tok</th>
-                  <th style="text-align: right;" title="Tokens de sortida (suma)">Out tok</th>
-                  <th style="text-align: right;" title="Tokens de caché (suma)">Caché</th>
-                  <th style="text-align: right;" title="Latència mitjana">ms∅</th>
-                  <th style="text-align: right;">Aigua (ml)</th>
+                  <th class="text-right">Peticions</th>
+                  <th class="text-right" title="Tokens d'entrada (suma)">In tok</th>
+                  <th class="text-right" title="Tokens de sortida (suma)">Out tok</th>
+                  <th class="text-right" title="Tokens de caché (suma)">Caché</th>
+                  <th class="text-right" title="Latència mitjana">ms∅</th>
+                  <th class="text-right">Aigua (ml)</th>
                 </tr>
               </thead>
               <tbody id="groupedTableBody">
@@ -1045,15 +1009,34 @@
 
         <div class="section">
           <h3>Historial de canvis</h3>
-          <div
-            class="changelog"
-            style="
-              border-left: 2px solid #e0e0e6;
-              padding-left: 20px;
-              margin-left: 10px;
-            "
-          >
+          <div class="changelog">
             <!-- CHANGELOG_START -->
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Panell de text font</strong>: Nou botó al peu del sidebar (icona de document) que mostra el text que s'ha enviat a la IA per resumir. Permet auditar exactament quin contingut s'ha extret de la pàgina i comprovar si coincideix amb les expectatives.</li>
+                <li><strong>Barra de títol</strong>: Tira enganxosa al damunt del contingut que mostra el títol de la pàgina resumida amb un enllaç directe a la pàgina original.</li>
+                <li><strong>Badge de caché clicable</strong>: El símbol ⚡ al peu és ara interactiu — clicar-lo carrega directament el resum emmagatzemat en caché sense necessitat de tornar a generar-lo.</li>
+                <li><strong>Panell d'historial</strong>: Llista navegable de tots els resums previs emmagatzemats en caché, accessible des del botó 🕐 al peu. Permet rellegir i recuperar qualsevol resum anterior.</li>
+                <li><strong>Selector de període a les estadístiques</strong>: El gràfic i la taula de la pàgina d'estadístiques suporten ara filtres de 7 dies, 30 dies, 6 mesos i 1 any, a més de les columnes de tokens entrada/sortida, hits de caché i temps mitjà de resposta.</li>
+                <li><strong>Extracció Twitter/X via Defuddle</strong>: El contingut de Twitter/X s'extreu ara amb la llibreria Defuddle (v0.14.0) amb fallback a scraping DOM, obtenint text molt més ric i precís que el mètode anterior.</li>
+                <li><strong>Millores Hacker News</strong>: Eliminat el límit de comentaris, afegida la descàrrega de l'article enllaçat per proporcionar context complet als resums de fils HN.</li>
+                <li><strong>Streaming en temps real</strong>: El contingut del resum ara es mostra com a text pla durant la generació i es transforma a Markdown amb format complet en acabar. Eliminada la latència visual d'esperar el final per veure contingut.</li>
+                <li><strong>Tokens reals de l'API</strong>: S'utilitzen els <code>usageMetadata</code> retornats per Gemini en lloc d'estimacions del tokenitzador local, obtenint comptes exactes d'entrada/sortida i de tokens de caché.</li>
+                <li><strong>Caché amb TTL de 30 dies</strong>: Purga automàtica de les entrades expirades en segon pla sense bloquejar la interfície.</li>
+                <li><strong>Historial carrega a la sidebar</strong>: El clic a una entrada de l'historial (stats) obre la sidebar i carrega el resum directament, sense obrir una URL.</li>
+                <li><strong>Permisos Firefox en instal·lació</strong>: Sol·licita automàticament l'accés a tots els llocs web quan l'usuari instal·la l'extensió per primera vegada, evitant passos manuals de configuració.</li>
+                <li><strong>Pàgina de configuració redissenyada</strong>: Navegació lateral amb tabs, millores de CSS, indicadors de color per a cada plugin i nova secció d'estadístiques integrada.</li>
+                <li><strong>Plugin "Netejar Timeline"</strong>: La funcionalitat de neteja de feeds algorítmics de Twitter/X i LinkedIn s'ha extret a una extensió independent. Eliminat el botó del sidebar, la configuració i els scripts d'injecció corresponents.</li>
+                <li><strong>Badge de caché</strong>: L'espai sempre reservat amb <code>visibility</code> en comptes de <code>display</code> evita que la barra inferior salti en aparèixer/desaparèixer el símbol.</li>
+                <li><strong>Fallback de quota</strong>: El fallback respecta els models favorits i evita seleccionar models cars quan la quota s'esgota.</li>
+                <li><strong>Diàleg duplicat de reload</strong>: Eliminat el condicional duplicat al listener de <code>apiKey</code> que provocava dos recarregaments consecutius.</li>
+                <li><strong>Deep Dive fix</strong>: El contingut es mostrava com a <code>hidden</code> fins al final del streaming en lloc d'aparèixer progressivament.</li>
+              </ul>
+            </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.1.0
@@ -1252,24 +1235,8 @@
         </div>
 
         <div class="section">
-          <div
-            class="about-footer"
-            style="
-              text-align: center;
-              margin-top: 50px;
-              color: #999;
-              font-size: 13px;
-            "
-          >
-            <small
-              >Creat per
-              <a
-                id="linkAuthor"
-                href="#"
-                style="color: inherit; text-decoration: none"
-                >Sergi Xaudiera</a
-              ></small
-            >
+          <div class="about-footer">
+            <small>Creat per <a id="linkAuthor" href="#">Sergi Xaudiera</a></small>
           </div>
         </div>
       </div>

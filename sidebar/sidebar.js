@@ -242,10 +242,26 @@ document.addEventListener("DOMContentLoaded", () => {
         doSummary(null, false, true, true);
     });
 
-    if (historyBtn) historyBtn.addEventListener("click", openHistoryPanel);
+    if (historyBtn) historyBtn.addEventListener("click", () => {
+        const historyPanel = document.getElementById("history-panel");
+        if (historyPanel && !historyPanel.classList.contains("hidden")) {
+            // Panel obert → tancar-lo
+            closeHistoryPanel();
+        } else {
+            // Panel tancat → obrir-lo
+            openHistoryPanel();
+        }
+    });
     if (sourceTextBtn) sourceTextBtn.addEventListener("click", () => {
         if (!currentSourceText) return;
-        openSourcePanel(currentSourceText);
+        const sourcePanel = document.getElementById("source-panel");
+        if (sourcePanel && !sourcePanel.classList.contains("hidden")) {
+            // Panel obert → tancar-lo
+            closeSourcePanel();
+        } else {
+            // Panel tancat → obrir-lo
+            openSourcePanel(currentSourceText);
+        }
     });
     const historyBackBtn = document.getElementById("historyBackBtn");
     if (historyBackBtn) historyBackBtn.addEventListener("click", openHistoryPanel);
@@ -373,6 +389,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const apiKey = syncData.apiKey;
             let modelName = syncData.modelName || DEFAULT_MODEL_ID;
+            
+            // Assegurar que el modelName es guarda si era per defecte (per a futures carregues)
+            if (!syncData.modelName) {
+                await ext.storage.sync.set({ modelName: DEFAULT_MODEL_ID });
+            }
             
             if (localData.isBionicActive === true) {
                 isBionicEnabled = true;

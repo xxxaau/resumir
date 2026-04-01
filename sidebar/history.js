@@ -3,6 +3,8 @@
 
 /** Stores which element was visible before the panel opened, for restoration. */
 let _previousVisible = null;
+/** Stores whether the page-title-strip was visible before the panel opened. */
+let _previousTitleStripVisible = false;
 
 /**
  * Opens the history panel.
@@ -18,6 +20,7 @@ async function openHistoryPanel() {
     // Hide back bar (in case we're returning from detail view)
     if (backBar) backBar.classList.add("hidden");
     const titleStrip = document.getElementById("page-title-strip");
+    _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
 
     // Snapshot visible element (content or error) for restoration on close
@@ -47,6 +50,9 @@ function _closePanel(panelEl) {
         _previousVisible.classList.remove("hidden");
         _previousVisible = null;
     }
+    const titleStrip = document.getElementById("page-title-strip");
+    if (titleStrip) titleStrip.classList.toggle("hidden", !_previousTitleStripVisible);
+    _previousTitleStripVisible = false;
 }
 
 /**
@@ -171,7 +177,8 @@ function openSourcePanel(text) {
     historyPanel.classList.add("hidden");
     historyPanel.innerHTML = "";
 
-    if (backBar)    backBar.classList.add("hidden");
+    if (backBar) backBar.classList.add("hidden");
+    _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
 
     // Capturar element visible per a restauració

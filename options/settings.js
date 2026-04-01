@@ -1,99 +1,185 @@
 // options/settings.js
 // Punt d'entrada: event listeners i inicialització de la pàgina de configuració
 // Les funcions estàn definides als mòduls settings-*.js carregats prèviament.
+// IMPORTANT: Tothom ha d'estar dins DOMContentLoaded!
 
-// Real-time fixation value update
-document.getElementById("bionicFixation").addEventListener("input", (e) => {
-    document.getElementById("bionicFixationValue").textContent = e.target.value + "%";
-});
-
-// Handle "Configure" buttons in extension list
-document.querySelectorAll('.btn-icon[data-target]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const target = e.currentTarget.getAttribute('data-target');
-        navigateToTab(target);
-    });
-});
-
-// Handle "Live" Toggles in extension list
-// Nota: només actualitza la UI de la barra lateral de configuració;
-// la persistència real es fa quan l'usuari prem un botó de "Desar" explícit.
-const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic"];
-extensionToggles.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('change', () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    // Restore saved options on page load and wait for completion
+    await restoreOptions();
+    
+    // Initialize UI elements that depend on restored data
+    if (typeof initializeSettingsPageUI === 'function') {
+        initializeSettingsPageUI();
+    }
+    
+    // Update sidebar with active plugins
+    if (typeof updateSidebar === 'function') {
         updateSidebar();
+    }
+    
+    // Update cache info and load statistics
+    if (typeof updateCacheInfo === 'function') {
+        updateCacheInfo();
+    }
+    if (typeof loadStatistics === 'function') {
+        loadStatistics();
+    }
+    
+    // Initialize sidebar navigation (needs to be after DOM is fully ready)
+    if (typeof initializeSidebarNavigation === 'function') {
+        initializeSidebarNavigation();
+    }
+
+    // Real-time fixation value update
+    const bionicFixation = document.getElementById("bionicFixation");
+    if (bionicFixation) {
+        bionicFixation.addEventListener("input", (e) => {
+            const valueEl = document.getElementById("bionicFixationValue");
+            if (valueEl) valueEl.textContent = e.target.value + "%";
+        });
+    }
+
+    // Handle "Configure" buttons in extension list
+    document.querySelectorAll('.btn-icon[data-target]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const target = e.currentTarget.getAttribute('data-target');
+            navigateToTab(target);
+        });
     });
-});
 
-// --- Event Listeners ---
-document.addEventListener("DOMContentLoaded", restoreOptions);
+    // Handle "Live" Toggles in extension list
+    // Nota: només actualitza la UI de la barra lateral de configuració;
+    // la persistència real es fa quan l'usuari prem un botó de "Desar" explícit.
+    const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience"];
+    extensionToggles.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', () => {
+            updateSidebar();
+        });
+    });
 
-// Bind all save buttons to saveOptions
-const saveBtns = ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience"];
-saveBtns.forEach(id => {
-    const btn = document.querySelector("#" + id);
-    if(btn) btn.addEventListener("click", saveOptions);
-});
+    // Bind all save buttons to saveOptions
+    const saveBtns = ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience"];
+    saveBtns.forEach(id => {
+        const btn = document.querySelector("#" + id);
+        if(btn) btn.addEventListener("click", saveOptions);
+    });
 
-document.querySelector("#resetTemplate").addEventListener("click", resetTemplate);
-document.querySelector("#resetObsidianTemplate").addEventListener("click", resetObsidianTemplate);
-document.querySelector("#resetSystemPrompt").addEventListener("click", resetSystemPrompt);
-document.querySelector("#resetDeepDive").addEventListener("click", resetDeepDivePrompt);
-document.querySelector("#resetScience").addEventListener("click", resetSciencePrompt);
-document.querySelector("#checkModels").addEventListener("click", listModels);
-document.querySelector("#refreshModels").addEventListener("click", refreshModels);
-document.getElementById("clearHistory").addEventListener("click", clearHistory);
-document.getElementById("clearCache").addEventListener("click", clearCache);
+    // Reset buttons (with null checks)
+    const resetTemplate = document.querySelector("#resetTemplate");
+    if (resetTemplate) resetTemplate.addEventListener("click", resetTemplate);
+    
+    const resetObsidianTemplate = document.querySelector("#resetObsidianTemplate");
+    if (resetObsidianTemplate) resetObsidianTemplate.addEventListener("click", resetObsidianTemplate);
+    
+    const resetSystemPrompt = document.querySelector("#resetSystemPrompt");
+    if (resetSystemPrompt) resetSystemPrompt.addEventListener("click", resetSystemPrompt);
+    
+    const resetDeepDive = document.querySelector("#resetDeepDive");
+    if (resetDeepDive) resetDeepDive.addEventListener("click", resetDeepDivePrompt);
+    
+    const resetScience = document.querySelector("#resetScience");
+    if (resetScience) resetScience.addEventListener("click", resetSciencePrompt);
+    
+    // Model selection buttons
+    const checkModels = document.querySelector("#checkModels");
+    if (checkModels) checkModels.addEventListener("click", listModels);
+    
+    const refreshModels = document.querySelector("#refreshModels");
+    if (refreshModels) refreshModels.addEventListener("click", refreshModels);
+    
+    // Cache and history buttons
+    const clearHistory = document.getElementById("clearHistory");
+    if (clearHistory) clearHistory.addEventListener("click", clearHistory);
+    
+    const clearCache = document.getElementById("clearCache");
+    if (clearCache) clearCache.addEventListener("click", clearCache);
 
-// Pagination Event Listeners
-document.getElementById("prevPage")?.addEventListener("click", () => {
-    if (currentPage > 1) {
-        currentPage--;
-        loadStatistics();
+    // Pagination Event Listeners
+    const prevPage = document.getElementById("prevPage");
+    if (prevPage) {
+        prevPage.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadStatistics();
+            }
+        });
     }
-});
 
-document.getElementById("nextPage")?.addEventListener("click", () => {
-    if (currentPage < totalPages) {
-        currentPage++;
-        loadStatistics();
+    const nextPage = document.getElementById("nextPage");
+    if (nextPage) {
+        nextPage.addEventListener("click", () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadStatistics();
+            }
+        });
     }
-});
 
-document.getElementById("pageSizeSelect")?.addEventListener("change", (e) => {
-    PAGE_SIZE = parseInt(e.target.value, 10);
-    ext.storage.local.set({ pageSize: PAGE_SIZE });
-    currentPage = 1;
-    loadStatistics();
-});
+    const pageSizeSelect = document.getElementById("pageSizeSelect");
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener("change", (e) => {
+            PAGE_SIZE = parseInt(e.target.value, 10);
+            ext.storage.local.set({ pageSize: PAGE_SIZE });
+            currentPage = 1;
+            loadStatistics();
+        });
+    }
 
-// Reordering Event Delegation
-document.querySelector(".extensions-list").addEventListener("click", (e) => {
-    const btn = e.target.closest(".btn-move-up, .btn-move-down");
-    if (!btn) return;
+    // Reordering Event Delegation
+    const extensionsList = document.querySelector(".extensions-list");
+    if (extensionsList) {
+        extensionsList.addEventListener("click", (e) => {
+            const btn = e.target.closest(".btn-move-up, .btn-move-down");
+            if (!btn) return;
 
-    const actionDiv = btn.closest(".extension-actions");
-    const id = actionDiv.getAttribute("data-extension-id");
-    const direction = btn.classList.contains("btn-move-up") ? "up" : "down";
+            const actionDiv = btn.closest(".extension-actions");
+            const id = actionDiv.getAttribute("data-extension-id");
+            const direction = btn.classList.contains("btn-move-up") ? "up" : "down";
 
-    moveExtension(id, direction);
-});
+            moveExtension(id, direction);
+        });
+    }
 
-// --- About Links (CSP Safe) ---
-document.getElementById("btnGithub").addEventListener("click", () => {
-    window.open("https://github.com/xxxaau/extensio-resumir-contingut", "_blank");
-});
-document.getElementById("btnIssues").addEventListener("click", () => {
-    window.open("https://github.com/xxxaau/extensio-resumir-contingut/issues", "_blank");
-});
-document.getElementById("linkAuthor").addEventListener("click", (e) => {
-    e.preventDefault();
-    window.open("https://sergi.xaudiera.xyz", "_blank");
+    // --- About Links (CSP Safe) ---
+    const btnGithub = document.getElementById("btnGithub");
+    if (btnGithub) {
+        btnGithub.addEventListener("click", () => {
+            window.open("https://github.com/xxxaau/extensio-resumir-contingut", "_blank");
+        });
+    }
+
+    const btnIssues = document.getElementById("btnIssues");
+    if (btnIssues) {
+        btnIssues.addEventListener("click", () => {
+            window.open("https://github.com/xxxaau/extensio-resumir-contingut/issues", "_blank");
+        });
+    }
+
+    const linkAuthor = document.getElementById("linkAuthor");
+    if (linkAuthor) {
+        linkAuthor.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.open("https://sergi.xaudiera.xyz", "_blank");
+        });
+    }
+
+    // Period selector
+    document.querySelectorAll(".period-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            currentPeriod = btn.dataset.period;
+            document.querySelectorAll(".period-btn").forEach(b =>
+                b.classList.toggle("active", b === btn)
+            );
+            currentPage = 1; // Reset paginació quan canvia el període
+            loadStatistics();
+        });
+    });
 });
 
 // Sync model selection with sidebar changes in real-time
+// This runs outside DOMContentLoaded because ext.storage.onChanged is a global listener
 ext.storage.onChanged.addListener((changes, area) => {
     if (area === 'sync' && changes.modelName && changes.modelName.newValue) {
         const modelEl = document.querySelector("#modelName");
@@ -101,16 +187,4 @@ ext.storage.onChanged.addListener((changes, area) => {
             modelEl.value = changes.modelName.newValue;
         }
     }
-});
-
-// Period selector
-document.querySelectorAll(".period-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        currentPeriod = btn.dataset.period;
-        document.querySelectorAll(".period-btn").forEach(b =>
-            b.classList.toggle("active", b === btn)
-        );
-        currentPage = 1; // Reset paginació quan canvia el període
-        loadStatistics();
-    });
 });

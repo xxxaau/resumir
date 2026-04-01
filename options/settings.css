@@ -416,6 +416,7 @@ label {
     font-size: 1em;
     color: #ccc;
     transition: color 0.15s, transform 0.15s;
+    -webkit-user-select: none;
     user-select: none;
     padding: 0 8px 0 0;
     flex-shrink: 0;
@@ -569,8 +570,9 @@ label {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Force 3 equal columns on one line */
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 15px;
     margin-bottom: 30px;
 }
 
@@ -644,10 +646,12 @@ a:hover {
 
 .table-footer {
     padding: 16px;
-    border-top: 1px solid var(--border-color); 
+    border-top: 1px solid var(--border-color);
     background: var(--card-bg);
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
     border-radius: 0 0 8px 8px;
 }
 
@@ -863,4 +867,201 @@ input:checked + .slider:before {
   background-color: var(--button-color);
   color: #fff;
   border-color: var(--button-color);
+}
+
+/* ── New Utility Classes ─────────────────────────────────────── */
+
+/* Display/Visibility Utilities */
+.hidden {
+  display: none !important;
+}
+
+.sidebar-header-hidden {
+  display: none;
+  margin-top: 20px;
+}
+
+/* Flexbox Utilities */
+.flex-row-gap {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Text Utilities */
+.text-muted-small {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.text-small-muted {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Input/Form Utilities */
+.input-label-bold {
+  min-width: 40px;
+  font-weight: bold;
+}
+
+.error-button {
+  border-color: #d70022 !important;
+  color: #d70022 !important;
+}
+
+/* Icon Color Classes */
+.icon-blue { color: #0060df; }
+.icon-green { color: #10b981; }
+.icon-red { color: #ef4444; }
+.icon-purple { color: #a855f7; }
+.icon-gray { color: #666; }
+
+/* Stats Cards & KPIs */
+.stat-card {
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-card-large {
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-icon-large {
+  font-size: 2.5em;
+}
+
+.stat-icon-blue { color: var(--button-hover-bg); }
+.stat-icon-green { color: #2e7d32; }
+.stat-icon-light-blue { color: #5bb8f5; }
+
+.kpi-water-total {
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Table Utilities */
+.table-container {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.table-sticky-header thead {
+  position: sticky;
+  top: 0;
+  background: var(--bg-color);
+  z-index: 1;
+}
+
+.table-col-date { width: 20%; }
+
+/* Version History Section */
+.version-entry {
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.version-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.version-date {
+  font-weight: normal;
+  color: #666;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+.version-list {
+  margin: 5px 0;
+  padding-left: 20px;
+  color: #444;
+}
+
+.version-desc {
+  margin: 4px 0 6px;
+  color: #555;
+  font-size: 0.9em;
+}
+
+/* ── Stats Dashboard ──────────────────────────────────────── */
+#dailyChartContainer {
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+/* ── Pagination Controls ──────────────────────────────────── */
+.pagination-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#pageInfo {
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+.table-footer-right {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+#pageSizeSelect {
+  width: auto;
+  padding: 4px 8px;
+}
+
+/* ── Changelog ────────────────────────────────────────────── */
+.changelog {
+  border-left: 2px solid #e0e0e6;
+  padding-left: 20px;
+  margin-left: 10px;
+}
+
+/* ── About Footer ─────────────────────────────────────────── */
+.about-footer {
+  text-align: center;
+  margin-top: 50px;
+  color: #999;
+  font-size: 13px;
+}
+
+#linkAuthor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

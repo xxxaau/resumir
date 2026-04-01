@@ -14,9 +14,30 @@ ext.action.onClicked.addListener(async (tab) => {
 
 // --- Context Menus ---
 
-ext.runtime.onInstalled.addListener(() => {
+ext.runtime.onInstalled.addListener(async () => {
   // Chromium: register side panel to open on action click
   ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
+
+  // Firefox: request all_urls permission for website access on install
+  if (ext.runtime.getBrowserInfo) {
+    try {
+      const browserInfo = await ext.runtime.getBrowserInfo();
+      if (browserInfo.name === "Firefox") {
+        ext.permissions.request({
+          permissions: [],
+          origins: ["<all_urls>"]
+        }).then((granted) => {
+          if (granted) {
+            console.log("Firefox: Access to all websites granted");
+          }
+        }).catch((_err) => {
+          console.log("Firefox: User declined or permission already granted");
+        });
+      }
+    } catch (e) {
+      console.log("getBrowserInfo not available or other error, skipping Firefox permission request");
+    }
+  }
 
   // Create context menu items
   ext.menus.create({

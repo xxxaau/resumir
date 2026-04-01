@@ -45,6 +45,7 @@ function applyExtensionVisibility(config) {
     if (summarizeBtnEl) {
         summarizeBtnEl.style.display = config.enableResum !== false ? "flex" : "none";
     }
+
 }
 
 /**
@@ -57,7 +58,7 @@ function applyExtensionOrder(order) {
     // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
     // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
     if (!order.includes("resum")) {
-        order = ["resum", "science", "deepdive", "obsidian", "markdown", "bionic"];
+        order = ["resum", "science", "deepdive", "bionic", "obsidian", "markdown"];
         ext.storage.sync.set({ extensionOrder: order });
     }
 
@@ -66,14 +67,14 @@ function applyExtensionOrder(order) {
 
     const summarizeBtnEl = document.getElementById("summarizeBtn");
     const settingsBtnEl = document.getElementById("settingsBtn");
-    
+
     const extensionIdToButtonId = {
         "resum": "summarizeBtn",
         "obsidian": "obsidianBtn",
         "markdown": "copyBtn",
         "deepdive": "deepDiveBtn",
         "bionic": "bionicBtn",
-        "science": "scienceBtn"
+        "science": "scienceBtn",
     };
     
     const orderedButtons = [];
@@ -364,32 +365,21 @@ const WATER_ML_PER_GLASS = 300;    // ml per got estàndard
 
 function updateWaterStats(totalTodayAll, modelId, requestsByModel) {
     const waterEl  = document.getElementById("water-ml");
-    const remainEl = document.getElementById("requests-remaining");
 
     // --- Water consumption: ALL queries today (all models) ---
     const gots = (totalTodayAll * WATER_ML_PER_QUERY) / WATER_ML_PER_GLASS;
+    
+    // Round to nearest 0.5 for friendly display
+    const friendlyGots = Math.round(gots * 2) / 2;
     let waterStr;
-    if (gots < 0.01) {
-        waterStr = gots.toFixed(3) + " gots";
-    } else if (gots < 1) {
-        waterStr = gots.toFixed(2) + " gots";
+    if (friendlyGots === 0) {
+        waterStr = "0 gots";
+    } else if (friendlyGots < 1) {
+        waterStr = friendlyGots.toFixed(1) + " got";
     } else {
-        waterStr = gots.toFixed(1) + " gots";
+        waterStr = friendlyGots.toFixed(1) + " gots";
     }
     if (waterEl) waterEl.textContent = waterStr;
-
-    // --- Remaining requests ---
-    const info = getCuratedModelInfo(modelId);
-    const rpd  = info.rpd;
-    const remaining = Math.max(0, rpd - (requestsByModel || 0));
-    if (remainEl) {
-        if (rpd >= 999999) {
-            remainEl.textContent = "∞ resums avui";
-        } else {
-            remainEl.textContent = `~${remaining} resums avui`;
-            remainEl.style.color = remaining < 5 ? "var(--error-text)" : "";
-        }
-    }
 
     const footer = document.getElementById("footer-status");
     if (footer) footer.classList.remove("hidden");
@@ -425,6 +415,50 @@ function stopGenerationTimer() {
     }
 }
 
+/**
+ * Formats a number with thousands separator (.) and millions notation (M).
+ * Examples: 1000 → "1.000", 1500000 → "1,5M", 950000 → "950.000"
+ * @param {number} num - The number to format
+ * @returns {string} Formatted number
+ */
+function formatTokenCount(num) {
+    if (num === 0 || num < 0) return "-";
+    
+    num = Math.round(num);
+    
+    // If >= 1 million, convert to M notation
+    if (num >= 1000000) {
+        const millions = num / 1000000;
+        // Show one decimal if not a whole number
+        if (millions % 1 === 0) {
+            return millions + "M";
+        } else {
+            return millions.toFixed(1).replace(".", ",") + "M";
+        }
+    }
+    
+    // For thousands, add . separator (European format)
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/**
+ * Updates the token count display in the footer.
+ * @param {number} inputTokens - Number of tokens sent to the API
+ * @param {number} outputTokens - Number of tokens received from the API
+ */
+function updateTokenStats(inputTokens, outputTokens) {
+    const tokensInCount = document.getElementById("tokens-in-count");
+    const tokensOutCount = document.getElementById("tokens-out-count");
+
+    if (tokensInCount) {
+        tokensInCount.textContent = inputTokens > 0 ? formatTokenCount(inputTokens) : "-";
+    }
+
+    if (tokensOutCount) {
+        tokensOutCount.textContent = outputTokens > 0 ? formatTokenCount(outputTokens) : "-";
+    }
+}
+
 let countdownInterval = null;
 
 async function startCountdown(seconds) {
@@ -446,23 +480,10 @@ function runCountdownTimer(unblockTime) {
         const now = Date.now();
         const remainingMs = unblockTime - now;
         const remainingSec = Math.ceil(remainingMs / 1000);
-        
-        const remainEl = document.getElementById("requests-remaining");
 
         if (remainingSec <= 0) {
             clearInterval(countdownInterval);
             ext.storage.local.remove("blockedUntil");
-            
-            if (remainEl) {
-                remainEl.textContent = "Reintenta-ho"; 
-                remainEl.style.color = "#28a745"; 
-            }
-        } else {
-            if (remainEl) {
-                remainEl.textContent = `Límit assolit (${remainingSec}s restants)`;
-                remainEl.style.color = "#d70022";
-                remainEl.style.fontWeight = "bold";
-            }
         }
     };
     

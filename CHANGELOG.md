@@ -2,6 +2,38 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [2.2.0] - 2026-04-01
+
+### Afegit
+
+- **Panell de text font**: Nou botó al peu del sidebar (icona de document) que mostra el text que s'ha enviat a la IA per resumir. Permet auditar exactament quin contingut s'ha extret de la pàgina i comprovar si coincideix amb les expectatives.
+- **Barra de títol**: Tira enganxosa al damunt del contingut que mostra el títol de la pàgina resumida amb un enllaç directe a la pàgina original.
+- **Badge de caché clicable**: El símbol ⚡ al peu és ara interactiu — clicar-lo carrega directament el resum emmagatzemat en caché sense necessitat de tornar a generar-lo.
+- **Panell d'historial**: Llista navegable de tots els resums previs emmagatzemats en caché, accessible des del botó 🕐 al peu. Permet rellegir i recuperar qualsevol resum anterior.
+- **Selector de període a les estadístiques**: El gràfic i la taula de la pàgina d'estadístiques suporten ara filtres de 7 dies, 30 dies, 6 mesos i 1 any, a més de les columnes de tokens entrada/sortida, hits de caché i temps mitjà de resposta.
+- **Extracció Twitter/X via Defuddle**: El contingut de Twitter/X s'extreu ara amb la llibreria Defuddle (v0.14.0) amb fallback a scraping DOM, obtenint text molt més ric i precís que el mètode anterior.
+- **Millores Hacker News**: Eliminat el límit de comentaris, afegida la descàrrega de l'article enllaçat per proporcionar context complet als resums de fils HN.
+
+### Millorat
+
+- **Streaming en temps real**: El contingut del resum ara es mostra com a text pla durant la generació i es transforma a Markdown amb format complet en acabar. Eliminada la latència visual d'esperar el final per veure contingut.
+- **Tokens reals de l'API**: S'utilitzen els `usageMetadata` retornats per Gemini en lloc d'estimacions del tokenitzador local, obtenint comptes exactes d'entrada/sortida i de tokens de caché.
+- **Caché amb TTL de 30 dies**: Purga automàtica de les entrades expirades en segon pla sense bloquejar la interfície.
+- **Historial carrega a la sidebar**: El clic a una entrada de l'historial (stats) obre la sidebar i carrega el resum directament, sense obrir una URL.
+- **Permisos Firefox en instal·lació**: Sol·licita automàticament l'accés a tots els llocs web quan l'usuari instal·la l'extensió per primera vegada, evitant passos manuals de configuració.
+- **Pàgina de configuració redissenyada**: Navegació lateral amb tabs, millores de CSS, indicadors de color per a cada plugin i nova secció d'estadístiques integrada.
+
+### Eliminat
+
+- **Plugin "Netejar Timeline"**: La funcionalitat de neteja de feeds algorítmics de Twitter/X i LinkedIn s'ha extret a una extensió independent. Eliminat el botó del sidebar, la configuració i els scripts d'injecció corresponents.
+
+### Corregit
+
+- **Badge de caché**: L'espai sempre reservat amb `visibility` en comptes de `display` evita que la barra inferior salti en aparèixer/desaparèixer el símbol.
+- **Fallback de quota**: El fallback respecta els models favorits i evita seleccionar models cars quan la quota s'esgota.
+- **Diàleg duplicat de reload**: Eliminat el condicional duplicat al listener de `apiKey` que provocava dos recarregaments consecutius.
+- **Deep Dive fix**: El contingut es mostrava com a `hidden` fins al final del streaming en lloc d'aparèixer progressivament.
+
 ## [2.1.0] - 2026-03-04
 
 ### Afegit

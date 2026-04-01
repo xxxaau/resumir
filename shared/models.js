@@ -21,14 +21,27 @@ const DEFAULT_MODEL_ID = "gemini-3-flash-preview";
 /**
  * Assegura que favoriteModels existeix a storage.sync.
  * Si no existeix (primer ús), l'inicialitza amb els models curats.
+ * Si ja existeix, assegura que sempre inclou el model per defecte (Gemini 3 Flash).
  * Retorna l'array de IDs favorits.
  */
 async function ensureFavoriteModels() {
     const data = await ext.storage.sync.get({ favoriteModels: null });
-    if (data.favoriteModels) return data.favoriteModels;
-    const defaults = CURATED_MODELS.map(m => m.id);
-    await ext.storage.sync.set({ favoriteModels: defaults });
-    return defaults;
+    let favorites = data.favoriteModels;
+    
+    // Primer ús: inicialitzar amb tots els models curats
+    if (!favorites) {
+        favorites = CURATED_MODELS.map(m => m.id);
+        await ext.storage.sync.set({ favoriteModels: favorites });
+        return favorites;
+    }
+    
+    // Migració: assegurar que sempre inclou el model per defecte
+    if (!favorites.includes(DEFAULT_MODEL_ID)) {
+        favorites = [DEFAULT_MODEL_ID, ...favorites];
+        await ext.storage.sync.set({ favoriteModels: favorites });
+    }
+    
+    return favorites;
 }
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.

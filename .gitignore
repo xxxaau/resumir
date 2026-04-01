@@ -16,7 +16,11 @@ desktop.ini
 *.xpi
 *.crx
 background.bundle.js
+sidebar.bundle.js
 build_*/
+
+# Temporary output files
+*.txt
 
 # Environment Variables
 .env

@@ -264,11 +264,42 @@ async function getPageContent() {
           func: () => {
               if (typeof Readability !== 'undefined') {
                   try {
-                      const article = new Readability(document.cloneNode(true)).parse();
-                      if (article && article.textContent) return article.textContent;
+                      const docClone = document.cloneNode(true);
+                      // Remove ALL non-content elements: scripts, styles, navigation/chrome, images, iframes, etc.
+                      [
+                          'script', 'style', 'noscript', 'iframe', 'svg',
+                          'nav', 'header', 'footer', 'aside', 
+                          '[role="navigation"]', '[role="banner"]', '[role="complementary"]',
+                          '[role="contentinfo"]', '[data-ad="true"]',
+                          '.ad', '.advertisement', '.social', '.sharing', '.comments-section'
+                      ].forEach(sel => {
+                          try { docClone.querySelectorAll(sel).forEach(el => el.remove()); } catch(e) {}
+                      });
+                      // Also remove all img tags to avoid image URLs/data inflating tokens
+                      try { docClone.querySelectorAll('img').forEach(el => el.remove()); } catch(e) {}
+                      
+                      const article = new Readability(docClone).parse();
+                      if (article && article.textContent && article.textContent.trim().length > 100) {
+                          // Further clean: remove excessive whitespace after Readability
+                          return article.textContent.replace(/\s{3,}/g, '\n\n').trim();
+                      }
                   } catch(e) {}
               }
-              return document.body.innerText;
+              // Last resort: body text with aggressive cleanup.
+              try {
+                  const bodyClone = document.body.cloneNode(true);
+                  [
+                      'script', 'style', 'noscript', 'iframe', 'svg',
+                      'nav', 'header', 'footer', 'aside',
+                      '[role="navigation"]', '[role="banner"]', '[role="complementary"]'
+                  ].forEach(sel => {
+                      try { bodyClone.querySelectorAll(sel).forEach(el => el.remove()); } catch(e) {}
+                  });
+                  // Remove images
+                  try { bodyClone.querySelectorAll('img').forEach(el => el.remove()); } catch(e) {}
+                  return bodyClone.innerText.replace(/\s{3,}/g, '\n\n').trim();
+              } catch(e) {}
+              return document.body.innerText.replace(/\s{3,}/g, '\n\n').trim();
           }
         });
         

@@ -57,9 +57,10 @@ function restoreOptions() {
     "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault", 
     "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation", 
     "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "enableDeepdive", "deepDivePrompt",
-    "enableScience", "sciencePrompt", "enableResum", "extensionOrder"];
+    "enableScience", "sciencePrompt", "enableResum",
+    "extensionOrder"];
     
-  ext.storage.sync.get(configKeys).then((data) => {
+  return ext.storage.sync.get(configKeys).then((data) => {
     document.querySelector("#apiKey").value = data.apiKey || "";
     document.querySelector("#modelName").value = data.modelName || DEFAULT_MODEL_ID;
     document.querySelector("#themeSelect").value = data.theme || "system";
@@ -105,12 +106,14 @@ function restoreOptions() {
         applyExtensionOrder(data.extensionOrder);
     }
 
-    updateSidebar();
-    updateCacheInfo();
-    loadStatistics();
-
+    return true; // Signal completion
+  }).catch(err => {
+    console.error("Error restoring options:", err);
+    return false;
   });
+}
 
+function initializeSettingsPageUI() {
   const manifest = ext.runtime.getManifest();
   document.getElementById("appVersion").textContent = manifest.version;
 

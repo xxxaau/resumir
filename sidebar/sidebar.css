@@ -246,14 +246,49 @@ body {
   width: 100%;
   background-color: var(--footer-bg);
   border-top: 1px solid var(--footer-border);
-  padding: 8px 15px;
+  padding: 8px 12px;
   font-size: 11px;
   color: var(--footer-text);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   box-sizing: border-box;
   z-index: 100;
+  gap: 16px;
+}
+
+.footer-section {
+  display: flex;
   align-items: center;
+  gap: 6px;
+  padding: 0;
+}
+
+.footer-section-left {
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.footer-section-middle {
+  flex: 1;
+  justify-content: center;
+  padding: 4px 15px;
+}
+
+.footer-section-right {
+  flex-shrink: 0;
+}
+
+.section-divider {
+  color: rgba(0, 0, 0, 0.2);
+  font-weight: 300;
+  margin: 0 3px;
+}
+
+#footer-status .separator {
+  margin: 0 8px;
+  color: var(--border-color);
+  opacity: 0.5;
 }
 
 #model-select {
@@ -273,6 +308,51 @@ body {
 #model-select option {
   color: var(--text-color);
   background: var(--bg-color);
+}
+
+.footer-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 1em;
+  color: var(--footer-text);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.footer-btn:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.footer-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#tokens-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9em;
+}
+
+#tokens-in-count,
+#tokens-out-count {
+  display: inline-block;
+  min-width: 35px;
+  text-align: right;
+}
+
+#water-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.9em;
 }
 
 #footer-status .separator {
@@ -556,8 +636,54 @@ body {
   font-size: 11px;
   color: var(--footer-text);
   white-space: nowrap;
+  visibility: hidden;
 }
 
 #cache-badge[data-clickable="true"] {
   cursor: pointer;
+}
+
+/* ── Toolbar button colors & initial visibility ───────────── */
+#obsidianBtn {
+  color: #a855f7;
+}
+
+#bionicBtn {
+  display: none;
+}
+
+#deepDiveBtn {
+  display: none;
+}
+
+#scienceBtn {
+  display: none;
+  color: #10b981;
+}
+
+#timelineCleanerBtn {
+  display: none;
+  color: #ef4444;
+  position: relative;
+}
+
+/* Línia diagonal quan el plugin NO està actiu (sense classe .active) */
+#timelineCleanerBtn:not(.active)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  background: currentColor;
+  transform: translateY(-50%) rotate(-45deg);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* ── Footer history/cache group ───────────────────────────── */
+#history-cache-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }

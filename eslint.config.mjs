@@ -57,6 +57,10 @@ const extensionGlobals = {
     openHistoryPanel: "readonly",
     closeHistoryPanel: "readonly",
     loadHistoryEntry: "readonly",
+    openSourcePanel: "readonly",
+    closeSourcePanel: "readonly",
+    // defuddle.js (injectat com a script en runtime)
+    Defuddle: "readonly",
     // sidebar/stats.js
     getDailyStats: "readonly",
     getTodayRequestCount: "readonly",
@@ -86,6 +90,7 @@ const settingsGlobals = {
     // settings-stats.js
     PAGE_SIZE: "writable",
     currentPage: "writable",
+    currentPeriod: "writable",
     totalPages: "writable",
     loadStatistics: "readonly",
     getRelativeTime: "readonly",
@@ -117,6 +122,7 @@ export default [
         // Fitxers a ignorar
         ignores: [
             "Readability.js",         // Llibreria de tercers (Mozilla)
+            "defuddle.js",            // Llibreria de tercers (Defuddle)
             "background.bundle.js",   // Generat automàticament pel build
             "build_*/",
             "node_modules/",

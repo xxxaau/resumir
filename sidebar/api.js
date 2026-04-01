@@ -184,7 +184,13 @@ async function loadModels(apiKey, currentModel) {
         moreOpt.textContent = "Triar més models…";
         modelSelect.appendChild(moreOpt);
 
-        if (currentModel) modelSelect.value = currentModel;
+        // Seleccionar el model actual o el per defecte
+        if (currentModel && modelsToShow.find(m => m.id === currentModel)) {
+            modelSelect.value = currentModel;
+        } else if (modelsToShow.length > 0) {
+            // Si no hi ha model actual, seleccionar el primer (que és el per defecte)
+            modelSelect.value = modelsToShow[0].id;
+        }
         
     } catch (e) {
         console.error("Error loading models:", e);
