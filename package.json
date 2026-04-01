@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "lint": "eslint sidebar/ options/ shared/ *.js --max-warnings 50",
+    "lint": "eslint sidebar/ options/ shared/ *.js --max-warnings 50 --no-warn-ignored",
     "build": "pwsh ./build.ps1 -Target all",
     "build:firefox": "pwsh ./build.ps1 -Target firefox",
     "build:chromium": "pwsh ./build.ps1 -Target chromium",

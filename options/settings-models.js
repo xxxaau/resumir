@@ -22,7 +22,6 @@ document.addEventListener("click", (e) => {
 async function listModels(e) {
     e.preventDefault();
     const modelsList = document.querySelector("#modelsList");
-    const checkBtn = document.querySelector("#checkModels");
 
     // Toggle: si ja està visible, amaga'l
     if (modelsList.style.display === "block") {

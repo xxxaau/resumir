@@ -1,6 +1,5 @@
 // sidebar/summary.js
 // Core summary generation logic extracted from sidebar.js
-/* global updateTokenStats */
 
 // Fallback prompts — the full defaults live in settings.js and are saved to storage.
 // These are only used if storage has never been written (fresh install, first run).

@@ -29,11 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
         strip.classList.remove("hidden");
     }
 
-    function hidePageTitleStrip() {
-        const strip = document.getElementById("page-title-strip");
-        if (strip) strip.classList.add("hidden");
-    }
-
     function updateSourceBtn() {
         if (sourceTextBtn) sourceTextBtn.disabled = !currentSourceText;
     }

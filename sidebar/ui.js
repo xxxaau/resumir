@@ -65,7 +65,6 @@ function applyExtensionOrder(order) {
     const toolbar = document.querySelector(".toolbar");
     if (!toolbar) return;
 
-    const summarizeBtnEl = document.getElementById("summarizeBtn");
     const settingsBtnEl = document.getElementById("settingsBtn");
 
     const extensionIdToButtonId = {
@@ -363,7 +362,7 @@ function formatTextToFragment(text, bionic = false, fixation = 0.45) {
 const WATER_ML_PER_QUERY = 0.26;  // ml per consulta de text
 const WATER_ML_PER_GLASS = 300;    // ml per got estàndard
 
-function updateWaterStats(totalTodayAll, modelId, requestsByModel) {
+function updateWaterStats(totalTodayAll, _modelId, _requestsByModel) {
     const waterEl  = document.getElementById("water-ml");
 
     // --- Water consumption: ALL queries today (all models) ---

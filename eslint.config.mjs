@@ -44,6 +44,7 @@ const extensionGlobals = {
     PLAY_ICON_STR: "readonly",
     PAUSE_ICON_STR: "readonly",
     formatTextToFragment: "readonly",
+    updateTokenStats: "readonly",
     updateWaterStats: "readonly",
     WATER_ML_PER_QUERY: "readonly",
     WATER_ML_PER_GLASS: "readonly",
@@ -105,6 +106,7 @@ const settingsGlobals = {
     // settings-options.js
     saveOptions: "readonly",
     restoreOptions: "readonly",
+    initializeSettingsPageUI: "readonly",
     resetTemplate: "readonly",
     resetObsidianTemplate: "readonly",
     resetSystemPrompt: "readonly",
@@ -112,9 +114,12 @@ const settingsGlobals = {
     resetSciencePrompt: "readonly",
     showStatus: "readonly",
     // settings-sidebar.js
+    initializeSidebarNavigation: "readonly",
     navigateToTab: "readonly",
     updateSidebar: "readonly",
 };
+
+const crossFilePublicNamesPattern = `^(${[...Object.keys(extensionGlobals), ...Object.keys(settingsGlobals)].join("|")})$`;
 
 export default [
     js.configs.recommended,
@@ -142,7 +147,7 @@ export default [
         },
         rules: {
             // Funcions cross-file: definides en un <script> i usades en un altre (globals)
-            "no-unused-vars": ["warn", { argsIgnorePattern: "^_", caughtErrors: "none" }],
+            "no-unused-vars": ["warn", { varsIgnorePattern: crossFilePublicNamesPattern, argsIgnorePattern: "^_", caughtErrors: "none" }],
             // Permetre catch buits: catch {} és un patró vàlid en extensions
             "no-empty": ["error", { allowEmptyCatch: true }],
         },
@@ -161,7 +166,7 @@ export default [
             // Cap console.log en producció (console.error i console.warn permesos)
             "no-console": ["warn", { allow: ["error", "warn"] }],
             // Variables no usades (warn: moltes funcions s'usen cross-file via globals)
-            "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+            "no-unused-vars": ["warn", { varsIgnorePattern: crossFilePublicNamesPattern, argsIgnorePattern: "^_" }],
             // Redeclarar variables és un error
             "no-redeclare": "error",
             // Permetre catch buits: catch {} és un patró vàlid en extensions per a errors silenciosos
