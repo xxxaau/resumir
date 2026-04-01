@@ -29,7 +29,7 @@ function getCuratedModelInfo(modelId) {
 /**
  * Calls the Gemini API using streaming (Server-Sent Events)
  */
-async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, onChunk) {
+async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, onChunk, onUsage) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse`;
     
     let body;
@@ -105,6 +105,9 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
                     }
                     if (data.usageMetadata) {
                         lastUsageMeta = data.usageMetadata;
+                        if (typeof onUsage === "function") {
+                            onUsage(lastUsageMeta);
+                        }
                     }
                 } catch (e) {
                     console.warn("Error parsing stream JSON", e);

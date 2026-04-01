@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Resumir contingut (DEV)",
+    "name": "Resumir contingut",
     "version": "2.2.0",
     "author": "Sergi Xaudiera",
     "homepage_url": "https://github.com/xxxaau/extensio-resumir-contingut",
@@ -36,7 +36,7 @@
     ],
     "browser_specific_settings": {
         "gecko": {
-            "id": "sergi@xaudiera.xyz",
+            "id": "sergi.dev@xaudiera.xyz",
             "strict_min_version": "142.0",
             "data_collection_permissions": {
                 "required": [

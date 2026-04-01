@@ -442,13 +442,31 @@ function formatTokenCount(num) {
 }
 
 /**
+ * Formats token counts for tooltip text using full integer notation.
+ * @param {number} num - Token count
+ * @returns {string} Formatted full number (no M abbreviation)
+ */
+function formatTokenTooltipCount(num) {
+    const safeNum = Math.max(0, Math.round(num || 0));
+    return safeNum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/**
  * Updates the token count display in the footer.
  * @param {number} inputTokens - Number of tokens sent to the API
  * @param {number} outputTokens - Number of tokens received from the API
+ * @param {Object} options - Tooltip and live-state options
+ * @param {boolean} options.inputEstimated - Whether input tokens are estimated
+ * @param {boolean} options.outputEstimated - Whether output tokens are estimated
  */
-function updateTokenStats(inputTokens, outputTokens) {
+function updateTokenStats(inputTokens, outputTokens, options = {}) {
     const tokensInCount = document.getElementById("tokens-in-count");
     const tokensOutCount = document.getElementById("tokens-out-count");
+    const tokensIn = document.getElementById("tokens-in");
+    const tokensOut = document.getElementById("tokens-out");
+
+    const inputEstimated = options.inputEstimated === true;
+    const outputEstimated = options.outputEstimated === true;
 
     if (tokensInCount) {
         tokensInCount.textContent = inputTokens > 0 ? formatTokenCount(inputTokens) : "-";
@@ -456,6 +474,16 @@ function updateTokenStats(inputTokens, outputTokens) {
 
     if (tokensOutCount) {
         tokensOutCount.textContent = outputTokens > 0 ? formatTokenCount(outputTokens) : "-";
+    }
+
+    if (tokensIn) {
+        const prefix = inputEstimated ? "Estimacio: " : "";
+        tokensIn.title = `${prefix}${formatTokenTooltipCount(inputTokens)} tokens enviats al model`;
+    }
+
+    if (tokensOut) {
+        const prefix = outputEstimated ? "Estimacio: " : "";
+        tokensOut.title = `${prefix}${formatTokenTooltipCount(outputTokens)} tokens rebuts del model`;
     }
 }
 

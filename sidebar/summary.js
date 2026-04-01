@@ -265,11 +265,20 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         let lastError = null;
         const bionicEnabled = ctx.isBionicEnabled();
         let apiUsage = null;
+        const liveInputTokens = estimateTokens(pageText);
+        let liveOutputTokens = 0;
+        let lastTokenUiUpdate = 0;
+
+        updateTokenStats(liveInputTokens, liveOutputTokens, {
+            inputEstimated: true,
+            outputEstimated: true
+        });
 
         for (const tryModel of modelsToTry) {
             if (signal.aborted) break;
             try {
                 currentMetadata.summary = ""; // Reset output text
+                liveOutputTokens = 0;
                 apiUsage = await callGeminiStream(apiKey, tryModel, systemPrompt, pageText, signal, (chunkText) => {
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
@@ -278,6 +287,22 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                         contentDiv.textContent = currentMetadata.summary;
                         lastUpdate = now;
                     }
+                    if (now - lastTokenUiUpdate > 200) {
+                        liveOutputTokens = estimateTokens(currentMetadata.summary);
+                        updateTokenStats(liveInputTokens, liveOutputTokens, {
+                            inputEstimated: true,
+                            outputEstimated: true
+                        });
+                        lastTokenUiUpdate = now;
+                    }
+                }, (usageMeta) => {
+                    if (!usageMeta) return;
+                    const streamInput = usageMeta.promptTokenCount ?? liveInputTokens;
+                    const streamOutput = usageMeta.candidatesTokenCount ?? liveOutputTokens;
+                    updateTokenStats(streamInput, streamOutput, {
+                        inputEstimated: usageMeta.promptTokenCount == null,
+                        outputEstimated: usageMeta.candidatesTokenCount == null
+                    });
                 });
                 success = true;
                 // Update model name to the successful one 
@@ -333,7 +358,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         
         const { byModel, total } = await getDailyStats(modelName);
         updateWaterStats(total, modelName, byModel);
-        updateTokenStats(inputTokens, outputTokens);
+        updateTokenStats(inputTokens, outputTokens, {
+            inputEstimated: false,
+            outputEstimated: false
+        });
 
     } catch (err) {
         if (signal.aborted || err.name === 'AbortError') {

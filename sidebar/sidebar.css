@@ -246,7 +246,7 @@ body {
   width: 100%;
   background-color: var(--footer-bg);
   border-top: 1px solid var(--footer-border);
-  padding: 8px 12px;
+  padding: 6px 10px;
   font-size: 11px;
   color: var(--footer-text);
   display: flex;
@@ -254,13 +254,13 @@ body {
   align-items: center;
   box-sizing: border-box;
   z-index: 100;
-  gap: 16px;
+  gap: 8px;
 }
 
 .footer-section {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 0;
 }
 
@@ -272,7 +272,8 @@ body {
 .footer-section-middle {
   flex: 1;
   justify-content: center;
-  padding: 4px 15px;
+  padding: 0;
+  gap: 3px;
 }
 
 .footer-section-right {
@@ -282,7 +283,7 @@ body {
 .section-divider {
   color: rgba(0, 0, 0, 0.2);
   font-weight: 300;
-  margin: 0 3px;
+  margin: 0 1px;
 }
 
 #footer-status .separator {
@@ -337,22 +338,43 @@ body {
 #tokens-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   font-size: 0.9em;
+}
+
+#tokens-in,
+#tokens-out {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.token-label {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  display: inline-block;
+  width: 10px;
+  text-align: center;
 }
 
 #tokens-in-count,
 #tokens-out-count {
   display: inline-block;
-  min-width: 35px;
+  min-width: 36px;
   text-align: right;
 }
 
 #water-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   font-size: 0.9em;
+}
+
+#history-cache-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 #footer-status .separator {
