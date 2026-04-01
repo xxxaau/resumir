@@ -26,16 +26,10 @@ ext.runtime.onInstalled.addListener(async () => {
         ext.permissions.request({
           permissions: [],
           origins: ["<all_urls>"]
-        }).then((granted) => {
-          if (granted) {
-            console.log("Firefox: Access to all websites granted");
-          }
-        }).catch((_err) => {
-          console.log("Firefox: User declined or permission already granted");
-        });
+        }).catch(() => {});
       }
-    } catch (e) {
-      console.log("getBrowserInfo not available or other error, skipping Firefox permission request");
+    } catch (_e) {
+      // getBrowserInfo not available (Chromium), skip silently
     }
   }
 

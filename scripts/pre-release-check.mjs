@@ -45,10 +45,11 @@ function collectFiles(dir, predicate, files = []) {
     return files;
 }
 
-/** Fitxers JS de producció (exclou Readability.js i bundles generats) */
+/** Fitxers JS de producció (exclou vendor i bundles generats) */
 const JS_FILES = collectFiles(root, (full, rel) =>
     extname(full) === ".js" &&
     !rel.includes("Readability") &&
+    !rel.includes("defuddle") &&
     !full.endsWith(".bundle.js") &&
     !rel.startsWith("node_modules")
 );
@@ -185,6 +186,8 @@ check("Seguretat: no 'innerHTML' amb concatenació dinàmica", () => {
                 // Acceptar: assignació de template literal pur sense interpolació
                 const assignMatch = line.match(/\.innerHTML\s*=\s*(`[^`]*`)\s*;?/);
                 if (assignMatch && !assignMatch[1].includes("${")) return; // literal pur OK
+                // Acceptar: innerHTML = "" o innerHTML = '' (neteja segura de contingut)
+                if (/\.innerHTML\s*=\s*["']\s*["']/.test(line)) return;
                 hits.push(`${relative(root, f)}:${i + 1} → ${trimmed}`);
             }
         });
