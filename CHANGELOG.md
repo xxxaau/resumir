@@ -2,6 +2,15 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [2.2.1] - 2026-04-07
+
+### Millorat
+
+- **Prompts per defecte centralitzats**: Extrets a `shared/defaults.js` com a font de veritat única, compartida entre la sidebar i la pàgina d'opcions.
+- **Inicialització de favorits simplificada**: En el primer ús, s'afegeix només el model per defecte als favorits (en lloc de tots els models curats).
+- **Neteja UI**: Simplificació de `sidebar/ui.js`, `sidebar/summary.js` i `sidebar/sidebar.html`, eliminant codi redundant.
+- **Opcions refactoritzades**: `settings-defaults.js` i `settings.js` netejats i simplificats.
+
 ## [2.2.0] - 2026-04-01
 
 ### Afegit
