@@ -93,6 +93,7 @@ async function getPageContent() {
     
     // YOUTUBE SPECIAL LOGIC
     else if (tabUrl.includes("youtube.com/watch")) {
+        let noTranscript = false;
         try {
             let transcriptText = "";
             
@@ -179,29 +180,37 @@ async function getPageContent() {
 
             // 3. Description Fallback (Critical if no transcript found)
             if (!transcriptText) {
+                noTranscript = true;
                 const descResult = await executeScriptSafe({
                     target: {tabId: tabId},
                     func: () => {
                         const title = document.title;
                         const moreBtn = document.querySelector('#expand');
                         if(moreBtn) moreBtn.click();
-                        
+
                         const descEl = document.querySelector('#description-inline-expander') || document.querySelector('#description');
                         const desc = descEl ? descEl.innerText : "";
                         return `Title: ${title}\n\nDescription:\n${desc}`;
                     }
                 });
                 if (descResult?.[0]?.result && descResult[0].result.length > 50) {
-                    transcriptText = descResult[0].result + "\n\n[Nota: No s'ha trobat transcripció disponible per a aquest vídeo. Es resumeix la descripció.]";
+                    transcriptText = descResult[0].result;
                 }
             }
 
             if (transcriptText) {
                 text = transcriptText;
+            } else {
+                text = `Títol del vídeo: ${tabTitle}`;
             }
 
         } catch (e) {
             console.warn("YouTube extraction totally failed", e);
+            noTranscript = true;
+            text = `Títol del vídeo: ${tabTitle}`;
+        }
+        if (noTranscript) {
+            return { title: tabTitle, url: tabUrl, text, noTranscript: true };
         }
     }
     

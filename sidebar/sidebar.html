@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Resumir contingut</title>
+    <title>Resumidor</title>
     <link rel="stylesheet" href="sidebar.css" />
     <script src="../theme.js"></script>
   </head>
@@ -13,8 +13,8 @@
         <button
           id="summarizeBtn"
           class="action-btn primary"
-          title="Resumir pàgina"
-          aria-label="Resumir"
+          title="Resumeix"
+          aria-label="Resumeix"
         >
           <svg
             aria-hidden="true"
@@ -85,8 +85,8 @@
         <button
           id="deepDiveBtn"
           class="icon-btn"
-          title="Aprofundiment"
-          aria-label="Aprofundiment"
+          title="Aprofundeix"
+          aria-label="Aprofundeix"
         >
           <svg
             viewBox="0 0 24 24"
@@ -108,8 +108,8 @@
         <button
           id="scienceBtn"
           class="icon-btn"
-          title="Validació científica"
-          aria-label="Validació científica"
+          title="Valida"
+          aria-label="Valida"
         >
           <svg
             viewBox="0 0 24 24"
@@ -206,37 +206,15 @@
         <select id="model-select" aria-label="Selecciona model">
           <!-- Options populated by JS -->
         </select>
-      </div>
-
-      <div class="footer-section footer-section-middle">
+        <span class="section-divider">·</span>
         <span id="generation-timer" title="Temps de resposta">0.0s</span>
         <span class="section-divider">·</span>
-        <span
-          id="tokens-indicator"
-          title="Tokens enviats al model / tokens rebuts del model"
-        >
-          <span id="tokens-in" title="0 tokens enviats al model"><span id="tokens-in-count">0.0</span> <span class="token-label">↑</span></span>
-          <span id="tokens-out" title="0 tokens rebuts del model"><span id="tokens-out-count">0.0</span> <span class="token-label">↓</span></span>
+        <span id="tokens-out-wrapper">
+          <span id="tokens-out" title="0 Tokens rebuts"><span id="tokens-out-count">0.0</span> <span class="token-label">↓</span></span>
         </span>
         <span class="section-divider">·</span>
-        <span
-          id="water-indicator"
-          title="Consum d'aigua estimat avui (1 got = 300 ml, 0.26 ml/consulta)"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="12"
-            height="12"
-            fill="#5bb8f5"
-            aria-hidden="true"
-          >
-            <path
-              d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"
-            />
-            <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z" />
-          </svg>
-          <span id="water-ml">0.0 gots</span>
+        <span id="tokens-indicator" title="Tokens enviats / Tokens rebuts">
+          <span id="tokens-in" title="0 Tokens enviats"><span id="tokens-in-count">0.0</span> <span class="token-label">↑</span></span>
         </span>
       </div>
 
@@ -270,6 +248,7 @@
     <script src="../Readability.js"></script>
     <script src="../ext.js"></script>
     <script src="../shared/models.js"></script>
+    <script src="../shared/defaults.js"></script>
     <script src="utils.js"></script>
     <script src="api.js"></script>
     <script src="content.js"></script>

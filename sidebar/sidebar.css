@@ -265,15 +265,10 @@ body {
 }
 
 .footer-section-left {
-  min-width: 120px;
-  flex-shrink: 0;
-}
-
-.footer-section-middle {
   flex: 1;
-  justify-content: center;
-  padding: 0;
-  gap: 3px;
+  flex-shrink: 1;
+  min-width: 0;
+  gap: 4px;
 }
 
 .footer-section-right {
@@ -360,7 +355,7 @@ body {
 #tokens-in-count,
 #tokens-out-count {
   display: inline-block;
-  min-width: 36px;
+  min-width: 5ch;
   text-align: right;
 }
 

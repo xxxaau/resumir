@@ -37,9 +37,8 @@ async function getTotalTodayCount() {
 /**
  * Refreshes water indicator + remaining requests when model changes.
  */
-async function refreshRemainingOnModelChange(modelId) {
-  const { byModel, total } = await getDailyStats(modelId);
-  updateWaterStats(total, modelId, byModel);
+async function refreshRemainingOnModelChange(_modelId) {
+  // Water indicator removed; no display to refresh
 }
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.

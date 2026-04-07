@@ -28,9 +28,9 @@ async function ensureFavoriteModels() {
     const data = await ext.storage.sync.get({ favoriteModels: null });
     let favorites = data.favoriteModels;
     
-    // Primer ús: inicialitzar amb tots els models curats
+    // Primer ús: inicialitzar amb el model per defecte
     if (!favorites) {
-        favorites = CURATED_MODELS.map(m => m.id);
+        favorites = [DEFAULT_MODEL_ID];
         await ext.storage.sync.set({ favoriteModels: favorites });
         return favorites;
     }

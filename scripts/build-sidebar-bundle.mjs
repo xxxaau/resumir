@@ -30,6 +30,7 @@ if (!outFile) {
 const files = [
     resolve(root, "ext.js"),
     resolve(root, "shared/models.js"),
+    resolve(root, "shared/defaults.js"),
     resolve(root, "sidebar/utils.js"),
     resolve(root, "sidebar/api.js"),
     resolve(root, "sidebar/content.js"),

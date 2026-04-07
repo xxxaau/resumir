@@ -97,11 +97,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.location.reload();
             }
             if (changes.modelName) {
-                if (modelSelect && modelSelect.value !== changes.modelName.newValue && changes.modelName.newValue) {
-                    modelSelect.value = changes.modelName.newValue;
-                }
+                const newModel = changes.modelName.newValue;
                 if (globalConfigCache) {
-                    globalConfigCache.modelName = changes.modelName.newValue;
+                    globalConfigCache.modelName = newModel;
+                }
+                if (modelSelect && newModel && modelSelect.value !== newModel) {
+                    if (modelSelect.querySelector(`option[value="${CSS.escape(newModel)}"]`)) {
+                        modelSelect.value = newModel;
+                    } else {
+                        loadModels(null, newModel);
+                    }
                 }
             }
             // Recarregar el select si els favorits canvien des de settings

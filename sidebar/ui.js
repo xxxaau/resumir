@@ -359,30 +359,6 @@ function formatTextToFragment(text, bionic = false, fixation = 0.45) {
 
 // --- Status and Timers ---
 
-const WATER_ML_PER_QUERY = 0.26;  // ml per consulta de text
-const WATER_ML_PER_GLASS = 300;    // ml per got estàndard
-
-function updateWaterStats(totalTodayAll, _modelId, _requestsByModel) {
-    const waterEl  = document.getElementById("water-ml");
-
-    // --- Water consumption: ALL queries today (all models) ---
-    const gots = (totalTodayAll * WATER_ML_PER_QUERY) / WATER_ML_PER_GLASS;
-    
-    // Round to nearest 0.5 for friendly display
-    const friendlyGots = Math.round(gots * 2) / 2;
-    let waterStr;
-    if (friendlyGots === 0) {
-        waterStr = "0 gots";
-    } else if (friendlyGots < 1) {
-        waterStr = friendlyGots.toFixed(1) + " got";
-    } else {
-        waterStr = friendlyGots.toFixed(1) + " gots";
-    }
-    if (waterEl) waterEl.textContent = waterStr;
-
-    const footer = document.getElementById("footer-status");
-    if (footer) footer.classList.remove("hidden");
-}
 
 let generationInterval = null;
 let generationStartTime = 0;
@@ -422,21 +398,19 @@ function stopGenerationTimer() {
  */
 function formatTokenCount(num) {
     if (num === 0 || num < 0) return "-";
-    
+
     num = Math.round(num);
-    
-    // If >= 1 million, convert to M notation
-    if (num >= 1000000) {
-        const millions = num / 1000000;
-        // Show one decimal if not a whole number
-        if (millions % 1 === 0) {
-            return millions + "M";
-        } else {
-            return millions.toFixed(1).replace(".", ",") + "M";
-        }
+
+    if (num >= 1_000_000) {
+        const m = num / 1_000_000;
+        return (m % 1 === 0 ? m : m.toFixed(1).replace(".", ",")) + "M";
     }
-    
-    // For thousands, add . separator (European format)
+
+    if (num >= 100_000) {
+        const k = num / 1_000;
+        return (k % 1 === 0 ? k : k.toFixed(1).replace(".", ",")) + "k";
+    }
+
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
@@ -477,12 +451,12 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
 
     if (tokensIn) {
         const prefix = inputEstimated ? "Estimacio: " : "";
-        tokensIn.title = `${prefix}${formatTokenTooltipCount(inputTokens)} tokens enviats al model`;
+        tokensIn.title = `${prefix}${formatTokenTooltipCount(inputTokens)} tokens enviats`;
     }
 
     if (tokensOut) {
         const prefix = outputEstimated ? "Estimacio: " : "";
-        tokensOut.title = `${prefix}${formatTokenTooltipCount(outputTokens)} tokens rebuts del model`;
+        tokensOut.title = `${prefix}${formatTokenTooltipCount(outputTokens)} tokens rebuts`;
     }
 }
 

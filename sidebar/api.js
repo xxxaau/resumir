@@ -99,9 +99,10 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
 
                 try {
                     const data = JSON.parse(jsonStr);
-                    const part = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (part) {
-                        onChunk(part);
+                    const parts = data.candidates?.[0]?.content?.parts ?? [];
+                    for (const part of parts) {
+                        if (part.thought) continue; // thinking models: skip reasoning tokens
+                        if (part.text) onChunk(part.text);
                     }
                     if (data.usageMetadata) {
                         lastUsageMeta = data.usageMetadata;

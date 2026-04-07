@@ -86,12 +86,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const checkModels = document.querySelector("#checkModels");
     if (checkModels) checkModels.addEventListener("click", listModels);
     
-    const refreshModels = document.querySelector("#refreshModels");
-    if (refreshModels) refreshModels.addEventListener("click", refreshModels);
-    
+    const refreshModelsBtn = document.querySelector("#refreshModels");
+    if (refreshModelsBtn) refreshModelsBtn.addEventListener("click", refreshModels);
+
     // Cache and history buttons
-    const clearHistory = document.getElementById("clearHistory");
-    if (clearHistory) clearHistory.addEventListener("click", clearHistory);
+    const clearHistoryBtn = document.getElementById("clearHistory");
+    if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", clearHistory);
     
     const clearCache = document.getElementById("clearCache");
     if (clearCache) clearCache.addEventListener("click", clearCache);

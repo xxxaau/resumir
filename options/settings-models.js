@@ -184,14 +184,27 @@ async function refreshModels(e) {
             availableModelsUpdated: Date.now()
         });
 
+        // Eliminar dels favorits els models que ja no existeixen a l'API
+        const validIds = new Set(mergedModels.map(m => m.id));
+        const syncData = await ext.storage.sync.get({ favoriteModels: [] });
+        const currentFavorites = syncData.favoriteModels || [];
+        const cleanedFavorites = currentFavorites.filter(id => validIds.has(id));
+        if (cleanedFavorites.length !== currentFavorites.length) {
+            if (!cleanedFavorites.includes(DEFAULT_MODEL_ID) && validIds.has(DEFAULT_MODEL_ID)) {
+                cleanedFavorites.unshift(DEFAULT_MODEL_ID);
+            }
+            await ext.storage.sync.set({ favoriteModels: cleanedFavorites });
+        }
+        const removedCount = currentFavorites.length - cleanedFavorites.length;
+
         statusDiv.style.display = "block";
         statusDiv.style.color = "var(--success-color, #28a745)";
-        statusDiv.textContent = `✓ ${mergedModels.length} models disponibles (${CURATED_MODELS.length} recomanats + ${apiModels.length} addicionals)`;
+        statusDiv.textContent = `✓ ${mergedModels.length} models disponibles (${CURATED_MODELS.length} recomanats + ${apiModels.length} addicionals)`
+            + (removedCount > 0 ? ` · ${removedCount} favorit${removedCount > 1 ? "s" : ""} eliminat${removedCount > 1 ? "s" : ""} per obsolets` : "");
 
         // Si el panell de selecció està obert, actualitza'l
         const modelsList = document.querySelector("#modelsList");
         if (modelsList.style.display === "block") {
-            const syncData = await ext.storage.sync.get({ favoriteModels: [] });
             const currentModel = document.querySelector("#modelName").value;
             modelsList.querySelectorAll(".models-list-info").forEach(el => el.remove());
             const dateStr = new Date().toLocaleDateString("ca-ES", {
@@ -201,7 +214,7 @@ async function refreshModels(e) {
             infoDiv.className = "models-list-info";
             infoDiv.textContent = `Última actualització: ${dateStr}`;
             modelsList.prepend(infoDiv);
-            renderModelList(mergedModels, syncData.favoriteModels || [], currentModel, modelsList);
+            renderModelList(mergedModels, cleanedFavorites, currentModel, modelsList);
         }
 
     } catch (err) {
