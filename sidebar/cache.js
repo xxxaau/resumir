@@ -2,6 +2,28 @@
 // Handles local storage operations for summaries, sessions, and statistics
 
 const CACHE_TTL_DAYS = 30;
+const SUMMARY_CACHE_INDEX_KEY = "summary_cache_index";
+
+function getSummaryCacheKey(url) {
+    return `summary_cache:${url}`;
+}
+
+async function getSummaryCacheIndex() {
+    const data = await ext.storage.local.get({ [SUMMARY_CACHE_INDEX_KEY]: [] });
+    if (Array.isArray(data[SUMMARY_CACHE_INDEX_KEY])) {
+        return data[SUMMARY_CACHE_INDEX_KEY];
+    }
+
+    // Fallback to enumerating existing cache keys if the index is missing.
+    // This is a safe fallback for older storage states and unit tests.
+    try {
+        const allData = await ext.storage.local.get(null);
+        return Object.keys(allData).filter(key => key.startsWith("summary_cache:"));
+    } catch (fallbackError) {
+        console.warn("Cache index missing and full storage enumeration failed:", fallbackError);
+        return [];
+    }
+}
 
 /**
  * Checks local storage for a cached summary of the given URL.
@@ -28,7 +50,7 @@ async function getSummaryCache(url) {
  */
 async function saveSummaryCache(url, title, summary, modelName, inputTokens, outputTokens) {
     try {
-        const cacheKey = `summary_cache:${url}`;
+        const cacheKey = getSummaryCacheKey(url);
         const cacheEntry = {
             url: url,
             title: title,
@@ -38,7 +60,16 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
             version: "1.0",
             stats: { input: inputTokens, output: outputTokens }
         };
-        await ext.storage.local.set({ [cacheKey]: cacheEntry });
+
+        const cacheIndex = await getSummaryCacheIndex();
+        if (!cacheIndex.includes(cacheKey)) {
+            cacheIndex.push(cacheKey);
+        }
+
+        await ext.storage.local.set({
+            [cacheKey]: cacheEntry,
+            [SUMMARY_CACHE_INDEX_KEY]: cacheIndex
+        });
         return true;
     } catch (e) {
         console.error("Error saving to cache:", e);
@@ -53,16 +84,25 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
  */
 async function purgeStaleCacheEntries() {
     try {
-        const allData = await ext.storage.local.get(null);
+        const cacheIndex = await getSummaryCacheIndex();
+        if (cacheIndex.length === 0) return 0;
+
         const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+        const allData = await ext.storage.local.get(cacheIndex);
         const keysToRemove = [];
-        for (const [key, value] of Object.entries(allData)) {
-            if (!key.startsWith("summary_cache:")) continue;
+
+        for (const key of cacheIndex) {
+            const value = allData[key];
             const ts = value?.timestamp ? new Date(value.timestamp).getTime() : 0;
-            if (ts < cutoff) keysToRemove.push(key);
+            if (ts < cutoff || !value) {
+                keysToRemove.push(key);
+            }
         }
+
         if (keysToRemove.length > 0) {
+            const newIndex = cacheIndex.filter(key => !keysToRemove.includes(key));
             await ext.storage.local.remove(keysToRemove);
+            await ext.storage.local.set({ [SUMMARY_CACHE_INDEX_KEY]: newIndex });
         }
         return keysToRemove.length;
     } catch (e) {
@@ -78,11 +118,15 @@ async function purgeStaleCacheEntries() {
  */
 async function listCachedSummaries() {
     try {
-        const allData = await ext.storage.local.get(null);
+        const cacheIndex = await getSummaryCacheIndex();
+        if (cacheIndex.length === 0) return [];
+
+        const allData = await ext.storage.local.get(cacheIndex);
         const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
         const entries = [];
-        for (const [key, value] of Object.entries(allData)) {
-            if (!key.startsWith("summary_cache:")) continue;
+
+        for (const key of cacheIndex) {
+            const value = allData[key];
             if (!value?.timestamp) continue;
             const ts = new Date(value.timestamp).getTime();
             if (ts < cutoff) continue;
