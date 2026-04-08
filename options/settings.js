@@ -30,8 +30,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         initializeSidebarNavigation();
     }
 
+    const getEl = id => document.getElementById(id);
+    const bindClick = (id, handler) => {
+        const el = getEl(id);
+        if (el) el.addEventListener('click', handler);
+    };
+    const bindChange = (id, handler) => {
+        const el = getEl(id);
+        if (el) el.addEventListener('change', handler);
+    };
+
     // Real-time fixation value update
-    const bionicFixation = document.getElementById("bionicFixation");
+    const bionicFixation = getEl("bionicFixation");
     if (bionicFixation) {
         bionicFixation.addEventListener("input", (e) => {
             const valueEl = document.getElementById("bionicFixationValue");
@@ -60,41 +70,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Bind all save buttons to saveOptions
-    const saveBtns = ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience"];
-    saveBtns.forEach(id => {
-        const btn = document.querySelector("#" + id);
-        if(btn) btn.addEventListener("click", saveOptions);
+    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience"].forEach(id => {
+        bindClick(id, saveOptions);
     });
 
     // Reset buttons (with null checks)
-    const resetTemplateBtn = document.querySelector("#resetTemplate");
-    if (resetTemplateBtn) resetTemplateBtn.addEventListener("click", resetTemplate);
-    
-    const resetObsidianTemplateBtn = document.querySelector("#resetObsidianTemplate");
-    if (resetObsidianTemplateBtn) resetObsidianTemplateBtn.addEventListener("click", resetObsidianTemplate);
-    
-    const resetSystemPromptBtn = document.querySelector("#resetSystemPrompt");
-    if (resetSystemPromptBtn) resetSystemPromptBtn.addEventListener("click", resetSystemPrompt);
-    
-    const resetDeepDiveBtn = document.querySelector("#resetDeepDive");
-    if (resetDeepDiveBtn) resetDeepDiveBtn.addEventListener("click", resetDeepDivePrompt);
-    
-    const resetScienceBtn = document.querySelector("#resetScience");
-    if (resetScienceBtn) resetScienceBtn.addEventListener("click", resetSciencePrompt);
-    
+    bindClick("resetTemplate", resetTemplate);
+    bindClick("resetObsidianTemplate", resetObsidianTemplate);
+    bindClick("resetSystemPrompt", resetSystemPrompt);
+    bindClick("resetDeepDive", resetDeepDivePrompt);
+    bindClick("resetScience", resetSciencePrompt);
+
     // Model selection buttons
-    const checkModels = document.querySelector("#checkModels");
-    if (checkModels) checkModels.addEventListener("click", listModels);
-    
-    const refreshModelsBtn = document.querySelector("#refreshModels");
-    if (refreshModelsBtn) refreshModelsBtn.addEventListener("click", refreshModels);
+    bindClick("checkModels", listModels);
+    bindClick("refreshModels", refreshModels);
 
     // Cache and history buttons
-    const clearHistoryBtn = document.getElementById("clearHistory");
-    if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", clearHistory);
-    
-    const clearCacheBtn = document.getElementById("clearCache");
-    if (clearCacheBtn) clearCacheBtn.addEventListener("click", clearCache);
+    bindClick("clearHistory", clearHistory);
+    bindClick("clearCache", clearCache);
 
     // Pagination Event Listeners
     const prevPage = document.getElementById("prevPage");
@@ -117,15 +110,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    const pageSizeSelect = document.getElementById("pageSizeSelect");
-    if (pageSizeSelect) {
-        pageSizeSelect.addEventListener("change", (e) => {
-            PAGE_SIZE = parseInt(e.target.value, 10);
+    bindChange("pageSizeSelect", (e) => {
+        const selected = parseInt(e.target.value, 10);
+        if (Number.isInteger(selected) && selected > 0) {
+            PAGE_SIZE = selected;
             ext.storage.local.set({ pageSize: PAGE_SIZE });
             currentPage = 1;
             loadStatistics();
-        });
-    }
+        }
+    });
 
     // Reordering Event Delegation
     const extensionsList = document.querySelector(".extensions-list");
