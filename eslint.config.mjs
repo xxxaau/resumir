@@ -181,10 +181,26 @@ export default [
             ecmaVersion: 2022,
             globals: {
                 ...globals.node,
+                ...globals.browser,
             },
         },
         rules: {
             "no-console": "off",
+        },
+    },
+    {
+        // Scripts de construcció i utilitats Node
+        files: ["scripts/**/*.mjs"],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: "module",
+            globals: {
+                ...globals.node,
+            },
+        },
+        rules: {
+            "no-console": "off",
+            "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
         },
     },
 ];

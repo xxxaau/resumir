@@ -165,7 +165,8 @@ npm run build:chromium
 
 # Generar paquets ZIP per a tots dos navegadors
 npm run build
-
+# Validar codi i tests amb un sol comando
+npm run check
 # Fer una release en mode Firefox i restaurar el mode original
 npm run release:firefox
 

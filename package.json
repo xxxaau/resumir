@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "lint": "eslint sidebar/ options/ shared/ *.js --max-warnings 50 --no-warn-ignored",
+    "lint": "eslint . --ext .js,.mjs --max-warnings 50 --no-warn-ignored",
+    "check": "npm run lint && npm test",
     "build": "node scripts/pwsh-runner.mjs ./build.ps1 -Target all",
     "build:firefox": "node scripts/pwsh-runner.mjs ./build.ps1 -Target firefox",
     "build:chromium": "node scripts/pwsh-runner.mjs ./build.ps1 -Target chromium",
