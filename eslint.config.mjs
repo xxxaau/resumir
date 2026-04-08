@@ -25,6 +25,10 @@ const extensionGlobals = {
     getCuratedModelInfo: "readonly",
     callGeminiStream: "readonly",
     loadModels: "readonly",
+    // shared/defaults.js
+    DEFAULT_SYSTEM_PROMPT: "readonly",
+    DEFAULT_DEEP_DIVE_PROMPT: "readonly",
+    DEFAULT_SCIENCE_PROMPT: "readonly",
     // sidebar/summary.js
     startSummary: "readonly",
     classifyError: "readonly",
@@ -45,9 +49,6 @@ const extensionGlobals = {
     PAUSE_ICON_STR: "readonly",
     formatTextToFragment: "readonly",
     updateTokenStats: "readonly",
-    updateWaterStats: "readonly",
-    WATER_ML_PER_QUERY: "readonly",
-    WATER_ML_PER_GLASS: "readonly",
     // sidebar/cache.js
     getSummaryCache: "readonly",
     saveSummaryCache: "readonly",

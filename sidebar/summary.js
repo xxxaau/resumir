@@ -255,8 +255,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     const streamInput = usageMeta.promptTokenCount ?? liveInputTokens;
                     const streamOutput = usageMeta.candidatesTokenCount ?? liveOutputTokens;
                     updateTokenStats(streamInput, streamOutput, {
-                        inputEstimated: usageMeta.promptTokenCount == null,
-                        outputEstimated: usageMeta.candidatesTokenCount == null
+                        inputEstimated: usageMeta.promptTokenCount === undefined,
+                        outputEstimated: usageMeta.candidatesTokenCount === undefined
                     });
                 });
                 success = true;
