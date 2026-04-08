@@ -67,20 +67,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Reset buttons (with null checks)
-    const resetTemplate = document.querySelector("#resetTemplate");
-    if (resetTemplate) resetTemplate.addEventListener("click", resetTemplate);
+    const resetTemplateBtn = document.querySelector("#resetTemplate");
+    if (resetTemplateBtn) resetTemplateBtn.addEventListener("click", resetTemplate);
     
-    const resetObsidianTemplate = document.querySelector("#resetObsidianTemplate");
-    if (resetObsidianTemplate) resetObsidianTemplate.addEventListener("click", resetObsidianTemplate);
+    const resetObsidianTemplateBtn = document.querySelector("#resetObsidianTemplate");
+    if (resetObsidianTemplateBtn) resetObsidianTemplateBtn.addEventListener("click", resetObsidianTemplate);
     
-    const resetSystemPrompt = document.querySelector("#resetSystemPrompt");
-    if (resetSystemPrompt) resetSystemPrompt.addEventListener("click", resetSystemPrompt);
+    const resetSystemPromptBtn = document.querySelector("#resetSystemPrompt");
+    if (resetSystemPromptBtn) resetSystemPromptBtn.addEventListener("click", resetSystemPrompt);
     
-    const resetDeepDive = document.querySelector("#resetDeepDive");
-    if (resetDeepDive) resetDeepDive.addEventListener("click", resetDeepDivePrompt);
+    const resetDeepDiveBtn = document.querySelector("#resetDeepDive");
+    if (resetDeepDiveBtn) resetDeepDiveBtn.addEventListener("click", resetDeepDivePrompt);
     
-    const resetScience = document.querySelector("#resetScience");
-    if (resetScience) resetScience.addEventListener("click", resetSciencePrompt);
+    const resetScienceBtn = document.querySelector("#resetScience");
+    if (resetScienceBtn) resetScienceBtn.addEventListener("click", resetSciencePrompt);
     
     // Model selection buttons
     const checkModels = document.querySelector("#checkModels");
@@ -93,8 +93,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const clearHistoryBtn = document.getElementById("clearHistory");
     if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", clearHistory);
     
-    const clearCache = document.getElementById("clearCache");
-    if (clearCache) clearCache.addEventListener("click", clearCache);
+    const clearCacheBtn = document.getElementById("clearCache");
+    if (clearCacheBtn) clearCacheBtn.addEventListener("click", clearCache);
 
     // Pagination Event Listeners
     const prevPage = document.getElementById("prevPage");

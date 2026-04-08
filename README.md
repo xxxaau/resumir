@@ -98,8 +98,7 @@
 │   └── settings.js        #   Lògica de configuració + sidebar dinàmica
 │
 ├── tests/                 # Tests
-│   ├── test.html          #   Runner HTML
-│   └── test_logic.js      #   Tests unitaris (utils.js, api.js, summary.js)
+│   ├── tests/*.test.mjs   #   Tests unitaris amb Node.js built-in test runner
 │
 └── icons/                 # Icones (16–128px)
 ```
@@ -153,14 +152,16 @@ Les contribucions són benvingudes! Si vols col·laborar:
 
 ```bash
 # Activar mode desenvolupament (canvia nom i ID del manifest)
-./set_dev_mode.ps1 dev
+pwsh ./set_dev_mode.ps1 dev
 
 # Activar mode producció
-./set_dev_mode.ps1 prod
+pwsh ./set_dev_mode.ps1 prod
 
 # Generar paquet ZIP per a distribució
-python make_zip_v4.py
+pwsh ./build.ps1 -Target all
 ```
+
+> Nota: els scripts de build actuals s'executen amb PowerShell (`pwsh`), així que assegura't de tenir-lo instal·lat abans d'executar-los.
 
 ---
 
