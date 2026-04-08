@@ -1013,6 +1013,33 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.2
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Automatització de la versió</strong>: <code>postversion</code> ara sincronitza <code>CHANGELOG.md</code> juntament amb els manifests i <code>settings.html</code> després de <code>npm version</code>.</li>
+                <li><strong>Comprovació global</strong>: afegit <code>npm run check</code> per executar lint + tests en un sol pas.</li>
+                <li><strong>Scripts de build més robustos</strong>: <code>scripts/pwsh-runner.mjs</code> comprova l'existència del script PowerShell i mostra ajuda quan no se li passa cap argument.</li>
+                <li><strong>Compatibilitat PowerShell</strong>: <code>set_dev_mode.ps1</code> escriu JSON compatible amb versions antigues de PowerShell sense l'opció <code>utf8NoBOM</code>.</li>
+                <li><strong>Refactorització d'opcions</strong>: <code>options/settings.js</code> s'ha netejat amb helpers de binding d'esdeveniments i validació més robusta del <code>pageSize</code>.</li>
+                <li><strong>Millora de la sidebar</strong>: <code>sidebar/summary.js</code> ara usa una funció comuna per aplicar estil biònic i evita errors quan falta l'element de càrrega.</li>
+                <li><strong>Documentació actualitzada</strong>: <code>README.md</code> ara descriu les ordres de build/release i l'ús de <code>npm run check</code>.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.1
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Prompts per defecte centralitzats</strong>: Extrets a <code>shared/defaults.js</code> com a font de veritat única, compartida entre la sidebar i la pàgina d'opcions.</li>
+                <li><strong>Inicialització de favorits simplificada</strong>: En el primer ús, s'afegeix només el model per defecte als favorits (en lloc de tots els models curats).</li>
+                <li><strong>Neteja UI</strong>: Simplificació de <code>sidebar/ui.js</code>, <code>sidebar/summary.js</code> i <code>sidebar/sidebar.html</code>, eliminant codi redundant.</li>
+                <li><strong>Opcions refactoritzades</strong>: <code>settings-defaults.js</code> i <code>settings.js</code> netejats i simplificats.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.0
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>

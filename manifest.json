@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "Resumir contingut",
-    "version": "2.2.1",
+    "name": "Resumir contingut (DEV)",
+    "version": "2.2.2",
     "author": "Sergi Xaudiera",
     "homepage_url": "https://github.com/xxxaau/extensio-resumir-contingut",
     "description": "Resumeix text seleccionat amb Gemini.",

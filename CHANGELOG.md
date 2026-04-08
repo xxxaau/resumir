@@ -2,6 +2,18 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [2.2.2] - 2026-04-08
+
+### Millorat
+
+- **Automatització de la versió**: `postversion` ara sincronitza `CHANGELOG.md` juntament amb els manifests i `settings.html` després de `npm version`.
+- **Comprovació global**: afegit `npm run check` per executar lint + tests en un sol pas.
+- **Scripts de build més robustos**: `scripts/pwsh-runner.mjs` comprova l'existència del script PowerShell i mostra ajuda quan no se li passa cap argument.
+- **Compatibilitat PowerShell**: `set_dev_mode.ps1` escriu JSON compatible amb versions antigues de PowerShell sense l'opció `utf8NoBOM`.
+- **Refactorització d'opcions**: `options/settings.js` s'ha netejat amb helpers de binding d'esdeveniments i validació més robusta del `pageSize`.
+- **Millora de la sidebar**: `sidebar/summary.js` ara usa una funció comuna per aplicar estil biònic i evita errors quan falta l'element de càrrega.
+- **Documentació actualitzada**: `README.md` ara descriu les ordres de build/release i l'ús de `npm run check`.
+
 ## [2.2.1] - 2026-04-07
 
 ### Millorat
