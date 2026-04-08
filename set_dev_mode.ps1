@@ -28,10 +28,10 @@ if ($Mode -eq "dev") {
     # Use DEV patches
     $ffPatch = Get-Content $ffPatchPath -Raw | ConvertFrom-Json
     $ffPatch.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz"
-    $ffPatch | ConvertTo-Json -Depth 10 | Set-Content $ffPatchPath -Encoding UTF8
+    $ffPatch | ConvertTo-Json -Depth 10 | Set-Content $ffPatchPath -Encoding utf8NoBOM
     
     $chromiumPatch = Get-Content $chromiumPatchPath -Raw | ConvertFrom-Json
-    $chromiumPatch | ConvertTo-Json -Depth 10 | Set-Content $chromiumPatchPath -Encoding UTF8
+    $chromiumPatch | ConvertTo-Json -Depth 10 | Set-Content $chromiumPatchPath -Encoding utf8NoBOM
     
     node (Join-Path $root "scripts/merge-manifest.mjs") firefox  (Join-Path $root "manifest.json")
     node (Join-Path $root "scripts/merge-manifest.mjs") chromium (Join-Path $root "manifest.chromium.json")
@@ -47,7 +47,7 @@ elseif ($Mode -eq "prod") {
     } else {
         $ffPatch = Get-Content $ffPatchPath -Raw | ConvertFrom-Json
         $ffPatch.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
-        $ffPatch | ConvertTo-Json -Depth 10 | Set-Content $ffPatchPath -Encoding UTF8
+        $ffPatch | ConvertTo-Json -Depth 10 | Set-Content $ffPatchPath -Encoding utf8NoBOM
     }
     
     if (Test-Path $chromiumProdPatchPath) {

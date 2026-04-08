@@ -15,6 +15,10 @@ $buildScript = Join-Path $root "build.ps1"
 Write-Host "
 Release build starting..." -ForegroundColor Cyan
 
+# Keep the original working mode so we can restore it after release.
+$base = Get-Content (Join-Path $root "manifest.base.json") -Raw | ConvertFrom-Json
+$originalMode = if ($base.name -like '*DEV*') { 'dev' } else { 'prod' }
+
 if (-not $NoBackup) {
     Write-Host "
 [1/4] Backing up DEV data..." -ForegroundColor Yellow
@@ -38,8 +42,8 @@ Write-Host "
 
 if (-not $SkipDevRestore) {
     Write-Host "
-[4/4] Restoring DEV mode..." -ForegroundColor Yellow
-    & $devModeScript dev
+[4/4] Restoring original mode ($originalMode)..." -ForegroundColor Yellow
+    & $devModeScript $originalMode
 }
 
 Write-Host "
