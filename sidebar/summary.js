@@ -20,6 +20,18 @@ function buildFallbackList(preferredModel, favoriteIds) {
     return [...new Set([preferredModel, ...favoriteIds, ...globalFallbacks])];
 }
 
+function applyBionicStyles(element, isEnabled, config = {}) {
+    if (!element) return;
+    if (isEnabled) {
+        element.style.fontFamily = config.bionicFont || "inherit";
+        element.style.lineHeight = config.bionicLineHeight || "1.5";
+        element.style.setProperty("--bionic-weight", config.bionicWeight || "700");
+    } else {
+        element.style.fontFamily = "";
+        element.style.lineHeight = "";
+    }
+}
+
 /**
  * Main summary generation function.
  *
@@ -58,12 +70,14 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     setGeneratingState(true, false, activeBtnId);
     
     const loadingDiv = document.getElementById("loading");
-    if (isScience) {
-        loadingDiv.textContent = "Investigant la validació científica...";
-    } else if (isDeepDive) {
-        loadingDiv.textContent = "Generant anàlisi detallada...";
-    } else {
-        loadingDiv.textContent = "Generant resum...";
+    if (loadingDiv) {
+        if (isScience) {
+            loadingDiv.textContent = "Investigant la validació científica...";
+        } else if (isDeepDive) {
+            loadingDiv.textContent = "Generant anàlisi detallada...";
+        } else {
+            loadingDiv.textContent = "Generant resum...";
+        }
     }
     
     const abortController = new AbortController();
@@ -120,15 +134,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 contentDiv.classList.remove("hidden");
                 
                 
-                if (ctx.isBionicEnabled()) {
-                    const cfg = ctx.getGlobalConfig() || {};
-                    contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
-                    contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
-                    contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "700");
-                } else {
-                    contentDiv.style.fontFamily = "";
-                    contentDiv.style.lineHeight = "";
-                }
+                const cfg = ctx.getGlobalConfig() || {};
+                applyBionicStyles(contentDiv, ctx.isBionicEnabled(), cfg);
                 
                 setGeneratingState(false, true);
                 
@@ -289,15 +296,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         
         contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
         
-        if (bionicEnabled) {
-             const cfg = ctx.getGlobalConfig() || {};
-             contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
-             contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
-             contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "700");
-        } else {
-             contentDiv.style.fontFamily = "";
-             contentDiv.style.lineHeight = "";
-        }
+        const cfg = ctx.getGlobalConfig() || {};
+        applyBionicStyles(contentDiv, bionicEnabled, cfg);
         
         setGeneratingState(false, true);
         
