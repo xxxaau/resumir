@@ -18,6 +18,7 @@ desktop.ini
 background.bundle.js
 sidebar.bundle.js
 build_*/
+.backups/
 
 # Temporary output files
 *.txt
