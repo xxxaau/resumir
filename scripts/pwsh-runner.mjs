@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
@@ -17,7 +18,7 @@ function findPowerShell() {
 }
 
 if (!SCRIPT) {
-  console.error("Usage: node scripts/pwsh-runner.mjs <script.ps1> [args...]");
+  console.log("Usage: node scripts/pwsh-runner.mjs <script.ps1> [args...]");
   process.exit(1);
 }
 
@@ -28,6 +29,11 @@ if (!pwsh) {
 }
 
 const scriptPath = resolve(process.cwd(), SCRIPT);
+if (!existsSync(scriptPath)) {
+  console.error(`PowerShell script not found: ${scriptPath}`);
+  process.exit(1);
+}
+
 const spawnArgs = ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", scriptPath, ...ARGS];
 
 const result = spawnSync(pwsh, spawnArgs, { stdio: 'inherit' });
