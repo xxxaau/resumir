@@ -157,8 +157,20 @@ npm run dev
 # Activar mode producció
 npm run prod
 
-# Generar paquet ZIP per a distribució
+# Generar paquet ZIP per a Firefox
+npm run build:firefox
+
+# Generar paquet ZIP per a Chromium
+npm run build:chromium
+
+# Generar paquets ZIP per a tots dos navegadors
 npm run build
+
+# Fer una release en mode Firefox i restaurar el mode original
+npm run release:firefox
+
+# Fer una release en mode Chromium i restaurar el mode original
+npm run release:chromium
 ```
 
 > Nota: els scripts de build actuals s'executen a través d'un wrapper Node que cerca PowerShell (`pwsh` o `powershell`) al teu sistema.
