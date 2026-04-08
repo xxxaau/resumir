@@ -5,6 +5,11 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+function Write-JsonFile($path, $object) {
+    $json = $object | ConvertTo-Json -Depth 10
+    [System.IO.File]::WriteAllText($path, $json, [System.Text.Encoding]::UTF8)
+}
+
 $root        = $PSScriptRoot
 $basePath    = Join-Path $root "manifest.base.json"
 $ffPatchPath = Join-Path $root "manifest.firefox.patch.json"
@@ -28,10 +33,10 @@ if ($Mode -eq "dev") {
     # Use DEV patches
     $ffPatch = Get-Content $ffPatchPath -Raw | ConvertFrom-Json
     $ffPatch.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz"
-    $ffPatch | ConvertTo-Json -Depth 10 | Set-Content $ffPatchPath -Encoding utf8NoBOM
+    Write-JsonFile $ffPatchPath $ffPatch
     
     $chromiumPatch = Get-Content $chromiumPatchPath -Raw | ConvertFrom-Json
-    $chromiumPatch | ConvertTo-Json -Depth 10 | Set-Content $chromiumPatchPath -Encoding utf8NoBOM
+    Write-JsonFile $chromiumPatchPath $chromiumPatch
     
     node (Join-Path $root "scripts/merge-manifest.mjs") firefox  (Join-Path $root "manifest.json")
     node (Join-Path $root "scripts/merge-manifest.mjs") chromium (Join-Path $root "manifest.chromium.json")
@@ -47,7 +52,7 @@ elseif ($Mode -eq "prod") {
     } else {
         $ffPatch = Get-Content $ffPatchPath -Raw | ConvertFrom-Json
         $ffPatch.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
-        $ffPatch | ConvertTo-Json -Depth 10 | Set-Content $ffPatchPath -Encoding utf8NoBOM
+        Write-JsonFile $ffPatchPath $ffPatch
     }
     
     if (Test-Path $chromiumProdPatchPath) {
@@ -59,7 +64,7 @@ elseif ($Mode -eq "prod") {
     node (Join-Path $root "scripts/merge-manifest.mjs") chromium (Join-Path $root "manifest.chromium.json")
 }
 
-$base | ConvertTo-Json -Depth 10 | Set-Content $basePath -Encoding UTF8
+Write-JsonFile $basePath $base
 Write-Host "  Fitxers base i patch actualitzats." -ForegroundColor DarkGray
 Write-Host "  Manifests regenerats." -ForegroundColor DarkGray
 
