@@ -13,7 +13,7 @@
  *   node scripts/backup-extension-data.mjs restore <backup-id> # Restore from backup
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync, statSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from "fs";
 import { resolve } from "path";
 import * as readline from "readline";
 

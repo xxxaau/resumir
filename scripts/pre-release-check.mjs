@@ -182,7 +182,7 @@ check("Seguretat: no 'innerHTML' amb concatenació dinàmica", () => {
         const lines = src.split("\n");
         lines.forEach((line, i) => {
             const trimmed = line.trimStart();
-            if (/\.innerHTML\s*[+]?=/.test(line) && !/^\s*\/\//.test(line)) {
+            if (DYNAMIC_RE.test(line) && !/^\s*\/\//.test(line)) {
                 // Acceptar: assignació de template literal pur sense interpolació
                 const assignMatch = line.match(/\.innerHTML\s*=\s*(`[^`]*`)\s*;?/);
                 if (assignMatch && !assignMatch[1].includes("${")) return; // literal pur OK
