@@ -152,16 +152,16 @@ Les contribucions són benvingudes! Si vols col·laborar:
 
 ```bash
 # Activar mode desenvolupament (canvia nom i ID del manifest)
-pwsh ./set_dev_mode.ps1 dev
+npm run dev
 
 # Activar mode producció
-pwsh ./set_dev_mode.ps1 prod
+npm run prod
 
 # Generar paquet ZIP per a distribució
-pwsh ./build.ps1 -Target all
+npm run build
 ```
 
-> Nota: els scripts de build actuals s'executen amb PowerShell (`pwsh`), així que assegura't de tenir-lo instal·lat abans d'executar-los.
+> Nota: els scripts de build actuals s'executen a través d'un wrapper Node que cerca PowerShell (`pwsh` o `powershell`) al teu sistema.
 
 ---
 
