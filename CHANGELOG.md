@@ -4,6 +4,10 @@ Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
 ## [Unreleased]
 
+### Millorat
+
+- **Usabilitat taules d'estadístiques**: L'historial de peticions ara mostra els 20 registres sense scroll intern (eliminat `max-height` del contenidor). La taula "Resums per model i dia" té paginació de 20 registres per pàgina amb botons Anterior/Següent, en lloc de scroll vertical. La paginació es reinicia automàticament en canviar el període.
+
 ### Corregit
 
 - **Fallback de models ampliat**: El sistema de fallback ara també activa el canvi de model quan rep errors 404 (model no disponible), 503 (servei no disponible) i "not found", no només errors de quota (429). Abans, qualsevol error que no fos de quota interrompria la cadena de fallback i mostraria l'error directament a l'usuari.
