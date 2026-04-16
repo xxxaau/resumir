@@ -281,12 +281,23 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             } catch (e) {
                 if (signal.aborted || e.name === 'AbortError') throw e;
                 const msg = e.message.toLowerCase();
-                if (msg.includes("429") || msg.includes("quota") || msg.includes("exhausted") || msg.includes("resource has been exhausted") || msg.includes("overloaded")) {
-                    console.warn(`Model ${tryModel} exhausted quota or overloaded. Attempting fallback...`);
+                const isRetryable =
+                    msg.includes("429") ||
+                    msg.includes("quota") ||
+                    msg.includes("exhausted") ||
+                    msg.includes("resource has been exhausted") ||
+                    msg.includes("overloaded") ||
+                    msg.includes("503") ||
+                    msg.includes("service unavailable") ||
+                    msg.includes("404") ||
+                    msg.includes("not found") ||
+                    msg.includes("model");
+                if (isRetryable) {
+                    console.warn(`Model ${tryModel} unavailable or quota exceeded. Attempting fallback...`, e.message);
                     lastError = e;
                     continue;
                 }
-                throw e; // Other unexpected errors
+                throw e; // Other unexpected errors (auth, network, etc.)
             }
         }
 
@@ -359,17 +370,33 @@ function classifyError(err) {
     }
     
     // API key missing
-    if (msgLower.includes("api key") || msgLower.includes("not found")) {
+    if (msgLower.includes("api key")) {
         return {
             message: msg,
             showConfig: true
         };
     }
-    
+
+    // Model not found (404) — not a config issue, just the model is unavailable
+    if (msg.includes("404") || msgLower.includes("not found") || msgLower.includes("model")) {
+        return {
+            message: "Cap dels models disponibles ha respost. Pot ser que els models triats no estiguin disponibles ara mateix. Proveu-ho més tard o canvieu els models favorits a la configuració.",
+            showConfig: true
+        };
+    }
+
+    // Service unavailable (503)
+    if (msg.includes("503") || msgLower.includes("service unavailable") || msgLower.includes("overloaded")) {
+        return {
+            message: "El servei de Gemini no està disponible ara mateix. Proveu-ho d'aquí a uns minuts.",
+            showConfig: false
+        };
+    }
+
     // Quota exceeded (429)
     if (msg.includes("429") || msgLower.includes("quota") || msgLower.includes("exhausted")) {
         return {
-            message: msg + " Tots els models alternatius també han excedit la quota. Proveu-ho més tard.",
+            message: "Tots els models alternatius han excedit la quota diària. Proveu-ho demà o afegiu més models favorits a la configuració.",
             showConfig: false
         };
     }

@@ -2,6 +2,13 @@
 
 Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
+## [Unreleased]
+
+### Corregit
+
+- **Fallback de models ampliat**: El sistema de fallback ara també activa el canvi de model quan rep errors 404 (model no disponible), 503 (servei no disponible) i "not found", no només errors de quota (429). Abans, qualsevol error que no fos de quota interrompria la cadena de fallback i mostraria l'error directament a l'usuari.
+- **Missatges d'error millorats**: `classifyError` distingeix ara entre model no trobat (missatge orientatiu amb botó de configuració), servei no disponible (missatge temporal sense botó) i quota esgotada (missatge amb indicació de dia).
+
 ## [2.2.2] - 2026-04-08
 
 ### Millorat
