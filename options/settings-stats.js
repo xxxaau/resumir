@@ -7,6 +7,11 @@ let currentPage = 1;
 let totalPages = 1;
 let currentPeriod = "7d";
 
+const GROUPED_PAGE_SIZE = 20;
+let groupedCurrentPage = 1;
+let groupedTotalPages = 1;
+let groupedData = []; // Cache per a la paginació del grouped table
+
 async function loadStatistics() {
     try {
         const data = await ext.storage.local.get(["usageHistory", "pageSize"]);
@@ -76,7 +81,8 @@ async function loadStatistics() {
         // Render Bar Chart (amb període)
         renderDailyChart(filtered, currentPeriod);
 
-        // Grouped History Table (amb període)
+        // Grouped History Table (amb període) — reinicia paginació quan canvia el període
+        groupedCurrentPage = 1;
         renderGroupedHistoryTable(filtered, currentPeriod);
 
         // 2. Render History Table with Pagination
@@ -356,18 +362,43 @@ function renderGroupedHistoryTable(history, period = "7d") {
         }
     });
 
+    groupedData = Object.values(groups).sort((a, b) => {
+        if (a.sortKey !== b.sortKey) return b.sortKey.localeCompare(a.sortKey);
+        return a.model.localeCompare(b.model);
+    });
+
+    groupedTotalPages = Math.ceil(groupedData.length / GROUPED_PAGE_SIZE) || 1;
+    if (groupedCurrentPage > groupedTotalPages) groupedCurrentPage = groupedTotalPages;
+
+    renderGroupedPage();
+}
+
+function renderGroupedPage() {
+    const tbody = document.getElementById("groupedTableBody");
+    if (!tbody) return;
+    tbody.replaceChildren();
+
+    const startIndex = (groupedCurrentPage - 1) * GROUPED_PAGE_SIZE;
+    const pageData = groupedData.slice(startIndex, startIndex + GROUPED_PAGE_SIZE);
+
     function fmtLatency(totalMs, count) {
         if (count === 0) return "—";
         const avg = Math.round(totalMs / count);
         return avg < 1000 ? avg + "ms" : (avg / 1000).toFixed(1) + "s";
     }
 
-    const sortedGroups = Object.values(groups).sort((a, b) => {
-        if (a.sortKey !== b.sortKey) return b.sortKey.localeCompare(a.sortKey);
-        return a.model.localeCompare(b.model);
-    });
+    if (pageData.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 8;
+        td.style.textAlign = "center";
+        td.style.color = "#999";
+        td.textContent = "Encara no hi ha dades d'ús.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    }
 
-    sortedGroups.forEach(group => {
+    pageData.forEach(group => {
         const tr = document.createElement("tr");
 
         const tdDate = document.createElement("td");
@@ -419,6 +450,18 @@ function renderGroupedHistoryTable(history, period = "7d") {
 
         tbody.appendChild(tr);
     });
+
+    // Actualitzar controls de paginació del grouped table
+    const prevBtn = document.getElementById("groupedPrevPage");
+    const nextBtn = document.getElementById("groupedNextPage");
+    const pageInfo = document.getElementById("groupedPageInfo");
+    if (prevBtn) prevBtn.disabled = groupedCurrentPage === 1;
+    if (nextBtn) nextBtn.disabled = groupedCurrentPage === groupedTotalPages;
+    if (pageInfo) {
+        pageInfo.textContent = groupedTotalPages > 1
+            ? `Pàgina ${groupedCurrentPage} de ${groupedTotalPages}`
+            : "";
+    }
 }
 
 function renderHistoryTable(history) {

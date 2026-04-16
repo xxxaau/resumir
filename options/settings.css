@@ -959,10 +959,6 @@ input:checked + .slider:before {
 }
 
 /* Table Utilities */
-.table-container {
-  max-height: 250px;
-  overflow-y: auto;
-}
 
 .table-sticky-header thead {
   position: sticky;

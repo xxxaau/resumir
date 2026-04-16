@@ -110,6 +110,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    // Pagination for grouped table
+    const groupedPrevPage = document.getElementById("groupedPrevPage");
+    if (groupedPrevPage) {
+        groupedPrevPage.addEventListener("click", () => {
+            if (groupedCurrentPage > 1) {
+                groupedCurrentPage--;
+                renderGroupedPage();
+            }
+        });
+    }
+
+    const groupedNextPage = document.getElementById("groupedNextPage");
+    if (groupedNextPage) {
+        groupedNextPage.addEventListener("click", () => {
+            if (groupedCurrentPage < groupedTotalPages) {
+                groupedCurrentPage++;
+                renderGroupedPage();
+            }
+        });
+    }
+
     bindChange("pageSizeSelect", (e) => {
         const selected = parseInt(e.target.value, 10);
         if (Number.isInteger(selected) && selected > 0) {
