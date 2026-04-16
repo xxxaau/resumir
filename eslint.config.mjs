@@ -98,8 +98,11 @@ const settingsGlobals = {
     getRelativeTime: "readonly",
     renderDailyChart: "readonly",
     renderGroupedHistoryTable: "readonly",
+    renderGroupedPage: "readonly",
     renderHistoryTable: "readonly",
     clearHistory: "readonly",
+    groupedCurrentPage: "writable",
+    groupedTotalPages: "writable",
     // settings-models.js
     modelNote: "readonly",
     listModels: "readonly",

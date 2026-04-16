@@ -61,7 +61,24 @@
       "Bash(tree -L 2 /d/40361989w/Dev/sergi-resum-navegador -I 'node_modules' 2>/dev/null || find /d/40361989w/Dev/sergi-resum-navegador -maxdepth 2 -not -path '*/node_modules*' | sort)",
       "Bash(wc -l /d/40361989w/Dev/sergi-resum-navegador/sidebar/*.js /d/40361989w/Dev/sergi-resum-navegador/*.js /d/40361989w/Dev/sergi-resum-navegador/options/*.js 2>/dev/null | tail -20)",
       "Bash(cd D:/40361989w/Dev/sergi-resum-navegador && for fn in setGeneratingState resetUI formatTextToFragment updateWaterStats startGenerationTimer startCountdown renderApiKeyWarning; do echo \"=== $fn ===\"; grep -rn \"$fn\" sidebar/ options/ *.js --include=\"*.js\" | grep -v \"function $fn\\\\|'$fn'\"; done)",
-      "Bash(cd D:/40361989w/Dev/sergi-resum-navegador && grep -rn \"startCountdown\\\\|runCountdownTimer\\\\|blockedUntil\" sidebar/ *.js --include=\"*.js\")"
+      "Bash(cd D:/40361989w/Dev/sergi-resum-navegador && grep -rn \"startCountdown\\\\|runCountdownTimer\\\\|blockedUntil\" sidebar/ *.js --include=\"*.js\")",
+      "Skill(update-config)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "npm run lint; rc=$?; [ $rc -ne 0 ] && echo '{\"continue\":false,\"stopReason\":\"Lint ha fallat! Corregeix els errors ESLint abans de fer commit.\"}'",
+            "timeout": 60,
+            "statusMessage": "Verificant lint abans del commit..."
+          }
+        ]
+      }
     ]
   }
 }
