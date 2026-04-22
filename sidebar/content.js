@@ -97,109 +97,56 @@ async function getPageContent() {
         try {
             let transcriptText = "";
 
-            // Helper: fetch a timedtext URL (JSON3 format) and extract plain text
-            async function fetchTimedText(url) {
-                // Prefer JSON3 format for more reliable parsing
-                const jsonUrl = url.includes("fmt=") ? url : url + (url.includes("?") ? "&" : "?") + "fmt=json3";
-                const res = await fetch(jsonUrl, { credentials: 'include', signal: AbortSignal.timeout(8000) });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const body = await res.text();
-
-                // Try JSON3 format first (events array)
-                try {
-                    const data = JSON.parse(body);
-                    if (data.events) {
-                        return data.events
-                            .filter(e => e.segs)
-                            .map(e => e.segs.map(s => s.utf8 || "").join(""))
-                            .join(" ")
-                            .replace(/\s+/g, " ")
-                            .trim();
-                    }
-                } catch (_) { /* not JSON, fall through to XML */ }
-
-                // XML format fallback
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(body, "text/xml");
-                const texts = xmlDoc.getElementsByTagName("text");
-                let fullText = "";
-                for (let i = 0; i < texts.length; i++) {
-                    let line = texts[i].textContent;
-                    line = line.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-                    fullText += line + " ";
-                }
-                return fullText.replace(/\s+/g, " ").trim();
-            }
-
-            // 1. Player response injection: read captionTracks (manual + ASR)
-            const playerResponse = await executeScriptSafe({
+            // 1. Llegir transcripció des de ytInitialData (ja incrustada a la pàgina, cap fetch)
+            const transcriptResult = await executeScriptSafe({
                 target: { tabId: tabId },
                 world: "MAIN",
                 func: () => {
                     try {
-                        const player = document.getElementById('movie_player');
-                        let response = player && player.getPlayerResponse ? player.getPlayerResponse() : null;
-                        if (!response) response = window.ytInitialPlayerResponse;
-                        if (!response || !response.captions) return null;
+                        const data = window.ytInitialData;
+                        if (!data) return null;
 
-                        const tracks = response.captions.playerCaptionsTracklistRenderer?.captionTracks;
-                        if (!tracks || tracks.length === 0) return null;
+                        const panels = data.engagementPanels || [];
+                        const transcriptPanel = panels.find(p =>
+                            p?.engagementPanelSectionListRenderer?.targetId === 'engagement-panel-searchable-transcript'
+                        );
+                        if (!transcriptPanel) return null;
 
-                        // Score: prefer manual in Catalan > English > Spanish > any manual > ASR in those langs > any ASR
-                        const getScore = (t) => {
-                            const isAsr = t.kind === 'asr' || (t.vssId || '').startsWith('a.');
-                            const base  = isAsr ? 0 : 20;
-                            if (t.languageCode === 'ca') return base + 80;
-                            if (t.languageCode === 'en') return base + 30;
-                            if (t.languageCode === 'es') return base + 20;
-                            return base;
-                        };
+                        const segments = transcriptPanel
+                            ?.engagementPanelSectionListRenderer
+                            ?.content?.transcriptRenderer
+                            ?.content?.transcriptSearchPanelRenderer
+                            ?.body?.transcriptSegmentListRenderer
+                            ?.initialSegments || [];
 
-                        tracks.sort((a, b) => getScore(b) - getScore(a));
+                        const lines = segments
+                            .map(s => s?.transcriptSegmentRenderer?.snippet?.runs?.map(r => r.text)?.join('') || '')
+                            .filter(Boolean);
+
+                        if (lines.length === 0) return null;
+
+                        // Detectar idioma del primer track ASR per etiquetar
+                        const tracks = window.ytInitialPlayerResponse?.captions
+                            ?.playerCaptionsTracklistRenderer?.captionTracks || [];
                         const track = tracks[0];
-                        const isAsr = track.kind === 'asr' || (track.vssId || '').startsWith('a.');
-                        return { baseUrl: track.baseUrl, language: track.name?.simpleText || track.languageCode, isAsr };
+                        const lang = track?.name?.simpleText || track?.languageCode || '';
+                        const isAsr = track?.kind === 'asr' || (track?.vssId || '').startsWith('a.');
+
+                        return { text: lines.join(' '), lang, isAsr };
                     } catch (e) {
                         return null;
                     }
                 }
             });
 
-            const trackData = playerResponse?.[0]?.result;
-
-            if (trackData?.baseUrl) {
-                try {
-                    const fullText = await fetchTimedText(trackData.baseUrl);
-                    if (fullText.length > 50) {
-                        transcriptText = `[TRANSCRIPT: ${trackData.language}${trackData.isAsr ? ' (Auto)' : ''}]\n\n${fullText}`;
-                    }
-                } catch (err) {
-                    console.warn("YouTube timedtext fetch failed:", err);
-                }
+            const ytData = transcriptResult?.[0]?.result;
+            if (ytData?.text && ytData.text.length > 50) {
+                transcriptText = `[TRANSCRIPT: ${ytData.lang}${ytData.isAsr ? ' (Auto)' : ''}]\n\n${ytData.text}`;
             }
 
-            // 2. Timedtext API fallback: probe common langs with ASR when captionTracks gave nothing
+            // 2. UI Fallback: llegir del DOM si el panell ja està obert
             if (!transcriptText) {
-                const videoIdMatch = tabUrl.match(/[?&]v=([^&]+)/);
-                const videoId = videoIdMatch?.[1];
-                if (videoId) {
-                    const langCandidates = ['ca', 'en', 'es', 'fr', 'de', 'pt'];
-                    for (const lang of langCandidates) {
-                        try {
-                            const url = `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}&kind=asr&fmt=json3`;
-                            const fullText = await fetchTimedText(url);
-                            if (fullText.length > 50) {
-                                transcriptText = `[TRANSCRIPT: ${lang} (Auto)]\n\n${fullText}`;
-                                break;
-                            }
-                        } catch (_) { /* try next lang */ }
-                    }
-                }
-            }
-
-            // 3. UI Fallback: read the transcript panel if open
-            if (!transcriptText) {
-                const transcriptResult = await executeScriptSafe({
+                const domResult = await executeScriptSafe({
                     target: { tabId: tabId },
                     func: () => {
                         const segments = document.querySelectorAll('ytd-transcript-segment-renderer .segment-text');
@@ -209,12 +156,12 @@ async function getPageContent() {
                         return null;
                     }
                 });
-                if (transcriptResult?.[0]?.result) {
-                    transcriptText = "[TRANSCRIPT (FROM PANEL)]\n\n" + transcriptResult[0].result;
+                if (domResult?.[0]?.result) {
+                    transcriptText = "[TRANSCRIPT (FROM PANEL)]\n\n" + domResult[0].result;
                 }
             }
 
-            // 4. Description Fallback (last resort)
+            // 3. Description Fallback (last resort)
             if (!transcriptText) {
                 noTranscript = true;
                 const descResult = await executeScriptSafe({
