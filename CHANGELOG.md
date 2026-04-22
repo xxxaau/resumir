@@ -4,14 +4,23 @@ Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-04-22
+
 ### Millorat
 
-- **Usabilitat taules d'estadístiques**: L'historial de peticions ara mostra els 20 registres sense scroll intern (eliminat `max-height` del contenidor). La taula "Resums per model i dia" té paginació de 20 registres per pàgina amb botons Anterior/Següent, en lloc de scroll vertical. La paginació es reinicia automàticament en canviar el període.
+- **Fiabilitat API**: Timeout de 60 segons a totes les crides Gemini per evitar la sidebar penjada si el servidor no respon. Si expira, es mostra un missatge clar a l'usuari.
+- **Timeout en extracció de contingut**: Timeout de 8 segons als fetchs d'articles de Hacker News i transcripcions de YouTube per no bloquejar la generació.
+- **Fallback de models ampliat**: El sistema de fallback ara activa el canvi de model per errors 404, 500, 502, 503 i timeouts, no només errors de quota (429). El log mostra l'índex d'intent `[n/total]` per facilitar el debug.
+- **Arrencada de la sidebar més ràpida**: Les lectures de storage a l'inici s'executen en paral·lel amb `Promise.all`, reduint la latència d'arrencada ~100ms. El preload de contingut té un timeout de 2 s per no bloquejar la UI.
+- **Debounce del badge de caché**: Lectures de storage optimitzades en canvis ràpids de pestanya (150 ms de debounce). El badge s'amaga correctament quan el contingut actiu és una selecció de text.
+- **Usabilitat taules d'estadístiques**: L'historial de peticions ara mostra els 20 registres sense scroll intern. La taula "Resums per model i dia" té paginació de 20 registres per pàgina amb botons Anterior/Següent. La paginació es reinicia automàticament en canviar el període.
 
 ### Corregit
 
-- **Fallback de models ampliat**: El sistema de fallback ara també activa el canvi de model quan rep errors 404 (model no disponible), 503 (servei no disponible) i "not found", no només errors de quota (429). Abans, qualsevol error que no fos de quota interrompria la cadena de fallback i mostraria l'error directament a l'usuari.
-- **Missatges d'error millorats**: `classifyError` distingeix ara entre model no trobat (missatge orientatiu amb botó de configuració), servei no disponible (missatge temporal sense botó) i quota esgotada (missatge amb indicació de dia).
+- **Missatges d'error millorats**: `classifyError` distingeix entre model no trobat, servei no disponible, quota esgotada i timeout/connexió interrompuda, cadascun amb missatge específic.
+- **Fuites de memòria de botons**: Els nodes DOM clonats dels botons s'alliberen correctament després de cada generació; l'interval del comptador de quota es neteja quan expira o en tancar la sidebar.
+- **Caché més robusta**: L'índex de caché es limita a 500 entrades (elimina les més antigues). Les entrades sense camp `summary` vàlid es descarten.
+- **Cleanup en tancar**: Abort del generador, timers i intervals es netegen al tancar la sidebar (`beforeunload`).
 
 ## [2.2.2] - 2026-04-08
 

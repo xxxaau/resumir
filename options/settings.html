@@ -1028,13 +1028,14 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Automatització de la versió</strong>: <code>postversion</code> ara sincronitza <code>CHANGELOG.md</code> juntament amb els manifests i <code>settings.html</code> després de <code>npm version</code>.</li>
-                <li><strong>Comprovació global</strong>: afegit <code>npm run check</code> per executar lint + tests en un sol pas.</li>
-                <li><strong>Scripts de build més robustos</strong>: <code>scripts/pwsh-runner.mjs</code> comprova l'existència del script PowerShell i mostra ajuda quan no se li passa cap argument.</li>
-                <li><strong>Compatibilitat PowerShell</strong>: <code>set_dev_mode.ps1</code> escriu JSON compatible amb versions antigues de PowerShell sense l'opció <code>utf8NoBOM</code>.</li>
-                <li><strong>Refactorització d'opcions</strong>: <code>options/settings.js</code> s'ha netejat amb helpers de binding d'esdeveniments i validació més robusta del <code>pageSize</code>.</li>
-                <li><strong>Millora de la sidebar</strong>: <code>sidebar/summary.js</code> ara usa una funció comuna per aplicar estil biònic i evita errors quan falta l'element de càrrega.</li>
-                <li><strong>Documentació actualitzada</strong>: <code>README.md</code> ara descriu les ordres de build/release i l'ús de <code>npm run check</code>.</li>
+                <li><strong>Timeout API</strong>: Timeout de 60 s a totes les crides Gemini; timeout de 8 s als fetchs d'articles HN i transcripcions YouTube. Evita la sidebar penjada si el servidor no respon.</li>
+                <li><strong>Fallback de models ampliat</strong>: Retry per errors 404, 500, 502, 503 i timeout (no només 429). Log d'intent amb índex <code>[n/total]</code>.</li>
+                <li><strong>Arrencada més ràpida</strong>: Lectures de storage en paral·lel a l'inici (<code>Promise.all</code>); preload de contingut amb timeout de 2 s.</li>
+                <li><strong>Badge de caché optimitzat</strong>: Debounce de 150 ms en canvis de pestanya; s'amaga correctament per seleccions de text.</li>
+                <li><strong>Fuites de memòria corregides</strong>: Nodes DOM de botons alliberats després de cada generació; intervals netejats al tancar la sidebar.</li>
+                <li><strong>Caché més robusta</strong>: Límit de 500 entrades a l'índex; entrades sense <code>summary</code> vàlid descartades automàticament.</li>
+                <li><strong>Missatges d'error específics</strong>: Distinció entre timeout, connexió interrompuda, quota esgotada i model no disponible.</li>
+                <li><strong>Usabilitat taules d'estadístiques</strong>: Historial sense scroll intern; paginació a la taula de resums per model.</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
