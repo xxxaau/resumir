@@ -34,7 +34,7 @@ async function executeScriptSafe(injection) {
 
 /**
  * Extracts and returns the relevant text content from the active tab.
- * Includes specific heuristics for HackerNews, YouTube, Twitter/X, and fallback to Readability.
+ * Includes specific heuristics for HackerNews, YouTube, LinkedIn, Twitter/X, and fallback to Readability.
  */
 async function getPageContent() {
     const tabs = await ext.tabs.query({active: true, currentWindow: true});
@@ -67,7 +67,7 @@ async function getPageContent() {
                 let articleText = "";
                 if (hn.articleUrl && !hn.articleUrl.includes("ycombinator.com")) {
                     try {
-                        const resp = await fetch(hn.articleUrl);
+                        const resp = await fetch(hn.articleUrl, { signal: AbortSignal.timeout(8000) });
                         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                         const html = await resp.text();
                         const doc = new DOMParser().parseFromString(html, "text/html");
@@ -135,7 +135,10 @@ async function getPageContent() {
             if (trackData && trackData.baseUrl) {
                  
                  try {
-                     const transcriptResponse = await fetch(trackData.baseUrl, { credentials: 'include' });
+                     const transcriptResponse = await fetch(trackData.baseUrl, {
+                         credentials: 'include',
+                         signal: AbortSignal.timeout(8000)
+                     });
                      if (!transcriptResponse.ok) throw new Error("[005] Fetch failed");
                      const transcriptXml = await transcriptResponse.text();
                      
@@ -214,6 +217,102 @@ async function getPageContent() {
         }
     }
     
+    // LINKEDIN SPECIAL LOGIC
+    else if (tabUrl.includes("linkedin.com/posts/") || tabUrl.includes("linkedin.com/feed/update/")) {
+        try {
+            const linkedinResult = await executeScriptSafe({
+                target: { tabId: tabId },
+                func: () => {
+                    const parts = [];
+
+                    // Post author
+                    const authorEl = document.querySelector(
+                        ".update-components-actor__title, .feed-shared-actor__title"
+                    );
+                    const author = authorEl?.innerText?.trim().split("\n")[0] || "";
+
+                    // Post text — try expanded first, then visible text
+                    const expandBtn = document.querySelector(
+                        ".feed-shared-inline-show-more-text button, " +
+                        ".update-components-text button.see-more"
+                    );
+                    if (expandBtn) expandBtn.click();
+
+                    const postEl = document.querySelector(
+                        ".update-components-text, .feed-shared-text"
+                    );
+                    const postText = postEl?.innerText?.trim() || "";
+
+                    if (author) parts.push(`Autor: ${author}`);
+                    if (postText) parts.push(`\nPublicació:\n${postText}`);
+
+                    // Comments + replies (full thread)
+                    // Strategy: find all comment items, detect top-level vs reply by
+                    // checking if the item is inside a nested-items container.
+                    const UI_NOISE = /^(Like|Reply|Show translation|Load more|Comment|Repost|Send|See more|\d+\s*(like|comment|reaction))/i;
+
+                    const extractComment = (item, indent) => {
+                        // Author name — multiple known selector variants
+                        const nameEl = item.querySelector(
+                            ".comments-post-meta__name-text, " +
+                            ".comments-post-meta__name, " +
+                            ".feed-shared-actor__name, " +
+                            ".hoverable-link-text"
+                        );
+                        // Comment body text
+                        const textEl = item.querySelector(
+                            ".comments-comment-item__main-content, " +
+                            ".comments-comment-texteditor, " +
+                            ".update-components-text"
+                        );
+                        const name = nameEl?.innerText?.trim().split("\n")[0] || "";
+                        const txt = textEl?.innerText?.trim() || "";
+                        if (txt.length <= 5 || UI_NOISE.test(txt)) return null;
+                        return `${indent}${name ? name + ":\n" + indent : ""}${txt}`;
+                    };
+
+                    const allCommentItems = Array.from(
+                        document.querySelectorAll(".comments-comment-item")
+                    );
+                    console.log("[LinkedIn] comments-comment-item found:", allCommentItems.length);
+
+                    if (allCommentItems.length > 0) {
+                        const comments = [];
+                        allCommentItems.forEach(item => {
+                            const isReply = !!item.closest(".comments-comment-item__nested-items");
+                            const indent = isReply ? "  > " : "";
+                            const c = extractComment(item, indent);
+                            if (c) comments.push(c);
+                        });
+                        console.log("[LinkedIn] comments extracted:", comments.length);
+                        if (comments.length > 0) {
+                            parts.push(`\nComentaris:\n${comments.join("\n\n")}`);
+                        }
+                    } else {
+                        // DOM diagnostic: log what comment-related classes are present
+                        const allClasses = Array.from(document.querySelectorAll("[class]"))
+                            .map(el => el.className)
+                            .join(" ")
+                            .split(/\s+/)
+                            .filter(c => c.includes("comment"))
+                            .filter((c, i, a) => a.indexOf(c) === i)
+                            .slice(0, 20);
+                        console.warn("[LinkedIn] No comments-comment-item found. Comment-related classes:", allClasses);
+                    }
+
+                    return parts.length > 0 ? parts.join("\n") : null;
+                }
+            });
+
+            const linkedinText = linkedinResult?.[0]?.result;
+            if (linkedinText && linkedinText.trim().length > 30) {
+                text = linkedinText;
+            }
+        } catch (e) {
+            console.warn("LinkedIn extraction failed", e);
+        }
+    }
+
     // TWITTER / X SPECIAL LOGIC
     else if (tabUrl.includes("twitter.com") || tabUrl.includes("x.com")) {
         try {

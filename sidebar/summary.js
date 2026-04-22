@@ -144,7 +144,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 
                 if (cachedEntry.model) {
                     if (modelSelect.value !== cachedEntry.model) {
-                        if (!modelSelect.querySelector(`option[value='${CSS.escape(cachedEntry.model)}']`)) {
+                        if (!Array.from(modelSelect.options).some(o => o.value === cachedEntry.model)) {
                             const opt = document.createElement("option");
                             opt.value = cachedEntry.model;
                             opt.textContent = cachedEntry.model;
@@ -223,6 +223,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         contentDiv.classList.remove("hidden");
         let lastUpdate = 0;
         const modelsToTry = buildFallbackList(modelName, config.favoriteModels || []);
+        if (modelsToTry.length === 0) {
+            throw new Error("[003] No hi ha models configurats. Afegeix models favorits a la configuració.");
+        }
         let success = false;
         let lastError = null;
         const bionicEnabled = ctx.isBionicEnabled();
@@ -279,7 +282,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
                 break; // Request successful
             } catch (e) {
-                if (signal.aborted || e.name === 'AbortError') throw e;
+                if (signal.aborted) throw e;
                 const msg = e.message.toLowerCase();
                 const isRetryable =
                     msg.includes("429") ||
@@ -287,13 +290,16 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     msg.includes("exhausted") ||
                     msg.includes("resource has been exhausted") ||
                     msg.includes("overloaded") ||
+                    msg.includes("500") ||
+                    msg.includes("502") ||
                     msg.includes("503") ||
                     msg.includes("service unavailable") ||
                     msg.includes("404") ||
                     msg.includes("not found") ||
                     msg.includes("model");
                 if (isRetryable) {
-                    console.warn(`Model ${tryModel} unavailable or quota exceeded. Attempting fallback...`, e.message);
+                    const attempt = modelsToTry.indexOf(tryModel) + 1;
+                    console.warn(`[${attempt}/${modelsToTry.length}] Model ${tryModel} unavailable. Trying next...`, e.message);
                     lastError = e;
                     continue;
                 }
@@ -358,7 +364,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
  * Classifies API errors and returns user-friendly messages.
  */
 function classifyError(err) {
-    const msg = err.message || "";
+    const msg = String(err?.message || err || "");
     const msgLower = msg.toLowerCase();
     
     // API key invalid or revoked (401/403)
@@ -409,6 +415,14 @@ function classifyError(err) {
         };
     }
     
+    // Timeout or connection abort
+    if (err.name === 'AbortError' || msgLower.includes('aborted') || msgLower.includes('timeout')) {
+        return {
+            message: "La petició ha expirat o s'ha interromput la connexió. Comprova la connexió i torna-ho a provar.",
+            showConfig: false
+        };
+    }
+
     // Default
     return {
         message: msg,

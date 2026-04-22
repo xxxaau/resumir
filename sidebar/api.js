@@ -55,15 +55,27 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
         };
     }
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
-      },
-      body: JSON.stringify(body),
-      signal: signal
-    });
+    // Combine user abort signal with a 60s timeout
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), 60_000);
+    const fetchSignal = (typeof AbortSignal.any === 'function')
+        ? AbortSignal.any([signal, timeoutController.signal])
+        : signal;
+
+    let response;
+    try {
+        response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey
+            },
+            body: JSON.stringify(body),
+            signal: fetchSignal
+        });
+    } finally {
+        clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
         let errorMsg = response.statusText;
