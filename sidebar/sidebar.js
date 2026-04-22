@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     globalConfigCache.modelName = newModel;
                 }
                 if (modelSelect && newModel && modelSelect.value !== newModel) {
-                    if (modelSelect.querySelector(`option[value="${CSS.escape(newModel)}"]`)) {
+                    if (Array.from(modelSelect.options).some(o => o.value === newModel)) {
                         modelSelect.value = newModel;
                     } else {
                         loadModels(null, newModel);
@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 const tab = await ext.tabs.create({ url: uri, active: false });
-                setTimeout(() => ext.tabs.remove(tab.id), 3000);
+                setTimeout(() => ext.tabs.remove(tab.id).catch(() => {}), 5000);
             } catch (err) {
                 console.error("Obsidian protocol failed:", err);
                 errorDiv.textContent = "Error obrint Obsidian: " + err.message;
@@ -266,22 +266,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const historyBackBtn = document.getElementById("historyBackBtn");
     if (historyBackBtn) historyBackBtn.addEventListener("click", openHistoryPanel);
 
-    async function updateCacheBadge(url) {
-        const badge = document.getElementById("cache-badge");
-        if (!badge) return;
-        if (!url) {
-            badge.style.visibility = "hidden";
-            badge.removeAttribute("data-clickable");
-            return;
-        }
-        const cached = await getSummaryCache(url);
-        if (cached) {
-            badge.style.visibility = "visible";
-            badge.dataset.clickable = "true";
-        } else {
-            badge.style.visibility = "hidden";
-            badge.removeAttribute("data-clickable");
-        }
+    let cacheBadgeTimer = null;
+    function updateCacheBadge(url) {
+        clearTimeout(cacheBadgeTimer);
+        cacheBadgeTimer = setTimeout(async () => {
+            const badge = document.getElementById("cache-badge");
+            if (!badge) return;
+            if (!url || url.startsWith("seleccio:")) {
+                badge.style.visibility = "hidden";
+                badge.removeAttribute("data-clickable");
+                return;
+            }
+            const cached = await getSummaryCache(url);
+            if (cached) {
+                badge.style.visibility = "visible";
+                badge.dataset.clickable = "true";
+            } else {
+                badge.style.visibility = "hidden";
+                badge.removeAttribute("data-clickable");
+            }
+        }, 150);
     }
 
     const cacheBadge = document.getElementById("cache-badge");
@@ -375,17 +379,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    window.addEventListener('beforeunload', () => {
+        if (abortController) abortController.abort();
+        stopGenerationTimer();
+        stopCountdownTimer();
+    });
+
     // --- On Load Init ---
     (async () => {
         // Purgar caché expirada en segon pla (no bloquejant)
-        purgeStaleCacheEntries().catch(() => {});
+        purgeStaleCacheEntries().catch(err => { console.warn("Purge cache failed:", err); });
         // Inicialitzar badge de caché per a la URL del tab actiu
         ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
             if (tabs[0]?.url) updateCacheBadge(tabs[0].url);
         }).catch(() => {});
         try {
-            const syncData = await ext.storage.sync.get(["apiKey", "modelName"]);
-            const localData = await ext.storage.local.get(["blockedUntil", "isBionicActive"]);
+            const [syncData, localData] = await Promise.all([
+                ext.storage.sync.get(["apiKey", "modelName"]),
+                ext.storage.local.get(["blockedUntil", "isBionicActive"])
+            ]);
 
             const apiKey = syncData.apiKey;
             let modelName = syncData.modelName || DEFAULT_MODEL_ID;
@@ -406,7 +418,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const footer = document.getElementById("footer-status");
             if (footer) footer.classList.remove("hidden");
             
-            contentPreload = getPageContent().catch(() => null);
+            contentPreload = Promise.race([
+                getPageContent(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Preload timeout")), 2000))
+            ]).catch(() => null);
 
             if (localData.blockedUntil && Date.now() < localData.blockedUntil) {
                 runCountdownTimer(localData.blockedUntil);
