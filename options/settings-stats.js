@@ -14,8 +14,9 @@ let groupedData = []; // Cache per a la paginació del grouped table
 
 async function loadStatistics() {
     try {
-        const data = await ext.storage.local.get(["usageHistory", "pageSize"]);
+        const data = await ext.storage.local.get(["usageHistory", "dailyStats", "pageSize"]);
         const history = data.usageHistory || []; // Array of {date, title, url, model, inputTokens, outputTokens, latency}
+        const dailyStats = data.dailyStats || {}; // { "YYYY-MM-DD": count }
 
         if (data.pageSize) {
             PAGE_SIZE = data.pageSize;
@@ -35,9 +36,11 @@ async function loadStatistics() {
         const elArticles = document.getElementById("statsArticles");
         const elTimeSaved = document.getElementById("kpiTimeSaved");
 
-        if (elArticles) elArticles.textContent = filtered.length;
+        // Use dailyStats for accurate count (not capped by history limit)
+        const periodCount = countDailyStatsByPeriod(dailyStats, currentPeriod);
+        if (elArticles) elArticles.textContent = periodCount > 0 ? periodCount : filtered.length;
 
-        // Temps estalviat: calculat de les entrades del període
+        // Temps estalviat: calculat de les entrades del període (usageHistory)
         let timeSavedSeconds = 0;
         if (filtered.length > 0) {
             timeSavedSeconds = filtered.reduce((acc, curr) => {
@@ -56,16 +59,16 @@ async function loadStatistics() {
         const GLASS_ML = 300;
         const todayStr = new Date().toISOString().slice(0, 10);
 
-        // kpiWaterToday: sempre avui (historial sencer, independent del període)
-        const todayCount = history.filter(e => {
+        // kpiWaterToday: from dailyStats if available, else count from history
+        const todayCount = dailyStats[todayStr] ?? history.filter(e => {
             const ts = e.date || e.timestamp;
             return ts && new Date(ts).toISOString().slice(0, 10) === todayStr;
         }).length;
-        // kpiWaterTotal: del període filtrat
-        const periodCount = filtered.length;
+        // kpiWaterTotal: from dailyStats if available, else filtered history
+        const waterPeriodCount = periodCount > 0 ? periodCount : filtered.length;
 
-        const todayMl  = todayCount  * WATER_ML;
-        const periodMl = periodCount * WATER_ML;
+        const todayMl  = todayCount       * WATER_ML;
+        const periodMl = waterPeriodCount * WATER_ML;
 
         function fmtWater(ml) {
             if (ml < 1)        return ml.toFixed(2) + " ml";
@@ -78,8 +81,8 @@ async function loadStatistics() {
         if (elWaterToday) elWaterToday.textContent = fmtWater(todayMl);
         if (elWaterTotal) elWaterTotal.textContent = `Consum del període: ${fmtWater(periodMl)}`;
 
-        // Render Bar Chart (amb període)
-        renderDailyChart(filtered, currentPeriod);
+        // Render Bar Chart — use dailyStats for accurate counts, fall back to history
+        renderDailyChart(filtered, currentPeriod, dailyStats);
 
         // Grouped History Table (amb període) — reinicia paginació quan canvia el període
         groupedCurrentPage = 1;
@@ -128,6 +131,27 @@ function getMondayOfWeek(date) {
 }
 
 /**
+ * Suma els comptadors de dailyStats per al període indicat.
+ * @param {{ [date: string]: number }} dailyStats
+ * @param {"7d"|"30d"|"6m"|"1a"} period
+ * @returns {number}
+ */
+function countDailyStatsByPeriod(dailyStats, period) {
+    const cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
+    switch (period) {
+        case "30d": cutoff.setDate(cutoff.getDate() - 29);        break;
+        case "6m":  cutoff.setMonth(cutoff.getMonth() - 6);       break;
+        case "1a":  cutoff.setFullYear(cutoff.getFullYear() - 1); break;
+        default:    cutoff.setDate(cutoff.getDate() - 6);         break;
+    }
+    return Object.entries(dailyStats).reduce((sum, [key, count]) => {
+        const d = new Date(key);
+        return (!isNaN(d.getTime()) && d >= cutoff) ? sum + count : sum;
+    }, 0);
+}
+
+/**
  * Filtra l'historial d'ús per retornar només les entrades dins el període indicat.
  * Les entrades amb data invàlida es descarten.
  * @param {Array} history
@@ -173,7 +197,7 @@ function getRelativeTime(dateInput) {
     return `fa ${diffDays} dies`;
 }
 
-function renderDailyChart(history, period = "7d") {
+function renderDailyChart(history, period = "7d", dailyStats = {}) {
     const container = document.getElementById("dailyChartContainer");
     if (!container) return;
     container.replaceChildren();
@@ -244,23 +268,40 @@ function renderDailyChart(history, period = "7d") {
         }
     }
 
-    // Comptar entrades per bucket
-    history.forEach(entry => {
-        const d = new Date(entry.date);
-        if (isNaN(d.getTime())) return;
-        d.setHours(0, 0, 0, 0);
-
-        let key;
-        if (period === "6m") {
-            key = getMondayOfWeek(d).toISOString().slice(0, 10);
-        } else if (period === "1a") {
-            key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        } else {
-            key = d.toISOString().slice(0, 10);
-        }
-        const bucket = buckets.find(b => b.key === key);
-        if (bucket) bucket.count++;
-    });
+    // Comptar entrades per bucket — dailyStats és la font exacta, history com a fallback
+    const hasDailyStats = Object.keys(dailyStats).length > 0;
+    if (hasDailyStats) {
+        Object.entries(dailyStats).forEach(([dateKey, count]) => {
+            const d = new Date(dateKey);
+            if (isNaN(d.getTime())) return;
+            let key;
+            if (period === "6m") {
+                key = getMondayOfWeek(d).toISOString().slice(0, 10);
+            } else if (period === "1a") {
+                key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+            } else {
+                key = dateKey;
+            }
+            const bucket = buckets.find(b => b.key === key);
+            if (bucket) bucket.count += count;
+        });
+    } else {
+        history.forEach(entry => {
+            const d = new Date(entry.date);
+            if (isNaN(d.getTime())) return;
+            d.setHours(0, 0, 0, 0);
+            let key;
+            if (period === "6m") {
+                key = getMondayOfWeek(d).toISOString().slice(0, 10);
+            } else if (period === "1a") {
+                key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+            } else {
+                key = d.toISOString().slice(0, 10);
+            }
+            const bucket = buckets.find(b => b.key === key);
+            if (bucket) bucket.count++;
+        });
+    }
 
     const maxCount = Math.max(...buckets.map(b => b.count), 1);
     const gapMap = { "7d": "10px", "30d": "3px", "6m": "4px", "1a": "6px" };
@@ -533,5 +574,5 @@ function clearHistory() {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getMondayOfWeek, filterHistoryByPeriod };
+    module.exports = { getMondayOfWeek, filterHistoryByPeriod, countDailyStatsByPeriod };
 }

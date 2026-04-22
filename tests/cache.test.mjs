@@ -243,3 +243,37 @@ test("saveUsageStats - cacheTokens es guarda correctament", async () => {
     const data = await storageMock.get("usageHistory");
     assert.equal(data.usageHistory[0].cacheTokens, 25);
 });
+
+// ---------------------------------------------------------------------------
+// dailyStats
+// ---------------------------------------------------------------------------
+
+test("saveUsageStats - dailyStats incrementa el comptador del dia actual", async () => {
+    clearStorage();
+    const todayKey = new Date().toISOString().slice(0, 10);
+    await saveUsageStats(100, 50, false, "gemini-2.0-flash", 1000, "T", "https://t.com");
+    const data = await storageMock.get("dailyStats");
+    assert.equal(data.dailyStats[todayKey], 1, "Ha de comptar 1 per avui");
+});
+
+test("saveUsageStats - dailyStats acumula múltiples resums del mateix dia", async () => {
+    clearStorage();
+    const todayKey = new Date().toISOString().slice(0, 10);
+    await saveUsageStats(100, 50, false, "model-a", 1000, "A", "https://a.com");
+    await saveUsageStats(200, 80, false, "model-b", 1200, "B", "https://b.com");
+    await saveUsageStats(150, 60, false, "model-c", 900, "C", "https://c.com");
+    const data = await storageMock.get("dailyStats");
+    assert.equal(data.dailyStats[todayKey], 3, "Ha d'acumular 3 resums per avui");
+});
+
+test("saveUsageStats - dailyStats preserva comptadors d'altres dies", async () => {
+    clearStorage();
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const yesterdayKey = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+    // Injectar un comptador d'ahir
+    await storageMock.set({ dailyStats: { [yesterdayKey]: 5 } });
+    await saveUsageStats(100, 50, false, "model-a", 1000, "T", "https://t.com");
+    const data = await storageMock.get("dailyStats");
+    assert.equal(data.dailyStats[yesterdayKey], 5, "El comptador d'ahir s'ha de preservar");
+    assert.equal(data.dailyStats[todayKey], 1, "El comptador d'avui ha de ser 1");
+});

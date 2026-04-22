@@ -160,8 +160,8 @@ async function listCachedSummaries() {
  */
 async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, latency, title, url, cacheTokens = 0) {
     try {
-        // Read stats and history in a single call
-        const data = await ext.storage.local.get(["stats", "usageHistory"]);
+        // Read stats, history and daily counters in a single call
+        const data = await ext.storage.local.get(["stats", "usageHistory", "dailyStats"]);
         const currentStats = data.stats || { articles: 0, tokens: 0 };
 
         const newStats = {
@@ -187,7 +187,12 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
         // Keep last 1000 entries (~300 dies a 3 resums/dia, ~200KB storage)
         if (history.length > 1000) history.pop();
 
-        await ext.storage.local.set({ stats: newStats, usageHistory: history });
+        // Compact daily counter — not limited by history cap
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const dailyStats = data.dailyStats || {};
+        dailyStats[todayKey] = (dailyStats[todayKey] || 0) + 1;
+
+        await ext.storage.local.set({ stats: newStats, usageHistory: history, dailyStats });
         return newStats;
     } catch (e) {
         console.error("Error saving statistics:", e);
