@@ -14,36 +14,40 @@ ext.action.onClicked.addListener(async (tab) => {
 
 // --- Context Menus ---
 
-ext.runtime.onInstalled.addListener(async () => {
-  // Chromium: register side panel to open on action click
+ext.runtime.onInstalled.addListener(async (details) => {
+  // Chromium: register side panel to open on action click (needed on install AND update)
   ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
 
-  // Firefox: request all_urls permission for website access on install
-  if (ext.runtime.getBrowserInfo) {
-    try {
-      const browserInfo = await ext.runtime.getBrowserInfo();
-      if (browserInfo.name === "Firefox") {
-        ext.permissions.request({
-          permissions: [],
-          origins: ["<all_urls>"]
-        }).catch(() => {});
+  if (details.reason === "install") {
+    // Firefox: request all_urls permission on first install only
+    if (ext.runtime.getBrowserInfo) {
+      try {
+        const browserInfo = await ext.runtime.getBrowserInfo();
+        if (browserInfo.name === "Firefox") {
+          ext.permissions.request({
+            permissions: [],
+            origins: ["<all_urls>"]
+          }).catch(() => {});
+        }
+      } catch (_e) {
+        // getBrowserInfo not available (Chromium), skip silently
       }
-    } catch (_e) {
-      // getBrowserInfo not available (Chromium), skip silently
     }
   }
 
-  // Create context menu items
-  ext.menus.create({
-    id: "summarize-selection",
-    title: "Resumir text seleccionat",
-    contexts: ["selection"]
-  });
+  // Recreate context menus on install and update (browser clears them on update)
+  ext.menus.removeAll(() => {
+    ext.menus.create({
+      id: "summarize-selection",
+      title: "Resumir text seleccionat",
+      contexts: ["selection"]
+    });
 
-  ext.menus.create({
-    id: "summarize-page",
-    title: "Resumir contingut",
-    contexts: ["page", "all"]
+    ext.menus.create({
+      id: "summarize-page",
+      title: "Resumir contingut",
+      contexts: ["page", "all"]
+    });
   });
 });
 
