@@ -151,14 +151,14 @@ test("saveUsageStats - l'entrada és 'lite' per a models no-pro sense isDeepDive
     assert.equal(data.usageHistory[0].type, "lite");
 });
 
-test("saveUsageStats - l'historial es limita a 100 entrades (no creix indefinidament)", async () => {
+test("saveUsageStats - l'historial es limita a 1000 entrades (no creix indefinidament)", async () => {
     clearStorage();
-    // Omplim 101 entrades
-    for (let i = 0; i < 101; i++) {
+    // Omplim 1001 entrades
+    for (let i = 0; i < 1001; i++) {
         await saveUsageStats(10, 5, false, "model-x", 100, `Article ${i}`, `https://test.com/${i}`);
     }
     const data = await storageMock.get("usageHistory");
-    assert.equal(data.usageHistory.length, 100);
+    assert.equal(data.usageHistory.length, 1000);
 });
 
 test("saveUsageStats - l'entrada més recent va primer (unshift)", async () => {

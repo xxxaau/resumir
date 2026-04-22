@@ -184,8 +184,8 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
         const history = data.usageHistory || [];
         history.unshift(historyEntry);
 
-        // Keep last 100 entries
-        if (history.length > 100) history.pop();
+        // Keep last 1000 entries (~300 dies a 3 resums/dia, ~200KB storage)
+        if (history.length > 1000) history.pop();
 
         await ext.storage.local.set({ stats: newStats, usageHistory: history });
         return newStats;
