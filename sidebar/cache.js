@@ -29,11 +29,13 @@ async function getSummaryCacheIndex() {
  * Checks local storage for a cached summary of the given URL.
  */
 async function getSummaryCache(url) {
+    if (!url || typeof url !== 'string') return null;
     try {
         const cacheKey = `summary_cache:${url}`;
         const cachedData = await ext.storage.local.get(cacheKey);
         const entry = cachedData[cacheKey];
         if (!entry) return null;
+        if (!entry.summary || typeof entry.summary !== 'string') return null;
         // Verificar TTL — entrades sense timestamp es consideren expirades (igual que purgeStaleCacheEntries)
         if (!entry.timestamp) return null;
         const ageMs = Date.now() - new Date(entry.timestamp).getTime();
@@ -64,6 +66,13 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
         const cacheIndex = await getSummaryCacheIndex();
         if (!cacheIndex.includes(cacheKey)) {
             cacheIndex.push(cacheKey);
+        }
+
+        // Cap index to 500 entries — remove oldest entries if over limit
+        const MAX_CACHE_ENTRIES = 500;
+        if (cacheIndex.length > MAX_CACHE_ENTRIES) {
+            const toRemove = cacheIndex.splice(0, cacheIndex.length - MAX_CACHE_ENTRIES);
+            await ext.storage.local.remove(toRemove);
         }
 
         await ext.storage.local.set({

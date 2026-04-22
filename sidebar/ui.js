@@ -142,7 +142,11 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
     } else {
         const activeBtn = document.getElementById(currentActiveBtnId);
         if (activeBtn && originalBtnContent[currentActiveBtnId]) {
-            activeBtn.replaceChildren(...originalBtnContent[currentActiveBtnId].map(n => n.cloneNode(true)));
+            const stored = originalBtnContent[currentActiveBtnId];
+            if (Array.isArray(stored) && stored.length > 0) {
+                activeBtn.replaceChildren(...stored.map(n => n.cloneNode(true)));
+            }
+            delete originalBtnContent[currentActiveBtnId];
             activeBtn.classList.remove("stop-btn");
             if (currentActiveBtnId === "summarizeBtn") {
                 activeBtn.classList.add("primary");
@@ -383,11 +387,16 @@ function startGenerationTimer() {
 function stopGenerationTimer() {
     if (generationInterval) clearInterval(generationInterval);
     generationInterval = null;
-    
+
     const timerEl = document.getElementById("generation-timer");
     if (timerEl) {
-        timerEl.style.color = "#28a745"; 
+        timerEl.style.color = "#28a745";
     }
+}
+
+function stopCountdownTimer() {
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = null;
 }
 
 /**
@@ -484,7 +493,8 @@ function runCountdownTimer(unblockTime) {
 
         if (remainingSec <= 0) {
             clearInterval(countdownInterval);
-            ext.storage.local.remove("blockedUntil");
+            countdownInterval = null;
+            ext.storage.local.remove("blockedUntil").catch(() => {});
         }
     };
     

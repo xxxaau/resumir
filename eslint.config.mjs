@@ -42,6 +42,7 @@ const extensionGlobals = {
     runCountdownTimer: "readonly",
     startGenerationTimer: "readonly",
     stopGenerationTimer: "readonly",
+    stopCountdownTimer: "readonly",
     startCountdown: "readonly",
     getIcon: "readonly",
     CHECK_ICON_STR: "readonly",
