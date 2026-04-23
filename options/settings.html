@@ -1024,18 +1024,48 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.3
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Extracció de transcripcions YouTube més robusta</strong>: Simplificat a un flux de 2 passos (llegir pistes + clicar "Mostra la transcripció" i llegir DOM). Ara suporta tant el panell clàssic (<code>ytd-transcript-segment-renderer</code>) com el nou (<code>transcript-segment-view-model</code>), i funciona tant per captions manuals com auto-generats (ASR).</li>
+                <li><strong>Detecció correcta de pista activa</strong>: La capçalera <code>[TRANSCRIPT: <lang>]</code> o <code>[TRANSCRIPT: <lang> (Auto)]</code> ara reflecteix la pista que YouTube mostra al panell (no la primera de la llista). Resolució en 3 nivells: selector visible del panell → heurística (prefereix manual sobre ASR) → fallback. Així, en vídeos amb ASR i manuals disponibles, el resum no es marca incorrectament com "(Auto)".</li>
+                <li><strong>Neteja de logs de LinkedIn</strong>: Eliminats els <code>console.log</code> diagnòstics que embrutaven la consola de l'usuari a producció.</li>
+                <li><strong>Match de pistes amb nom buit</strong>: Les pistes ASR de YouTube de vegades tenen el camp <code>name</code> buit; el matching anterior les triava erròniament sempre com a primera pista perquè <code>''.includes('')</code> retorna <code>true</code>. Ara s'ignoren al match de selector i cau a l'heurística manual-sobre-ASR.</li>
+                <li><strong>Match de pistes ambigu per substring</strong>: Evita que <code>"English"</code> encaixi dins de <code>"English (auto-generated)"</code> ordenant les pistes candidates per longitud descendent abans del match.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.2
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Timeout API</strong>: Timeout de 60 s a totes les crides Gemini; timeout de 8 s als fetchs d'articles HN i transcripcions YouTube. Evita la sidebar penjada si el servidor no respon.</li>
-                <li><strong>Fallback de models ampliat</strong>: Retry per errors 404, 500, 502, 503 i timeout (no només 429). Log d'intent amb índex <code>[n/total]</code>.</li>
-                <li><strong>Arrencada més ràpida</strong>: Lectures de storage en paral·lel a l'inici (<code>Promise.all</code>); preload de contingut amb timeout de 2 s.</li>
-                <li><strong>Badge de caché optimitzat</strong>: Debounce de 150 ms en canvis de pestanya; s'amaga correctament per seleccions de text.</li>
-                <li><strong>Fuites de memòria corregides</strong>: Nodes DOM de botons alliberats després de cada generació; intervals netejats al tancar la sidebar.</li>
-                <li><strong>Caché més robusta</strong>: Límit de 500 entrades a l'índex; entrades sense <code>summary</code> vàlid descartades automàticament.</li>
-                <li><strong>Missatges d'error específics</strong>: Distinció entre timeout, connexió interrompuda, quota esgotada i model no disponible.</li>
-                <li><strong>Usabilitat taules d'estadístiques</strong>: Historial sense scroll intern; paginació a la taula de resums per model.</li>
+                <li><strong>Fiabilitat API</strong>: Timeout de 60 segons a totes les crides Gemini per evitar la sidebar penjada si el servidor no respon. Si expira, es mostra un missatge clar a l'usuari.</li>
+                <li><strong>Timeout en extracció de contingut</strong>: Timeout de 8 segons als fetchs d'articles de Hacker News i transcripcions de YouTube per no bloquejar la generació.</li>
+                <li><strong>Fallback de models ampliat</strong>: El sistema de fallback ara activa el canvi de model per errors 404, 500, 502, 503 i timeouts, no només errors de quota (429). El log mostra l'índex d'intent <code>[n/total]</code> per facilitar el debug.</li>
+                <li><strong>Arrencada de la sidebar més ràpida</strong>: Les lectures de storage a l'inici s'executen en paral·lel amb <code>Promise.all</code>, reduint la latència d'arrencada ~100ms. El preload de contingut té un timeout de 2 s per no bloquejar la UI.</li>
+                <li><strong>Debounce del badge de caché</strong>: Lectures de storage optimitzades en canvis ràpids de pestanya (150 ms de debounce). El badge s'amaga correctament quan el contingut actiu és una selecció de text.</li>
+                <li><strong>Usabilitat taules d'estadístiques</strong>: L'historial de peticions ara mostra els 20 registres sense scroll intern. La taula "Resums per model i dia" té paginació de 20 registres per pàgina amb botons Anterior/Següent. La paginació es reinicia automàticament en canviar el període.</li>
+                <li><strong>Missatges d'error millorats</strong>: <code>classifyError</code> distingeix entre model no trobat, servei no disponible, quota esgotada i timeout/connexió interrompuda, cadascun amb missatge específic.</li>
+                <li><strong>Fuites de memòria de botons</strong>: Els nodes DOM clonats dels botons s'alliberen correctament després de cada generació; l'interval del comptador de quota es neteja quan expira o en tancar la sidebar.</li>
+                <li><strong>Caché més robusta</strong>: L'índex de caché es limita a 500 entrades (elimina les més antigues). Les entrades sense camp <code>summary</code> vàlid es descarten.</li>
+                <li><strong>Cleanup en tancar</strong>: Abort del generador, timers i intervals es netegen al tancar la sidebar (<code>beforeunload</code>).</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.2
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Automatització de la versió</strong>: <code>postversion</code> ara sincronitza <code>CHANGELOG.md</code> juntament amb els manifests i <code>settings.html</code> després de <code>npm version</code>.</li>
+                <li><strong>Comprovació global</strong>: afegit <code>npm run check</code> per executar lint + tests en un sol pas.</li>
+                <li><strong>Scripts de build més robustos</strong>: <code>scripts/pwsh-runner.mjs</code> comprova l'existència del script PowerShell i mostra ajuda quan no se li passa cap argument.</li>
+                <li><strong>Compatibilitat PowerShell</strong>: <code>set_dev_mode.ps1</code> escriu JSON compatible amb versions antigues de PowerShell sense l'opció <code>utf8NoBOM</code>.</li>
+                <li><strong>Refactorització d'opcions</strong>: <code>options/settings.js</code> s'ha netejat amb helpers de binding d'esdeveniments i validació més robusta del <code>pageSize</code>.</li>
+                <li><strong>Millora de la sidebar</strong>: <code>sidebar/summary.js</code> ara usa una funció comuna per aplicar estil biònic i evita errors quan falta l'element de càrrega.</li>
+                <li><strong>Documentació actualitzada</strong>: <code>README.md</code> ara descriu les ordres de build/release i l'ús de <code>npm run check</code>.</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">

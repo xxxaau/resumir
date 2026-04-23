@@ -4,6 +4,19 @@ Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
 ## [Unreleased]
 
+## [2.2.3] - 2026-04-23
+
+### Millorat
+
+- **Extracció de transcripcions YouTube més robusta**: Simplificat a un flux de 2 passos (llegir pistes + clicar "Mostra la transcripció" i llegir DOM). Ara suporta tant el panell clàssic (`ytd-transcript-segment-renderer`) com el nou (`transcript-segment-view-model`), i funciona tant per captions manuals com auto-generats (ASR).
+- **Detecció correcta de pista activa**: La capçalera `[TRANSCRIPT: <lang>]` o `[TRANSCRIPT: <lang> (Auto)]` ara reflecteix la pista que YouTube mostra al panell (no la primera de la llista). Resolució en 3 nivells: selector visible del panell → heurística (prefereix manual sobre ASR) → fallback. Així, en vídeos amb ASR i manuals disponibles, el resum no es marca incorrectament com "(Auto)".
+- **Neteja de logs de LinkedIn**: Eliminats els `console.log` diagnòstics que embrutaven la consola de l'usuari a producció.
+
+### Corregit
+
+- **Match de pistes amb nom buit**: Les pistes ASR de YouTube de vegades tenen el camp `name` buit; el matching anterior les triava erròniament sempre com a primera pista perquè `''.includes('')` retorna `true`. Ara s'ignoren al match de selector i cau a l'heurística manual-sobre-ASR.
+- **Match de pistes ambigu per substring**: Evita que `"English"` encaixi dins de `"English (auto-generated)"` ordenant les pistes candidates per longitud descendent abans del match.
+
 ## [2.2.2] - 2026-04-22
 
 ### Millorat
