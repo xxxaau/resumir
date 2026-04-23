@@ -97,71 +97,123 @@ async function getPageContent() {
         try {
             let transcriptText = "";
 
-            // 1. Llegir transcripció des de ytInitialData (ja incrustada a la pàgina, cap fetch)
-            const transcriptResult = await executeScriptSafe({
+            // Step 1 — MAIN world: llegir la llista de pistes de ytInitialPlayerResponse
+            // per poder després casar-la amb la pista activa al panell (resolta al Step 2).
+            const metaResult = await executeScriptSafe({
                 target: { tabId: tabId },
                 world: "MAIN",
                 func: () => {
                     try {
-                        const data = window.ytInitialData;
-                        if (!data) return null;
-
-                        const panels = data.engagementPanels || [];
-                        const transcriptPanel = panels.find(p =>
-                            p?.engagementPanelSectionListRenderer?.targetId === 'engagement-panel-searchable-transcript'
-                        );
-                        if (!transcriptPanel) return null;
-
-                        const segments = transcriptPanel
-                            ?.engagementPanelSectionListRenderer
-                            ?.content?.transcriptRenderer
-                            ?.content?.transcriptSearchPanelRenderer
-                            ?.body?.transcriptSegmentListRenderer
-                            ?.initialSegments || [];
-
-                        const lines = segments
-                            .map(s => s?.transcriptSegmentRenderer?.snippet?.runs?.map(r => r.text)?.join('') || '')
-                            .filter(Boolean);
-
-                        if (lines.length === 0) return null;
-
-                        // Detectar idioma del primer track ASR per etiquetar
                         const tracks = window.ytInitialPlayerResponse?.captions
                             ?.playerCaptionsTracklistRenderer?.captionTracks || [];
-                        const track = tracks[0];
-                        const lang = track?.name?.simpleText || track?.languageCode || '';
-                        const isAsr = track?.kind === 'asr' || (track?.vssId || '').startsWith('a.');
-
-                        return { text: lines.join(' '), lang, isAsr };
-                    } catch (e) {
-                        return null;
-                    }
+                        return {
+                            hasTracks: tracks.length > 0,
+                            tracks: tracks.map(t => ({
+                                lang: t.languageCode || '',
+                                name: t.name?.simpleText || '',
+                                isAsr: t.kind === 'asr' || (t.vssId || '').startsWith('a.')
+                            }))
+                        };
+                    } catch (e) { return { error: String(e) }; }
                 }
             });
+            const meta = metaResult?.[0]?.result || {};
 
-            const ytData = transcriptResult?.[0]?.result;
-            if (ytData?.text && ytData.text.length > 50) {
-                transcriptText = `[TRANSCRIPT: ${ytData.lang}${ytData.isAsr ? ' (Auto)' : ''}]\n\n${ytData.text}`;
-            }
-
-            // 2. UI Fallback: llegir del DOM si el panell ja està obert
-            if (!transcriptText) {
-                const domResult = await executeScriptSafe({
+            // Step 2 — ISOLATED world: clicar "Mostra la transcripció" i llegir segments del DOM.
+            // YouTube actualment serveix dos formats de panell:
+            //   - Format clàssic: ytd-transcript-segment-renderer .segment-text
+            //   - Format modern: transcript-segment-view-model span.ytAttributedStringHost
+            // Aquesta via funciona tant per captions manuals com ASR.
+            if (meta.hasTracks) {
+                const extractResult = await executeScriptSafe({
                     target: { tabId: tabId },
-                    func: () => {
-                        const segments = document.querySelectorAll('ytd-transcript-segment-renderer .segment-text');
-                        if (segments && segments.length > 0) {
-                            return Array.from(segments).map(s => s.innerText).join(" ");
+                    func: async () => {
+                        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+                        function readSegments() {
+                            const modernSegs = document.querySelectorAll(
+                                'transcript-segment-view-model span.ytAttributedStringHost'
+                            );
+                            if (modernSegs.length > 0) {
+                                return Array.from(modernSegs)
+                                    .map(s => s.textContent.trim())
+                                    .filter(Boolean);
+                            }
+                            const classicSegs = document.querySelectorAll(
+                                'ytd-transcript-segment-renderer .segment-text'
+                            );
+                            if (classicSegs.length > 0) {
+                                return Array.from(classicSegs)
+                                    .map(s => s.textContent.trim())
+                                    .filter(Boolean);
+                            }
+                            return [];
                         }
-                        return null;
+
+                        // Nom de la pista activa al selector del panell (footer del panell clàssic
+                        // o toolbar del panell modern). Permet al caller decidir isAsr correctament.
+                        function activeTrackName() {
+                            const classicPanel = document.querySelector(
+                                'ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-searchable-transcript"] ytd-transcript-footer-renderer tp-yt-paper-button'
+                            );
+                            if (classicPanel) return classicPanel.textContent.trim();
+                            const modernPanel = document.querySelector(
+                                'ytd-engagement-panel-section-list-renderer[target-id="PAmodern_transcript_view"] yt-dropdown-menu'
+                            );
+                            if (modernPanel) return modernPanel.textContent.trim();
+                            return '';
+                        }
+
+                        async function extract() {
+                            // Si el panell ja és obert
+                            let lines = readSegments();
+                            if (lines.length > 0) return { text: lines.join(' '), activeName: activeTrackName() };
+
+                            // Expandir descripció per exposar el botó
+                            document.querySelector('#expand')?.click();
+                            await sleep(600);
+
+                            const section = document.querySelector('ytd-video-description-transcript-section-renderer');
+                            const btn = section?.querySelector('button') ||
+                                Array.from(document.querySelectorAll('button'))
+                                    .find(b => /transcri/i.test((b.getAttribute('aria-label') || '') + ' ' + b.textContent));
+                            if (!btn) return null;
+                            btn.click();
+
+                            for (let i = 0; i < 40; i++) {
+                                await sleep(250);
+                                lines = readSegments();
+                                if (lines.length > 0) return { text: lines.join(' '), activeName: activeTrackName() };
+                            }
+                            return null;
+                        }
+                        return await extract();
                     }
                 });
-                if (domResult?.[0]?.result) {
-                    transcriptText = "[TRANSCRIPT (FROM PANEL)]\n\n" + domResult[0].result;
+
+                const extracted = extractResult?.[0]?.result;
+                if (extracted?.text && extracted.text.length > 50) {
+                    // Resolució de la pista activa:
+                    //   1. Selector visible (panell clàssic) — match estricte (nom no buit i,
+                    //      si dos noms podrien matchejar, el més llarg guanya per evitar que
+                    //      "English" encaixi dins de "English (auto-generated)").
+                    //   2. Heurística: YouTube prefereix sempre manual sobre ASR, així que si
+                    //      hi ha qualsevol pista no-ASR, marquem com a manual. Només etiquetem
+                    //      com "(Auto)" quan totes les pistes disponibles són ASR.
+                    const activeName = (extracted.activeName || '').replace(/\s+/g, ' ').trim();
+                    const matched = (activeName && [...meta.tracks]
+                        .filter(t => t.name)
+                        .sort((a, b) => b.name.length - a.name.length)
+                        .find(t => activeName.includes(t.name))) ||
+                        meta.tracks.find(t => !t.isAsr) ||
+                        meta.tracks[0];
+                    const isAsr = !!matched?.isAsr;
+                    const lang = matched?.lang || '';
+                    transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${extracted.text}`;
                 }
             }
 
-            // 3. Description Fallback (last resort)
+            // Fallback: descripció
             if (!transcriptText) {
                 noTranscript = true;
                 const descResult = await executeScriptSafe({
@@ -248,7 +300,6 @@ async function getPageContent() {
                     const allCommentItems = Array.from(
                         document.querySelectorAll(".comments-comment-item")
                     );
-                    console.log("[LinkedIn] comments-comment-item found:", allCommentItems.length);
 
                     if (allCommentItems.length > 0) {
                         const comments = [];
@@ -258,20 +309,9 @@ async function getPageContent() {
                             const c = extractComment(item, indent);
                             if (c) comments.push(c);
                         });
-                        console.log("[LinkedIn] comments extracted:", comments.length);
                         if (comments.length > 0) {
                             parts.push(`\nComentaris:\n${comments.join("\n\n")}`);
                         }
-                    } else {
-                        // DOM diagnostic: log what comment-related classes are present
-                        const allClasses = Array.from(document.querySelectorAll("[class]"))
-                            .map(el => el.className)
-                            .join(" ")
-                            .split(/\s+/)
-                            .filter(c => c.includes("comment"))
-                            .filter((c, i, a) => a.indexOf(c) === i)
-                            .slice(0, 20);
-                        console.warn("[LinkedIn] No comments-comment-item found. Comment-related classes:", allClasses);
                     }
 
                     return parts.length > 0 ? parts.join("\n") : null;

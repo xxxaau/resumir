@@ -188,20 +188,17 @@ test("getPageContent - HN degrada gracefully quan l'article retorna error HTTP",
 // getPageContent — YouTube (fallback descripció)
 // ---------------------------------------------------------------------------
 
-test("getPageContent - detecta URL de YouTube i intenta extreure transcripció", async () => {
+test("getPageContent - YouTube sense transcripció retorna descripció com a fallback", async () => {
     const ytTab = { id: 3, url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", title: "Video Title" };
-    // Simula que cap mètode de transcripció funciona però la descripció sí
     let calls = 0;
     global.ext = {
         tabs: { query: async () => [ytTab], get: async () => ytTab },
         scripting: {
             executeScript: async () => {
                 calls++;
-                // API MAIN world: no captions
-                if (calls === 1) return [{ result: null }];
-                // UI transcript panel: empty
-                if (calls === 2) return [{ result: null }];
-                // Description fallback
+                // Step 1: sense pistes
+                if (calls === 1) return [{ result: { hasTracks: false, tracks: [] } }];
+                // Fallback descripció
                 return [{ result: "Title: Video Title\n\nDescription:\nDescripció del vídeo molt interessant amb molt de contingut útil." }];
             },
         },
@@ -209,4 +206,131 @@ test("getPageContent - detecta URL de YouTube i intenta extreure transcripció",
     };
     const result = await getPageContent();
     assert.ok(result.text.includes("Descripció"), "Ha de retornar la descripció com a fallback de YouTube");
+    assert.strictEqual(result.noTranscript, true, "noTranscript ha de ser true quan s'utilitza el fallback");
+});
+
+test("getPageContent - YouTube pista ASR única es marca com '(Auto)'", async () => {
+    const ytTab = { id: 4, url: "https://www.youtube.com/watch?v=abc12345678", title: "ASR Video" };
+    let calls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async () => {
+                calls++;
+                // Step 1: pista única ASR
+                if (calls === 1) return [{ result: { hasTracks: true, tracks: [{ lang: 'en', name: 'English (auto-generated)', isAsr: true }] } }];
+                // Step 2: text + nom del selector
+                return [{ result: { text: 'hello world ' + 'lorem ipsum '.repeat(20), activeName: 'English (auto-generated)' } }];
+            },
+        },
+        permissions: { request: async () => false },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: en (Auto)]'), "Ha d'incloure '(Auto)' per a pista ASR única");
+    assert.ok(result.text.includes('hello world'), "Ha de contenir el text de la transcripció");
+});
+
+test("getPageContent - YouTube prefereix pista manual quan hi ha ASR i manual", async () => {
+    const ytTab = { id: 5, url: "https://www.youtube.com/watch?v=xyz12345678", title: "Mixed Video" };
+    let calls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async () => {
+                calls++;
+                // Step 1: ASR al [0] i manual al [1]
+                if (calls === 1) return [{
+                    result: { hasTracks: true, tracks: [
+                        { lang: 'en', name: 'English (auto-generated)', isAsr: true },
+                        { lang: 'en', name: 'English', isAsr: false },
+                    ] }
+                }];
+                // Step 2: sense nom actiu (panell modern) — heurística hauria de triar la manual
+                return [{ result: { text: 'content from manual captions '.repeat(5), activeName: '' } }];
+            },
+        },
+        permissions: { request: async () => false },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: en]'), "No ha d'incloure '(Auto)' si existeix pista manual");
+    assert.ok(!result.text.includes('(Auto)'), "Capçalera no ha d'incloure '(Auto)'");
+});
+
+test("getPageContent - YouTube casa el selector actiu amb la pista corresponent (panell clàssic)", async () => {
+    const ytTab = { id: 6, url: "https://www.youtube.com/watch?v=abcDEF12345", title: "Classic Panel Video" };
+    let calls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async () => {
+                calls++;
+                // Step 1: ASR al [0], manual al [1] — si el selector indica ASR, ha d'anar a ASR
+                if (calls === 1) return [{
+                    result: { hasTracks: true, tracks: [
+                        { lang: 'en', name: 'English (auto-generated)', isAsr: true },
+                        { lang: 'en', name: 'English', isAsr: false },
+                    ] }
+                }];
+                // Selector indica la pista ASR com a activa
+                return [{ result: { text: 'asr content '.repeat(10), activeName: 'English (auto-generated)' } }];
+            },
+        },
+        permissions: { request: async () => false },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: en (Auto)]'), "Selector explícit d'ASR ha de marcar '(Auto)'");
+});
+
+test("getPageContent - YouTube ignora pistes amb nom buit al match de selector", async () => {
+    // Regressió: ''.includes('') és true, i activeName.includes('') també, cosa que feia
+    // que la primera pista sempre guanyés si tenia name buit. Ha de saltar a l'heurística
+    // de preferir no-ASR.
+    const ytTab = { id: 7, url: "https://www.youtube.com/watch?v=emptyName12", title: "Empty Name Video" };
+    let calls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async () => {
+                calls++;
+                if (calls === 1) return [{
+                    result: { hasTracks: true, tracks: [
+                        { lang: 'en', name: '', isAsr: true },
+                        { lang: 'ca', name: 'català', isAsr: false },
+                    ] }
+                }];
+                // Selector buit (panell modern): cau a l'heurística no-ASR, NO a tracks[0].
+                return [{ result: { text: 'text de prova '.repeat(10), activeName: '' } }];
+            },
+        },
+        permissions: { request: async () => false },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: ca]'), "Ha de triar la pista catalana manual, no l'ASR anglesa amb nom buit");
+    assert.ok(!result.text.includes('(Auto)'), "No s'ha de marcar com a '(Auto)'");
+});
+
+test("getPageContent - YouTube evita que 'English' matchi 'English (auto-generated)' per substring", async () => {
+    // Regressió: l'ordre d'insercio pot fer que el nom curt es comprovi primer.
+    // Si ordenem per longitud desc, el nom més llarg guanya.
+    const ytTab = { id: 8, url: "https://www.youtube.com/watch?v=substrCheck", title: "Substring Check" };
+    let calls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async () => {
+                calls++;
+                if (calls === 1) return [{
+                    result: { hasTracks: true, tracks: [
+                        { lang: 'en', name: 'English', isAsr: false },           // Manual primer
+                        { lang: 'en', name: 'English (auto-generated)', isAsr: true },
+                    ] }
+                }];
+                // Selector explícit: track ASR llarg és l'actiu
+                return [{ result: { text: 'contingut asr '.repeat(10), activeName: 'English (auto-generated)' } }];
+            },
+        },
+        permissions: { request: async () => false },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: en (Auto)]'), "Ha de triar el match més llarg (ASR), no el curt (English)");
 });
