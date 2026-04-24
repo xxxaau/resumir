@@ -102,12 +102,11 @@ async function getPageContent() {
         try {
             let transcriptText = "";
 
-            // Step 1 — MAIN world: llistar pistes (ytInitialPlayerResponse) i llegir la pista
-            // ACTIVA al player via #movie_player.getOption('captions','track'). Aquesta última
-            // és l'única manera fiable de saber quina pista mostrarà el panell modern
-            // (PAmodern_transcript_view), ja que aquest panell NO exposa cap selector al DOM.
-            // Si falla (p.ex. world:"MAIN" no suportat en certes versions de Firefox), saltem
-            // directament al Step 2 — la lectura de segments del DOM funciona independentment.
+            // Step 1 — MAIN world: llegir la transcripció PRE-RENDERITZADA dins de
+            // ytInitialData.engagementPanels[engagement-panel-searchable-transcript].
+            // YouTube incrusta els segments a la pàgina sense necessitat d'obrir cap panell.
+            // També llegim les pistes (per a etiquetatge idioma/ASR) i la pista activa al player.
+            // Si MAIN world falla (p.ex. Firefox antic), Step 2 intenta obrir el panell.
             let meta = {};
             try {
                 const metaResult = await executeScriptSafe({
@@ -124,6 +123,27 @@ async function getPageContent() {
                                 const active = player?.getOption?.('captions', 'track');
                                 activeVssId = active?.vss_id || active?.vssId || null;
                             } catch { /* API privada — ignorem */ }
+
+                            // Llegir segments de transcripció incrustats a ytInitialData.
+                            // Aquesta és la via més robusta: no requereix obrir cap panell.
+                            let prerenderedText = '';
+                            try {
+                                const panels = window.ytInitialData?.engagementPanels || [];
+                                const transcriptPanel = panels.find(p =>
+                                    p?.engagementPanelSectionListRenderer?.targetId === 'engagement-panel-searchable-transcript'
+                                );
+                                const segments = transcriptPanel
+                                    ?.engagementPanelSectionListRenderer
+                                    ?.content?.transcriptRenderer
+                                    ?.content?.transcriptSearchPanelRenderer
+                                    ?.body?.transcriptSegmentListRenderer
+                                    ?.initialSegments || [];
+                                const lines = segments
+                                    .map(s => s?.transcriptSegmentRenderer?.snippet?.runs?.map(r => r.text)?.join('') || '')
+                                    .filter(Boolean);
+                                if (lines.length > 0) prerenderedText = lines.join(' ');
+                            } catch { /* ytInitialData absent o estructura canviada */ }
+
                             return {
                                 hasTracks: tracks.length > 0,
                                 tracks: tracks.map(t => ({
@@ -133,6 +153,7 @@ async function getPageContent() {
                                     isAsr: t.kind === 'asr' || (t.vssId || '').startsWith('a.'),
                                 })),
                                 activeVssId,
+                                prerenderedText,
                             };
                         } catch (e) { return { error: String(e) }; }
                     }
@@ -179,9 +200,23 @@ async function getPageContent() {
                     }
                 }
 
+                // Shortcut: si Step 1 ha aconseguit llegir la transcripció pre-renderitzada
+                // des de ytInitialData, la fem servir directament i saltem tot el Step 2
+                // (obrir panell + polling del DOM). Aquesta és la via més robusta.
+                if (meta.prerenderedText && meta.prerenderedText.length > 50) {
+                    if (resolvedTrack) {
+                        const lang = resolvedTrack.lang || '';
+                        const isAsr = !!resolvedTrack.isAsr;
+                        transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${meta.prerenderedText}`;
+                    } else {
+                        transcriptText = `[TRANSCRIPT]\n\n${meta.prerenderedText}`;
+                    }
+                }
+
                 // Step 2 — ISOLATED world: obrir descripció, clicar "Mostra la transcripció"
                 // (detecció multi-idioma) i llegir segments del DOM.
-                const extractResult = await executeScriptSafe({
+                // Només s'executa si Step 1 no ha aconseguit la transcripció pre-renderitzada.
+                const extractResult = transcriptText ? null : await executeScriptSafe({
                     target: { tabId: tabId },
                     func: async () => {
                         const sleep = ms => new Promise(r => setTimeout(r, ms));

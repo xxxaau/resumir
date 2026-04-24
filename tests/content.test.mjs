@@ -14,6 +14,14 @@ const dom = new JSDOM("<!DOCTYPE html><body></body>");
 global.document = dom.window.document;
 global.DOMParser = dom.window.DOMParser;
 
+// navigator és getter-only a Node 22+: cal defineProperty. Wrapper mutable per poder
+// canviar language dins d'un test i restaurar-lo.
+const _navState = { language: "en-US" };
+Object.defineProperty(global, "navigator", {
+    configurable: true,
+    get() { return _navState; },
+});
+
 const require = createRequire(import.meta.url);
 
 // ---------------------------------------------------------------------------
@@ -38,13 +46,25 @@ function makeExt({ tabs = [], scriptResult = null, scriptError = null, permissio
         },
         permissions: {
             request: async () => permissionGranted,
+            contains: async () => true,
+        },
+        storage: {
+            sync: { get: async () => ({}) },
+            local: { get: async () => ({}) },
         },
     };
 }
 
+// (navigator configurat al principi del fitxer via defineProperty)
+
 const DEFAULT_TAB = { id: 1, url: "https://example.com/article", title: "Article Title" };
 
 global.ext = makeExt({ tabs: [DEFAULT_TAB], scriptResult: "Some page text" });
+
+// Carregar selectYoutubeTrack com a global — al navegador es carrega via <script>
+// des de sidebar.html i és un global. En tests l'exposem igual.
+const { selectYoutubeTrack } = require("../sidebar/youtube-track-select.js");
+global.selectYoutubeTrack = selectYoutubeTrack;
 
 const { executeScriptSafe, getPageContent } = require("../sidebar/content.js");
 
@@ -188,22 +208,35 @@ test("getPageContent - HN degrada gracefully quan l'article retorna error HTTP",
 // getPageContent — YouTube (fallback descripció)
 // ---------------------------------------------------------------------------
 
-test("getPageContent - YouTube sense transcripció retorna descripció com a fallback", async () => {
-    const ytTab = { id: 3, url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", title: "Video Title" };
+// Helper: mock d'ext específic per a tests de YouTube amb la nova arquitectura
+// (Step 1 retorna { tracks, activeVssId }, Step 2 retorna { text }).
+function makeYoutubeExt(ytTab, step1Result, step2Result, { preferredLangs = [] } = {}) {
     let calls = 0;
-    global.ext = {
+    return {
         tabs: { query: async () => [ytTab], get: async () => ytTab },
         scripting: {
             executeScript: async () => {
                 calls++;
-                // Step 1: sense pistes
-                if (calls === 1) return [{ result: { hasTracks: false, tracks: [] } }];
-                // Fallback descripció
-                return [{ result: "Title: Video Title\n\nDescription:\nDescripció del vídeo molt interessant amb molt de contingut útil." }];
+                if (calls === 1) return [{ result: step1Result }];
+                if (calls === 2 && typeof step2Result === 'string') return [{ result: step2Result }];
+                return [{ result: step2Result }];
             },
         },
-        permissions: { request: async () => false },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: {
+            sync: { get: async () => ({ youtubePreferredLangs: preferredLangs }) },
+            local: { get: async () => ({}) },
+        },
     };
+}
+
+test("getPageContent - YouTube sense transcripció retorna descripció com a fallback", async () => {
+    const ytTab = { id: 3, url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", title: "Video Title" };
+    global.ext = makeYoutubeExt(
+        ytTab,
+        { hasTracks: false, tracks: [], activeVssId: null },
+        "Title: Video Title\n\nDescription:\nDescripció del vídeo molt interessant amb molt de contingut útil."
+    );
     const result = await getPageContent();
     assert.ok(result.text.includes("Descripció"), "Ha de retornar la descripció com a fallback de YouTube");
     assert.strictEqual(result.noTranscript, true, "noTranscript ha de ser true quan s'utilitza el fallback");
@@ -211,126 +244,163 @@ test("getPageContent - YouTube sense transcripció retorna descripció com a fal
 
 test("getPageContent - YouTube pista ASR única es marca com '(Auto)'", async () => {
     const ytTab = { id: 4, url: "https://www.youtube.com/watch?v=abc12345678", title: "ASR Video" };
-    let calls = 0;
-    global.ext = {
-        tabs: { query: async () => [ytTab], get: async () => ytTab },
-        scripting: {
-            executeScript: async () => {
-                calls++;
-                // Step 1: pista única ASR
-                if (calls === 1) return [{ result: { hasTracks: true, tracks: [{ lang: 'en', name: 'English (auto-generated)', isAsr: true }] } }];
-                // Step 2: text + nom del selector
-                return [{ result: { text: 'hello world ' + 'lorem ipsum '.repeat(20), activeName: 'English (auto-generated)' } }];
-            },
+    global.ext = makeYoutubeExt(
+        ytTab,
+        {
+            hasTracks: true,
+            tracks: [{ lang: 'en', langName: 'English (auto)', vssId: 'a.en', isAsr: true }],
+            activeVssId: 'a.en',
         },
-        permissions: { request: async () => false },
-    };
+        { text: 'hello world ' + 'lorem ipsum '.repeat(20) }
+    );
     const result = await getPageContent();
     assert.ok(result.text.startsWith('[TRANSCRIPT: en (Auto)]'), "Ha d'incloure '(Auto)' per a pista ASR única");
     assert.ok(result.text.includes('hello world'), "Ha de contenir el text de la transcripció");
 });
 
-test("getPageContent - YouTube prefereix pista manual quan hi ha ASR i manual", async () => {
+test("getPageContent - YouTube etiqueta el header segons activeVssId quan existeix", async () => {
+    // Nota comportamental: quan activeVssId existeix (player inicialitzat), s'usa aquesta
+    // pista per etiquetar el header — és la que el panell modern realment mostrarà.
     const ytTab = { id: 5, url: "https://www.youtube.com/watch?v=xyz12345678", title: "Mixed Video" };
-    let calls = 0;
-    global.ext = {
-        tabs: { query: async () => [ytTab], get: async () => ytTab },
-        scripting: {
-            executeScript: async () => {
-                calls++;
-                // Step 1: ASR al [0] i manual al [1]
-                if (calls === 1) return [{
-                    result: { hasTracks: true, tracks: [
-                        { lang: 'en', name: 'English (auto-generated)', isAsr: true },
-                        { lang: 'en', name: 'English', isAsr: false },
-                    ] }
-                }];
-                // Step 2: sense nom actiu (panell modern) — heurística hauria de triar la manual
-                return [{ result: { text: 'content from manual captions '.repeat(5), activeName: '' } }];
-            },
+    global.ext = makeYoutubeExt(
+        ytTab,
+        {
+            hasTracks: true,
+            tracks: [
+                { lang: 'en', langName: 'English (auto)', vssId: 'a.en', isAsr: true },
+                { lang: 'en', langName: 'English', vssId: '.en', isAsr: false },
+            ],
+            activeVssId: '.en',  // pista manual activa al player
         },
-        permissions: { request: async () => false },
-    };
+        { text: 'content from manual captions '.repeat(5) }
+    );
     const result = await getPageContent();
-    assert.ok(result.text.startsWith('[TRANSCRIPT: en]'), "No ha d'incloure '(Auto)' si existeix pista manual");
-    assert.ok(!result.text.includes('(Auto)'), "Capçalera no ha d'incloure '(Auto)'");
+    assert.ok(result.text.startsWith('[TRANSCRIPT: en]'), "Ha d'etiquetar 'en' (manual, activa al player)");
+    assert.ok(!result.text.includes('(Auto)'), "Capçalera no ha d'incloure '(Auto)' per pista manual");
 });
 
-test("getPageContent - YouTube casa el selector actiu amb la pista corresponent (panell clàssic)", async () => {
-    const ytTab = { id: 6, url: "https://www.youtube.com/watch?v=abcDEF12345", title: "Classic Panel Video" };
-    let calls = 0;
-    global.ext = {
-        tabs: { query: async () => [ytTab], get: async () => ytTab },
-        scripting: {
-            executeScript: async () => {
-                calls++;
-                // Step 1: ASR al [0], manual al [1] — si el selector indica ASR, ha d'anar a ASR
-                if (calls === 1) return [{
-                    result: { hasTracks: true, tracks: [
-                        { lang: 'en', name: 'English (auto-generated)', isAsr: true },
-                        { lang: 'en', name: 'English', isAsr: false },
-                    ] }
-                }];
-                // Selector indica la pista ASR com a activa
-                return [{ result: { text: 'asr content '.repeat(10), activeName: 'English (auto-generated)' } }];
-            },
+test("getPageContent - YouTube tria per preferència d'usuari quan activeVssId és null", async () => {
+    const ytTab = { id: 6, url: "https://www.youtube.com/watch?v=prefCheck01", title: "Preferred Lang" };
+    global.ext = makeYoutubeExt(
+        ytTab,
+        {
+            hasTracks: true,
+            tracks: [
+                { lang: 'de', langName: 'Deutsch', vssId: '.de', isAsr: false },
+                { lang: 'en', langName: 'English', vssId: '.en', isAsr: false },
+                { lang: 'ca', langName: 'català', vssId: '.ca', isAsr: false },
+            ],
+            activeVssId: null,  // player no inicialitzat → usar preferences
         },
-        permissions: { request: async () => false },
-    };
+        { text: 'contingut en català '.repeat(10) },
+        { preferredLangs: ['ca', 'es'] }
+    );
     const result = await getPageContent();
-    assert.ok(result.text.startsWith('[TRANSCRIPT: en (Auto)]'), "Selector explícit d'ASR ha de marcar '(Auto)'");
+    assert.ok(result.text.startsWith('[TRANSCRIPT: ca]'), "Ha de triar la pista catalana per preferència d'usuari");
 });
 
-test("getPageContent - YouTube ignora pistes amb nom buit al match de selector", async () => {
-    // Regressió: ''.includes('') és true, i activeName.includes('') també, cosa que feia
-    // que la primera pista sempre guanyés si tenia name buit. Ha de saltar a l'heurística
-    // de preferir no-ASR.
-    const ytTab = { id: 7, url: "https://www.youtube.com/watch?v=emptyName12", title: "Empty Name Video" };
-    let calls = 0;
-    global.ext = {
-        tabs: { query: async () => [ytTab], get: async () => ytTab },
-        scripting: {
-            executeScript: async () => {
-                calls++;
-                if (calls === 1) return [{
-                    result: { hasTracks: true, tracks: [
-                        { lang: 'en', name: '', isAsr: true },
-                        { lang: 'ca', name: 'català', isAsr: false },
-                    ] }
-                }];
-                // Selector buit (panell modern): cau a l'heurística no-ASR, NO a tracks[0].
-                return [{ result: { text: 'text de prova '.repeat(10), activeName: '' } }];
+test("getPageContent - YouTube tria per navigator.language quan activeVssId i preferences buits", async () => {
+    const prevLang = _navState.language;
+    _navState.language = "ca-ES";
+    try {
+        const ytTab = { id: 7, url: "https://www.youtube.com/watch?v=browserLang", title: "Browser Lang" };
+        global.ext = makeYoutubeExt(
+            ytTab,
+            {
+                hasTracks: true,
+                tracks: [
+                    { lang: 'de', langName: 'Deutsch', vssId: '.de', isAsr: false },
+                    { lang: 'ca', langName: 'català', vssId: '.ca', isAsr: false },
+                    { lang: 'en', langName: 'English', vssId: '.en', isAsr: false },
+                ],
+                activeVssId: null,
             },
-        },
-        permissions: { request: async () => false },
-    };
-    const result = await getPageContent();
-    assert.ok(result.text.startsWith('[TRANSCRIPT: ca]'), "Ha de triar la pista catalana manual, no l'ASR anglesa amb nom buit");
-    assert.ok(!result.text.includes('(Auto)'), "No s'ha de marcar com a '(Auto)'");
+            { text: 'text en català del browser '.repeat(5) }
+        );
+        const result = await getPageContent();
+        assert.ok(result.text.startsWith('[TRANSCRIPT: ca]'), "Ha de triar la pista catalana per navigator.language");
+    } finally {
+        _navState.language = prevLang;
+    }
 });
 
-test("getPageContent - YouTube evita que 'English' matchi 'English (auto-generated)' per substring", async () => {
-    // Regressió: l'ordre d'insercio pot fer que el nom curt es comprovi primer.
-    // Si ordenem per longitud desc, el nom més llarg guanya.
-    const ytTab = { id: 8, url: "https://www.youtube.com/watch?v=substrCheck", title: "Substring Check" };
-    let calls = 0;
+test("getPageContent - YouTube: Step 1 falla però Step 2 llegeix segments (Firefox fallback)", async () => {
+    // Cas: world:"MAIN" no disponible / falla → meta buit → cal que Step 2 segueixi
+    // intentant llegir segments del DOM. Si n'hi ha, s'etiqueta [TRANSCRIPT] genèric.
+    const ytTab = { id: 9, url: "https://www.youtube.com/watch?v=ffFallback", title: "FF Fallback" };
     global.ext = {
         tabs: { query: async () => [ytTab], get: async () => ytTab },
         scripting: {
-            executeScript: async () => {
-                calls++;
-                if (calls === 1) return [{
-                    result: { hasTracks: true, tracks: [
-                        { lang: 'en', name: 'English', isAsr: false },           // Manual primer
-                        { lang: 'en', name: 'English (auto-generated)', isAsr: true },
-                    ] }
-                }];
-                // Selector explícit: track ASR llarg és l'actiu
-                return [{ result: { text: 'contingut asr '.repeat(10), activeName: 'English (auto-generated)' } }];
+            executeScript: async (inj) => {
+                // Step 1 (MAIN) — simula fallada de Firefox
+                if (inj.world === "MAIN") throw new Error("Options.world is not supported");
+                // Step 2 — retorna segments com si el panell s'hagués obert
+                return [{ result: { text: 'transcription content from DOM '.repeat(5) } }];
             },
         },
-        permissions: { request: async () => false },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: {
+            sync: { get: async () => ({}) },
+            local: { get: async () => ({}) },
+        },
     };
     const result = await getPageContent();
-    assert.ok(result.text.startsWith('[TRANSCRIPT: en (Auto)]'), "Ha de triar el match més llarg (ASR), no el curt (English)");
+    assert.ok(result.text.startsWith('[TRANSCRIPT]'), "Ha d'etiquetar amb [TRANSCRIPT] genèric quan Step 1 falla");
+    assert.ok(!result.text.includes('(Auto)'), "No ha d'incloure (Auto) sense info del kind");
+    assert.ok(result.text.includes('transcription content'), "Ha d'incloure els segments");
+    assert.ok(!result.noTranscript, "noTranscript ha de ser falsy quan hem obtingut text real");
+});
+
+test("getPageContent - YouTube usa prerenderedText de ytInitialData i salta Step 2", async () => {
+    // Cas principal: ytInitialData.engagementPanels ja conté la transcripció renderitzada.
+    // El codi ha d'usar-la directament i NO intentar obrir cap panell (Step 2 skipped).
+    const ytTab = { id: 11, url: "https://www.youtube.com/watch?v=prerenderOK", title: "Pre-rendered Video" };
+    let step2Called = false;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async (inj) => {
+                if (inj.world === "MAIN") {
+                    return [{ result: {
+                        hasTracks: true,
+                        tracks: [{ lang: 'ca', langName: 'català', vssId: '.ca', isAsr: false }],
+                        activeVssId: '.ca',
+                        prerenderedText: 'contingut pre-renderitzat del panell de transcripció '.repeat(5),
+                    } }];
+                }
+                step2Called = true;
+                return [{ result: { text: 'should not be used' } }];
+            },
+        },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: {
+            sync: { get: async () => ({}) },
+            local: { get: async () => ({}) },
+        },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: ca]'), "Ha d'etiquetar amb la pista resolta");
+    assert.ok(result.text.includes('contingut pre-renderitzat'), "Ha d'incloure el text pre-renderitzat");
+    assert.ok(!step2Called, "Step 2 (obrir panell) NO s'ha d'executar quan ja tenim prerenderedText");
+});
+
+test("getPageContent - YouTube activeVssId té prioritat sobre preferences", async () => {
+    // Vídeo alemany activat al player. Usuari ha configurat 'ca' com preferit però el
+    // panell modern ignora setOption → el header ha de reflectir el que el panell mostra (de).
+    const ytTab = { id: 8, url: "https://www.youtube.com/watch?v=activeWins", title: "Active Wins" };
+    global.ext = makeYoutubeExt(
+        ytTab,
+        {
+            hasTracks: true,
+            tracks: [
+                { lang: 'de', langName: 'Deutsch', vssId: '.de', isAsr: false },
+                { lang: 'ca', langName: 'català', vssId: '.ca', isAsr: false },
+            ],
+            activeVssId: '.de',
+        },
+        { text: 'Ich habe gedacht '.repeat(10) },
+        { preferredLangs: ['ca'] }
+    );
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT: de]'), "Ha d'etiquetar 'de' (pista activa), no 'ca' (preferit)");
 });
