@@ -55,11 +55,24 @@ function _closePanel(panelEl) {
     if (toolbar) toolbar.classList.remove("hidden");
     const backBar = document.getElementById("history-back-bar");
     if (backBar) backBar.classList.add("hidden");
+
+    // Restore original element order: toolbar → page-title-strip → history-back-bar → content
+    const container = document.getElementById("container");
+    const titleStrip = document.getElementById("page-title-strip");
+    if (container && titleStrip && toolbar) {
+        // Move toolbar to top (it's outside container, so just ensure back bar is after it visually)
+        // Move title strip to its original position (after toolbar, before history-back-bar)
+        const contentDiv = document.getElementById("content");
+        if (backBar && contentDiv) {
+            container.insertBefore(titleStrip, backBar);
+            container.insertBefore(backBar, contentDiv);
+        }
+    }
+
     if (_previousVisible) {
         _previousVisible.classList.remove("hidden");
         _previousVisible = null;
     }
-    const titleStrip = document.getElementById("page-title-strip");
     if (titleStrip) titleStrip.classList.toggle("hidden", !_previousTitleStripVisible);
     _previousTitleStripVisible = false;
 }
@@ -102,6 +115,13 @@ async function loadHistoryEntry(entry) {
         titleLink.textContent = entry.title || entry.url || "";
         try { titleLink.href = ["http:", "https:"].includes(new URL(entry.url).protocol) ? entry.url : "#"; } catch { titleLink.href = "#"; }
         titleStrip.classList.remove("hidden");
+    }
+
+    // Reorder elements: back bar → title strip → content
+    const container = document.getElementById("container");
+    if (container && backBar && titleStrip) {
+        container.insertBefore(backBar, container.firstChild);
+        container.insertBefore(titleStrip, contentDiv);
     }
 }
 
