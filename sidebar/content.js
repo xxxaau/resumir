@@ -202,33 +202,66 @@ async function getPageContent() {
                             return [];
                         }
 
-                        // Detecció del botó "Mostra la transcripció" — multi-idioma.
-                        // Via 1: selector semàntic (funciona en qualsevol idioma, és estructural).
-                        // Via 2: fallback per textContent/aria-label amb termes específics de
-                        // "transcripció". IMPORTANT: NO incloem termes de "subtítols" (com 'subtit',
-                        // 'napisy', 'titlovi', 'başlık', 'metin') perquè matchegen el botó CC del
-                        // reproductor (que activa subtítols però NO obre el panell de transcripció).
+                        // Intenta expandir la descripció usant diversos selectors coneguts.
+                        // YouTube canvia l'estructura sovint; aquests selectors cobreixen
+                        // les variants modernes i clàssiques.
+                        function expandDescription() {
+                            const expandSelectors = [
+                                'ytd-text-inline-expander #expand',
+                                'ytd-text-inline-expander tp-yt-paper-button',
+                                '#description #expand',
+                                'tp-yt-paper-button#expand',
+                                '#expand',
+                                'ytd-text-inline-expander #more',
+                                '#more',
+                            ];
+                            for (const sel of expandSelectors) {
+                                const el = document.querySelector(sel);
+                                if (el) { try { el.click(); } catch {} }
+                            }
+                        }
+
+                        // Detecció del botó "Mostra la transcripció" — multi-idioma i robusta.
+                        // Via 1: selector semàntic dins de la descripció.
+                        // Via 2: fallback per text, excloent el reproductor (on està el botó CC).
+                        // IMPORTANT: els termes han de ser específics de "transcripció", NO de
+                        // "subtítols" — són botons diferents (CC vs. panell de transcripció).
                         function findTranscriptButton() {
+                            // Via 1: selector semàntic (funciona en qualsevol idioma)
                             const section = document.querySelector('ytd-video-description-transcript-section-renderer');
                             const semanticBtn = section?.querySelector('button');
                             if (semanticBtn) return semanticBtn;
 
+                            // Via 2: també provar selectors semàntics alternatius que YouTube usa
+                            const altSelectors = [
+                                'ytd-video-description-transcript-section-renderer button',
+                                '[target-id="engagement-panel-searchable-transcript"] button',
+                                'button[aria-label*="transcri" i]',
+                                'button[aria-label*="transkri" i]',
+                            ];
+                            for (const sel of altSelectors) {
+                                try {
+                                    const el = document.querySelector(sel);
+                                    if (el) return el;
+                                } catch {}
+                            }
+
+                            // Via 3: fallback per text en tot el document, però EXCLOENT
+                            // el reproductor (#movie_player) per evitar matchejar el botó CC.
                             const TRANSCRIPT_TERMS = [
-                                'transcri',     // ca/en/es/fr/pt/it/ro
+                                'transcri',     // ca/en/es/fr/pt/it/ro/da/sv/no
                                 'transkri',     // de/nl
                                 'átirat',       // hu
                                 'транскри',     // ru/uk/bg
                                 'प्रतिलेख',       // hi
                                 '文字起こし',    // ja
-                                '脚本',         // zh
+                                '字幕記錄',      // zh-TW
+                                '脚本',         // zh-CN
                                 '스크립트',      // ko
                             ];
-                            // Limita la cerca a la zona sota del vídeo (descripció/info),
-                            // NO al reproductor — evita matchejar el botó CC per error.
-                            const searchRoot = document.querySelector('#below')
-                                || document.querySelector('#secondary')
-                                || document.body;
-                            return Array.from(searchRoot.querySelectorAll('button')).find(b => {
+                            const player = document.querySelector('#movie_player');
+                            return Array.from(document.querySelectorAll('button')).find(b => {
+                                if (player && player.contains(b)) return false;
                                 const blob = ((b.getAttribute('aria-label') || '') + ' ' + b.textContent);
                                 return TRANSCRIPT_TERMS.some(term => blob.toLowerCase().includes(term.toLowerCase()));
                             });
@@ -238,16 +271,21 @@ async function getPageContent() {
                         const existing = readSegments();
                         if (existing.length > 0) return { text: existing.join(' ') };
 
-                        // Expandir descripció per exposar el botó
-                        document.querySelector('#expand')?.click();
+                        // Scroll i expand per exposar el botó (YouTube fa lazy loading del
+                        // contingut sota del vídeo).
+                        try { window.scrollTo({ top: 500, behavior: 'instant' }); } catch {}
+                        expandDescription();
 
-                        // Polling fins a 3 s per esperar que el botó aparegui al DOM
-                        // (més robust que un sleep fix, cobre dispositius lents i canvis de layout).
+                        // Polling fins a 5 s per esperar que el botó aparegui al DOM.
+                        // Reintentar expand a cada iteració — de vegades YouTube triga
+                        // a renderitzar el botó de transcripció després d'expandir.
                         let btn = null;
-                        for (let i = 0; i < 12; i++) {
+                        for (let i = 0; i < 20; i++) {
                             await sleep(250);
                             btn = findTranscriptButton();
                             if (btn) break;
+                            // Cada 1s, reintentem expandir (útil si el primer expand no va)
+                            if (i > 0 && i % 4 === 0) expandDescription();
                         }
                         if (!btn) return null;
                         btn.click();
