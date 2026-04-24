@@ -236,7 +236,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             try {
                 currentMetadata.summary = pageData.noTranscript ? "Vídeo sense transcripció.\n\n" : ""; // Reset output text
                 liveOutputTokens = 0;
+                const loadingDiv = document.getElementById("loading");
                 apiUsage = await callGeminiStream(apiKey, tryModel, systemPrompt, pageText, signal, (chunkText) => {
+                    // Amagar els puntets en el primer chunk rebut
+                    if (loadingDiv && !loadingDiv.classList.contains("hidden")) {
+                        loadingDiv.classList.add("hidden");
+                    }
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
                     if (now - lastUpdate > 100) {
