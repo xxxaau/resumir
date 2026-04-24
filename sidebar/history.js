@@ -50,9 +50,11 @@ async function openHistoryPanel() {
 function _closePanel(panelEl) {
     panelEl.classList.add("hidden");
     panelEl.innerHTML = "";
-    // Show toolbar again
+    // Show toolbar again, hide back bar (only visible when in history detail view)
     const toolbar = document.querySelector(".toolbar");
     if (toolbar) toolbar.classList.remove("hidden");
+    const backBar = document.getElementById("history-back-bar");
+    if (backBar) backBar.classList.add("hidden");
     if (_previousVisible) {
         _previousVisible.classList.remove("hidden");
         _previousVisible = null;
