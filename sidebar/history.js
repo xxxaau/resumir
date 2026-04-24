@@ -16,9 +16,13 @@ async function openHistoryPanel() {
     const loadingDiv    = document.getElementById("loading");
     const errorDiv      = document.getElementById("error");
     const backBar       = document.getElementById("history-back-bar");
+    const toolbar       = document.querySelector(".toolbar");
 
     // Hide back bar (in case we're returning from detail view)
     if (backBar) backBar.classList.add("hidden");
+    // Hide toolbar (no summarize/plugins while viewing history)
+    if (toolbar) toolbar.classList.add("hidden");
+
     const titleStrip = document.getElementById("page-title-strip");
     _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
@@ -46,6 +50,9 @@ async function openHistoryPanel() {
 function _closePanel(panelEl) {
     panelEl.classList.add("hidden");
     panelEl.innerHTML = "";
+    // Show toolbar again
+    const toolbar = document.querySelector(".toolbar");
+    if (toolbar) toolbar.classList.remove("hidden");
     if (_previousVisible) {
         _previousVisible.classList.remove("hidden");
         _previousVisible = null;
@@ -84,14 +91,14 @@ async function loadHistoryEntry(entry) {
     historyPanel.classList.add("hidden");
     historyPanel.innerHTML = "";
 
-    // Show back bar so user can return to history list
+    // Show back bar so user can return to history list (toolbar remains hidden)
     const backBar = document.getElementById("history-back-bar");
     if (backBar) backBar.classList.remove("hidden");
     const titleStrip = document.getElementById("page-title-strip");
     const titleLink  = document.getElementById("page-title-link");
     if (titleStrip && titleLink) {
         titleLink.textContent = entry.title || entry.url || "";
-        titleLink.href = entry.url || "#";
+        try { titleLink.href = ["http:", "https:"].includes(new URL(entry.url).protocol) ? entry.url : "#"; } catch { titleLink.href = "#"; }
         titleStrip.classList.remove("hidden");
     }
 }
@@ -172,12 +179,15 @@ function openSourcePanel(text) {
     const errorDiv     = document.getElementById("error");
     const backBar      = document.getElementById("history-back-bar");
     const titleStrip   = document.getElementById("page-title-strip");
+    const toolbar      = document.querySelector(".toolbar");
 
     // Tancar history panel si estava obert (sense restaurar estat)
     historyPanel.classList.add("hidden");
     historyPanel.innerHTML = "";
 
     if (backBar) backBar.classList.add("hidden");
+    // Hide toolbar (no summarize/plugins while viewing source)
+    if (toolbar) toolbar.classList.add("hidden");
     _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
 

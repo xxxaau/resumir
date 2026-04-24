@@ -561,9 +561,13 @@ body {
 
 /* ── History panel ─────────────────────────────────────────── */
 #history-back-bar {
-  padding: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: 4px;
+  margin-bottom: 15px;
+  background-color: var(--toolbar-bg) !important;
+  border-radius: 4px;
 }
 
 #history-panel, #source-panel {
