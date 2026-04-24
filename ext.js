@@ -109,3 +109,8 @@ if (typeof globalThis !== 'undefined') {
 } else if (typeof window !== 'undefined') {
     window.ext = ext;
 }
+
+// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = ext;
+}

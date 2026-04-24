@@ -138,7 +138,7 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getCuratedModelInfo };
+    module.exports = { getCuratedModelInfo, callGeminiStream };
 }
 
 /**
