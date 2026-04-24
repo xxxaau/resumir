@@ -175,6 +175,30 @@ body {
 #loading {
   color: var(--text-muted);
   font-style: italic;
+  font-size: 1.2em;
+  letter-spacing: 2px;
+}
+
+.loading-dot {
+  animation: dot-pulse 1.4s infinite;
+  display: inline-block;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%, 60%, 100% {
+    opacity: 0.4;
+  }
+  30% {
+    opacity: 1;
+  }
 }
 
 #error {
