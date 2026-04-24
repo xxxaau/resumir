@@ -103,7 +103,9 @@ async function loadHistoryEntry(entry) {
     historyPanel.classList.add("hidden");
     historyPanel.innerHTML = "";
 
-    // Show back bar so user can return to history list (toolbar remains hidden)
+    // Hide toolbar and show back bar (consistent whether coming from history list or cache badge)
+    const toolbar = document.querySelector(".toolbar");
+    if (toolbar) toolbar.classList.add("hidden");
     const backBar = document.getElementById("history-back-bar");
     if (backBar) backBar.classList.remove("hidden");
     const titleStrip = document.getElementById("page-title-strip");
@@ -116,7 +118,6 @@ async function loadHistoryEntry(entry) {
 
     // Reorder elements: toolbar → back bar → title strip → content
     const container = document.getElementById("container");
-    const toolbar = document.querySelector(".toolbar");
     if (container && backBar && titleStrip && toolbar) {
         // Move back bar after toolbar, title strip after back bar
         container.insertBefore(backBar, toolbar.nextSibling);
