@@ -69,17 +69,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     
     setGeneratingState(true, false, activeBtnId);
     
-    const loadingDiv = document.getElementById("loading");
-    if (loadingDiv) {
-        if (isScience) {
-            loadingDiv.textContent = "Investigant la validació científica...";
-        } else if (isDeepDive) {
-            loadingDiv.textContent = "Generant anàlisi detallada...";
-        } else {
-            loadingDiv.textContent = "Generant resum...";
-        }
-    }
-    
     const abortController = new AbortController();
     const signal = abortController.signal;
     
@@ -88,8 +77,11 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
     try {
         // 1. Get Configuration
-        const config = await ext.storage.sync.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder", "favoriteModels"]);
-        const apiKey = config.apiKey;
+        const [config, localSecrets] = await Promise.all([
+            ext.storage.sync.get(["modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder", "favoriteModels"]),
+            ext.storage.local.get(["apiKey"])
+        ]);
+        const apiKey = localSecrets.apiKey;
         let modelName = config.modelName || DEFAULT_MODEL_ID;
         
         let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
@@ -203,8 +195,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
         }
 
-        let pageText = pageData.text;
-        ctx.setSourceText(pageText);
+        let pageText = `<UNTRUSTED_CONTENT>\n${pageData.text}\n</UNTRUSTED_CONTENT>`;
+        ctx.setSourceText(pageData.text);
 
         if (signal.aborted) return abortController;
 
@@ -294,9 +286,11 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     msg.includes("502") ||
                     msg.includes("503") ||
                     msg.includes("service unavailable") ||
+                    msg.includes("model not found") ||
+                    msg.includes("model unavailable") ||
+                    msg.includes("model is not available") ||
                     msg.includes("404") ||
-                    msg.includes("not found") ||
-                    msg.includes("model");
+                    msg.includes("not found");
                 if (isRetryable) {
                     const attempt = modelsToTry.indexOf(tryModel) + 1;
                     console.warn(`[${attempt}/${modelsToTry.length}] Model ${tryModel} unavailable. Trying next...`, e.message);
