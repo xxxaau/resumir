@@ -59,14 +59,11 @@ function _closePanel(panelEl) {
     // Restore original element order: toolbar → page-title-strip → history-back-bar → content
     const container = document.getElementById("container");
     const titleStrip = document.getElementById("page-title-strip");
-    if (container && titleStrip && toolbar) {
-        // Move toolbar to top (it's outside container, so just ensure back bar is after it visually)
-        // Move title strip to its original position (after toolbar, before history-back-bar)
-        const contentDiv = document.getElementById("content");
-        if (backBar && contentDiv) {
-            container.insertBefore(titleStrip, backBar);
-            container.insertBefore(backBar, contentDiv);
-        }
+    const contentDiv = document.getElementById("content");
+    if (container && titleStrip && backBar && contentDiv && toolbar) {
+        // Ensure order: toolbar is first, then title strip, then back bar, then content
+        container.insertBefore(titleStrip, backBar);
+        container.insertBefore(backBar, contentDiv);
     }
 
     if (_previousVisible) {
@@ -117,10 +114,12 @@ async function loadHistoryEntry(entry) {
         titleStrip.classList.remove("hidden");
     }
 
-    // Reorder elements: back bar → title strip → content
+    // Reorder elements: toolbar → back bar → title strip → content
     const container = document.getElementById("container");
-    if (container && backBar && titleStrip) {
-        container.insertBefore(backBar, container.firstChild);
+    const toolbar = document.querySelector(".toolbar");
+    if (container && backBar && titleStrip && toolbar) {
+        // Move back bar after toolbar, title strip after back bar
+        container.insertBefore(backBar, toolbar.nextSibling);
         container.insertBefore(titleStrip, contentDiv);
     }
 }

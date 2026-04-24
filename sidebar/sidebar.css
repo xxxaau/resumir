@@ -101,15 +101,9 @@ body {
   padding: 8px 12px; /* Add padding for header look */
   border-bottom: 1px solid var(--border-color);
   background-color: var(--toolbar-bg) !important;
-  /* Ensure generic styles work */
-  margin-top: -15px; /* Offset body padding if needed, or adjust body padding. 
-     Actually body has padding 15px. To make toolbar full width, we might need negative margin 
-     or move toolbar out of body padding. 
-     Let's keep it simple: just bg color for now, maybe rounded? 
-     User said "barra superior quedi en fosc". If it's inside body padding, it's just a bar. 
-     Let's try to make it look like a header by removing top margin impact if possible. 
-     But seeing current CSS, it's just a flex box. */
-  border-radius: 4px; /* Slight roundness if inside padding */
+  border-radius: 4px;
+  position: relative;
+  z-index: 20;
 }
 
 /* Button Styles */
