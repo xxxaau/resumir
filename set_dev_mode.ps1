@@ -29,22 +29,24 @@ $base = Get-Content $basePath -Raw | ConvertFrom-Json
 if ($Mode -eq "dev") {
     Write-Host "Canviant a mode DESENVOLUPAMENT..." -ForegroundColor DarkYellow
     $base.name = "Resumir contingut (DEV)"
-    
+    Write-JsonFile $basePath $base
+
     # Use DEV patches
     $ffPatch = Get-Content $ffPatchPath -Raw | ConvertFrom-Json
     $ffPatch.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz"
     Write-JsonFile $ffPatchPath $ffPatch
-    
+
     $chromiumPatch = Get-Content $chromiumPatchPath -Raw | ConvertFrom-Json
     Write-JsonFile $chromiumPatchPath $chromiumPatch
-    
+
     node (Join-Path $root "scripts/merge-manifest.mjs") firefox  (Join-Path $root "manifest.json")
     node (Join-Path $root "scripts/merge-manifest.mjs") chromium (Join-Path $root "manifest.chromium.json")
 }
 elseif ($Mode -eq "prod") {
     Write-Host "Canviant a mode PRODUCCIO..." -ForegroundColor Cyan
     $base.name = "Resumir contingut"
-    
+    Write-JsonFile $basePath $base
+
     # Use PROD patches if they exist, otherwise fallback to regular patches
     if (Test-Path $ffProdPatchPath) {
         Copy-Item $ffProdPatchPath $ffPatchPath -Force
@@ -54,18 +56,16 @@ elseif ($Mode -eq "prod") {
         $ffPatch.browser_specific_settings.gecko.id = "sergi@xaudiera.xyz"
         Write-JsonFile $ffPatchPath $ffPatch
     }
-    
+
     if (Test-Path $chromiumProdPatchPath) {
         Copy-Item $chromiumProdPatchPath $chromiumPatchPath -Force
         Write-Host "  Utilizant parche Chromium de PRODUCCION" -ForegroundColor DarkGray
     }
-    
+
     node (Join-Path $root "scripts/merge-manifest.mjs") firefox  (Join-Path $root "manifest.json")
     node (Join-Path $root "scripts/merge-manifest.mjs") chromium (Join-Path $root "manifest.chromium.json")
 }
-
-Write-JsonFile $basePath $base
-Write-Host "  Fitxers base i patch actualitzats." -ForegroundColor DarkGray
+Write-Host "  Fitxers base i patch actualitzats (base escrit abans del merge)." -ForegroundColor DarkGray
 Write-Host "  Manifests regenerats." -ForegroundColor DarkGray
 
 $sizes = @(16, 32, 48, 64, 96, 128)

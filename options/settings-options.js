@@ -6,8 +6,8 @@
 function saveOptions(e) {
   if(e) e.preventDefault();
   
+  const apiKeyValue = document.querySelector("#apiKey").value;
   const settings = {
-    apiKey: document.querySelector("#apiKey").value,
     modelName: document.querySelector("#modelName").value,
     theme: document.querySelector("#themeSelect").value,
     systemPrompt: document.querySelector("#systemPrompt").value,
@@ -37,12 +37,17 @@ function saveOptions(e) {
     enableResum: document.querySelector("#enableResum").checked,
 
     // Configura l'ordre de les extensions
-    extensionOrder: getCurrentExtensionOrder()
+    extensionOrder: getCurrentExtensionOrder(),
+
+    // YouTube — idiomes preferits per a transcripcions, codis ISO 639-1 ordenats
+    youtubePreferredLangs: (document.querySelector("#youtubePreferredLangs").value || "")
+        .split(",").map(s => s.trim().toLowerCase()).filter(Boolean),
   };
 
 
   Promise.all([
-      ext.storage.sync.set(settings)
+      ext.storage.sync.set(settings),
+      ext.storage.local.set({ apiKey: apiKeyValue })
   ]).then(() => {
      showStatus("Configuració guardada correctament!");
      updateSidebar(); 
@@ -53,15 +58,18 @@ function saveOptions(e) {
 }
 
 function restoreOptions() {
-  const configKeys = ["apiKey", "modelName", "theme", "systemPrompt", 
-    "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault", 
-    "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation", 
+  const configKeys = ["modelName", "theme", "systemPrompt",
+    "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
+    "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
     "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "enableDeepdive", "deepDivePrompt",
     "enableScience", "sciencePrompt", "enableResum",
-    "extensionOrder"];
-    
-  return ext.storage.sync.get(configKeys).then((data) => {
-    document.querySelector("#apiKey").value = data.apiKey || "";
+    "extensionOrder", "youtubePreferredLangs"];
+
+  return Promise.all([
+    ext.storage.sync.get(configKeys),
+    ext.storage.local.get(["apiKey"])
+  ]).then(([data, localData]) => {
+    document.querySelector("#apiKey").value = localData.apiKey || "";
     document.querySelector("#modelName").value = data.modelName || DEFAULT_MODEL_ID;
     document.querySelector("#themeSelect").value = data.theme || "system";
     document.querySelector("#systemPrompt").value = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
@@ -101,6 +109,10 @@ function restoreOptions() {
 
     // Resum: actiu per defecte
     document.querySelector("#enableResum").checked = data.enableResum !== false;
+
+    // YouTube: idiomes preferits (array) → string CSV per al camp de text
+    document.querySelector("#youtubePreferredLangs").value =
+        Array.isArray(data.youtubePreferredLangs) ? data.youtubePreferredLangs.join(", ") : "";
 
     if (data.extensionOrder && Array.isArray(data.extensionOrder)) {
         applyExtensionOrder(data.extensionOrder);

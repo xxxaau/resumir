@@ -88,6 +88,28 @@
         </div>
 
         <div class="section">
+          <h3>YouTube</h3>
+          <div class="form-group">
+            <label for="youtubePreferredLangs">Idiomes preferits per a transcripcions</label>
+            <input
+              type="text"
+              id="youtubePreferredLangs"
+              class="form-control"
+              placeholder="ca, es, en"
+            />
+            <div class="help-text">
+              Codis ISO 639-1 separats per comes, en ordre de preferència. Si el
+              vídeo no té cap pista en aquests idiomes, s'usa l'idioma del navegador
+              i, com a últim recurs, la primera pista disponible.
+              <br />
+              <strong>Nota:</strong> YouTube decideix internament quina pista mostra
+              al panell de transcripció. Aquesta preferència s'aplica només quan el
+              panell no ha decidit encara.
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
           <h3>Emmagatzematge i privadesa</h3>
           <div class="form-group">
             <label>Memòria cau local</label>
@@ -1022,6 +1044,22 @@
           <h3>Historial de canvis</h3>
           <div class="changelog">
             <!-- CHANGELOG_START -->
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.4
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Extracció de pistes YouTube refactoritzada</strong>: Lògica de selecció de pista en mòdul independent (<code>sidebar/youtube-track-select.js</code>) amb cobertura de tests completa (13 tests). Llegeix la transcripció directament de <code>ytInitialData</code> sense obrir el panell (més ràpid i fiable). Nou fallback <code>prerenderedText</code> quan <code>playerCaptionsTracklistRenderer</code> és buit.</li>
+                <li><strong>Selector d'idioma per a YouTube</strong>: Nova opció a la configuració per triar l'idioma preferit de les transcripcions de YouTube.</li>
+                <li><strong>Migració de clau API a <code>storage.local</code></strong>: La clau Gemini es guarda ara a <code>storage.local</code> (no sincronitzada entre dispositius) en lloc de <code>storage.sync</code>. Millora la privadesa i evita quotes de sincronització.</li>
+                <li><strong>Protecció contra injecció de prompts</strong>: El contingut de la pàgina s'envia embolcallat amb <code><UNTRUSTED_CONTENT></code> per aïllar-lo de les instruccions del sistema.</li>
+                <li><strong>Indicador de càrrega animat</strong>: Punts animats durant la generació; la toolbar s'amaga quan es carrega des del badge.</li>
+                <li><strong>Panell de transcripció YouTube</strong>: El panell no s'obria correctament en navegar a un vídeo directament. Detecció del botó molt més robusta.</li>
+                <li><strong>Punts de càrrega</strong>: S'amaguen correctament en rebre el primer chunk d'streaming; eliminat text de càrrega codificat manualment.</li>
+                <li><strong>Toolbar al carregar caché</strong>: La toolbar es mostrava incorrectament en carregar una entrada de caché des del badge.</li>
+              </ul>
+            </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.3

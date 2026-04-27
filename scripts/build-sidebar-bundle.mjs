@@ -33,6 +33,7 @@ const files = [
     resolve(root, "shared/defaults.js"),
     resolve(root, "sidebar/utils.js"),
     resolve(root, "sidebar/api.js"),
+    resolve(root, "sidebar/youtube-track-select.js"),
     resolve(root, "sidebar/content.js"),
     resolve(root, "sidebar/cache.js"),
     resolve(root, "sidebar/stats.js"),

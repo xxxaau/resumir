@@ -72,6 +72,8 @@ const extensionGlobals = {
     // sidebar/content.js
     getPageContent: "readonly",
     executeScriptSafe: "readonly",
+    // sidebar/youtube-track-select.js
+    selectYoutubeTrack: "readonly",
 };
 
 /** Globals cross-file específics de la pàgina d'opcions (settings-*.js) */

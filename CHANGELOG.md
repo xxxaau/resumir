@@ -4,6 +4,22 @@ Tots els canvis notables d'aquest projecte es documentaran en aquest fitxer.
 
 ## [Unreleased]
 
+## [2.2.4] - 2026-04-27
+
+### Millorat
+
+- **Extracció de pistes YouTube refactoritzada**: Lògica de selecció de pista en mòdul independent (`sidebar/youtube-track-select.js`) amb cobertura de tests completa (13 tests). Llegeix la transcripció directament de `ytInitialData` sense obrir el panell (més ràpid i fiable). Nou fallback `prerenderedText` quan `playerCaptionsTracklistRenderer` és buit.
+- **Selector d'idioma per a YouTube**: Nova opció a la configuració per triar l'idioma preferit de les transcripcions de YouTube.
+- **Migració de clau API a `storage.local`**: La clau Gemini es guarda ara a `storage.local` (no sincronitzada entre dispositius) en lloc de `storage.sync`. Millora la privadesa i evita quotes de sincronització.
+- **Protecció contra injecció de prompts**: El contingut de la pàgina s'envia embolcallat amb `<UNTRUSTED_CONTENT>` per aïllar-lo de les instruccions del sistema.
+- **Indicador de càrrega animat**: Punts animats durant la generació; la toolbar s'amaga quan es carrega des del badge.
+
+### Corregit
+
+- **Panell de transcripció YouTube**: El panell no s'obria correctament en navegar a un vídeo directament. Detecció del botó molt més robusta.
+- **Punts de càrrega**: S'amaguen correctament en rebre el primer chunk d'streaming; eliminat text de càrrega codificat manualment.
+- **Toolbar al carregar caché**: La toolbar es mostrava incorrectament en carregar una entrada de caché des del badge.
+
 ## [2.2.3] - 2026-04-23
 
 ### Millorat

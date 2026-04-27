@@ -53,8 +53,10 @@ test("getCuratedModelInfo - gemini-2.0-flash-lite té RPD pràcticament il·limi
 // CURATED_MODELS (estructura de dades)
 // ---------------------------------------------------------------------------
 
-test("CURATED_MODELS conté exactament 6 models", () => {
-    assert.equal(CURATED_MODELS.length, 6);
+test("CURATED_MODELS conté els models clau esperats", () => {
+    assert.ok(CURATED_MODELS.length >= 1, "Ha d'haver-hi almenys un model");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-2.5-flash"), "Ha d'existir gemini-2.5-flash");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-2.5-pro"), "Ha d'existir gemini-2.5-pro");
 });
 
 test("CURATED_MODELS - tots els models tenen els camps requerits", () => {

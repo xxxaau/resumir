@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const link  = document.getElementById("page-title-link");
         if (!strip || !link) return;
         link.textContent = title || url;
-        link.href = url || "#";
+        try { link.href = ["http:", "https:"].includes(new URL(url).protocol) ? url : "#"; } catch { link.href = "#"; }
         strip.classList.remove("hidden");
     }
 
@@ -67,13 +67,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- Configuration Initialization & Migration ---
+    // API key lives only in storage.local to avoid sync across devices via browser account.
+    // Migration: if key was previously written to storage.sync, move it back to local.
     ext.storage.sync.get(["apiKey"]).then(async (syncConfig) => {
-        if (!syncConfig.apiKey) {
-            const localConfig = await ext.storage.local.get(["apiKey", "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "obsidianVault", "obsidianPath", "obsidianTemplate", "markdownTemplate"]);
-            if (localConfig.apiKey) {
-                console.warn("Migrating settings from Local to Sync...");
-                await ext.storage.sync.set(localConfig);
+        if (syncConfig.apiKey) {
+            const localConfig = await ext.storage.local.get(["apiKey"]);
+            if (!localConfig.apiKey) {
+                await ext.storage.local.set({ apiKey: syncConfig.apiKey });
             }
+            await ext.storage.sync.remove("apiKey");
         }
     });
 
@@ -92,10 +94,10 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(e => console.error("Error loading initial visibility config:", e));
 
     ext.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.apiKey && changes.apiKey.newValue !== changes.apiKey.oldValue) {
+            window.location.reload();
+        }
         if (area === 'sync') {
-            if (changes.apiKey && changes.apiKey.newValue !== changes.apiKey.oldValue) {
-                window.location.reload();
-            }
             if (changes.modelName) {
                 const newModel = changes.modelName.newValue;
                 if (globalConfigCache) {
@@ -147,7 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const anchor = e.target.closest("a[href]");
         if (anchor) {
             e.preventDefault();
-            ext.tabs.create({ url: anchor.href });
+            try {
+                const parsed = new URL(anchor.href);
+                if (["http:", "https:"].includes(parsed.protocol)) ext.tabs.create({ url: anchor.href });
+            } catch { /* invalid URL — ignore */ }
         }
     });
 
@@ -395,11 +400,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }).catch(() => {});
         try {
             const [syncData, localData] = await Promise.all([
-                ext.storage.sync.get(["apiKey", "modelName"]),
-                ext.storage.local.get(["blockedUntil", "isBionicActive"])
+                ext.storage.sync.get(["modelName"]),
+                ext.storage.local.get(["apiKey", "blockedUntil", "isBionicActive"])
             ]);
 
-            const apiKey = syncData.apiKey;
+            const apiKey = localData.apiKey;
             let modelName = syncData.modelName || DEFAULT_MODEL_ID;
             
             // Assegurar que el modelName es guarda si era per defecte (per a futures carregues)
