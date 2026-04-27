@@ -164,12 +164,16 @@ async function getPageContent() {
                 meta = {}; // Step 2 intentarà llegir segments igualment
             }
 
-            // Atenció: entrem al bloc d'extracció SEMPRE. Si Step 1 va fallar (meta buit),
-            // Step 2 intentarà llegir segments igualment i els etiquetarem amb [TRANSCRIPT]
-            // genèric. Si Step 1 va funcionar i NO hi ha pistes, saltem i caiem al fallback
-            // de descripció (el comportament original per vídeos sense subtítols).
+            // Quan entrem al bloc d'extracció:
+            //  - Step 1 va fallar (meta buit) → Step 2 prova el DOM, [TRANSCRIPT] genèric.
+            //  - Step 1 detecta pistes (hasTracks) → camí normal.
+            //  - Step 1 no detecta pistes però SÍ prerenderedText → alguns vídeos exposen
+            //    el panell a ytInitialData.engagementPanels sense llistar les pistes a
+            //    playerCaptionsTracklistRenderer; en aquests casos, prerenderedText és
+            //    l'únic senyal de transcripció disponible.
+            //  - Cap senyal → saltem al fallback de descripció (estalviem 5–10 s de polling).
             const step1Worked = meta && typeof meta.hasTracks === 'boolean';
-            if (!step1Worked || meta.hasTracks) {
+            if (!step1Worked || meta.hasTracks || meta.prerenderedText) {
                 // Sidebar: triar la pista que representarà millor el que el panell mostrarà.
                 // Nota: el panell modern NO respecta player.setOption — mostra sempre la pista
                 // que YouTube ha decidit (generalment la primera no-ASR o la del player actiu).

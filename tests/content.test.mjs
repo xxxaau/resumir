@@ -384,6 +384,41 @@ test("getPageContent - YouTube usa prerenderedText de ytInitialData i salta Step
     assert.ok(!step2Called, "Step 2 (obrir panell) NO s'ha d'executar quan ja tenim prerenderedText");
 });
 
+test("getPageContent - YouTube usa prerenderedText quan hasTracks=false", async () => {
+    // Cas: alguns vídeos no exposen captionTracks a ytInitialPlayerResponse, però
+    // ytInitialData.engagementPanels SÍ que conté el panell amb segments. El codi ha
+    // d'usar prerenderedText encara que hasTracks sigui false (no caure a descripció).
+    const ytTab = { id: 12, url: "https://www.youtube.com/watch?v=prerNoTracks", title: "PreRender No Tracks" };
+    let step2Called = false;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async (inj) => {
+                if (inj.world === "MAIN") {
+                    return [{ result: {
+                        hasTracks: false,
+                        tracks: [],
+                        activeVssId: null,
+                        prerenderedText: 'transcripció present malgrat manca de tracks API '.repeat(5),
+                    } }];
+                }
+                step2Called = true;
+                return [{ result: null }];
+            },
+        },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: {
+            sync: { get: async () => ({}) },
+            local: { get: async () => ({}) },
+        },
+    };
+    const result = await getPageContent();
+    assert.ok(result.text.startsWith('[TRANSCRIPT]'), "Ha d'usar [TRANSCRIPT] genèric quan no hi ha tracks");
+    assert.ok(result.text.includes('transcripció present'), "Ha d'incloure el text pre-renderitzat");
+    assert.ok(!step2Called, "Step 2 NO s'ha d'executar si tenim prerenderedText");
+    assert.ok(!result.noTranscript, "noTranscript ha de ser falsy quan hem trobat transcripció");
+});
+
 test("getPageContent - YouTube activeVssId té prioritat sobre preferences", async () => {
     // Vídeo alemany activat al player. Usuari ha configurat 'ca' com preferit però el
     // panell modern ignora setOption → el header ha de reflectir el que el panell mostra (de).
