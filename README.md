@@ -1,189 +1,122 @@
 # ![Icona](icons/icon-48.png) Resumir contingut
 
-> Extensió de navegador que resumeix pàgines web amb Intel·ligència Artificial (Google Gemini).
+Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — sense fer seguiment, sense telemetria, sense dades que subin al núvol.
 
-[![Mozilla License](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSE)
-[![Firefox](https://img.shields.io/badge/Firefox-MV3-ff7139?logo=firefox-browser)](https://www.mozilla.org/firefox/)
-[![Chromium](https://img.shields.io/badge/Chromium-Natiu-4285F4?logo=googlechrome)](#compatibilitat)
-
----
-
-## Funcionalitats
-
-| Funció | Descripció |
-| --- | --- |
-| **Resum amb IA** | Genera resums estructurats de qualsevol pàgina amb un sol clic |
-| **Validació científica** | Verifica afirmacions amb rigor acadèmic i referències reals |
-| **Aprofundiment (Deep Dive)** | Anàlisi detallada amb arguments i evidències |
-| **YouTube i Hacker News** | Extracció intel·ligent de transcripcions i comentaris |
-| **Lectura biònica** | Mode de lectura ràpida amb fixació configurable |
-| **Exportació Markdown** | Copia els resums amb plantilles personalitzables |
-| **Integració Obsidian** | Envia resums directament a la teva vault |
-| **Temes** | 5 temes visuals (sistema, clar, fosc, solarized, gris) |
-| **Estadístiques** | Tauler amb historial, tokens consumits i velocitat |
-| **Streaming** | Resposta en temps real (SSE) amb timer de generació |
-| **Sistema de plugins** | Activa, desactiva i reordena funcionalitats a voluntat |
+[![Download for Firefox](https://img.shields.io/badge/Firefox-Download-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
+[![Download for Chrome](https://img.shields.io/badge/Chrome-Download-4285F4?logo=googlechrome)](https://chromewebstore.google.com)
+[![License MPL-2.0](https://img.shields.io/badge/License-MPL--2.0-blue)](LICENSE)
 
 ---
 
+## Features
+
+- **Resumeix amb IA** — un sol clic per obtenir un resum estructurat
+- **YouTube i Hacker News** — extracció intel·ligent de transcripcions i comentaris
+- **Lectura biònica** — mode de lectura ràpida amb fixació configurable
+- **Exporta a Markdown** — copia directa o envia a Obsidian
+- **Múltiples temes** — sistema, clar, fosc, solarized, gris
+- **Estadístiques** — seguiment de tokens i velocitat
+- **Privadesa completa** — tot local, cap servidor, cap seguiment
+
 ---
 
-## Requisits
+## Installation
 
-- **Navegador**: Firefox 115+ o qualsevol navegador basat en Chromium (Chrome, Edge, Brave, Vivaldi, etc.)
-- **API Key**: Google Gemini (gratuïta) → [Obtenir-la a Google AI Studio](https://aistudio.google.com/app/apikey)
+### Firefox
+
+1. **Via Mozilla Add-ons** (recomanat):
+   - Visita [addons.mozilla.org](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
+   - Clica «Afegir a Firefox»
+
+2. **Per desenvolupament** (temporal):
+   - Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
+   - Obre `about:debugging#/runtime/this-firefox`
+   - Clica «Carrega complemento temporal» i selecciona `manifest.json`
+
+### Chrome / Edge / Brave
+
+1. **Via Chrome Web Store** (pròximament):
+   - Enllaç disponible a breus
+   
+2. **Per desenvolupament** (temporal):
+   - Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
+   - Obre `chrome://extensions` i activa «Mode de desenvolupador»
+   - Clica «Carrega extensió no empaquetada» i selecciona la carpeta del repo
 
 ---
 
-## Instal·lació
+## Setup
 
-### Firefox (temporal, per a desenvolupament)
+1. Obri la barra lateral o vés a **Extensions > Resumir contingut > Configuració**
+2. Enganxa la teva **API Key de Google Gemini** (gratis a [aistudio.google.com](https://aistudio.google.com/app/apikey))
+3. Desa els canvis i comença a resumir
 
-```text
-1. Clona el repositori:       git clone https://github.com/xxxaau/extensio-resumir-contingut.git
-2. Obre Firefox:              about:debugging#/runtime/this-firefox
-3. Clic «Load Temporary Add-on» → selecciona manifest.json
+---
+
+## Architecture
+
 ```
-
-### Firefox (permanent)
-
-**Opció A — Firefox Developer Edition** (sense signar):
-
-1. `about:config` → `xpinstall.signatures.required` = `false`
-2. Empaqueta en `.xpi` i arrossega al navegador
-
-**Opció B — Signatura privada** (recomanat):
-
-1. Puja el `.zip` a [addons.mozilla.org/developers](https://addons.mozilla.org/developers/)
-2. Selecciona «On my own» → descarrega el `.xpi` signat
-
----
-
-## Configuració inicial
-
-1. Obre la barra lateral o vés a **Extensions > Resumir contingut > Configuració**
-2. Enganxa la teva **Google Gemini API Key** al camp corresponent
-3. Desa els canvis
-
----
-
-## Arquitectura
-
-```text
-├── manifest.json          # Configuració MV3
-├── ext.js                 # Wrapper cross-browser (Firefox ↔ Chromium)
-├── background.js          # Service worker / menú contextual
-├── theme.js               # Gestió de temes (sincronitzada)
-├── Readability.js         # Parser de contingut (Mozilla)
-│
-├── sidebar/               # Barra lateral principal
-│   ├── sidebar.html       #   Layout + toolbar
-│   ├── sidebar.css        #   Estils (5 temes, CSS custom properties)
-│   ├── sidebar.js         #   Orquestrador (init, events, wiring)
-│   ├── summary.js         #   Lògica de generació + gestió d'errors
-│   ├── api.js             #   Client Gemini (streaming SSE)
-│   ├── content.js         #   Extracció de text (YouTube, HN, Readability)
-│   ├── cache.js           #   Memòria cau local + estadístiques
-│   ├── stats.js           #   Seguiment de quota diària + consum d'aigua
-│   ├── ui.js              #   Renderitzador DOM + visibilitat de plugins
-│   └── utils.js           #   Helpers (Obsidian path, Markdown, tokens)
-│
-├── options/               # Pàgina de configuració
-│   ├── settings.html      #   UI completa (tabs, formularis)
-│   ├── settings.css       #   Estils (5 temes)
-│   └── settings.js        #   Lògica de configuració + sidebar dinàmica
-│
-├── tests/                 # Tests
-│   ├── tests/*.test.mjs   #   Tests unitaris amb Node.js built-in test runner
-│
-└── icons/                 # Icones (16–128px)
+manifest.json               # Configuració MV3
+ext.js                     # Cross-browser wrapper (Firefox ↔ Chromium)
+background.js              # Service worker, context menu
+sidebar/                   # Main UI (HTML + CSS + JS modules)
+  sidebar.js               # Orchestrator
+  summary.js               # Generation logic
+  api.js                   # Gemini streaming client
+  content.js               # Text extraction (YouTube, HN, Readability)
+  cache.js                 # Local cache + stats
+options/                   # Settings page
+tests/                     # Unit tests (160/160 passing)
 ```
 
 ---
 
-## Compatibilitat
-
-| Navegador | Estat | Notes |
-| --- | --- | --- |
-| Firefox 115+ | ✅ Funcional | `sidebar_action`, `menus`, `background.scripts` |
-| Chrome/Edge/Brave 116+ | ✅ Funcional | `sidePanel`, `contextMenus`, `service_worker` (`manifest.chromium.json`) |
-
-### Abstracció cross-browser (`ext.js`)
-
-L'extensió utilitza un wrapper `ext.*` que encapsula les diferències entre navegadors:
-
-| API | Firefox | Chromium |
-| --- | --- | --- |
-| Menú contextual | `browser.menus` | `chrome.contextMenus` |
-| Obrir sidebar | `sidebarAction.open()` | `sidePanel.open({ windowId })` |
-| Tancar sidebar | `sidebarAction.close()` | `sidePanel.setOptions({ enabled: false })` ⚠️ |
-| Detectar sidebar | `extension.getViews({ type: "sidebar" })` | `[]` (fallback a open) |
-| Registrar panel | (natiu) | `sidePanel.setPanelBehavior()` |
-
-### Empaquetatge Dual
-
-L'script de build (`build.ps1`) genera automàticament els paquets `.zip` independents per a Firefox i per a Chromium a partir de la mateixa base de codi compartida.
-
----
-
-## Seguretat i privadesa
-
-- **Dades locals**: Clau API, preferències i historial es guarden exclusivament al navegador (`storage.sync` / `storage.local`). Cap dada surt del teu ordinador sense la teva acció.
-- **Connexió única**: L'extensió només contacta amb `generativelanguage.googleapis.com` per enviar el text i rebre el resum. No hi ha telemetria, analytics ni servidors de tercers.
-- Consulta la [Política de privadesa](PRIVACY_POLICY.md) per a detalls complets.
-
----
-
-## Contribuir
-
-Les contribucions són benvingudes! Si vols col·laborar:
-
-1. Fes un **fork** del repositori
-2. Crea una **branca** per a la teva funcionalitat: `git checkout -b feature/la-meva-funcionalitat`
-3. Fes **commit** dels canvis: `git commit -m "Afegeix funcionalitat X"`
-4. Puja la branca: `git push origin feature/la-meva-funcionalitat`
-5. Obre un **Pull Request**
-
-### Guia ràpida de desenvolupament
+## Development
 
 ```bash
-# Activar mode desenvolupament (canvia nom i ID del manifest)
-npm run dev
+# Run tests
+npm test
 
-# Activar mode producció
-npm run prod
-
-# Generar paquet ZIP per a Firefox
-npm run build:firefox
-
-# Generar paquet ZIP per a Chromium
-npm run build:chromium
-
-# Generar paquets ZIP per a tots dos navegadors
+# Build for all browsers
 npm run build
 
-# Validar codi i tests amb un sol comando
-npm run check
+# Check code quality (lint + tests)
+npm run prerelease
 
-# Incrementar la versió i sincronitzar manifests/changelog
-npm version patch
+# Switch to dev mode
+npm run dev
 
-# Fer una release en mode Firefox i restaurar el mode original
-npm run release:firefox
-
-# Fer una release en mode Chromium i restaurar el mode original
-npm run release:chromium
+# Switch to production mode
+npm run prod
 ```
 
-> Nota: els scripts de build actuals s'executen a través d'un wrapper Node que cerca PowerShell (`pwsh` o `powershell`) al teu sistema.
+See [CLAUDE.md](CLAUDE.md) for detailed architecture and build commands.
 
 ---
 
-## Llicència
+## Privacy & Security
 
-Distribuït sota la llicència **Mozilla Public License 2.0 (MPL-2.0)**.
-Consulta el fitxer [LICENSE](LICENSE) per als detalls complets.
+- **No tracking**: All data stays local (API key, preferences, cache)
+- **No telemetry**: Only calls Google Gemini API (no third-party servers)
+- **No permissions abuse**: `<all_urls>` is optional (requested at runtime)
+- **Security first**: CSP, SSRF protection, minimal permissions
 
 ---
 
-> Fet amb ❤️ en català
+## Contributing
+
+1. Fork this repo
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit changes: `git commit -m "Add my feature"`
+4. Push: `git push origin feature/my-feature`
+5. Open a Pull Request
+
+---
+
+## License
+
+[Mozilla Public License 2.0 (MPL-2.0)](LICENSE)
+
+---
+
+Made with ❤️ in Catalan
