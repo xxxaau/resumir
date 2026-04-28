@@ -1,13 +1,16 @@
-{
+﻿{
     "permissions":  [
                         "menus"
                     ],
     "optional_permissions":  [
-                                 "<all_urls>"
+                                 "\u003call_urls\u003e"
                              ],
+    "content_security_policy":  {
+                                    "extension_pages":  "script-src \u0027self\u0027; object-src \u0027self\u0027; connect-src \u0027self\u0027 https://generativelanguage.googleapis.com https://*"
+                                },
     "browser_specific_settings":  {
                                       "gecko":  {
-                                                    "id":  "sergi@xaudiera.xyz",
+                                                    "id":  "sergi.dev@xaudiera.xyz",
                                                     "strict_min_version":  "142.0",
                                                     "data_collection_permissions":  {
                                                                                         "required":  [

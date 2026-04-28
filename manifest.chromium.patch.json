@@ -1,13 +1,22 @@
-{
-    "permissions": [
-        "contextMenus",
-        "sidePanel"
-    ],
-    "side_panel": {
-        "default_path": "sidebar/sidebar.html"
-    },
-    "background": {
-        "service_worker": "background.bundle.js",
-        "type": "module"
-    }
+﻿{
+    "permissions":  [
+                        "contextMenus",
+                        "sidePanel"
+                    ],
+    "optional_permissions":  [
+                                 "\u003call_urls\u003e"
+                             ],
+    "optional_host_permissions":  [
+                                      "\u003call_urls\u003e"
+                                  ],
+    "side_panel":  {
+                       "default_path":  "sidebar/sidebar.html"
+                   },
+    "background":  {
+                       "service_worker":  "background.bundle.js",
+                       "type":  "module"
+                   },
+    "content_security_policy":  {
+                                    "extension_pages":  "script-src \u0027self\u0027; object-src \u0027self\u0027; connect-src \u0027self\u0027 https://generativelanguage.googleapis.com https://*"
+                                }
 }

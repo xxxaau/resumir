@@ -1,6 +1,6 @@
 # ![Icona](icons/icon-48.png) Resumir contingut
 
-Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — sense fer seguiment, sense telemetria, sense dades que subin al núvol.
+Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — sense fer seguiment, sense telemetria, sense dades que pugin al núvol.
 
 [![Download for Firefox](https://img.shields.io/badge/Firefox-Download-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
 [![Download for Chrome](https://img.shields.io/badge/Chrome-Download-4285F4?logo=googlechrome)](https://chromewebstore.google.com)
@@ -119,4 +119,4 @@ See [CLAUDE.md](CLAUDE.md) for detailed architecture and build commands.
 
 ---
 
-Made with ❤️ in Catalan
+Made with ❤️ in Banyoles
