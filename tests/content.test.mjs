@@ -161,7 +161,11 @@ test("getPageContent - HN retorna discussió sense article quan articleUrl és n
 test("getPageContent - HN combina article i discussió quan articleUrl és extern", async () => {
     const hnTab = { id: 2, url: "https://news.ycombinator.com/item?id=12345", title: "HN Thread" };
     const articleHtml = "<html><body><p>" + "Text de l'article. ".repeat(20) + "</p></body></html>";
-    global.fetch = async () => ({ ok: true, text: async () => articleHtml });
+    global.fetch = async () => ({
+        ok: true,
+        headers: { get: (k) => k === "content-type" ? "text/html; charset=utf-8" : null },
+        text: async () => articleHtml
+    });
     global.Readability = class {
         constructor(doc) { this._doc = doc; }
         parse() { return { textContent: "Text de l'article. ".repeat(20) }; }

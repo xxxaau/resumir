@@ -32,6 +32,37 @@ async function executeScriptSafe(injection) {
     }
 }
 
+// SSRF Protection: Denylisted IP ranges
+const isPrivateOrReservedIP = (hostname) => {
+    // Try to parse as IPv4
+    const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+    if (ipv4Match) {
+        const [, a, b, c, d] = ipv4Match.map(Number);
+        const ip = (a << 24) | (b << 16) | (c << 8) | d;
+        // 0.0.0.0/8, 10.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16 (link-local),
+        // 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4 (multicast), 255.255.255.255/32
+        if ((ip >>> 24) === 0) return true;
+        if ((ip >>> 24) === 10) return true;
+        if ((ip >>> 24) === 127) return true;
+        if ((ip & 0xfff0000) === 0xc0a80000) return true;
+        if ((ip >>> 20) === 0xac1) return true;
+        if ((ip >>> 16) === 0xa9fe) return true;
+        if ((ip >>> 22) === 0x1840) return true;
+        if ((ip >>> 4) === 0x0fffffff) return true;
+        return false;
+    }
+    // Check IPv6
+    if (hostname.includes(':')) {
+        const lower = hostname.toLowerCase();
+        if (lower === '::1' || lower.startsWith('::ffff:127.') ||
+            lower.startsWith('fe80:') || lower.startsWith('ff')) {
+            return true;
+        }
+    }
+    // Check common hostnames
+    return /^(localhost|metadata|internal)$/i.test(hostname);
+};
+
 /**
  * Extracts and returns the relevant text content from the active tab.
  * Includes specific heuristics for HackerNews, YouTube, LinkedIn, Twitter/X, and fallback to Readability.
@@ -68,14 +99,16 @@ async function getPageContent() {
                 if (hn.articleUrl && !hn.articleUrl.includes("ycombinator.com")) {
                     try {
                         const _hnUrl = new URL(hn.articleUrl);
-                        const _privateHost = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1|metadata\.)/.test(_hnUrl.hostname);
-                        if (_hnUrl.protocol !== "https:" || _privateHost) throw new Error("Blocked URL");
+                        if (_hnUrl.protocol !== "https:" || _hnUrl.port !== "" || isPrivateOrReservedIP(_hnUrl.hostname)) {
+                            throw new Error("Blocked: private/reserved IP or invalid protocol/port");
+                        }
                         const resp = await fetch(hn.articleUrl, { credentials: "omit", signal: AbortSignal.timeout(8000) });
                         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                        const contentType = resp.headers.get("content-type") || "";
+                        if (!contentType.includes("text/html")) throw new Error("Invalid content-type");
                         const _raw = await resp.text();
                         if (_raw.length > 2 * 1024 * 1024) throw new Error("Response too large");
-                        const html = _raw;
-                        const doc = new DOMParser().parseFromString(html, "text/html");
+                        const doc = new DOMParser().parseFromString(_raw, "text/html");
                         const base = doc.createElement("base");
                         base.href = hn.articleUrl;
                         doc.head.insertBefore(base, doc.head.firstChild);
@@ -84,7 +117,7 @@ async function getPageContent() {
                             articleText = article.textContent.trim();
                         }
                     } catch (e) {
-                        console.warn("HN article fetch failed", e);
+                        console.warn("HN article fetch failed:", e?.message);
                     }
                 }
                 text = articleText
