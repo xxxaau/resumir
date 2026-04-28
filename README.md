@@ -26,10 +26,6 @@
 
 ---
 
-## Captura de pantalla
-
-> *Afegir aquí captures o GIF de demostració.*
-
 ---
 
 ## Requisits
@@ -180,12 +176,6 @@ npm run release:chromium
 ```
 
 > Nota: els scripts de build actuals s'executen a través d'un wrapper Node que cerca PowerShell (`pwsh` o `powershell`) al teu sistema.
-
----
-
-## Roadmap
-
-Consulta el [ROADMAP.md](ROADMAP.md) per veure les funcionalitats planificades.
 
 ---
 

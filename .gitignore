@@ -22,6 +22,12 @@ build_*/
 
 # Temporary output files
 *.txt
+*.log
+
+# Internal / IDE-assisted development
+.claude/
+.agent/
+.playwright-mcp/
 
 # Environment Variables
 .env
