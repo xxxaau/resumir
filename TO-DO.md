@@ -23,14 +23,14 @@ Esforç estimat: **6–9 dies de feina concentrada** per arribar a "ready to pub
 
 **Objectiu:** repo publicable sense vergonyes ni filtracions.
 
-- [ ] **B3** Substituir `xxxaau` globalment pel handle real. `npm run manifests:gen` després.
-- [ ] **B4** Netejar el repo:
+- [x] **B3** Substituir `xxxaau` globalment pel handle real. `npm run manifests:gen` després.
+- [x] **B4** Netejar el repo:
   - `git rm -r --cached .claude .agent .playwright-mcp docs/superpowers project_audit_output*.txt resumir-contingut-v*.zip background.bundle.js`
   - Afegir-los al `.gitignore` (alguns hi són però no des-trackejats)
   - Auditar la història: `git log --all -p | grep -iE "private_key|BEGIN PRIVATE|AIza[A-Za-z0-9_-]{35}"` — si surt res → `git filter-repo` abans del push
-- [ ] Moure `CLAUDE.md` i `STORAGE_ISOLATION.md` a `docs/internal/` (excloure del ZIP) o eliminar
+- [x] Moure `CLAUDE.md` i `STORAGE_ISOLATION.md` a `docs/internal/` (excloure del ZIP) o eliminar
 - [x] Arreglar errors al `CONTRIBUTING.md`: "Fa canvis" → "Fes canvis", "Nova código" → català, inconsistència 56 vs 160 tests
-- [ ] Decidir idioma de docs: README en anglès amb `README.ca.md` per audiència ampla
+- [x] Decidir idioma de docs: README en anglès amb `README.ca.md` per audiència ampla
 - [x] Governança mínima: `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `.github/ISSUE_TEMPLATE/{bug_report,feature_request}.yml`, `.github/PULL_REQUEST_TEMPLATE.md`
 - [x] Capçaleres MPL als ~16 fitxers font propis (`/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0... */`)
 - [x] README: retirar badges de stores trencats; afegir 2-3 captures reals a `img/`; afegir badge CI
