@@ -23,7 +23,7 @@ Esforç estimat: **6–9 dies de feina concentrada** per arribar a "ready to pub
 
 **Objectiu:** repo publicable sense vergonyes ni filtracions.
 
-- [x] **B3** Substituir `xxxaau` globalment pel handle real. `npm run manifests:gen` després.
+- [ ] **B3** Substituir `xxxaau` globalment pel handle real. `npm run manifests:gen` després.
 - [x] **B4** Netejar el repo:
   - `git rm -r --cached .claude .agent .playwright-mcp docs/superpowers project_audit_output*.txt resumir-contingut-v*.zip background.bundle.js`
   - Afegir-los al `.gitignore` (alguns hi són però no des-trackejats)

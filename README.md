@@ -5,7 +5,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 [![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
 [![Disponible a Chrome Web Store](https://img.shields.io/badge/Chrome-Pròximament-4285F4?logo=googlechrome)](#)
 [![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
-[![CI](https://github.com/SergiXaudiera/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/SergiXaudiera/extensio-resumir-contingut/actions/workflows/ci.yml)
+[![CI](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml)
 
 ---
 
@@ -30,7 +30,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 2. Clica «Afegir a Firefox»
 
 **Per a desenvolupament** (temporal):
-1. Clona el repo: `git clone https://github.com/SergiXaudiera/extensio-resumir-contingut.git`
+1. Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
 2. Obre `about:debugging#/runtime/this-firefox`
 3. Clica «Carrega complement temporal» i selecciona `manifest.json`
 
@@ -39,7 +39,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 **Via Chrome Web Store** (pròximament disponible):
 
 **Per a desenvolupament** (temporal):
-1. Clona el repo: `git clone https://github.com/SergiXaudiera/extensio-resumir-contingut.git`
+1. Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
 2. Obre `chrome://extensions` i activa el «Mode de desenvolupador»
 3. Clica «Carrega extensió desempaquetada» i selecciona la carpeta del repo
 

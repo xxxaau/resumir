@@ -3,7 +3,7 @@
     "name":  "Resumir contingut",
     "version":  "2.2.4",
     "author":  "Sergi Xaudiera",
-    "homepage_url":  "https://github.com/SergiXaudiera/extensio-resumir-contingut",
+    "homepage_url":  "https://github.com/xxxaau/extensio-resumir-contingut",
     "description":  "Resumeix text seleccionat amb Gemini.",
     "permissions":  [
                         "storage",
