@@ -7,29 +7,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { createStorageMock } from "./helpers/storage-mock.mjs";
 
 const require = createRequire(import.meta.url);
-
-// ---------------------------------------------------------------------------
-// Mock de ext.storage.local (in-memory)
-// ---------------------------------------------------------------------------
-
-function createStorageMock() {
-    const store = {};
-    return {
-        async get(keys) {
-            if (typeof keys === "string") return { [keys]: store[keys] };
-            if (Array.isArray(keys)) return Object.fromEntries(keys.map(k => [k, store[k]]));
-            return { ...store };
-        },
-        async set(obj) { Object.assign(store, obj); },
-        async remove(keys) {
-            const ks = typeof keys === "string" ? [keys] : keys;
-            ks.forEach(k => delete store[k]);
-        },
-        _clear() { Object.keys(store).forEach(k => delete store[k]); },
-    };
-}
 
 const storageMock = createStorageMock();
 global.ext = { storage: { local: storageMock } };
@@ -198,10 +178,12 @@ test("purgeStaleCacheEntries - elimina entrades antigues i retorna el nombre eli
     clearStorage();
     const oldTs = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
     const freshTs = new Date().toISOString();
+    // Cal injectar l'índex perquè getSummaryCacheIndex el trobi
     await storageMock.set({
+        "summary_cache_index": ["summary_cache:https://old.com", "summary_cache:https://fresh.com"],
         "summary_cache:https://old.com": { url: "https://old.com", title: "Vell", summary: "X", timestamp: oldTs, version: "1.0", stats: {} },
         "summary_cache:https://fresh.com": { url: "https://fresh.com", title: "Fresc", summary: "Y", timestamp: freshTs, version: "1.0", stats: {} },
-        "stats": { articles: 5, tokens: 1000 }, // no és caché, no s'ha d'eliminar
+        "stats": { articles: 5, tokens: 1000 },
     });
     const removed = await purgeStaleCacheEntries();
     assert.equal(removed, 1, "Ha d'eliminar 1 entrada expirada");
@@ -231,6 +213,7 @@ test("getSummaryCache - retorna null per entrades sense timestamp (considerades 
 test("purgeStaleCacheEntries - elimina entrades sense timestamp (considerades expirades)", async () => {
     clearStorage();
     await storageMock.set({
+        "summary_cache_index": ["summary_cache:https://no-ts.com"],
         "summary_cache:https://no-ts.com": { url: "https://no-ts.com", title: "X", summary: "Y" }
     });
     const removed = await purgeStaleCacheEntries();

@@ -14,13 +14,13 @@ Gràcies per l'interès en contribuir a **Resumir contingut**! Aquesta guia expl
 ### Primer: clona i instal·la
 
 ```bash
-git clone https://github.com/xxxaau/extensio-resumir-contingut.git
+git clone https://github.com/SergiXaudiera/extensio-resumir-contingut.git
 cd extensio-resumir-contingut
 npm install
 npm run dev
 ```
 
-### Fa canvis
+### Fes canvis
 
 1. **Crea una branca** per a la teva funcionalitat:
    ```bash
@@ -51,9 +51,9 @@ npm run dev
 
 ### Qualitat
 
-- **Lint:** ESLint amb max 50 avisos. Corregeix els errors, marca ignorar els avisos si són justificats.
-- **Tests:** Cobertura mínima esperada és que les 56 funcions principals tinguin un test. Nova código = nuevos tests.
-- **Noms:** utilitza camelCase per a variables/funcions, kebab-case per a fitxers. Catalan o English (preferiblement Catalan per a comments).
+- **Lint:** ESLint sense avisos (0 warnings). Corregeix els errors; afegeix `// eslint-disable-line` si un avís és justificat.
+- **Tests:** La suite actual té 207 tests. Qualsevol funcionalitat nova requereix els seus tests corresponents.
+- **Noms:** utilitza camelCase per a variables/funcions, kebab-case per a fitxers. Preferiblement en català per als comentaris.
 
 ### Commit
 
@@ -108,7 +108,7 @@ npm run dev
     └── ...
 ```
 
-Veure `CLAUDE.md` per a més detalls arquitectònics.
+Veure `CLAUDE.md` per a més detalls arquitectònics (fitxer intern, no inclòs al ZIP de release).
 
 ## Reportar bugs
 

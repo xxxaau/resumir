@@ -7,28 +7,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { createStorageMock } from "./helpers/storage-mock.mjs";
 
 const require = createRequire(import.meta.url);
 
-// ---------------------------------------------------------------------------
-// Mock de ext.storage.local (in-memory)
-// ---------------------------------------------------------------------------
-
-function createStorageMock() {
-    const store = {};
-    return {
-        async get(keys) {
-            if (typeof keys === "string") return { [keys]: store[keys] };
-            if (Array.isArray(keys)) return Object.fromEntries(keys.map(k => [k, store[k]]));
-            return { ...store };
-        },
-        async set(obj) { Object.assign(store, obj); },
-        _clear() { Object.keys(store).forEach(k => delete store[k]); },
-        _setHistory(entries) { store.usageHistory = entries; },
-    };
-}
-
 const storageMock = createStorageMock();
+// _setHistory és específic d'aquest test: injecta dades d'historial directament
+storageMock._setHistory = (entries) => storageMock._set({ usageHistory: entries });
 global.ext = { storage: { local: storageMock } };
 
 const { getDailyStats, getTodayRequestCount, getTotalTodayCount } = require("../sidebar/stats.js");

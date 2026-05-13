@@ -15,40 +15,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { createStorageMock } from "./helpers/storage-mock.mjs";
 
 const require = createRequire(import.meta.url);
 
-// ---------------------------------------------------------------------------
-// Mock de storage (local + sync)
-// ---------------------------------------------------------------------------
-
-function createStorageMock() {
-    const store = {};
-    return {
-        async get(keys) {
-            if (keys === null || keys === undefined) return { ...store };
-            if (typeof keys === "string") return { [keys]: store[keys] };
-            if (Array.isArray(keys)) return Object.fromEntries(keys.map(k => [k, store[k]]));
-            // object with defaults
-            const result = {};
-            for (const [k, defaultVal] of Object.entries(keys)) {
-                result[k] = store[k] !== undefined ? store[k] : defaultVal;
-            }
-            return result;
-        },
-        async set(obj) { Object.assign(store, obj); },
-        async remove(keys) {
-            const ks = typeof keys === "string" ? [keys] : keys;
-            ks.forEach(k => delete store[k]);
-        },
-        _store: store,
-        _inject(obj) { Object.assign(store, obj); },
-        _clear() { Object.keys(store).forEach(k => delete store[k]); },
-    };
-}
-
 const localMock = createStorageMock();
 const syncMock  = createStorageMock();
+// _inject és àlies de _set per compatibilitat amb els tests existents
+localMock._inject = (obj) => localMock._set(obj);
+syncMock._inject  = (obj) => syncMock._set(obj);
 
 global.ext = {
     storage: {

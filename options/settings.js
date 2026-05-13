@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // options/settings.js
 // Punt d'entrada: event listeners i inicialització de la pàgina de configuració
 // Les funcions estàn definides als mòduls settings-*.js carregats prèviament.
@@ -160,14 +163,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnGithub = document.getElementById("btnGithub");
     if (btnGithub) {
         btnGithub.addEventListener("click", () => {
-            window.open("https://github.com/xxxaau/extensio-resumir-contingut", "_blank");
+            window.open("https://github.com/SergiXaudiera/extensio-resumir-contingut", "_blank");
         });
     }
 
     const btnIssues = document.getElementById("btnIssues");
     if (btnIssues) {
         btnIssues.addEventListener("click", () => {
-            window.open("https://github.com/xxxaau/extensio-resumir-contingut/issues", "_blank");
+            window.open("https://github.com/SergiXaudiera/extensio-resumir-contingut/issues", "_blank");
         });
     }
 

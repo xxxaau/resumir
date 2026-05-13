@@ -11,8 +11,9 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 // Carregar shared/models.js primer i exposar com a global
 // (simula l'ordre de <script> al navegador: models.js → api.js)
-const { CURATED_MODELS, DEFAULT_MODEL_ID, EUR_RATE } = require("../shared/models.js");
+const { CURATED_MODELS, DEFAULT_MODEL_ID, DEFAULT_MODEL_INFO, EUR_RATE } = require("../shared/models.js");
 global.CURATED_MODELS = CURATED_MODELS;
+global.DEFAULT_MODEL_INFO = DEFAULT_MODEL_INFO;
 global.EUR_RATE = EUR_RATE;
 const { getCuratedModelInfo } = require("../sidebar/api.js");
 

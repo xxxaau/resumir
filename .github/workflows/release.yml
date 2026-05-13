@@ -26,6 +26,12 @@ jobs:
       - name: Tests unitaris
         run: npm test
 
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: web-ext lint
+        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.zip'
+
       # pwsh (PowerShell Core) ve preinstal·lat a ubuntu-latest
       - name: Build Firefox i Chromium ZIPs
         shell: pwsh

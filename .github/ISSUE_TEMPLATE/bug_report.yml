@@ -1,0 +1,61 @@
+name: Informe d'error
+description: Informa d'un error o comportament inesperat
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Gràcies per informar d'un error! Omple els camps següents per ajudar-nos a reproduir-lo.
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Navegador
+      options:
+        - Firefox
+        - Chrome
+        - Edge
+        - Altres (especifica als comentaris)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Versió de l'extensió
+      placeholder: ex. 2.2.4
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripció de l'error
+      description: Explica clarament què ha passat.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos per reproduir
+      placeholder: |
+        1. Ves a '...'
+        2. Clica a '...'
+        3. Observa l'error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportament esperat
+      description: Què hauria de passar?
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Errors a la consola (opcional)
+      description: Obre F12 → Consola i enganxa qualsevol error rellevant.
+      render: text

@@ -20,6 +20,7 @@ const extensionGlobals = {
     // shared/models.js
     CURATED_MODELS: "readonly",
     DEFAULT_MODEL_ID: "readonly",
+    DEFAULT_MODEL_INFO: "readonly",
     EUR_RATE: "readonly",
     ensureFavoriteModels: "readonly",
     getCuratedModelInfo: "readonly",
@@ -138,6 +139,8 @@ export default [
             "background.bundle.js",   // Generat automàticament pel build
             "build_*/",
             "node_modules/",
+            "scripts/",               // Scripts d'utilitat (no part de l'extensió)
+            "coverage/",              // Reports de cobertura generats
         ],
     },
     {

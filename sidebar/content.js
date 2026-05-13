@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // sidebar/content.js
 // Handles parsing and extracting content from the active web page
 
@@ -32,37 +35,6 @@ async function executeScriptSafe(injection) {
     }
 }
 
-// SSRF Protection: Denylisted IP ranges
-const isPrivateOrReservedIP = (hostname) => {
-    // Try to parse as IPv4
-    const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-    if (ipv4Match) {
-        const [, a, b, c, d] = ipv4Match.map(Number);
-        const ip = (a << 24) | (b << 16) | (c << 8) | d;
-        // 0.0.0.0/8, 10.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16 (link-local),
-        // 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4 (multicast), 255.255.255.255/32
-        if ((ip >>> 24) === 0) return true;
-        if ((ip >>> 24) === 10) return true;
-        if ((ip >>> 24) === 127) return true;
-        if ((ip & 0xfff0000) === 0xc0a80000) return true;
-        if ((ip >>> 20) === 0xac1) return true;
-        if ((ip >>> 16) === 0xa9fe) return true;
-        if ((ip >>> 22) === 0x1840) return true;
-        if ((ip >>> 4) === 0x0fffffff) return true;
-        return false;
-    }
-    // Check IPv6
-    if (hostname.includes(':')) {
-        const lower = hostname.toLowerCase();
-        if (lower === '::1' || lower.startsWith('::ffff:127.') ||
-            lower.startsWith('fe80:') || lower.startsWith('ff')) {
-            return true;
-        }
-    }
-    // Check common hostnames
-    return /^(localhost|metadata|internal)$/i.test(hostname);
-};
-
 /**
  * Extracts and returns the relevant text content from the active tab.
  * Includes specific heuristics for HackerNews, YouTube, LinkedIn, Twitter/X, and fallback to Readability.
@@ -79,49 +51,94 @@ async function getPageContent() {
     // HACKER NEWS SPECIAL LOGIC
     if (tabUrl.includes("news.ycombinator.com/item")) {
         try {
+            // Pre-inject Readability so the in-page func can parse the article.
+            // Required when the article fetch succeeds and we want clean text.
+            try {
+                await executeScriptSafe({
+                    target: { tabId: tabId },
+                    files: ["Readability.js"]
+                });
+            } catch (e) { console.debug("HN Readability inject failed", e?.message); }
+
             const hnResult = await executeScriptSafe({
                 target: { tabId: tabId },
-                func: () => {
+                // The fetch runs INSIDE the page's content-script context (not the
+                // extension's extension_pages context), so the CSP `connect-src`
+                // of manifest.json does not apply. Cross-origin reach needs the
+                // optional <all_urls> host permission, which the user grants once.
+                func: async () => {
                     const titleEl = document.querySelector(".titleline a");
                     const comments = Array.from(document.querySelectorAll(".commtext"))
                         .map(c => "- " + c.innerText.replace(/\s+/g, " ").trim())
                         .join("\n");
-                    return {
-                        title: titleEl?.innerText || document.title,
-                        articleUrl: titleEl?.href || null,
-                        comments
+                    const title = titleEl?.innerText || document.title;
+                    const articleUrl = titleEl?.href || null;
+
+                    // Inline SSRF guard (function arg can't capture from outer scope).
+                    const isPrivateOrReservedIPInline = (hostname) => {
+                        const m = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+                        if (m) {
+                            const [, a, b, c, d] = m.map(Number);
+                            const ip = (a << 24) | (b << 16) | (c << 8) | d;
+                            if ((ip >>> 24) === 0) return true;
+                            if ((ip >>> 24) === 10) return true;
+                            if ((ip >>> 24) === 127) return true;
+                            if ((ip & 0xfff0000) === 0xc0a80000) return true;
+                            if ((ip >>> 20) === 0xac1) return true;
+                            if ((ip >>> 16) === 0xa9fe) return true;
+                            if ((ip >>> 22) === 0x1840) return true;
+                            if ((ip >>> 4) === 0x0fffffff) return true;
+                            return false;
+                        }
+                        if (hostname.includes(":")) {
+                            const lower = hostname.toLowerCase();
+                            if (lower === "::1" || lower.startsWith("::ffff:127.") ||
+                                lower.startsWith("fe80:") || lower.startsWith("ff")) return true;
+                        }
+                        return /^(localhost|metadata|internal)$/i.test(hostname);
                     };
+
+                    let articleText = "";
+                    if (articleUrl && !articleUrl.includes("ycombinator.com")) {
+                        try {
+                            const u = new URL(articleUrl);
+                            if (u.protocol !== "https:" || u.port !== "" || isPrivateOrReservedIPInline(u.hostname)) {
+                                throw new Error("Blocked: private/reserved IP or invalid protocol/port");
+                            }
+                            // redirect:"manual" prevents DNS-rebinding via cross-origin
+                            // 30x to internal IPs after the initial host check.
+                            const resp = await fetch(articleUrl, {
+                                credentials: "omit",
+                                redirect: "manual",
+                                signal: AbortSignal.timeout(8000)
+                            });
+                            if (resp.type === "opaqueredirect") throw new Error("Blocked: redirect");
+                            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                            const contentType = resp.headers.get("content-type") || "";
+                            if (!contentType.includes("text/html")) throw new Error("Invalid content-type");
+                            const raw = await resp.text();
+                            if (raw.length > 2 * 1024 * 1024) throw new Error("Response too large");
+                            if (typeof Readability !== "undefined") {
+                                const doc = new DOMParser().parseFromString(raw, "text/html");
+                                const base = doc.createElement("base");
+                                base.href = articleUrl;
+                                doc.head.insertBefore(base, doc.head.firstChild);
+                                const article = new Readability(doc).parse();
+                                if (article?.textContent?.trim().length > 200) {
+                                    articleText = article.textContent.trim();
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("HN article fetch failed:", e?.message);
+                        }
+                    }
+                    return { title, comments, articleText };
                 }
             });
             const hn = hnResult?.[0]?.result;
             if (hn) {
-                let articleText = "";
-                if (hn.articleUrl && !hn.articleUrl.includes("ycombinator.com")) {
-                    try {
-                        const _hnUrl = new URL(hn.articleUrl);
-                        if (_hnUrl.protocol !== "https:" || _hnUrl.port !== "" || isPrivateOrReservedIP(_hnUrl.hostname)) {
-                            throw new Error("Blocked: private/reserved IP or invalid protocol/port");
-                        }
-                        const resp = await fetch(hn.articleUrl, { credentials: "omit", signal: AbortSignal.timeout(8000) });
-                        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                        const contentType = resp.headers.get("content-type") || "";
-                        if (!contentType.includes("text/html")) throw new Error("Invalid content-type");
-                        const _raw = await resp.text();
-                        if (_raw.length > 2 * 1024 * 1024) throw new Error("Response too large");
-                        const doc = new DOMParser().parseFromString(_raw, "text/html");
-                        const base = doc.createElement("base");
-                        base.href = hn.articleUrl;
-                        doc.head.insertBefore(base, doc.head.firstChild);
-                        const article = new Readability(doc).parse();
-                        if (article?.textContent?.trim().length > 200) {
-                            articleText = article.textContent.trim();
-                        }
-                    } catch (e) {
-                        console.warn("HN article fetch failed:", e?.message);
-                    }
-                }
-                text = articleText
-                    ? `Title: ${hn.title}\n\nARTICLE:\n${articleText}\n\nHACKER NEWS DISCUSSION:\n${hn.comments}`
+                text = hn.articleText
+                    ? `Title: ${hn.title}\n\nARTICLE:\n${hn.articleText}\n\nHACKER NEWS DISCUSSION:\n${hn.comments}`
                     : `Title: ${hn.title}\n\nTop Discussion Comments:\n${hn.comments}`;
             }
         } catch (e) {
@@ -147,7 +164,7 @@ async function getPageContent() {
                     world: "MAIN",
                     func: () => {
                         try {
-                            const tracks = window.ytInitialPlayerResponse?.captions
+                            const rawCaptionTracks = window.ytInitialPlayerResponse?.captions
                                 ?.playerCaptionsTracklistRenderer?.captionTracks || [];
                             let activeVssId = null;
                             try {
@@ -157,8 +174,7 @@ async function getPageContent() {
                                 activeVssId = active?.vss_id || active?.vssId || null;
                             } catch { /* API privada — ignorem */ }
 
-                            // Llegir segments de transcripció incrustats a ytInitialData.
-                            // Aquesta és la via més robusta: no requereix obrir cap panell.
+                            // Via A: segments pre-renderitzats a ytInitialData.engagementPanels.
                             let prerenderedText = '';
                             try {
                                 const panels = window.ytInitialData?.engagementPanels || [];
@@ -177,9 +193,19 @@ async function getPageContent() {
                                 if (lines.length > 0) prerenderedText = lines.join(' ');
                             } catch { /* ytInitialData absent o estructura canviada */ }
 
+                            // Via B: retornem baseUrl de la millor pista perquè el sidebar faci
+                            // el fetch directament (evita la CSP de YouTube al MAIN world).
+                            let captionBaseUrl = null;
+                            if (!prerenderedText && rawCaptionTracks.length > 0) {
+                                const best = rawCaptionTracks.find(t => t.vssId === activeVssId)
+                                    || rawCaptionTracks.find(t => t.kind !== 'asr')
+                                    || rawCaptionTracks[0];
+                                captionBaseUrl = best?.baseUrl || null;
+                            }
+
                             return {
-                                hasTracks: tracks.length > 0,
-                                tracks: tracks.map(t => ({
+                                hasTracks: rawCaptionTracks.length > 0,
+                                tracks: rawCaptionTracks.map(t => ({
                                     lang: t.languageCode || '',
                                     langName: t.name?.simpleText || '',
                                     vssId: t.vssId || '',
@@ -187,6 +213,7 @@ async function getPageContent() {
                                 })),
                                 activeVssId,
                                 prerenderedText,
+                                captionBaseUrl,
                             };
                         } catch (e) { return { error: String(e) }; }
                     }
@@ -248,6 +275,31 @@ async function getPageContent() {
                     } else {
                         transcriptText = `[TRANSCRIPT]\n\n${meta.prerenderedText}`;
                     }
+                }
+
+                // Via B: fetch de la timedtext API des del sidebar (bypassa la CSP de YouTube).
+                // El MAIN world ens ha retornat captionBaseUrl; el sidebar té <all_urls> i pot fer-ho.
+                if (!transcriptText && meta.captionBaseUrl) {
+                    try {
+                        const resp = await fetch(meta.captionBaseUrl + '&fmt=json3');
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            const lines = (data.events || [])
+                                .filter(e => e.segs)
+                                .map(e => e.segs.map(s => s.utf8 ?? '').join('').replace(/\n/g, ' ').trim())
+                                .filter(Boolean);
+                            const timedtextFetched = lines.join(' ');
+                            if (timedtextFetched.length > 50) {
+                                if (resolvedTrack) {
+                                    const lang = resolvedTrack.lang || '';
+                                    const isAsr = !!resolvedTrack.isAsr;
+                                    transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${timedtextFetched}`;
+                                } else {
+                                    transcriptText = `[TRANSCRIPT]\n\n${timedtextFetched}`;
+                                }
+                            }
+                        }
+                    } catch { /* timedtext API no disponible — Step 2 com a fallback */ }
                 }
 
                 // Step 2 — ISOLATED world: obrir descripció, clicar "Mostra la transcripció"

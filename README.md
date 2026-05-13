@@ -2,121 +2,121 @@
 
 Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — sense fer seguiment, sense telemetria, sense dades que pugin al núvol.
 
-[![Download for Firefox](https://img.shields.io/badge/Firefox-Download-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
-[![Download for Chrome](https://img.shields.io/badge/Chrome-Download-4285F4?logo=googlechrome)](https://chromewebstore.google.com)
-[![License MPL-2.0](https://img.shields.io/badge/License-MPL--2.0-blue)](LICENSE)
+[![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
+[![Disponible a Chrome Web Store](https://img.shields.io/badge/Chrome-Pròximament-4285F4?logo=googlechrome)](#)
+[![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
+[![CI](https://github.com/SergiXaudiera/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/SergiXaudiera/extensio-resumir-contingut/actions/workflows/ci.yml)
 
 ---
 
-## Features
+## Funcionalitats
 
-- **Resumeix amb IA** — un sol clic per obtenir un resum estructurat
-- **YouTube i Hacker News** — extracció intel·ligent de transcripcions i comentaris
-- **Lectura biònica** — mode de lectura ràpida amb fixació configurable
-- **Exporta a Markdown** — copia directa o envia a Obsidian
+- **Resum amb IA** — un sol clic per obtenir un resum estructurat de qualsevol pàgina
+- **YouTube i Hacker News** — extracció intel·ligent de transcripcions i fils de comentaris
+- **Lectura biònica** — mode de lectura ràpida amb nivell de fixació configurable
+- **Exporta a Markdown** — copia directament o envia a [Obsidian](https://obsidian.md)
 - **Múltiples temes** — sistema, clar, fosc, solarized, gris
-- **Estadístiques** — seguiment de tokens i velocitat
-- **Privadesa completa** — tot local, cap servidor, cap seguiment
+- **Estadístiques d'ús** — seguiment de tokens i velocitat de generació
+- **Privadesa total** — tot s'executa en local; cap servidor propi, cap seguiment
 
 ---
 
-## Installation
+## Instal·lació
 
 ### Firefox
 
-1. **Via Mozilla Add-ons** (recomanat):
-   - Visita [addons.mozilla.org](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
-   - Clica «Afegir a Firefox»
+**Via Mozilla Add-ons** (recomanat):
+1. Visita [addons.mozilla.org/firefox/addon/resumir-contingut](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
+2. Clica «Afegir a Firefox»
 
-2. **Per desenvolupament** (temporal):
-   - Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
-   - Obre `about:debugging#/runtime/this-firefox`
-   - Clica «Carrega complemento temporal» i selecciona `manifest.json`
+**Per a desenvolupament** (temporal):
+1. Clona el repo: `git clone https://github.com/SergiXaudiera/extensio-resumir-contingut.git`
+2. Obre `about:debugging#/runtime/this-firefox`
+3. Clica «Carrega complement temporal» i selecciona `manifest.json`
 
 ### Chrome / Edge / Brave
 
-1. **Via Chrome Web Store** (pròximament):
-   - Enllaç disponible a breus
-   
-2. **Per desenvolupament** (temporal):
-   - Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
-   - Obre `chrome://extensions` i activa «Mode de desenvolupador»
-   - Clica «Carrega extensió no empaquetada» i selecciona la carpeta del repo
+**Via Chrome Web Store** (pròximament disponible):
+
+**Per a desenvolupament** (temporal):
+1. Clona el repo: `git clone https://github.com/SergiXaudiera/extensio-resumir-contingut.git`
+2. Obre `chrome://extensions` i activa el «Mode de desenvolupador»
+3. Clica «Carrega extensió desempaquetada» i selecciona la carpeta del repo
 
 ---
 
-## Setup
+## Configuració
 
-1. Obri la barra lateral o vés a **Extensions > Resumir contingut > Configuració**
-2. Enganxa la teva **API Key de Google Gemini** (gratis a [aistudio.google.com](https://aistudio.google.com/app/apikey))
+1. Obre la barra lateral o vés a **Extensions › Resumir contingut › Opcions**
+2. Enganxa la teva **API Key de Google Gemini** (gratuïta a [aistudio.google.com](https://aistudio.google.com/app/apikey))
 3. Desa els canvis i comença a resumir
 
 ---
 
-## Architecture
+## Arquitectura
 
 ```
-manifest.json               # Configuració MV3
-ext.js                     # Cross-browser wrapper (Firefox ↔ Chromium)
-background.js              # Service worker, context menu
-sidebar/                   # Main UI (HTML + CSS + JS modules)
-  sidebar.js               # Orchestrator
-  summary.js               # Generation logic
-  api.js                   # Gemini streaming client
-  content.js               # Text extraction (YouTube, HN, Readability)
-  cache.js                 # Local cache + stats
-options/                   # Settings page
-tests/                     # Unit tests (160/160 passing)
+manifest.base.json          # Configuració MV3 compartida (Firefox + Chromium)
+ext.js                      # Wrapper cross-browser (Firefox ↔ Chromium)
+background.js               # Service worker i menú contextual
+sidebar/
+  sidebar.js                # Orquestrador principal
+  summary.js                # Lògica de generació
+  api.js                    # Client de streaming Gemini (SSE)
+  content.js                # Extracció de text (YouTube, HN, Readability)
+  cache.js                  # Caché local i estadístiques
+  history.js                # Historial de resums
+options/                    # Pàgina de configuració
+shared/                     # Models i valors per defecte compartits
+tests/                      # Tests unitaris i d'integració
 ```
+
+Consulta [CLAUDE.md](CLAUDE.md) per a detalls d'arquitectura i ordres de compilació.
 
 ---
 
-## Development
+## Desenvolupament
 
 ```bash
-# Run tests
+# Executar els tests
 npm test
 
-# Build for all browsers
+# Compilar per a tots els navegadors
 npm run build
 
-# Check code quality (lint + tests)
+# Verificació completa pre-release (lint + tests + manifests)
 npm run prerelease
 
-# Switch to dev mode
+# Activar mode desenvolupament (icones DEV)
 npm run dev
 
-# Switch to production mode
+# Tornar a mode producció
 npm run prod
 ```
 
-See [CLAUDE.md](CLAUDE.md) for detailed architecture and build commands.
+---
+
+## Privadesa i seguretat
+
+- **Sense seguiment**: l'API key, les preferències i la caché es guarden en local
+- **Sense telemetria**: l'extensió només crida a l'API de Google Gemini
+- **Permisos mínims**: `<all_urls>` és opcional i es demana en temps d'execució
+- **Seguretat**: CSP restrictiva, protecció SSRF, permisos mínims necessaris
+
+Llegeix la [Política de privadesa](PRIVACY_POLICY.md) per a més detalls.
 
 ---
 
-## Privacy & Security
+## Contribucions
 
-- **No tracking**: All data stays local (API key, preferences, cache)
-- **No telemetry**: Only calls Google Gemini API (no third-party servers)
-- **No permissions abuse**: `<all_urls>` is optional (requested at runtime)
-- **Security first**: CSP, SSRF protection, minimal permissions
+Les contribucions són benvingudes. Llegeix [CONTRIBUTING.md](CONTRIBUTING.md) per saber com participar.
 
 ---
 
-## Contributing
-
-1. Fork this repo
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Commit changes: `git commit -m "Add my feature"`
-4. Push: `git push origin feature/my-feature`
-5. Open a Pull Request
-
----
-
-## License
+## Llicència
 
 [Mozilla Public License 2.0 (MPL-2.0)](LICENSE)
 
 ---
 
-Made with ❤️ in Banyoles
+Fet amb ❤️ a Banyoles

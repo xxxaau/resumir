@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // sidebar/summary.js
 // Core summary generation logic extracted from sidebar.js
 
@@ -280,22 +283,22 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 break; // Request successful
             } catch (e) {
                 if (signal.aborted) throw e;
-                const msg = e.message.toLowerCase();
-                const isRetryable =
-                    msg.includes("429") ||
-                    msg.includes("quota") ||
-                    msg.includes("exhausted") ||
-                    msg.includes("resource has been exhausted") ||
-                    msg.includes("overloaded") ||
-                    msg.includes("500") ||
-                    msg.includes("502") ||
-                    msg.includes("503") ||
-                    msg.includes("service unavailable") ||
-                    msg.includes("model not found") ||
-                    msg.includes("model unavailable") ||
-                    msg.includes("model is not available") ||
-                    msg.includes("404") ||
-                    msg.includes("not found");
+                // Prefer status-based classification when the error came from
+                // callGeminiStream (it sets e.status from the HTTP response).
+                // Fallback to message substring for network/timeout errors.
+                const status = typeof e.status === "number" ? e.status : null;
+                const msg = (e.message || "").toLowerCase();
+                const isRetryable = status
+                    ? (status === 404 || status === 429 || status === 500 || status === 502 || status === 503)
+                    : (
+                        msg.includes("quota") ||
+                        msg.includes("exhausted") ||
+                        msg.includes("overloaded") ||
+                        msg.includes("service unavailable") ||
+                        msg.includes("model not found") ||
+                        msg.includes("model unavailable") ||
+                        msg.includes("model is not available")
+                    );
                 if (isRetryable) {
                     const attempt = modelsToTry.indexOf(tryModel) + 1;
                     console.warn(`[${attempt}/${modelsToTry.length}] Model ${tryModel} unavailable. Trying next...`, e.message);
@@ -361,51 +364,53 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
 /**
  * Classifies API errors and returns user-friendly messages.
+ * Prefers err.status (set by callGeminiStream) over substring matching.
  */
 function classifyError(err) {
     const msg = String(err?.message || err || "");
     const msgLower = msg.toLowerCase();
-    
+    const status = typeof err?.status === "number" ? err.status : null;
+
     // API key invalid or revoked (401/403)
-    if (msg.includes("401") || msg.includes("403") || msgLower.includes("api key not valid")) {
+    if (status === 401 || status === 403 || msgLower.includes("api key not valid")) {
         return {
             message: "La clau API no és vàlida o ha estat revocada. Comprova-la a la configuració.",
             showConfig: true
         };
     }
-    
-    // API key missing
-    if (msgLower.includes("api key")) {
+
+    // API key missing (no HTTP yet — surfaced from summary.js as an Error)
+    if (!status && msgLower.includes("api key")) {
         return {
             message: msg,
             showConfig: true
         };
     }
 
-    // Model not found (404) — not a config issue, just the model is unavailable
-    if (msg.includes("404") || msgLower.includes("not found") || msgLower.includes("model")) {
+    // Quota exceeded (429) — checked before generic 4xx so it gets its own message
+    if (status === 429 || msgLower.includes("quota") || msgLower.includes("exhausted")) {
         return {
-            message: "Cap dels models disponibles ha respost. Pot ser que els models triats no estiguin disponibles ara mateix. Proveu-ho més tard o canvieu els models favorits a la configuració.",
-            showConfig: true
+            message: "Tots els models alternatius han excedit la quota diària. Proveu-ho demà o afegiu més models favorits a la configuració.",
+            showConfig: false
         };
     }
 
-    // Service unavailable (503)
-    if (msg.includes("503") || msgLower.includes("service unavailable") || msgLower.includes("overloaded")) {
+    // Service unavailable (5xx)
+    if ((status && status >= 500) || msgLower.includes("service unavailable") || msgLower.includes("overloaded")) {
         return {
             message: "El servei de Gemini no està disponible ara mateix. Proveu-ho d'aquí a uns minuts.",
             showConfig: false
         };
     }
 
-    // Quota exceeded (429)
-    if (msg.includes("429") || msgLower.includes("quota") || msgLower.includes("exhausted")) {
+    // Model not found (404) — not a config issue, just the model is unavailable
+    if (status === 404 || msgLower.includes("model not found") || msgLower.includes("model unavailable") || msgLower.includes("model is not available")) {
         return {
-            message: "Tots els models alternatius han excedit la quota diària. Proveu-ho demà o afegiu més models favorits a la configuració.",
-            showConfig: false
+            message: "Cap dels models disponibles ha respost. Pot ser que els models triats no estiguin disponibles ara mateix. Proveu-ho més tard o canvieu els models favorits a la configuració.",
+            showConfig: true
         };
     }
-    
+
     // Permission errors (host permissions)
     if (msgLower.includes("permission") || msgLower.includes("access denied") || msgLower.includes("missing host permission")) {
         return {
@@ -413,7 +418,7 @@ function classifyError(err) {
             showConfig: true
         };
     }
-    
+
     // Timeout or connection abort
     if (err.name === 'AbortError' || msgLower.includes('aborted') || msgLower.includes('timeout')) {
         return {
@@ -442,5 +447,5 @@ function handleTrigger(startSummaryFn, data) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { classifyError, buildFallbackList };
+    module.exports = { classifyError, buildFallbackList, startSummary };
 }

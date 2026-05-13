@@ -28,6 +28,8 @@ build_*/
 .claude/
 .agent/
 .playwright-mcp/
+docs/superpowers/
+docs/internal/
 
 # Environment Variables
 .env
@@ -37,3 +39,6 @@ build_*/
 .vscode/
 .idea/
 .superpowers/
+
+# Coverage reports
+coverage/

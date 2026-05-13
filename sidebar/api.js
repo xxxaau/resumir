@@ -1,11 +1,17 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // sidebar/api.js
-// Handles all communication with the Gemini API
-// CURATED_MODELS is defined in shared/models.js (loaded before this file)
-// EUR_RATE is defined in shared/models.js (loaded before this file)
+// Handles all communication with the Gemini API.
+// CURATED_MODELS, DEFAULT_MODEL_INFO and EUR_RATE come from shared/models.js
+// (loaded before this file in the sidebar bundle).
+
+/** Cap d'una resposta més gran que això (en bytes acumulats) avorta el stream. */
+const MAX_STREAM_BYTES = 5 * 1024 * 1024;
 
 /**
  * Returns curated model info (prices in EUR, rpd) for a given model ID.
- * Falls back to generic Flash defaults for unknown models.
+ * Falls back to DEFAULT_MODEL_INFO for unknown models.
  */
 function getCuratedModelInfo(modelId) {
     const found = CURATED_MODELS.find(m => modelId && (
@@ -23,15 +29,24 @@ function getCuratedModelInfo(modelId) {
             contextWindow: found.contextWindow
         };
     }
-    return { label: modelId, priceIn: 0.10 * EUR_RATE, priceOut: 0.40 * EUR_RATE, rpd: 1500 };
+    return {
+        label:         modelId,
+        priceIn:       DEFAULT_MODEL_INFO.priceIn  * EUR_RATE,
+        priceOut:      DEFAULT_MODEL_INFO.priceOut * EUR_RATE,
+        rpd:           DEFAULT_MODEL_INFO.rpd,
+        contextWindow: DEFAULT_MODEL_INFO.contextWindow
+    };
 }
 
 /**
- * Calls the Gemini API using streaming (Server-Sent Events)
+ * Calls the Gemini API using streaming (Server-Sent Events).
+ *
+ * On HTTP failure, throws an Error whose `.status` is the HTTP status code,
+ * letting callers classify retryability without parsing the message string.
  */
 async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, onChunk, onUsage) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse`;
-    
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:streamGenerateContent?alt=sse`;
+
     let body;
 
     if (modelName.toLowerCase().includes("gemma")) {
@@ -83,7 +98,17 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
             const errorData = await response.json();
             errorMsg = errorData.error?.message || errorMsg;
         } catch(e) {}
-        throw new Error(`[007] Error API (${response.status}): ${errorMsg}`);
+        const err = new Error(`[007] Error API (${response.status}): ${errorMsg}`);
+        err.status = response.status;
+        throw err;
+    }
+
+    // Reject responses whose body is not the SSE stream we expect. A reverse
+    // proxy or captive portal returning HTML would otherwise feed garbage to
+    // the JSON parser line-by-line.
+    const ct = response.headers.get("content-type") || "";
+    if (!ct.includes("text/event-stream")) {
+        throw new Error(`[009] Resposta inesperada del servidor (Content-Type: ${ct || "absent"}).`);
     }
 
     if (!response.body) throw new Error("[008] ReadableStream not supported");
@@ -92,41 +117,54 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
     let lastUsageMeta = null;
+    let totalBytes = 0;
 
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
+            totalBytes += value?.byteLength || 0;
+            if (totalBytes > MAX_STREAM_BYTES) {
+                // Defence against runaway responses (proxy injection, mistuned
+                // model returning gigabytes). 5 MB covers any normal summary.
+                try { reader.cancel(); } catch (_e) {}
+                throw new Error("[010] Stream massa gran; petició cancel·lada per seguretat.");
+            }
 
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
+            const chunk = decoder.decode(value, { stream: true });
+            buffer += chunk;
 
-        for (const line of lines) {
-            if (line.trim() === "") continue;
-            if (line.startsWith("data: ")) {
-                const jsonStr = line.slice(6);
-                if (jsonStr === "[DONE]") continue;
+            const lines = buffer.split("\n");
+            buffer = lines.pop();
 
-                try {
-                    const data = JSON.parse(jsonStr);
-                    const parts = data.candidates?.[0]?.content?.parts ?? [];
-                    for (const part of parts) {
-                        if (part.thought) continue; // thinking models: skip reasoning tokens
-                        if (part.text) onChunk(part.text);
-                    }
-                    if (data.usageMetadata) {
-                        lastUsageMeta = data.usageMetadata;
-                        if (typeof onUsage === "function") {
-                            onUsage(lastUsageMeta);
+            for (const line of lines) {
+                if (line.trim() === "") continue;
+                if (line.startsWith("data: ")) {
+                    const jsonStr = line.slice(6);
+                    if (jsonStr === "[DONE]") continue;
+
+                    try {
+                        const data = JSON.parse(jsonStr);
+                        const parts = data.candidates?.[0]?.content?.parts ?? [];
+                        for (const part of parts) {
+                            if (part.thought) continue; // thinking models: skip reasoning tokens
+                            if (part.text) onChunk(part.text);
                         }
+                        if (data.usageMetadata) {
+                            lastUsageMeta = data.usageMetadata;
+                            if (typeof onUsage === "function") {
+                                onUsage(lastUsageMeta);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Error parsing stream JSON", e);
                     }
-                } catch (e) {
-                    console.warn("Error parsing stream JSON", e);
                 }
             }
         }
+    } finally {
+        try { reader.releaseLock(); } catch (_e) {}
     }
 
     return {

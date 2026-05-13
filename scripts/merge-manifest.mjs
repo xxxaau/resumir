@@ -3,7 +3,9 @@
  * merge-manifest.mjs
  * Merges manifest.base.json + manifest.<target>.patch.json.
  *
- * Arrays are CONCATENATED (e.g., permissions: base + patch).
+ * Arrays of strings (e.g. permissions, host_permissions, optional_permissions)
+ * are concatenated and deduplicated, preserving first-seen order.
+ * Arrays of non-strings are concatenated without dedup.
  * Objects are deep-merged (patch overrides base).
  *
  * Usage:
@@ -24,11 +26,19 @@ function readJson(file) {
     return JSON.parse(raw);
 }
 
+function mergeArrays(a, b) {
+    const allStrings = [...a, ...b].every(v => typeof v === "string");
+    if (allStrings) {
+        return [...new Set([...a, ...b])];
+    }
+    return [...a, ...b];
+}
+
 function deepMerge(base, patch) {
     const result = { ...base };
     for (const key of Object.keys(patch)) {
         if (Array.isArray(patch[key]) && Array.isArray(result[key])) {
-            result[key] = [...result[key], ...patch[key]];
+            result[key] = mergeArrays(result[key], patch[key]);
         } else if (
             patch[key] !== null && typeof patch[key] === "object" && !Array.isArray(patch[key]) &&
             result[key] !== null && typeof result[key] === "object" && !Array.isArray(result[key])

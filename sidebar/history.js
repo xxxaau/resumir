@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // sidebar/history.js
 // History panel: browse and reload cached summaries from the sidebar
 
@@ -49,7 +52,7 @@ async function openHistoryPanel() {
  */
 function _closePanel(panelEl) {
     panelEl.classList.add("hidden");
-    panelEl.innerHTML = "";
+    panelEl.replaceChildren();
     // Show toolbar again, hide back bar (only visible when in history detail view)
     const toolbar = document.querySelector(".toolbar");
     if (toolbar) toolbar.classList.remove("hidden");
@@ -101,7 +104,7 @@ async function loadHistoryEntry(entry) {
     // Hide history panel without restoring previous state
     const historyPanel = document.getElementById("history-panel");
     historyPanel.classList.add("hidden");
-    historyPanel.innerHTML = "";
+    historyPanel.replaceChildren();
 
     // Hide toolbar and show back bar (consistent whether coming from history list or cache badge)
     const toolbar = document.querySelector(".toolbar");
@@ -131,7 +134,7 @@ async function loadHistoryEntry(entry) {
  * @param {Array} entries
  */
 function _renderHistoryPanel(panel, entries) {
-    panel.innerHTML = "";
+    panel.replaceChildren();
 
     const header = document.createElement("div");
     header.className = "history-header";
@@ -205,7 +208,7 @@ function openSourcePanel(text) {
 
     // Tancar history panel si estava obert (sense restaurar estat)
     historyPanel.classList.add("hidden");
-    historyPanel.innerHTML = "";
+    historyPanel.replaceChildren();
 
     if (backBar) backBar.classList.add("hidden");
     // Hide toolbar (no summarize/plugins while viewing source)
@@ -223,7 +226,7 @@ function openSourcePanel(text) {
     errorDiv.classList.add("hidden");
 
     // Construir panell
-    sourcePanel.innerHTML = "";
+    sourcePanel.replaceChildren();
 
     const header = document.createElement("div");
     header.className = "history-header";

@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 /**
  * ext.js - Cross-browser extension API wrapper
  * 
@@ -98,6 +101,22 @@ const ext = {
                 return baseApi.sidePanel.setPanelBehavior(options || {
                     openPanelOnActionClick: true
                 });
+            }
+        },
+
+        /**
+         * Toggles the sidebar/side panel (open if closed, close if open).
+         * Firefox: browser.sidebarAction.toggle()
+         * Chromium: no native toggle — falls back to open() (panel is already
+         *           managed by setPanelBehavior + openPanelOnActionClick).
+         */
+        toggle: async (windowId) => {
+            if (isFirefox) {
+                if (baseApi.sidebarAction && baseApi.sidebarAction.toggle) {
+                    return baseApi.sidebarAction.toggle();
+                }
+            } else {
+                return ext.sidebar.open(windowId);
             }
         }
     }

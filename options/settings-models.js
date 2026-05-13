@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // options/settings-models.js
 // Selecció de models i gestió de favorits
 // CURATED_MODELS ve de shared/models.js (carregat abans d'aquest fitxer)

@@ -33,7 +33,8 @@ test("classifyError - permís denegat mostra config i missatge de permisos", () 
 });
 
 test("classifyError - error 403 classificat igual que 401", () => {
-    const result = classifyError(new Error("Error API (403): Forbidden"));
+    const err = Object.assign(new Error("Forbidden"), { status: 403 });
+    const result = classifyError(err);
     assert.equal(result.showConfig, true);
     assert.ok(result.message.includes("clau API"));
 });

@@ -159,20 +159,18 @@ test("getPageContent - HN retorna discussió sense article quan articleUrl és n
 });
 
 test("getPageContent - HN combina article i discussió quan articleUrl és extern", async () => {
+    // El fetch de l'article s'executa DINS del content script (func injected via executeScriptSafe).
+    // En els tests, executeScriptSafe retorna scriptResult directament sense executar la funció.
+    // Per tant simulem que el content script ja ha fet el fetch i retorna articleText poblat.
     const hnTab = { id: 2, url: "https://news.ycombinator.com/item?id=12345", title: "HN Thread" };
-    const articleHtml = "<html><body><p>" + "Text de l'article. ".repeat(20) + "</p></body></html>";
-    global.fetch = async () => ({
-        ok: true,
-        headers: { get: (k) => k === "content-type" ? "text/html; charset=utf-8" : null },
-        text: async () => articleHtml
-    });
-    global.Readability = class {
-        constructor(doc) { this._doc = doc; }
-        parse() { return { textContent: "Text de l'article. ".repeat(20) }; }
-    };
     global.ext = makeExt({
         tabs: [hnTab],
-        scriptResult: { title: "Article Title", articleUrl: "https://example.com/article", comments: "- Comentari sobre l'article" },
+        scriptResult: {
+            title: "Article Title",
+            articleUrl: "https://example.com/article",
+            articleText: "Text de l'article. ".repeat(20),
+            comments: "- Comentari sobre l'article"
+        },
     });
     const result = await getPageContent();
     assert.ok(result.text.includes("ARTICLE:"), "Ha d'incloure la secció ARTICLE");

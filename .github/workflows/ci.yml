@@ -8,7 +8,10 @@ on:
 jobs:
   quality:
     name: Lint i tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -26,3 +29,12 @@ jobs:
 
       - name: Tests unitaris
         run: npm test
+
+      - name: Pre-release check
+        run: npm run prerelease
+
+      - name: Verificar vendors
+        run: npm run vendor:verify
+
+      - name: web-ext lint (Firefox)
+        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.test.*' '*.zip'

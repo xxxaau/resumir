@@ -31,8 +31,7 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 
 ## 3. YouTube i contingut de tercers
 
-- Quan resums vídeos de **YouTube**, l'extensió accedeix a les dades del reproductor (`ytInitialPlayerResponse`) per obtenir la transcripció automàtica del vídeo. Això requereix executar un petit script en el context de la pàgina (`world: "MAIN"`).
-- L'extensió fa una petició `fetch` als servidors de YouTube per descarregar el text de la transcripció. **No s'envien dades de l'usuari** en aquesta petició.
+- Quan resums vídeos de **YouTube**, l'extensió executa un petit script en el context de la pàgina (`world: "MAIN"`) per llegir les dades del reproductor (`ytInitialPlayerResponse`) ja carregades al navegador i extreure'n la transcripció automàtica. **No es fa cap petició de xarxa addicional als servidors de YouTube.** No s'envien dades de l'usuari.
 
 ## 4. Permisos Requerits
 

@@ -36,6 +36,7 @@ function mockFetch(stream, status = 200) {
         ok:         status >= 200 && status < 300,
         status,
         statusText: status === 200 ? "OK" : "HTTP Error",
+        headers:    { get: (h) => h.toLowerCase() === "content-type" ? "text/event-stream" : null },
         json:       async () => ({ error: { message: `Error ${status}` } }),
         body:       stream
     });

@@ -7,29 +7,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { createStorageMock } from "./helpers/storage-mock.mjs";
 
 const require = createRequire(import.meta.url);
-
-// ---------------------------------------------------------------------------
-// Mock de ext.storage.local (in-memory) — mateix patró que cache.test.mjs
-// ---------------------------------------------------------------------------
-
-function createStorageMock() {
-    const store = {};
-    return {
-        async get(keys) {
-            if (typeof keys === "string") return { [keys]: store[keys] };
-            if (Array.isArray(keys)) return Object.fromEntries(keys.map(k => [k, store[k]]));
-            return { ...store };  // handles null (get all)
-        },
-        async set(obj) { Object.assign(store, obj); },
-        async remove(keys) {
-            const ks = typeof keys === "string" ? [keys] : keys;
-            ks.forEach(k => delete store[k]);
-        },
-        _clear() { Object.keys(store).forEach(k => delete store[k]); },
-    };
-}
 
 const storageMock = createStorageMock();
 global.ext = { storage: { local: storageMock } };
@@ -80,6 +60,7 @@ test("listCachedSummaries - retorna entrades vàlides ordenades per data desc", 
     const older = new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString();
     const newer = new Date(now - 1 * 24 * 60 * 60 * 1000).toISOString();
     await storageMock.set({
+        "summary_cache_index": ["summary_cache:https://older.com", "summary_cache:https://newer.com"],
         "summary_cache:https://older.com": makeEntry({ url: "https://older.com", timestamp: older }),
         "summary_cache:https://newer.com": makeEntry({ url: "https://newer.com", timestamp: newer }),
     });

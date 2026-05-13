@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.mjs",
+    "coverage": "c8 --reporter=text --reporter=lcov node --test tests/*.test.mjs",
     "lint": "eslint . --ext .js,.mjs --max-warnings 50 --no-warn-ignored",
     "check": "npm run lint && npm test",
     "build": "node scripts/pwsh-runner.mjs ./build.ps1 -Target all",
@@ -19,10 +20,12 @@
     "version:sync": "node scripts/bump-version.mjs",
     "postversion": "node scripts/bump-version.mjs && node scripts/update-changelog-html.mjs && git add manifest.base.json manifest.json manifest.chromium.json options/settings.html CHANGELOG.md",
     "prerelease": "node scripts/pre-release-check.mjs",
-    "vendor:update": "node scripts/copy-vendor.mjs"
+    "vendor:update": "node scripts/copy-vendor.mjs",
+    "vendor:verify": "node scripts/verify-vendor.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
+    "c8": "^11.0.0",
     "defuddle": "^0.14.0",
     "esbuild": "^0.27.3",
     "eslint": "^9.18.0",

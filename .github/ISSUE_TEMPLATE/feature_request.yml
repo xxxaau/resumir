@@ -1,0 +1,36 @@
+name: Sol·licitud de funcionalitat
+description: Proposa una nova funcionalitat o millora
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Gràcies per la teva proposta! Explica-la amb el màxim detall possible.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema que resol
+      description: Descriu el problema o necessitat que motiva aquesta proposta.
+      placeholder: ex. Ara mateix no és possible...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solució proposada
+      description: Descriu com voldries que funcionés.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considerades (opcional)
+      description: Has considerat altres maneres de resoldre el problema?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context addicional (opcional)
+      description: Captures de pantalla, exemples o qualsevol altra informació útil.

@@ -51,13 +51,15 @@ const JS_FILES = collectFiles(root, (full, rel) =>
     !rel.includes("Readability") &&
     !rel.includes("defuddle") &&
     !full.endsWith(".bundle.js") &&
-    !rel.startsWith("node_modules")
+    !rel.startsWith("node_modules") &&
+    !rel.startsWith("coverage")
 );
 
 /** Fitxers HTML propis */
 const HTML_FILES = collectFiles(root, (full, rel) =>
     extname(full) === ".html" &&
-    !rel.startsWith("node_modules")
+    !rel.startsWith("node_modules") &&
+    !rel.startsWith("coverage")
 );
 
 // ─── Sistema de resultats ────────────────────────────────────────────────────
@@ -79,6 +81,15 @@ check("Manifests: name sense '(DEV)'", () => {
     const base   = readJson(resolve(root, "manifest.base.json"));
     if (base.name.includes("(DEV)")) throw new Error(`manifest.base.json name conté '(DEV)': "${base.name}"`);
     pass("Manifests: name sense '(DEV)'");
+});
+
+check("Manifests: gecko.id sense 'dev'", () => {
+    const ffPatch = readJson(resolve(root, "manifest.firefox.patch.json"));
+    const geckoId = ffPatch?.browser_specific_settings?.gecko?.id ?? "";
+    if (geckoId.toLowerCase().includes("dev")) {
+        throw new Error(`manifest.firefox.patch.json gecko.id conté 'dev': "${geckoId}". Actualitza-ho a l'id de producció abans de publicar.`);
+    }
+    pass("Manifests: gecko.id sense 'dev'");
 });
 
 check("Manifests: versió sincronitzada (package.json = manifest.json = manifest.chromium.json)", () => {
@@ -219,6 +230,49 @@ check("Tests: npm test (0 failures)", () => {
         // Extreu el resum de failures si existeix
         const summary = output.match(/# (fail .+)/im)?.[1] || "hi ha tests fallits";
         throw new Error(summary);
+    }
+});
+
+// 9. ZIPs: existeixen i mida < 4 MB
+check("ZIPs: existeixen i mida < 4 MB", () => {
+    const pkg = readJson(resolve(root, "package.json"));
+    const ver = pkg.version;
+    const targets = ["firefox", "chromium"];
+    const MAX_BYTES = 4 * 1024 * 1024;
+    const errs = [];
+    for (const t of targets) {
+        const zipPath = resolve(root, `resumir-contingut-v${ver}-${t}.zip`);
+        try {
+            const { size } = statSync(zipPath);
+            if (size > MAX_BYTES) errs.push(`${t} ZIP massa gran: ${(size / 1024 / 1024).toFixed(1)} MB`);
+        } catch {
+            errs.push(`ZIP no trobat: resumir-contingut-v${ver}-${t}.zip (executa npm run build primer)`);
+        }
+    }
+    if (errs.length) throw new Error(errs.join(" | "));
+    pass("ZIPs: existeixen i mida < 4 MB");
+});
+
+// 10. CHANGELOG: té una entrada per a la versió actual
+check("CHANGELOG: conté entrada per a la versió actual", () => {
+    const pkg  = readJson(resolve(root, "package.json"));
+    const ver  = pkg.version;
+    const changelog = readText(resolve(root, "CHANGELOG.md"));
+    if (!changelog.includes(`## [${ver}]`)) {
+        throw new Error(`CHANGELOG.md no té entrada '## [${ver}]'. Afegeix-la abans de publicar.`);
+    }
+    pass("CHANGELOG: conté entrada per a la versió actual");
+});
+
+// 11. npm audit: sense vulnerabilitats a dependències de producció
+check("npm audit: sense vulnerabilitats de producció", () => {
+    try {
+        execSync("npm audit --omit=dev --audit-level=moderate", { cwd: root, stdio: "pipe" });
+        pass("npm audit: sense vulnerabilitats de producció");
+    } catch (err) {
+        const output = err.stdout?.toString() || err.stderr?.toString() || "";
+        const summary = output.split("\n").find(l => l.includes("vulnerabilit")) || output.slice(0, 200);
+        throw new Error(summary || "npm audit ha detectat vulnerabilitats");
     }
 });
 

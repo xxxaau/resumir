@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 // shared/models.js
 // Font única de veritat per a la llista de models curats.
 // Carregat via <script> en sidebar.html i options/settings.html.
@@ -17,6 +20,18 @@ const CURATED_MODELS = [
 
 /** Model usat per defecte si l'usuari no n'ha triat cap. */
 const DEFAULT_MODEL_ID = "gemini-3-flash-preview";
+
+/**
+ * Pricing/quota fallback when a model is not in CURATED_MODELS.
+ * Conservative defaults aligned with Gemini Flash tier.
+ * Prices are in USD per 1M tokens; multiply by EUR_RATE for EUR.
+ */
+const DEFAULT_MODEL_INFO = {
+    priceIn: 0.10,
+    priceOut: 0.40,
+    rpd: 1500,
+    contextWindow: 1_000_000,
+};
 
 /**
  * Assegura que favoriteModels existeix a storage.sync.
@@ -46,5 +61,5 @@ async function ensureFavoriteModels() {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID, EUR_RATE };
+    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID, DEFAULT_MODEL_INFO, EUR_RATE };
 }
