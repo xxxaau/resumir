@@ -4,7 +4,6 @@ node_modules/
 # Scripts
 make_zip*.py
 generate_icons_blue.ps1
-set_dev_mode.ps1
 
 # System Files
 .DS_Store
