@@ -37,7 +37,7 @@ $commonFiles = @(
     "Readability.js",
     "theme.js",
     "LICENSE",
-    "PRIVACY_POLICY.md"
+    "docs/PRIVACY_POLICY.md"
 )
 
 $commonDirs = @(
@@ -74,7 +74,7 @@ function New-BuildZip {
     # Copy common files
     foreach ($file in $commonFiles) {
         if (Test-Path $file) {
-            Copy-Item $file "$buildDir\$file"
+            if ($file.Contains("\") -or $file.Contains("/")) { $parent = Split-Path $file; $targetDir = Join-Path $buildDir $parent; if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir | Out-Null } }; Copy-Item $file "$buildDir\$file"
         }
         else {
             Write-Host "  WARNING: $file not found!" -ForegroundColor Yellow
@@ -84,7 +84,7 @@ function New-BuildZip {
     # Copy extra files (browser-specific)
     foreach ($file in $ExtraFiles) {
         if (Test-Path $file) {
-            Copy-Item $file "$buildDir\$file"
+            if ($file.Contains("\") -or $file.Contains("/")) { $parent = Split-Path $file; $targetDir = Join-Path $buildDir $parent; if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir | Out-Null } }; Copy-Item $file "$buildDir\$file"
         }
         else {
             Write-Host "  WARNING: $file not found!" -ForegroundColor Yellow

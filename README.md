@@ -71,7 +71,7 @@ shared/                     # Models i valors per defecte compartits
 tests/                      # Tests unitaris i d'integració
 ```
 
-Consulta [CLAUDE.md](CLAUDE.md) per a detalls d'arquitectura i ordres de compilació.
+Consulta [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md) per a mapa de projectes, o [docs/MODELS-WORKFLOW.md](docs/MODELS-WORKFLOW.md) per a detalls tècnics d'API i models.
 
 ---
 
@@ -103,13 +103,13 @@ npm run prod
 - **Permisos mínims**: `<all_urls>` és opcional i es demana en temps d'execució
 - **Seguretat**: CSP restrictiva, protecció SSRF, permisos mínims necessaris
 
-Llegeix la [Política de privadesa](PRIVACY_POLICY.md) per a més detalls.
+Llegeix la [Política de privadesa](docs/PRIVACY_POLICY.md) per a més detalls.
 
 ---
 
 ## Contribucions
 
-Les contribucions són benvingudes. Llegeix [CONTRIBUTING.md](CONTRIBUTING.md) per saber com participar.
+Les contribucions són benvingudes. Llegeix [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) per saber com participar.
 
 ---
 

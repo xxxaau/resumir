@@ -17,10 +17,10 @@ $ffProdPatchPath = Join-Path $root "manifest.firefox.prod.patch.json"
 $chromiumPatchPath = Join-Path $root "manifest.chromium.patch.json"
 $chromiumProdPatchPath = Join-Path $root "manifest.chromium.prod.patch.json"
 $iconsDir    = Join-Path $root "icons"
-$imgSrcDir   = Join-Path $root "img\$Mode"
+$iconsSrcDir = Join-Path $root "icons\$Mode"
 
-if (-not (Test-Path $imgSrcDir)) {
-    Write-Error "No s'ha trobat '$imgSrcDir'."
+if (-not (Test-Path $iconsSrcDir)) {
+    Write-Error "No s'ha trobat '$iconsSrcDir'."
     exit 1
 }
 
@@ -70,9 +70,9 @@ Write-Host "  Manifests regenerats." -ForegroundColor DarkGray
 
 $sizes = @(16, 32, 48, 64, 96, 128)
 foreach ($sz in $sizes) {
-    $src = Join-Path $imgSrcDir "icon-$sz.png"
-    $dst = Join-Path $iconsDir  "icon-$sz.png"
+    $src = Join-Path $iconsSrcDir "icon-$sz.png"
+    $dst = Join-Path $iconsDir     "icon-$sz.png"
     Copy-Item $src $dst -Force
 }
-Write-Host "  Icones copiades des de img/$Mode/." -ForegroundColor DarkGray
+Write-Host "  Icones copiades des de icons/$Mode/." -ForegroundColor DarkGray
 Write-Host "Fet! Mode: $($Mode.ToUpper())" -ForegroundColor Green

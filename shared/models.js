@@ -6,20 +6,37 @@
 // Carregat via <script> en sidebar.html i options/settings.html.
 // Importat via require() en els tests Node.
 
-/** Taxa de conversió USD → EUR. Font: referència editorial, actualitzar cada any. */
-const EUR_RATE = 0.92; // 2026-Q1 (font: ECB)
+/** Taxa de conversió USD → EUR. Font: referència editorial, actualitzar cada trimestre.
+ * Last updated: May 18, 2026 (Q2 2026 rate from ECB)
+ */
+const EUR_RATE = 0.92; // 2026-Q2
 
 const CURATED_MODELS = [
-    { id: "gemini-3-flash-preview",    label: "Gemini 3 Flash",       priceIn: 0.50, priceOut: 3.00,  rpd: 500,    contextWindow: 1_048_576, fallback: true  },
-    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",       priceIn: 1.25, priceOut: 5.00,  rpd: 50,     contextWindow: 1_000_000, fallback: false },
-    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",     priceIn: 0.30, priceOut: 2.50,  rpd: 500,    contextWindow: 1_000_000, fallback: true  },
-    { id: "gemini-2.0-flash",          label: "Gemini 2.0 Flash",     priceIn: 0.10, priceOut: 0.40,  rpd: 1500,   contextWindow: 1_000_000, fallback: true  }, // deprecat 01/06/2026
-    { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite",priceIn: 0.07, priceOut: 0.30,  rpd: 999999, contextWindow: 1_000_000, fallback: true  }, // deprecat 01/06/2026
-    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",        priceIn: 0.15, priceOut: 0.15,  rpd: 2000,   contextWindow: 131_072,   fallback: true  },
+    // Tier: Flash Lite (més ràpids, més económics) — recomanat per a primer ús
+    { id: "gemini-3.1-flash-lite",     label: "Gemini 3.1 Flash Lite",  priceIn: 0.25,  priceOut: 1.50,   rpd: 2000,   contextWindow: 1_000_000, fallback: true  },
+    
+    // Tier: Flash (estable, equilibrat)
+    { id: "gemini-3-flash-preview",    label: "Gemini 3 Flash",        priceIn: 0.50,  priceOut: 3.00,   rpd: 1000,   contextWindow: 1_048_576, fallback: true  },
+    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",      priceIn: 0.30,  priceOut: 2.50,   rpd: 500,    contextWindow: 1_000_000, fallback: false },
+    
+    // Tier: Pro (més potent, més lent)
+    { id: "gemini-3.1-pro-preview",    label: "Gemini 3.1 Pro",        priceIn: 2.00,  priceOut: 12.00,  rpd: 100,    contextWindow: 1_048_576, fallback: false },
+    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",        priceIn: 1.25,  priceOut: 5.00,   rpd: 50,     contextWindow: 1_000_000, fallback: false },
+    
+    // Open models (alternativa sense cost)
+    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",         priceIn: 0.15,  priceOut: 0.15,   rpd: 2000,   contextWindow: 131_072,   fallback: true  },
+    
+    // DEPRECAT (mantinguts per a fallback de usuaris legacy, eliminació prevista 02/06/2026)
+    { id: "gemini-2.0-flash",          label: "Gemini 2.0 Flash (deprecat)", priceIn: 0.10, priceOut: 0.40, rpd: 1500, contextWindow: 1_000_000, fallback: true },
+    { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite (deprecat)", priceIn: 0.075, priceOut: 0.30, rpd: 999999, contextWindow: 1_000_000, fallback: true },
 ];
 
-/** Model usat per defecte si l'usuari no n'ha triat cap. */
-const DEFAULT_MODEL_ID = "gemini-3-flash-preview";
+/**
+ * Model usat per defecte si l'usuari no n'ha triat cap.
+ * PRIORITAT: Lite models per a millor UX en primera càrrega (ràpid + económic)
+ * Gemini 3.1 Flash Lite és el més nou i ràpid disponible.
+ */
+const DEFAULT_MODEL_ID = "gemini-3.1-flash-lite";
 
 /**
  * Pricing/quota fallback when a model is not in CURATED_MODELS.

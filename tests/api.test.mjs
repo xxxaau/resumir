@@ -23,7 +23,7 @@ const { getCuratedModelInfo } = require("../sidebar/api.js");
 
 test("getCuratedModelInfo - model conegut retorna label i rpd correctes", () => {
     const info = getCuratedModelInfo("gemini-2.0-flash");
-    assert.equal(info.label, "Gemini 2.0 Flash");
+    assert.equal(info.label, "Gemini 2.0 Flash (deprecat)");
     assert.equal(info.rpd, 1500);
     assert.ok(info.priceIn > 0, "priceIn ha de ser positiu");
     assert.ok(info.priceOut > 0, "priceOut ha de ser positiu");
@@ -71,8 +71,8 @@ test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
     }
 });
 
-test("CURATED_MODELS - el primer model és el model per defecte (gemini-3-flash-preview)", () => {
-    assert.equal(CURATED_MODELS[0].id, "gemini-3-flash-preview");
+test("CURATED_MODELS - el primer model és el model per defecte (gemini-3.1-flash-lite)", () => {
+    assert.equal(CURATED_MODELS[0].id, "gemini-3.1-flash-lite");
 });
 
 // ---------------------------------------------------------------------------

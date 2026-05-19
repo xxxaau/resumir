@@ -17,11 +17,11 @@ desktop.ini
 *.crx
 background.bundle.js
 sidebar.bundle.js
-build_*/
+build/
 .backups/
 
 # Temporary output files
-*.txt
+.dev/
 *.log
 
 # Internal / IDE-assisted development
@@ -30,6 +30,18 @@ build_*/
 .playwright-mcp/
 docs/superpowers/
 docs/internal/
+
+# Private documentation (internal-only)
+docs/AUDIT-REPORT*.md
+docs/FILE-ORGANIZATION.md
+docs/DIRECTORY-CONSOLIDATION.md
+docs/MODELS-WORKFLOW.md
+docs/PROJECT-STRUCTURE.md
+docs/THIRD_PARTY.md
+docs/architecture/
+docs/developer/
+docs/user-guide/
+docs/marketplace/
 
 # Environment Variables
 .env
