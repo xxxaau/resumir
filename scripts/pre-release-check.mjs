@@ -241,12 +241,12 @@ check("ZIPs: existeixen i mida < 4 MB", () => {
     const MAX_BYTES = 4 * 1024 * 1024;
     const errs = [];
     for (const t of targets) {
-        const zipPath = resolve(root, `resumir-contingut-v${ver}-${t}.zip`);
+        const zipPath = resolve(root, "build", `resumir-contingut-v${ver}-${t}.zip`);
         try {
             const { size } = statSync(zipPath);
             if (size > MAX_BYTES) errs.push(`${t} ZIP massa gran: ${(size / 1024 / 1024).toFixed(1)} MB`);
         } catch {
-            errs.push(`ZIP no trobat: resumir-contingut-v${ver}-${t}.zip (executa npm run build primer)`);
+            errs.push(`ZIP no trobat: build/resumir-contingut-v${ver}-${t}.zip (executa npm run build primer)`);
         }
     }
     if (errs.length) throw new Error(errs.join(" | "));
@@ -257,9 +257,9 @@ check("ZIPs: existeixen i mida < 4 MB", () => {
 check("CHANGELOG: conté entrada per a la versió actual", () => {
     const pkg  = readJson(resolve(root, "package.json"));
     const ver  = pkg.version;
-    const changelog = readText(resolve(root, "CHANGELOG.md"));
+    const changelog = readText(resolve(root, "docs/CHANGELOG.md"));
     if (!changelog.includes(`## [${ver}]`)) {
-        throw new Error(`CHANGELOG.md no té entrada '## [${ver}]'. Afegeix-la abans de publicar.`);
+        throw new Error(`docs/CHANGELOG.md no té entrada '## [${ver}]'. Afegeix-la abans de publicar.`);
     }
     pass("CHANGELOG: conté entrada per a la versió actual");
 });
@@ -273,6 +273,18 @@ check("npm audit: sense vulnerabilitats de producció", () => {
         const output = err.stdout?.toString() || err.stderr?.toString() || "";
         const summary = output.split("\n").find(l => l.includes("vulnerabilit")) || output.slice(0, 200);
         throw new Error(summary || "npm audit ha detectat vulnerabilitats");
+    }
+});
+
+// 12. Models: validació de la llista de models (estructura, pricing, deprecació)
+check("Models: validació de CURATED_MODELS (estructura, pricing, deprecació)", () => {
+    try {
+        execSync("node scripts/update-models-check.mjs", { cwd: root, stdio: "pipe" });
+        pass("Models: validació de CURATED_MODELS (estructura, pricing, deprecació)");
+    } catch (err) {
+        const output = err.stdout?.toString() || err.stderr?.toString() || "";
+        const lines = output.split("\n").filter(l => l.includes("❌") || l.includes("⚠️"));
+        throw new Error(lines.length > 0 ? lines.join(" | ") : "Models validation failed");
     }
 });
 
