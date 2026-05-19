@@ -30,8 +30,8 @@ for (const [filename, expectedHash] of Object.entries(EXPECTED)) {
     const filePath = resolve(root, filename);
     let actualHash;
     try {
-        const content = readFileSync(filePath);
-        actualHash = createHash("sha256").update(content).digest("hex");
+        const content = readFileSync(filePath, "utf8").replace(/\r\n/g, "\n");
+        actualHash = createHash("sha256").update(content, "utf8").digest("hex");
     } catch {
         console.error(`✗ ${filename}: no trobat a ${filePath}`);
         allOk = false;
