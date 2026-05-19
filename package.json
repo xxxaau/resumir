@@ -12,9 +12,9 @@
     "coverage": "c8 --reporter=text --reporter=lcov node scripts/run-tests.mjs",
     "lint": "eslint . --ext .js,.mjs --max-warnings 0 --no-warn-ignored",
     "check": "npm run lint && npm test",
-    "build": "node scripts/pwsh-runner.mjs ./build.ps1 -Target all",
-    "build:firefox": "node scripts/pwsh-runner.mjs ./build.ps1 -Target firefox",
-    "build:chromium": "node scripts/pwsh-runner.mjs ./build.ps1 -Target chromium",
+    "build": "node scripts/build.mjs all",
+    "build:firefox": "node scripts/build.mjs firefox",
+    "build:chromium": "node scripts/build.mjs chromium",
     "release": "node scripts/pwsh-runner.mjs ./release.ps1 -Target all",
     "release:firefox": "node scripts/pwsh-runner.mjs ./release.ps1 -Target firefox",
     "release:chromium": "node scripts/pwsh-runner.mjs ./release.ps1 -Target chromium",
@@ -39,3 +39,4 @@
     "jsdom": "^29.0.1"
   }
 }
+
