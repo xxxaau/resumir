@@ -1120,6 +1120,21 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.10
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Bug 1 — Llegibilitat del mapa conceptual en tema fosc</strong>: el text dels nodes ara és sempre llegible a tots els temes (clar, fosc, sèpia, gris). Les opcions <code>textColor</code>/<code>toggleBgColor</code> es resolen des de variables CSS i s'incrusten directament al SVG exportat a PNG.</li>
+                <li><strong>Bug 2 — Mapa conceptual redissenyat amb estil pill (NotebookLM)</strong>:</li>
+                <li><strong>Bug 3 — Transcripcions de YouTube tornen a funcionar</strong>: afegides Via B (variants <code>json3</code>/<code>srv3</code>/<code>cru</code> del timedtext) i Via C (<code>youtubei/v1/get_transcript</code> amb <code>INNERTUBE_API_KEY</code> i <code>INNERTUBE_CONTEXT</code> extrets del DOM). Quan els subtítols no es poden carregar pel mètode habitual, l'extensió ara prova rutes alternatives abans de fallar.</li>
+                <li><strong>Nou format del nom de fitxer del PNG del mapa conceptual</strong>: <code>YYYYMMDD_word1_word2.png</code> derivat del títol arrel del mapa (no del títol de la pestanya). Normalització NFD + strip diacrítics + lowercase + alfanumèric, amb stop-words ca/es/en filtrats. Fallback <code>_mapa.png</code> si cap token vàlid.</li>
+                <li>Nou fitxer <code>sidebar/conceptmap-filename.js</code> amb la funció pura compartida entre sidebar i overlay de pantalla completa.</li>
+                <li>15 nous tests unitaris per a la generació de noms de fitxer (<code>tests/conceptmap-filename.test.mjs</code>). Suite total: 222/222 passen.</li>
+                <li>Nou <code>scripts/set-mode.mjs</code> (port Node de <code>set_dev_mode.ps1</code>) per evitar restriccions de <code>MachinePolicy</code> a PowerShell. Els scripts npm <code>dev</code>/<code>prod</code> ara hi apunten.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.9
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
               </div>

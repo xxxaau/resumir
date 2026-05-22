@@ -12,6 +12,30 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [2.2.10] - 2026-05-22
+
+### Corregit
+- **Bug 1 — Llegibilitat del mapa conceptual en tema fosc**: el text dels nodes ara és sempre llegible a tots els temes (clar, fosc, sèpia, gris). Les opcions `textColor`/`toggleBgColor` es resolen des de variables CSS i s'incrusten directament al SVG exportat a PNG.
+- **Bug 2 — Mapa conceptual redissenyat amb estil pill (NotebookLM)**:
+  - Substituïts els nodes baseline + text per pills `<rect>` arrodonits estil NotebookLM.
+  - Paleta pastel jeràrquica idèntica a tots els temes: lila (root) → blau → verd clar → verd menta.
+  - Text fix `#1a1a1a` centrat verticalment dins el pill (`dominant-baseline=central`).
+  - Mesura precisa del text amb `canvas.measureText` (resol desencaixos entre baseline i edges).
+  - Toggle estil NotebookLM: cercle blanc amb glyph `<`/`>` tintat amb el color del pill.
+  - Edges connecten extrem dret del pare amb extrem esquerre del fill (opacitat plena).
+  - Mateix renderitzador a sidebar i a pàgina completa.
+- **Bug 3 — Transcripcions de YouTube tornen a funcionar**: afegides Via B (variants `json3`/`srv3`/`cru` del timedtext) i Via C (`youtubei/v1/get_transcript` amb `INNERTUBE_API_KEY` i `INNERTUBE_CONTEXT` extrets del DOM). Quan els subtítols no es poden carregar pel mètode habitual, l'extensió ara prova rutes alternatives abans de fallar.
+
+### Canviat
+- **Nou format del nom de fitxer del PNG del mapa conceptual**: `YYYYMMDD_word1_word2.png` derivat del títol arrel del mapa (no del títol de la pestanya). Normalització NFD + strip diacrítics + lowercase + alfanumèric, amb stop-words ca/es/en filtrats. Fallback `_mapa.png` si cap token vàlid.
+
+### Intern
+- Nou fitxer `sidebar/conceptmap-filename.js` amb la funció pura compartida entre sidebar i overlay de pantalla completa.
+- 15 nous tests unitaris per a la generació de noms de fitxer (`tests/conceptmap-filename.test.mjs`). Suite total: 222/222 passen.
+- Nou `scripts/set-mode.mjs` (port Node de `set_dev_mode.ps1`) per evitar restriccions de `MachinePolicy` a PowerShell. Els scripts npm `dev`/`prod` ara hi apunten.
+
+---
+
 ## [2.2.9] - 2026-05-22
 
 ### Canviat
