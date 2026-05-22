@@ -197,6 +197,8 @@
             spacingY: 10,
             colors: DEFAULT_COLORS,
             backgroundColor: null, // null = transparent
+            textColor: null,       // null = inherit via CSS (var(--text-color))
+            toggleBgColor: null,   // null = use computed background or white
         }, userOptions || {});
 
         // Ensure svg has a viewport <g> for zoom/pan transforms
@@ -277,7 +279,12 @@
                 text.setAttribute("dominant-baseline", "hanging");
                 text.setAttribute("font-size", String(options.fontSize));
                 text.setAttribute("font-family", "system-ui, -apple-system, sans-serif");
-                text.setAttribute("fill", "currentColor");
+                // Only set fill if textColor explicitly provided; otherwise let CSS
+                // (`.markmap-container .markmap-node text { fill: var(--text-color) }`)
+                // control colour so theme switches work without re-render.
+                if (options.textColor) {
+                    text.setAttribute("fill", options.textColor);
+                }
                 text.style.userSelect = "none";
 
                 node._lines.forEach((line, i) => {
@@ -295,7 +302,8 @@
                     toggle.setAttribute("cx", String(node._width + 6));
                     toggle.setAttribute("cy", String(node._height));
                     toggle.setAttribute("r", "5");
-                    toggle.setAttribute("fill", node.fold ? color : "#ffffff");
+                    const openFill = options.toggleBgColor || "var(--bg-color, #ffffff)";
+                    toggle.setAttribute("fill", node.fold ? color : openFill);
                     toggle.setAttribute("stroke", color);
                     toggle.setAttribute("stroke-width", "1.5");
                     toggle.style.cursor = "pointer";
@@ -436,7 +444,8 @@
         // Clone and inline computed styles
         const clone = svgElement.cloneNode(true);
 
-        // Inline essential computed styles
+        // Inline essential computed styles (so the SVG renders correctly outside
+        // of the extension context — PNG export, fullscreen overlay on host page).
         const orig = svgElement.querySelectorAll("*");
         const cloned = clone.querySelectorAll("*");
         const props = ["fill", "stroke", "stroke-width", "stroke-opacity", "fill-opacity",
@@ -448,6 +457,17 @@
                 if (v) cloned[i].style.setProperty(p, v);
             }
         }
+
+        // Resolve any remaining var(--bg-color) attribute values on cloned circles
+        // (toggle dots used var(--bg-color) for theme support; outside the sidebar
+        // context the variable is undefined and would render as black).
+        const bgFallback = opts.backgroundColor || "#ffffff";
+        cloned.forEach(el => {
+            const fill = el.getAttribute && el.getAttribute("fill");
+            if (fill && fill.includes("var(")) {
+                el.setAttribute("fill", bgFallback);
+            }
+        });
 
         // Use the viewport bounds, not the SVG element rect (which may be clipped/zoomed)
         const viewport = svgElement.querySelector(".markmap-viewport");

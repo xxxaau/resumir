@@ -338,7 +338,7 @@ function renderMarkmapInteractive(text, pageTitle = "") {
             downloadPngBtn.addEventListener("click", async () => {
                 try {
                     const filename = buildConceptMapFilename(pageTitle);
-                    await window.markmapNative.exportToPNG(svg, filename);
+                    await window.markmapNative.exportToPNG(svg, filename, { backgroundColor: "#ffffff" });
                 } catch (error) {
                     console.error("Error exporting PNG:", error);
                     alert("Error exportant a PNG.");
