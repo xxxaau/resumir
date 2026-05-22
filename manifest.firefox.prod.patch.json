@@ -30,5 +30,11 @@
             "ext.js",
             "background.js"
         ]
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["d3.min.js", "markmap-lib.js", "markmap-view.js"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }

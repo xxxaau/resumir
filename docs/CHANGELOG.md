@@ -12,6 +12,13 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [2.2.7] - 2026-05-22
+
+### Corregit
+- Afegit `web_accessible_resources` al manifest Firefox per permetre la injecció de les llibreries del mapa conceptual (`d3.min.js`, `markmap-lib.js`, `markmap-view.js`) a pàgines web externes. Sense aquesta declaració, Firefox bloquejava la injecció i el mode pantalla completa del mapa conceptual fallava amb error CSP.
+
+---
+
 ## [2.2.6] - 2026-05-22
 
 ### Corregit
