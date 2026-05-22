@@ -345,7 +345,7 @@ function renderMarkmapInteractive(text, pageTitle = "") {
                 }
             });
             fullPageBtn.addEventListener("click", () => {
-                openFullPageView(text);
+                openFullPageView(text, pageTitle);
             });
         } catch (error) {
             console.error("Map rendering error:", error);
@@ -379,13 +379,16 @@ function isInjectableUrl(url) {
 /**
  * Opens a full-page overlay of the mind map in the active tab.
  *
- * Strategy: serialize the SVG to a string in the sidebar context, then inject
- * the overlay into the page's MAIN world with the SVG markup as a string.
- * No external libraries needed in the page — we render fully here and pass HTML.
+ * Strategy: inject a self-contained function into the page's MAIN world that
+ * re-renders the map from scratch (parser + layout + SVG render + pan/zoom +
+ * controls + PNG export). This keeps all the code under the extension's
+ * own bundle (no <script src> to web-accessible vendors) while restoring
+ * full interactivity inside the host page.
  *
  * @param {string} text - Original markdown text
+ * @param {string} pageTitle - Page title (used for the PNG filename)
  */
-async function openFullPageView(text) {
+async function openFullPageView(text, pageTitle = "") {
     try {
         const tabs = await ext.tabs.query({ active: true, currentWindow: true });
         if (!tabs.length) { alert('No hi ha cap pestanya activa.'); return; }
@@ -397,122 +400,453 @@ async function openFullPageView(text) {
             return;
         }
 
-        if (typeof window.markmapNative === "undefined") {
-            alert("Error intern: el renderitzador del mapa no està disponible.");
+        const result = await executeScriptSafe({
+            target: { tabId },
+            world: "MAIN",
+            func: fullscreenOverlayFunc,
+            args: [text, pageTitle]
+        });
+
+        if (!result || !result.length) {
+            alert("No s'ha pogut crear l'overlay a la pàgina.");
             return;
         }
-
-        // Render the map off-screen, serialize to SVG string with all nodes expanded.
-        const offSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        offSvg.setAttribute("width", "1600");
-        offSvg.setAttribute("height", "1000");
-        // Must be in DOM (with size) for getBBox/measure to work
-        offSvg.style.cssText = "position:absolute;left:-99999px;top:0;width:1600px;height:1000px;";
-        document.body.appendChild(offSvg);
-
-        try {
-            const root = window.markmapNative.parseMarkdownTree(text);
-            window.markmapNative.createMindMap(offSvg, root, {});
-            // Force layout
-            await new Promise(r => requestAnimationFrame(r));
-            const svgString = window.markmapNative.serializeToSVG(offSvg, { padding: 40, backgroundColor: "#ffffff" });
-
-            const result = await executeScriptSafe({
-                target: { tabId },
-                world: "MAIN",
-                func: (svgMarkup) => {
-                    // Remove existing overlay
-                    const existing = document.getElementById('markmap-fullscreen-overlay');
-                    if (existing) existing.remove();
-
-                    // Backdrop
-                    const overlay = document.createElement('div');
-                    overlay.id = 'markmap-fullscreen-overlay';
-                    overlay.style.cssText = [
-                        'position:fixed', 'inset:0', 'width:100vw', 'height:100vh',
-                        'background:rgba(0,0,0,0.55)', 'z-index:2147483647',
-                        'display:flex', 'align-items:center', 'justify-content:center',
-                        'font-family:system-ui,sans-serif'
-                    ].join('!important;') + '!important';
-
-                    // Modal
-                    const modal = document.createElement('div');
-                    modal.style.cssText = [
-                        'width:95vw', 'height:95vh', 'background:#fff',
-                        'border-radius:12px',
-                        'box-shadow:0 20px 60px rgba(0,0,0,0.35)',
-                        'display:flex', 'flex-direction:column', 'overflow:hidden'
-                    ].join('!important;') + '!important';
-
-                    // Header
-                    const header = document.createElement('div');
-                    header.style.cssText = [
-                        'display:flex', 'justify-content:space-between', 'align-items:center',
-                        'padding:0.75em 1.25em', 'border-bottom:1px solid #e0e0e0',
-                        'background:#f9f9fb', 'flex-shrink:0'
-                    ].join('!important;') + '!important';
-
-                    const title = document.createElement('span');
-                    title.textContent = 'Mapa Conceptual';
-                    title.style.cssText = 'font-weight:600!important;font-size:1em!important;color:#100f0f!important';
-
-                    const closeBtn = document.createElement('button');
-                    closeBtn.textContent = '✕ Tancar';
-                    closeBtn.type = 'button';
-                    closeBtn.style.cssText = [
-                        'padding:0.4em 0.9em', 'border:1px solid #ccc',
-                        'border-radius:4px', 'background:#fff', 'color:#100f0f',
-                        'cursor:pointer', 'font-size:0.9em', 'font-family:inherit'
-                    ].join('!important;') + '!important';
-
-                    header.appendChild(title);
-                    header.appendChild(closeBtn);
-
-                    // Content area with SVG (parse the markup safely with DOMParser)
-                    const content = document.createElement('div');
-                    content.style.cssText = [
-                        'flex:1', 'position:relative', 'overflow:auto',
-                        'display:flex', 'align-items:center', 'justify-content:center',
-                        'padding:1em'
-                    ].join('!important;') + '!important';
-
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(svgMarkup, 'image/svg+xml');
-                    const svgEl = doc.documentElement;
-                    svgEl.style.cssText = 'max-width:100%!important;max-height:100%!important;height:auto!important;width:auto!important';
-                    content.appendChild(svgEl);
-
-                    modal.appendChild(header);
-                    modal.appendChild(content);
-                    overlay.appendChild(modal);
-                    document.body.appendChild(overlay);
-
-                    const closeOverlay = () => overlay.remove();
-                    closeBtn.onclick = closeOverlay;
-                    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
-                    document.addEventListener('keydown', function escHandler(e) {
-                        if (e.key === 'Escape') { closeOverlay(); document.removeEventListener('keydown', escHandler); }
-                    });
-
-                    return 'ok';
-                },
-                args: [svgString]
-            });
-
-            if (!result || !result.length) {
-                alert("No s'ha pogut crear l'overlay a la pàgina.");
-                return;
-            }
-            const overlayRes = result[0]?.result;
-            if (typeof overlayRes === 'string' && overlayRes.startsWith('error')) {
-                alert('Error al mapa: ' + overlayRes);
-            }
-        } finally {
-            if (offSvg.parentNode) offSvg.parentNode.removeChild(offSvg);
+        const overlayRes = result[0]?.result;
+        if (typeof overlayRes === 'string' && overlayRes.startsWith('error')) {
+            alert('Error al mapa: ' + overlayRes);
         }
-
     } catch (error) {
         console.error('Error opening fullscreen view:', error);
         alert('Error obrint vista completa: ' + error.message);
+    }
+}
+
+/**
+ * Self-contained function injected into the host page's MAIN world.
+ * Receives (text, pageTitle) and builds an interactive full-screen overlay
+ * with the mind map. No external dependencies — all logic inlined.
+ *
+ * IMPORTANT: this function is serialised to a string by executeScript and
+ * executed in the host page context. It cannot reference any outer scope.
+ */
+function fullscreenOverlayFunc(text, pageTitle) {
+    try {
+        // Remove existing overlay if any (re-open behaviour)
+        const existing = document.getElementById('markmap-fullscreen-overlay');
+        if (existing) existing.remove();
+
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const COLORS = ["#205ea6", "#5e409d", "#16a34a", "#dc2626", "#ea580c", "#0891b2"];
+
+        // ─── Parser ─────────────────────────────────────────────────────────
+        function parseMarkdownTree(src) {
+            if (!src || typeof src !== 'string') return { label: '(buit)', children: [], depth: 0 };
+            const rawLines = src.split('\n');
+            const lines = [];
+            for (const line of rawLines) {
+                const trimmed = line.trimStart();
+                if (!trimmed.startsWith('- ') && !trimmed.startsWith('* ')) continue;
+                lines.push({ indent: line.length - trimmed.length, content: trimmed.substring(2) });
+            }
+            if (lines.length === 0) return { label: src.split('\n')[0] || '(sense contingut)', children: [], depth: 0 };
+            let unit = 2;
+            for (const l of lines) {
+                if (l.indent > 0) { unit = l.indent <= 2 ? 2 : (l.indent <= 4 ? l.indent : 2); break; }
+            }
+            const minIndent = lines.reduce((m, l) => Math.min(m, l.indent), Infinity);
+            const nodes = lines.map(l => ({ level: Math.max(0, Math.round((l.indent - minIndent) / unit)), content: l.content }));
+            const root = { label: '', children: [], depth: 0 };
+            const stack = [{ node: root, level: -1 }];
+            for (const n of nodes) {
+                while (stack.length > 1 && stack[stack.length - 1].level >= n.level) stack.pop();
+                const parent = stack[stack.length - 1].node;
+                const child = { label: n.content, children: [], depth: parent.depth + 1 };
+                parent.children.push(child);
+                stack.push({ node: child, level: n.level });
+            }
+            if (root.children.length === 1) {
+                const promoted = root.children[0];
+                const fixDepth = (node, d) => { node.depth = d; node.children.forEach(c => fixDepth(c, d + 1)); };
+                fixDepth(promoted, 0);
+                return promoted;
+            }
+            root.label = 'Mapa';
+            return root;
+        }
+
+        // ─── Layout ────────────────────────────────────────────────────────
+        const FONT_SIZE = 14, LINE_H = 1.3, PAD_X = 10, PAD_Y = 6;
+        const MAX_LABEL_W = 320, SPACING_X = 70, SPACING_Y = 12;
+
+        function measureLabel(textStr) {
+            const avgChar = FONT_SIZE * 0.55;
+            const natural = textStr.length * avgChar;
+            if (natural <= MAX_LABEL_W) return { width: natural, lines: [textStr] };
+            const words = textStr.split(/\s+/);
+            const out = [];
+            let cur = '';
+            for (const w of words) {
+                const cand = cur ? cur + ' ' + w : w;
+                if (cand.length * avgChar <= MAX_LABEL_W) cur = cand;
+                else { if (cur) out.push(cur); cur = w; }
+            }
+            if (cur) out.push(cur);
+            const longest = out.reduce((m, l) => Math.max(m, l.length), 0);
+            return { width: longest * avgChar, lines: out };
+        }
+
+        function computeLayout(root) {
+            function measure(node) {
+                const m = measureLabel(node.label);
+                node._lines = m.lines;
+                node._width = m.width + PAD_X * 2;
+                node._height = m.lines.length * FONT_SIZE * LINE_H + PAD_Y * 2;
+                const visible = (!node.fold && node.children) ? node.children : [];
+                for (const c of visible) measure(c);
+            }
+            measure(root);
+            function subtreeHeight(node) {
+                const visible = (!node.fold && node.children) ? node.children : [];
+                if (visible.length === 0) { node._subtreeH = node._height; return node._subtreeH; }
+                let total = 0;
+                for (const c of visible) total += subtreeHeight(c);
+                total += (visible.length - 1) * SPACING_Y;
+                node._subtreeH = Math.max(node._height, total);
+                return node._subtreeH;
+            }
+            subtreeHeight(root);
+            function place(node, x, yCenter) {
+                node._x = x;
+                node._y = yCenter;
+                const visible = (!node.fold && node.children) ? node.children : [];
+                if (visible.length === 0) return;
+                const childX = x + node._width + SPACING_X;
+                const totalH = visible.reduce((s, c) => s + c._subtreeH, 0) + (visible.length - 1) * SPACING_Y;
+                let cursorY = yCenter - totalH / 2;
+                for (const c of visible) {
+                    const cy = cursorY + c._subtreeH / 2;
+                    place(c, childX, cy);
+                    cursorY += c._subtreeH + SPACING_Y;
+                }
+            }
+            place(root, 0, 0);
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            function walk(node) {
+                minX = Math.min(minX, node._x);
+                maxX = Math.max(maxX, node._x + node._width);
+                minY = Math.min(minY, node._y - node._height / 2);
+                maxY = Math.max(maxY, node._y + node._height / 2);
+                const visible = (!node.fold && node.children) ? node.children : [];
+                for (const c of visible) walk(c);
+            }
+            walk(root);
+            return { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
+        }
+
+        // ─── DOM scaffolding ───────────────────────────────────────────────
+        const overlay = document.createElement('div');
+        overlay.id = 'markmap-fullscreen-overlay';
+        overlay.style.cssText = 'all:initial;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:rgba(0,0,0,0.55)!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;font-family:system-ui,-apple-system,sans-serif!important';
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'width:95vw!important;height:95vh!important;background:#ffffff!important;border-radius:12px!important;box-shadow:0 20px 60px rgba(0,0,0,0.35)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important';
+
+        const header = document.createElement('div');
+        header.style.cssText = 'display:flex!important;justify-content:space-between!important;align-items:center!important;padding:0.6em 1em!important;border-bottom:1px solid #e0e0e0!important;background:#f9f9fb!important;flex-shrink:0!important';
+
+        const title = document.createElement('span');
+        title.textContent = 'Mapa Conceptual';
+        title.style.cssText = 'font-weight:600!important;font-size:1em!important;color:#100f0f!important';
+
+        const toolbar = document.createElement('div');
+        toolbar.style.cssText = 'display:flex!important;gap:0.4em!important;align-items:center!important';
+
+        function mkBtn(label, ttl) {
+            const b = document.createElement('button');
+            b.textContent = label;
+            b.title = ttl;
+            b.type = 'button';
+            b.style.cssText = 'padding:0.35em 0.7em!important;border:1px solid #ccc!important;border-radius:5px!important;background:#fff!important;color:#100f0f!important;cursor:pointer!important;font-size:0.85em!important;font-family:inherit!important;line-height:1!important';
+            return b;
+        }
+
+        const btnFit       = mkBtn('⛶', 'Ajustar a la vista');
+        const btnZoomIn    = mkBtn('+', 'Ampliar');
+        const btnZoomOut   = mkBtn('−', 'Reduir');
+        const btnExpand    = mkBtn('▾▾', 'Expandir tot');
+        const btnCollapse  = mkBtn('▴▴', 'Col·lapsar tot');
+        const btnPng       = mkBtn('⬇ PNG', 'Descarregar com a PNG');
+        const btnClose     = mkBtn('✕', 'Tancar (Esc)');
+        btnClose.style.borderColor = '#d32f2f';
+        btnClose.style.color = '#d32f2f';
+
+        [btnFit, btnZoomIn, btnZoomOut, btnExpand, btnCollapse, btnPng, btnClose].forEach(b => toolbar.appendChild(b));
+        header.appendChild(title);
+        header.appendChild(toolbar);
+
+        const content = document.createElement('div');
+        content.style.cssText = 'flex:1!important;position:relative!important;overflow:hidden!important;background:#ffffff!important';
+
+        const svg = document.createElementNS(SVG_NS, 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.style.cssText = 'display:block!important;width:100%!important;height:100%!important;cursor:grab!important';
+        content.appendChild(svg);
+
+        modal.appendChild(header);
+        modal.appendChild(content);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // ─── Render ────────────────────────────────────────────────────────
+        const root = parseMarkdownTree(text);
+        // Auto-fold from depth 2
+        (function autoFold(node, d) {
+            if (d >= 2 && node.children && node.children.length > 0) node.fold = true;
+            if (node.children) node.children.forEach(c => autoFold(c, d + 1));
+        })(root, 0);
+
+        const state = { transform: { x: 0, y: 0, k: 1 }, bounds: null };
+        const viewport = document.createElementNS(SVG_NS, 'g');
+        viewport.setAttribute('class', 'markmap-viewport');
+        svg.appendChild(viewport);
+
+        function colorFor(depth) { return COLORS[depth % COLORS.length]; }
+        function curve(x1, y1, x2, y2) {
+            const dx = Math.max(20, (x2 - x1) * 0.4);
+            return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+        }
+        function applyTransform() {
+            const { x, y, k } = state.transform;
+            viewport.setAttribute('transform', `translate(${x}, ${y}) scale(${k})`);
+        }
+        function render() {
+            state.bounds = computeLayout(root);
+            while (viewport.firstChild) viewport.removeChild(viewport.firstChild);
+            const linksG = document.createElementNS(SVG_NS, 'g');
+            const nodesG = document.createElementNS(SVG_NS, 'g');
+            viewport.appendChild(linksG);
+            viewport.appendChild(nodesG);
+
+            function walk(node) {
+                const visible = (!node.fold && node.children) ? node.children : [];
+                for (const c of visible) {
+                    const path = document.createElementNS(SVG_NS, 'path');
+                    path.setAttribute('d', curve(node._x + node._width, node._y, c._x, c._y));
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke', colorFor(c.depth));
+                    path.setAttribute('stroke-width', '1.5');
+                    path.setAttribute('opacity', '0.6');
+                    linksG.appendChild(path);
+                }
+                const g = document.createElementNS(SVG_NS, 'g');
+                g.setAttribute('transform', `translate(${node._x}, ${node._y - node._height / 2})`);
+                const color = colorFor(node.depth);
+
+                const baseline = document.createElementNS(SVG_NS, 'line');
+                baseline.setAttribute('x1', '0');
+                baseline.setAttribute('y1', String(node._height));
+                baseline.setAttribute('x2', String(node._width));
+                baseline.setAttribute('y2', String(node._height));
+                baseline.setAttribute('stroke', color);
+                baseline.setAttribute('stroke-width', '2');
+                g.appendChild(baseline);
+
+                const textEl = document.createElementNS(SVG_NS, 'text');
+                textEl.setAttribute('x', String(PAD_X));
+                textEl.setAttribute('y', String(PAD_Y));
+                textEl.setAttribute('dominant-baseline', 'hanging');
+                textEl.setAttribute('font-size', String(FONT_SIZE));
+                textEl.setAttribute('font-family', 'system-ui, -apple-system, sans-serif');
+                textEl.setAttribute('fill', '#100f0f');
+                textEl.style.userSelect = 'none';
+                node._lines.forEach((line, i) => {
+                    const ts = document.createElementNS(SVG_NS, 'tspan');
+                    ts.setAttribute('x', String(PAD_X));
+                    ts.setAttribute('dy', i === 0 ? '0' : String(FONT_SIZE * LINE_H));
+                    ts.textContent = line;
+                    textEl.appendChild(ts);
+                });
+                g.appendChild(textEl);
+
+                if (node.children && node.children.length > 0) {
+                    const toggle = document.createElementNS(SVG_NS, 'circle');
+                    toggle.setAttribute('cx', String(node._width + 6));
+                    toggle.setAttribute('cy', String(node._height));
+                    toggle.setAttribute('r', '5');
+                    toggle.setAttribute('fill', node.fold ? color : '#ffffff');
+                    toggle.setAttribute('stroke', color);
+                    toggle.setAttribute('stroke-width', '1.5');
+                    toggle.style.cursor = 'pointer';
+                    toggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        node.fold = !node.fold;
+                        render();
+                    });
+                    g.appendChild(toggle);
+                }
+                nodesG.appendChild(g);
+                for (const c of visible) walk(c);
+            }
+            walk(root);
+            applyTransform();
+        }
+
+        function fit() {
+            if (!state.bounds) return;
+            const rect = svg.getBoundingClientRect();
+            const sw = rect.width || 1200;
+            const sh = rect.height || 800;
+            const bw = state.bounds.width;
+            const bh = state.bounds.height;
+            if (bw <= 0 || bh <= 0) return;
+            const margin = 40;
+            const k = Math.min((sw - margin * 2) / bw, (sh - margin * 2) / bh, 2);
+            state.transform.k = k;
+            const cx = (state.bounds.minX + state.bounds.maxX) / 2;
+            const cy = (state.bounds.minY + state.bounds.maxY) / 2;
+            state.transform.x = sw / 2 - cx * k;
+            state.transform.y = sh / 2 - cy * k;
+            applyTransform();
+        }
+        function rescale(factor) {
+            const rect = svg.getBoundingClientRect();
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const newK = Math.max(0.1, Math.min(10, state.transform.k * factor));
+            const ratio = newK / state.transform.k;
+            state.transform.x = cx - (cx - state.transform.x) * ratio;
+            state.transform.y = cy - (cy - state.transform.y) * ratio;
+            state.transform.k = newK;
+            applyTransform();
+        }
+        function setFoldAll(fold) {
+            (function walk(n) {
+                if (n.children && n.children.length > 0) {
+                    n.fold = fold;
+                    n.children.forEach(walk);
+                }
+            })(root);
+            root.fold = false;
+        }
+
+        // ─── Interactions ──────────────────────────────────────────────────
+        let isPanning = false;
+        const pan = { x: 0, y: 0, tx: 0, ty: 0 };
+        svg.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'circle') return;
+            isPanning = true;
+            pan.x = e.clientX; pan.y = e.clientY;
+            pan.tx = state.transform.x; pan.ty = state.transform.y;
+            svg.style.cursor = 'grabbing';
+        });
+        const moveHandler = (e) => {
+            if (!isPanning) return;
+            state.transform.x = pan.tx + (e.clientX - pan.x);
+            state.transform.y = pan.ty + (e.clientY - pan.y);
+            applyTransform();
+        };
+        const upHandler = () => {
+            if (isPanning) { isPanning = false; svg.style.cursor = 'grab'; }
+        };
+        window.addEventListener('mousemove', moveHandler);
+        window.addEventListener('mouseup', upHandler);
+
+        svg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const rect = svg.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+            const newK = Math.max(0.1, Math.min(10, state.transform.k * factor));
+            const ratio = newK / state.transform.k;
+            state.transform.x = mx - (mx - state.transform.x) * ratio;
+            state.transform.y = my - (my - state.transform.y) * ratio;
+            state.transform.k = newK;
+            applyTransform();
+        }, { passive: false });
+
+        btnFit.addEventListener('click', fit);
+        btnZoomIn.addEventListener('click', () => rescale(1.25));
+        btnZoomOut.addEventListener('click', () => rescale(0.8));
+        btnExpand.addEventListener('click', () => { setFoldAll(false); render(); requestAnimationFrame(fit); });
+        btnCollapse.addEventListener('click', () => { setFoldAll(true); render(); requestAnimationFrame(fit); });
+
+        // ─── PNG Export ────────────────────────────────────────────────────
+        function buildFilename() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+            const sanit = String(pageTitle || '').replace(/[/\\:*?"<>|]/g, '').replace(/\s+/g, ' ').trim();
+            const short = sanit.length > 20 ? sanit.slice(0, 20).trimEnd() : sanit;
+            return `${date}${short ? '_' + short : ''}.png`;
+        }
+        btnPng.addEventListener('click', async () => {
+            try {
+                const clone = svg.cloneNode(true);
+                const vp = clone.querySelector('.markmap-viewport');
+                if (vp) vp.setAttribute('transform', 'translate(0,0) scale(1)');
+                // Compute bounds of viewport in original to size the export
+                const vpOrig = svg.querySelector('.markmap-viewport');
+                const bbox = vpOrig.getBBox();
+                const pad = 40;
+                const w = bbox.width + pad * 2;
+                const h = bbox.height + pad * 2;
+                clone.setAttribute('width', String(w));
+                clone.setAttribute('height', String(h));
+                clone.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${w} ${h}`);
+                clone.setAttribute('xmlns', SVG_NS);
+                const xml = new XMLSerializer().serializeToString(clone);
+                const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = 2;
+                    canvas.width = w * scale;
+                    canvas.height = h * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((pngBlob) => {
+                        URL.revokeObjectURL(url);
+                        if (!pngBlob) return;
+                        const pngUrl = URL.createObjectURL(pngBlob);
+                        const a = document.createElement('a');
+                        a.href = pngUrl;
+                        a.download = buildFilename();
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(pngUrl); }, 100);
+                    }, 'image/png');
+                };
+                img.onerror = () => { URL.revokeObjectURL(url); };
+                img.src = url;
+            } catch (err) {
+                console.error('PNG export failed:', err);
+            }
+        });
+
+        // ─── Close handlers ────────────────────────────────────────────────
+        function close() {
+            window.removeEventListener('mousemove', moveHandler);
+            window.removeEventListener('mouseup', upHandler);
+            document.removeEventListener('keydown', escHandler);
+            overlay.remove();
+        }
+        function escHandler(e) { if (e.key === 'Escape') close(); }
+        btnClose.addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        document.addEventListener('keydown', escHandler);
+
+        // ─── Initial render + fit ──────────────────────────────────────────
+        render();
+        requestAnimationFrame(() => requestAnimationFrame(fit));
+
+        return 'ok';
+    } catch (err) {
+        return 'error:' + (err && err.message ? err.message : String(err));
     }
 }
