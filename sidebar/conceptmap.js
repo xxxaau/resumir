@@ -660,8 +660,8 @@ async function openFullPageView(text) {
                 func: (codes) => {
                     try {
                         for (const code of codes) {
-                            // Use indirect eval-like pattern with explicit window binding.
-                            (new Function('window', 'self', 'globalThis', code)).call(window, window, window, window);
+                            // Indirect eval at global scope (avoids Function constructor).
+                            (0, eval)(code);
                         }
                         return {
                             ok: true,
