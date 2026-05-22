@@ -12,6 +12,17 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [2.2.6] - 2026-05-22
+
+### Corregit
+- Eliminat `incognito: "split"` del manifest (no suportat per Firefox)
+- Substituït el constructor `Function` per `eval` indirecte a `conceptmap.js` (millora de seguretat)
+- Restaurades les icones blaves de producció a `icons/prod/` i `icons/`
+- Les subcarpetes `icons/dev/` i `icons/prod/` ja no s'inclouen als ZIPs de release
+- Ruta del `CHANGELOG.md` corregida a `docs/CHANGELOG.md` als scripts de build
+
+---
+
 ## [2.2.5] - 2026-05-22
 
 ### Afegit

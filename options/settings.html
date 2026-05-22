@@ -1120,16 +1120,29 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.6
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li>Eliminat <code>incognito: "split"</code> del manifest (no suportat per Firefox)</li>
+                <li>Substituït el constructor <code>Function</code> per <code>eval</code> indirecte a <code>conceptmap.js</code> (millora de seguretat)</li>
+                <li>Restaurades les icones blaves de producció a <code>icons/prod/</code> i <code>icons/</code></li>
+                <li>Les subcarpetes <code>icons/dev/</code> i <code>icons/prod/</code> ja no s'inclouen als ZIPs de release</li>
+                <li>Ruta del <code>CHANGELOG.md</code> corregida a <code>docs/CHANGELOG.md</code> als scripts de build</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.5
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Renom de l'extensió</strong>: L'extensió passa a anomenar-se "Resumir" (mode DEV: "Resumir (DEV)").</li>
-                <li><strong>Icona mapa conceptual</strong>: La icona a configuració ara coincideix amb la del botó de la sidebar.</li>
-                <li><strong>Exportació PNG amb nom automàtic</strong>: El fitxer PNG del mapa conceptual es desa com <code>YYYYMMDD_titular.png</code> (titular abreujat a 20 caràcters).</li>
-                <li><strong>Configuració mapa conceptual simplificada</strong>: Eliminades les opcions de profunditat, branques, expandir tot i mostrar descripcions (ara es controlen des del prompt).</li>
-                <li><strong>Lectura biònica</strong>: Interlineat per defecte 1.5 i gruix de negreta per defecte Semi-negreta (600).</li>
-                <li><strong>Eliminada opció idiomes YouTube</strong>: La selecció d'idioma de transcripció es gestiona automàticament.</li>
+                <li>El nom del fitxer PNG exportat del mapa conceptual ara usa el format <code>YYYYMMDD_<titular>.png</code> (titular abreujat a 20 caràcters)</li>
+                <li>L'extensió passa a anomenar-se "Resumir" (mode DEV: "Resumir (DEV)")</li>
+                <li>Configuració del mapa conceptual: eliminades les opcions de profunditat, branques, expandir tot i mostrar descripcions (ara es controlen des del prompt)</li>
+                <li>Lectura biònica: interlineat per defecte canviat a 1.5, gruix de negreta per defecte canviat a 600 (semi-negreta)</li>
+                <li>La icona del mapa conceptual a configuració ara coincideix amb el botó de la sidebar</li>
+                <li>Eliminada l'opció d'idiomes preferits de YouTube a configuració (la selecció d'idioma ara és automàtica)</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1138,14 +1151,20 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Extracció de pistes YouTube refactoritzada</strong>: Lògica de selecció de pista en mòdul independent (<code>sidebar/youtube-track-select.js</code>) amb cobertura de tests completa (13 tests). Llegeix la transcripció directament de <code>ytInitialData</code> sense obrir el panell (més ràpid i fiable). Nou fallback <code>prerenderedText</code> quan <code>playerCaptionsTracklistRenderer</code> és buit.</li>
-                <li><strong>Selector d'idioma per a YouTube</strong>: Nova opció a la configuració per triar l'idioma preferit de les transcripcions de YouTube.</li>
-                <li><strong>Migració de clau API a <code>storage.local</code></strong>: La clau Gemini es guarda ara a <code>storage.local</code> (no sincronitzada entre dispositius) en lloc de <code>storage.sync</code>. Millora la privadesa i evita quotes de sincronització.</li>
-                <li><strong>Protecció contra injecció de prompts</strong>: El contingut de la pàgina s'envia embolcallat amb <code><UNTRUSTED_CONTENT></code> per aïllar-lo de les instruccions del sistema.</li>
-                <li><strong>Indicador de càrrega animat</strong>: Punts animats durant la generació; la toolbar s'amaga quan es carrega des del badge.</li>
-                <li><strong>Panell de transcripció YouTube</strong>: El panell no s'obria correctament en navegar a un vídeo directament. Detecció del botó molt més robusta.</li>
-                <li><strong>Punts de càrrega</strong>: S'amaguen correctament en rebre el primer chunk d'streaming; eliminat text de càrrega codificat manualment.</li>
-                <li><strong>Toolbar al carregar caché</strong>: La toolbar es mostrava incorrectament en carregar una entrada de caché des del badge.</li>
+                <li>Indicador de càrrega animat amb punts durant la generació del resum</li>
+                <li>Refactorització de l'extracció de transcripcions de YouTube: extracció MAIN world (Pas 1) + fallback via API (Pas 2)</li>
+                <li>Suport per a <code>prerenderedText</code> quan <code>playerCaptionsTracklistRenderer</code> és buit</li>
+                <li>Lectura directa de la transcripció des de <code>ytInitialData</code> sense obrir el panell</li>
+                <li>Protecció contra injecció de prompts: embolcall <code><UNTRUSTED_CONTENT></code> al prompt del sistema</li>
+                <li>Clau API migrada de <code>storage.sync</code> a <code>storage.local</code> per millor aïllament de seguretat</li>
+                <li>El panell de transcripció de YouTube no s'obria en navegar a un vídeo</li>
+                <li>Detecció de la transcripció de YouTube molt més robusta</li>
+                <li>Els punts de càrrega ara s'amaguen en rebre el primer chunk d'streaming (sense parpelleig d'estat buit)</li>
+                <li>La toolbar es manté visible en visualitzar entrades de l'historial de caché</li>
+                <li>La barra de tornada s'amaga en tancar panells per tornar a la vista principal</li>
+                <li>Alineació de la barra del botó de tornada amb la toolbar; menú amagat en visualitzar panells</li>
+                <li>Disposició reordenada en visualitzar un resum de caché</li>
+                <li>La classe CSS <code>.hidden</code> ara sempre amaga elements independentment de l'especificitat</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1154,11 +1173,20 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Extracció de transcripcions YouTube més robusta</strong>: Simplificat a un flux de 2 passos (llegir pistes + clicar "Mostra la transcripció" i llegir DOM). Ara suporta tant el panell clàssic (<code>ytd-transcript-segment-renderer</code>) com el nou (<code>transcript-segment-view-model</code>), i funciona tant per captions manuals com auto-generats (ASR).</li>
-                <li><strong>Detecció correcta de pista activa</strong>: La capçalera <code>[TRANSCRIPT: <lang>]</code> o <code>[TRANSCRIPT: <lang> (Auto)]</code> ara reflecteix la pista que YouTube mostra al panell (no la primera de la llista). Resolució en 3 nivells: selector visible del panell → heurística (prefereix manual sobre ASR) → fallback. Així, en vídeos amb ASR i manuals disponibles, el resum no es marca incorrectament com "(Auto)".</li>
-                <li><strong>Neteja de logs de LinkedIn</strong>: Eliminats els <code>console.log</code> diagnòstics que embrutaven la consola de l'usuari a producció.</li>
-                <li><strong>Match de pistes amb nom buit</strong>: Les pistes ASR de YouTube de vegades tenen el camp <code>name</code> buit; el matching anterior les triava erròniament sempre com a primera pista perquè <code>''.includes('')</code> retorna <code>true</code>. Ara s'ignoren al match de selector i cau a l'heurística manual-sobre-ASR.</li>
-                <li><strong>Match de pistes ambigu per substring</strong>: Evita que <code>"English"</code> encaixi dins de <code>"English (auto-generated)"</code> ordenant les pistes candidates per longitud descendent abans del match.</li>
+                <li>Millores a l'extracció de transcripcions ASR (autogenerades) de YouTube</li>
+                <li>Comptador diari per a estadístiques precises per període</li>
+                <li>Límit de l'historial d'estadístiques augmentat de 100 a 1.000 entrades</li>
+                <li>Tests de persistència: validen la integritat de les dades entre actualitzacions de versió</li>
+                <li>Lectura de transcripcions de YouTube des de <code>ytInitialData</code> (suport ASR complet)</li>
+                <li>Detecció de la pista activa en l'extracció de transcripcions de YouTube</li>
+                <li>Gestor <code>onInstalled</code>: evita menús contextuals duplicats en actualitzar</li>
+                <li>Fuites de memòria en la caché i els bindings de botons</li>
+                <li>Fallback del model API ampliat; missatges d'error de l'API millorats</li>
+                <li>Temps d'inici de la sidebar millorat</li>
+                <li>Crides API: afegits timeouts i fiabilitat millorada</li>
+                <li>Estadístiques: lectures de <code>getDailyStats</code> unificades en una sola crida <code>storage.get</code></li>
+                <li>Nom al manifest de producció corregit (ja no inclou l'etiqueta <code>DEV</code>)</li>
+                <li>Globals d'ESLint corregits; hook de lint pre-commit afegit</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1167,31 +1195,17 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Fiabilitat API</strong>: Timeout de 60 segons a totes les crides Gemini per evitar la sidebar penjada si el servidor no respon. Si expira, es mostra un missatge clar a l'usuari.</li>
-                <li><strong>Timeout en extracció de contingut</strong>: Timeout de 8 segons als fetchs d'articles de Hacker News i transcripcions de YouTube per no bloquejar la generació.</li>
-                <li><strong>Fallback de models ampliat</strong>: El sistema de fallback ara activa el canvi de model per errors 404, 500, 502, 503 i timeouts, no només errors de quota (429). El log mostra l'índex d'intent <code>[n/total]</code> per facilitar el debug.</li>
-                <li><strong>Arrencada de la sidebar més ràpida</strong>: Les lectures de storage a l'inici s'executen en paral·lel amb <code>Promise.all</code>, reduint la latència d'arrencada ~100ms. El preload de contingut té un timeout de 2 s per no bloquejar la UI.</li>
-                <li><strong>Debounce del badge de caché</strong>: Lectures de storage optimitzades en canvis ràpids de pestanya (150 ms de debounce). El badge s'amaga correctament quan el contingut actiu és una selecció de text.</li>
-                <li><strong>Usabilitat taules d'estadístiques</strong>: L'historial de peticions ara mostra els 20 registres sense scroll intern. La taula "Resums per model i dia" té paginació de 20 registres per pàgina amb botons Anterior/Següent. La paginació es reinicia automàticament en canviar el període.</li>
-                <li><strong>Missatges d'error millorats</strong>: <code>classifyError</code> distingeix entre model no trobat, servei no disponible, quota esgotada i timeout/connexió interrompuda, cadascun amb missatge específic.</li>
-                <li><strong>Fuites de memòria de botons</strong>: Els nodes DOM clonats dels botons s'alliberen correctament després de cada generació; l'interval del comptador de quota es neteja quan expira o en tancar la sidebar.</li>
-                <li><strong>Caché més robusta</strong>: L'índex de caché es limita a 500 entrades (elimina les més antigues). Les entrades sense camp <code>summary</code> vàlid es descarten.</li>
-                <li><strong>Cleanup en tancar</strong>: Abort del generador, timers i intervals es netegen al tancar la sidebar (<code>beforeunload</code>).</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.2.2
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Automatització de la versió</strong>: <code>postversion</code> ara sincronitza <code>CHANGELOG.md</code> juntament amb els manifests i <code>settings.html</code> després de <code>npm version</code>.</li>
-                <li><strong>Comprovació global</strong>: afegit <code>npm run check</code> per executar lint + tests en un sol pas.</li>
-                <li><strong>Scripts de build més robustos</strong>: <code>scripts/pwsh-runner.mjs</code> comprova l'existència del script PowerShell i mostra ajuda quan no se li passa cap argument.</li>
-                <li><strong>Compatibilitat PowerShell</strong>: <code>set_dev_mode.ps1</code> escriu JSON compatible amb versions antigues de PowerShell sense l'opció <code>utf8NoBOM</code>.</li>
-                <li><strong>Refactorització d'opcions</strong>: <code>options/settings.js</code> s'ha netejat amb helpers de binding d'esdeveniments i validació més robusta del <code>pageSize</code>.</li>
-                <li><strong>Millora de la sidebar</strong>: <code>sidebar/summary.js</code> ara usa una funció comuna per aplicar estil biònic i evita errors quan falta l'element de càrrega.</li>
-                <li><strong>Documentació actualitzada</strong>: <code>README.md</code> ara descriu les ordres de build/release i l'ús de <code>npm run check</code>.</li>
+                <li>Les operacions de caché ara usen un índex de resums per a purga i llistat més ràpids</li>
+                <li>Embolcall de PowerShell multiplataforma (<code>build.ps1</code>) amb comprovació d'existència de l'script</li>
+                <li>Changelog injectat automàticament a <code>settings.html</code> en fer un bump de versió (script <code>postversion</code>)</li>
+                <li>Ordres de build i release per a Firefox/Chromium documentades a <code>BUILD.md</code></li>
+                <li>Fallback de l'índex de caché: purga i llistat funcionen correctament quan falta l'índex</li>
+                <li>Bindings de botons de la pàgina d'opcions corregits</li>
+                <li>El manifest de producció de Chromium ja no conté la clau de Chrome incrustada</li>
+                <li>Estil biònic extret en un helper dedicat; renderització del resum endurit</li>
+                <li>Bindings d'esdeveniments de settings refactoritzats; gestió del pageSize endurit</li>
+                <li>El flux de release conserva el mode dev/prod original i escriu fitxers de patch JSON sense BOM</li>
+                <li>Directoris de còpia de seguretat del build (<code>build_*/</code>) exclosos de git</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1200,10 +1214,11 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Prompts per defecte centralitzats</strong>: Extrets a <code>shared/defaults.js</code> com a font de veritat única, compartida entre la sidebar i la pàgina d'opcions.</li>
-                <li><strong>Inicialització de favorits simplificada</strong>: En el primer ús, s'afegeix només el model per defecte als favorits (en lloc de tots els models curats).</li>
-                <li><strong>Neteja UI</strong>: Simplificació de <code>sidebar/ui.js</code>, <code>sidebar/summary.js</code> i <code>sidebar/sidebar.html</code>, eliminant codi redundant.</li>
-                <li><strong>Opcions refactoritzades</strong>: <code>settings-defaults.js</code> i <code>settings.js</code> netejats i simplificats.</li>
+                <li>Barra inferior millorada: visualització de l'ús de tokens amb millores d'UX</li>
+                <li>Globals d'ESLint per als prompts per defecte corregits</li>
+                <li>Ús de stream a <code>summary.js</code> corregit</li>
+                <li>Settings refactoritzades: valors per defecte i UI simplificats</li>
+                <li>Manifests regenerats en mode PROD (el nom ja no conté <code>DEV</code>)</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1212,24 +1227,31 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Panell de text font</strong>: Nou botó al peu del sidebar (icona de document) que mostra el text que s'ha enviat a la IA per resumir. Permet auditar exactament quin contingut s'ha extret de la pàgina i comprovar si coincideix amb les expectatives.</li>
-                <li><strong>Barra de títol</strong>: Tira enganxosa al damunt del contingut que mostra el títol de la pàgina resumida amb un enllaç directe a la pàgina original.</li>
-                <li><strong>Badge de caché clicable</strong>: El símbol ⚡ al peu és ara interactiu — clicar-lo carrega directament el resum emmagatzemat en caché sense necessitat de tornar a generar-lo.</li>
-                <li><strong>Panell d'historial</strong>: Llista navegable de tots els resums previs emmagatzemats en caché, accessible des del botó 🕐 al peu. Permet rellegir i recuperar qualsevol resum anterior.</li>
-                <li><strong>Selector de període a les estadístiques</strong>: El gràfic i la taula de la pàgina d'estadístiques suporten ara filtres de 7 dies, 30 dies, 6 mesos i 1 any, a més de les columnes de tokens entrada/sortida, hits de caché i temps mitjà de resposta.</li>
-                <li><strong>Extracció Twitter/X via Defuddle</strong>: El contingut de Twitter/X s'extreu ara amb la llibreria Defuddle (v0.14.0) amb fallback a scraping DOM, obtenint text molt més ric i precís que el mètode anterior.</li>
-                <li><strong>Millores Hacker News</strong>: Eliminat el límit de comentaris, afegida la descàrrega de l'article enllaçat per proporcionar context complet als resums de fils HN.</li>
-                <li><strong>Streaming en temps real</strong>: El contingut del resum ara es mostra com a text pla durant la generació i es transforma a Markdown amb format complet en acabar. Eliminada la latència visual d'esperar el final per veure contingut.</li>
-                <li><strong>Tokens reals de l'API</strong>: S'utilitzen els <code>usageMetadata</code> retornats per Gemini en lloc d'estimacions del tokenitzador local, obtenint comptes exactes d'entrada/sortida i de tokens de caché.</li>
-                <li><strong>Caché amb TTL de 30 dies</strong>: Purga automàtica de les entrades expirades en segon pla sense bloquejar la interfície.</li>
-                <li><strong>Historial carrega a la sidebar</strong>: El clic a una entrada de l'historial (stats) obre la sidebar i carrega el resum directament, sense obrir una URL.</li>
-                <li><strong>Permisos Firefox en instal·lació</strong>: Sol·licita automàticament l'accés a tots els llocs web quan l'usuari instal·la l'extensió per primera vegada, evitant passos manuals de configuració.</li>
-                <li><strong>Pàgina de configuració redissenyada</strong>: Navegació lateral amb tabs, millores de CSS, indicadors de color per a cada plugin i nova secció d'estadístiques integrada.</li>
-                <li><strong>Plugin "Netejar Timeline"</strong>: La funcionalitat de neteja de feeds algorítmics de Twitter/X i LinkedIn s'ha extret a una extensió independent. Eliminat el botó del sidebar, la configuració i els scripts d'injecció corresponents.</li>
-                <li><strong>Badge de caché</strong>: L'espai sempre reservat amb <code>visibility</code> en comptes de <code>display</code> evita que la barra inferior salti en aparèixer/desaparèixer el símbol.</li>
-                <li><strong>Fallback de quota</strong>: El fallback respecta els models favorits i evita seleccionar models cars quan la quota s'esgota.</li>
-                <li><strong>Diàleg duplicat de reload</strong>: Eliminat el condicional duplicat al listener de <code>apiKey</code> que provocava dos recarregaments consecutius.</li>
-                <li><strong>Deep Dive fix</strong>: El contingut es mostrava com a <code>hidden</code> fins al final del streaming en lloc d'aparèixer progressivament.</li>
+                <li>Panell de text font: visualitza el text pla enviat a la IA per a la resumització</li>
+                <li>Extracció de contingut de Twitter/X via la biblioteca Defuddle amb fallback de scraping DOM</li>
+                <li>Hacker News: eliminat el límit de comentaris; afegida la càrrega de l'article enllaçat</li>
+                <li>Readability.js carregat en el context de la sidebar per a la càrrega d'articles de HN</li>
+                <li>Insígnia de caché: insígnia clicable que mostra l'estat de caché a la toolbar</li>
+                <li>Estadístiques: selector de període (7d / 30d / 6m / 1a) per a KPIs, gràfic i taula</li>
+                <li>Estadístiques: columnes per a tokens d'entrada, tokens de sortida, encerts de caché i ms mitjans</li>
+                <li>Comptatge real de tokens des de <code>usageMetadata</code> de l'API de Gemini (substitueix les estimacions)</li>
+                <li>Historial d'estadístiques: càrrega de resum de caché directament a la sidebar (no només obre l'URL)</li>
+                <li>Barra de títol de pàgina: barra adhesiva que mostra el títol de la pàgina actual durant la resumització</li>
+                <li>Panell d'historial: llista navegable de resums anteriors a la sidebar</li>
+                <li><code>listCachedSummaries</code> per al panell d'historial</li>
+                <li>Caché: TTL de 30 dies amb <code>purgeStaleCacheEntries</code> per a entrades caducades</li>
+                <li>Caché: <code>clearCache</code> ara esborra totes les claus <code>summary_cache:*</code>, no només les indexades</li>
+                <li>Resum: div de contingut visible durant l'streaming (estava amagat fins al final)</li>
+                <li>Resum: el fallback de quota respecta els models favorits i evita els models cars</li>
+                <li>Models: límit de tokens per model via <code>contextWindow</code>; <code>EUR_RATE</code> mogut a <code>shared/models.js</code></li>
+                <li>Sidebar: condicional duplicat eliminat del listener <code>apiKey</code></li>
+                <li>Estadístiques: guardia per a dates invàlides; format <code>toLocaleString</code> per als tokens</li>
+                <li>Estadístiques: funcions d'agrupació setmanal/mensual (<code>getMondayOfWeek</code>, <code>filterHistoryByPeriod</code>)</li>
+                <li>Streaming: text pla durant l'streaming, renderització completa de Markdown en finalitzar</li>
+                <li>Caché: dues lectures seqüencials de <code>saveUsageStats</code> combinades en una sola <code>storage.get</code></li>
+                <li>Models: <code>favoriteModels</code> llegit a la inicialització, evitant una crida extra a <code>storage.sync</code></li>
+                <li><code>defuddle</code> afegit com a dependència npm de vendor (fixat a <code>^0.14.0</code>)</li>
+                <li>El bundle de la sidebar inclou <code>history.js</code></li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1238,27 +1260,21 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Març 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Selector de models amb favorits</strong>: Nova interfície amb estrelles per marcar/desmarcar models favorits des de la pàgina d'ajustaments. Els models seleccionats es sincronitzen automàticament amb el sidebar.</li>
-                <li><strong>Botó "Actualitzar"</strong>: Connecta amb l'API de Google per obtenir la llista completa de models Gemini disponibles i emmagatzema-la en cache local.</li>
-                <li><strong>Botó "Seleccionar"</strong>: Obre el llistat de models (cache local + curats) per gestionar favorits sense necessitat de connexió a l'API.</li>
-                <li><strong>Opció "Triar més models…"</strong>: El desplegable del sidebar inclou un enllaç directe als ajustaments quan l'usuari vol afegir nous models.</li>
-                <li><strong>Build multi-target</strong>: Nou sistema de build amb <code>manifest.base.json</code> + patches per Firefox/Chromium, bundle esbuild per Chromium, i generació de ZIPs via Node.js (eliminada dependència de Python).</li>
-                <li><strong>Codi consolidat</strong>: Extreta funció <code>ensureFavoriteModels()</code> a <code>shared/models.js</code> i <code>extractExecutiveSummary()</code> a <code>utils.js</code> per eliminar duplicació.</li>
-                <li><strong>Neteja de producció</strong>: Eliminats fitxers obsolets (<code>make_zip_v4.py</code>, <code>generate_icons_blue.ps1</code>, <code>test_models.py</code>) i <code>console.log</code> innecessari.</li>
-                <li><strong>SyntaxError a la pàgina d'ajustaments</strong>: Solucionada declaració duplicada de <code>extensionToggles</code> entre <code>settings-options.js</code> i <code>settings.js</code> que impedia carregar la pàgina.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.0.1
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Bionic Reader (UI/UX)</strong>: El botó d'activació ara està sempre disponible de forma incondicional al faldó de l'aplicació en comptes de requerir un resum completat.</li>
-                <li><strong>Bionic Reader (Configuració)</strong>: El filtre tipogràfic als ajustaments amaga intel·ligentment les fonts que no pertanyen al sistema operatiu (<code>macOS</code> o <code>Windows</code>) reduint el soroll visual de la llista desplegable. A més, canviar la font, interlineat o pes biònic des de les opcions reflectirà els canvis a l'instant al Sidebar de darrere.</li>
-                <li><strong>Bionic Reader (Persistència)</strong>: L'estat triat (actiu/inactiu) es guarda permanentment entre sessions gràcies a l'emmagatzematge local de l'extensió. De la mateixa manera, si deixes l'efecte encès i resumeixes una altra pàgina, el nou text adoptarà automàticament l'estil i formatatge preservats.</li>
-                <li><strong>Traçabilitat d'errors</strong>: S'han assignat identificadors numèrics (<code>[001]</code> a <code>[010]</code>) a cadascun dels missatges d'excepció (quotes esgotades, llocs invàlids, fallades de l'API o d'extracció) per optimitzar-ne el procés de diagnòstic de suport tècnic.</li>
-                <li><strong>Bug del Recarregar necessari (F5)</strong>: Solventat el problema d'extracció que exigia refrescar la finestra al moure's entre pestanyes amb la sidebar tancada. S'ha migrat l'accés web universal d'<code>optional_host_permissions</code> a l'assignació estàtica de Chromium i Firefox, consolidant la recollida de dades sense pèrdua de gest d'usuari (user gesture limits).</li>
+                <li>Sistema de models favorits: fixa els models de Gemini preferits al capdamunt de la llista</li>
+                <li>Script de comprovació pre-release (<code>scripts/pre-release-check.mjs</code>) amb auditoria automatitzada</li>
+                <li>Bundle de la sidebar per a Chromium amb esbuild (<code>scripts/build-sidebar-bundle.mjs</code>)</li>
+                <li>CI/CD: fluxos de treball de GitHub Actions per a lint, tests i release</li>
+                <li>ESLint integrat a tot el projecte; executor de tests natiu de Node.js (56 tests, 0 errors)</li>
+                <li><code>CURATED_MODELS</code> unificat a <code>shared/models.js</code> com a font de veritat única</li>
+                <li>Estat biònic gestionat via classe CSS (sense estils inline)</li>
+                <li>Icones pregenerides a <code>img/</code>; <code>set_dev_mode.ps1</code> millorat</li>
+                <li><code>shared/defaults.js</code> extret per als valors de prompt per defecte</li>
+                <li><code>getCuratedModelInfo</code> corregit per a variants de model</li>
+                <li>Compatibilitat de build per a Linux (GitHub Actions <code>ubuntu-latest</code>)</li>
+                <li><code>settings.js</code> dividit en 8 submòduls temàtics</li>
+                <li>Creació de ZIP en Node.js pur (eliminada la dependència de Python)</li>
+                <li>Estratègia de manifest: <code>manifest.base.json</code> + fitxers de patch per objectiu</li>
+                <li>Procediment de release simplificat amb <code>npm run prerelease</code></li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1266,14 +1282,13 @@
                 v2.0.0
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
-              <p style="margin: 4px 0 6px; color: #555; font-size: 0.9em">Milestone 2.0.0: Versió amb suport natiu per a l'ecosistema Chromium.</p>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Suport Chromium</strong>: Compatibilitat completa amb navegadors basats en Chromium (Google Chrome, Edge, Brave, etc.) gràcies al nou wrapper <code>ext.js</code> que abstreu la crida correcta a <code>browser</code> o <code>chrome</code>.</li>
-                <li><strong>Build Multi-Target</strong>: Scripts de generació actualitzats per empaquetar de forma simultània l'arxiu <code>.zip</code> per Firefox i el <code>.zip</code> per Chromium alhora.</li>
-                <li><strong>Side Panel Natiu</strong>: Integració amb l'API de <code>chrome.sidePanel</code> per a entorns Google garantint que el panell lateral o l'action de l'extensió funcionen previsiblement.</li>
-                <li><strong>Auditories i procediments</strong>: Obligatorietat de testejar tant el branch Firefox com el Chromium de qualsevol canvi futur. Millores a l'eina automàtica de release per eliminar paquets o extrets <code>.zip</code> antics i carpetes un-packed.</li>
-                <li><strong>Problema Caching Selecció vs Web Completa</strong>: Solucionat error fatal (<em>"Cannot set properties of null"</em>) a l'hora de canviar de resumir un text pre-seleccionat i seguidament una pàgina completa. Ara les seleccions tenen un identificador únic (prefixat amb <code>seleccio:</code>).</li>
-                <li><strong>UX Menú Contextual</strong>: S'han retirat les icones lletges de l'entorn dev als menús contextuals de Firefox i Chrome per tal que només aparegui el text net, igualant el look & feel de sistema.</li>
+                <li>Suport per a Chromium (Chrome, Edge, Brave) amb <code>side_panel</code> de Manifest V3</li>
+                <li>Build dual-objectiu: ZIPs separats per a Firefox i Chromium</li>
+                <li>Empaquetat ZIP compatible amb AMO (separadors de ruta amb barra endavant)</li>
+                <li><code>ext.js</code>: capa d'abstracció cross-browser unificada (Firefox <code>browser.<em></code> / Chromium <code>chrome.</em></code>)</li>
+                <li>Bundle esbuild per al service worker en segon pla (requisit de Chromium per a mòduls ES)</li>
+                <li>Extensió portada de Firefox-only a MV3 cross-browser complet</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1282,13 +1297,7 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Refactorització sidebar.js</strong>: Reduït de 632 a 230 línies. Extreta la lògica de generació a <code>summary.js</code>, quota/estadístiques a <code>stats.js</code>, i avís API key a <code>ui.js</code>.</li>
-                <li><strong>Missatges d'error</strong>: Nova funció <code>classifyError()</code> que mostra missatges clars i en català per errors d'API key (401/403), quota excedida (429), permisos denegats, i contingut buit.</li>
-                <li><strong>Contingut buit</strong>: Substituït l'error tècnic "Page content empty" per un missatge clar indicant que cal recarregar la pestanya.</li>
-                <li><strong>ext.js cross-browser</strong>: Completat el wrapper amb suport sidePanel per a Chromium (open, close, getViews, setPanelBehavior). Firefox no afectat.</li>
-                <li><code>sidebar/stats.js</code>: Mòdul de seguiment de quota diària i consum d'aigua.</li>
-                <li><code>sidebar/summary.js</code>: Mòdul amb la lògica principal de generació (<code>startSummary</code>), classificació d'errors (<code>classifyError</code>), i gestió de triggers.</li>
-                <li>Tests nous (15 → 23): <code>estimateTokens</code> edge cases, <code>getCuratedModelInfo</code>, <code>classifyError</code>, <code>formatObsidianPath</code> amb tokens de temps.</li>
+                <li>Correccions menors i millores d'estabilitat abans de la reescriptura 2.0</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1297,28 +1306,7 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Permisos de host (fix crític)</strong>: <code>executeScriptSafe</code> refactoritzat amb estratègia "try first, request if needed". Elimina la comprovació prèvia <code>permissions.contains()</code> que retornava falsos negatius en URLs amb query params o hash, causant "Page content empty" en producció.</li>
-                <li><strong>Manifest AMO</strong>: Afegit camp obligatori <code>data_collection_permissions</code> (declara <code>websiteContent</code>) i apujat <code>strict_min_version</code> a <code>140.0</code> per eliminar warnings de l'AMO.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.1.6
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Seguretat</strong>: API key moguda de URL a header HTTP (<code>x-goog-api-key</code>) a totes les crides (sidebar + settings).</li>
-                <li><strong>Seguretat</strong>: Eliminat tot l'ús de <code>innerHTML</code> amb contingut dinàmic. Substituït per manipulació DOM segura (<code>DOMParser</code>, <code>replaceChildren</code>, <code>textContent</code>).</li>
-                <li><strong>Seguretat</strong>: <code>host_permissions</code> canviat a <code>optional_host_permissions</code> — permisos demanats dinàmicament.</li>
-                <li><strong>Seguretat</strong>: Comprovació de permisos (<code>permissions.contains()</code>) abans d'injectar scripts, eliminant errors de consola.</li>
-                <li><strong>Accessibilitat</strong>: Afegit <code>lang="ca"</code>, <code>aria-label</code> a tots els botons, <code>aria-hidden</code> a tots els SVGs decoratius, <code>aria-live</code> als elements d'estat.</li>
-                <li><strong>Privadesa</strong>: <code>PRIVACY_POLICY.md</code> actualitzada amb tots els permisos, YouTube/MAIN world i historial.</li>
-                <li><strong>Codi</strong>: Eliminats tots els <code>console.log</code> de producció, corregit typo "Obisidian", selectors CSS segurs amb <code>CSS.escape()</code>.</li>
-                <li><strong>Codi</strong>: Netejada dual key <code>enableDeepdive</code>/<code>enableDeepDive</code>, eliminat <code>storage.local.set</code> redundant.</li>
-                <li><strong>UX</strong>: Obsidian ara obre en nova pestanya (no substitueix l'activa).</li>
-                <li><strong>UX</strong>: Tema llegit de <code>storage.sync</code> (coherent amb la resta de configuració).</li>
-                <li><code>THIRD_PARTY.md</code>: Documentació de codi de tercers (Readability.js, Apache 2.0).</li>
-                <li>Workflow d'auditoria pre-release (<code>/pre_release_audit</code>) integrat al procés de publicació.</li>
+                <li>Plugin de Validació Científica</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1327,13 +1315,8 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Reordenació de Plugins</strong>: Funcionalitat per moure amunt i avall l'ordre dels plugins/extensions des de la configuració i el panell lateral.</li>
-                <li><strong>Gràfic i Nou KPI</strong>: Afegit un gràfic de barres d'activitat dels últims 7 dies i la nova mètrica "Temps Estalviat Aprox" a les Estadístiques.</li>
-                <li><strong>Paginació a l'historial</strong>: Selector de quantitat de resultats (20, 50, 100) i paginació real a la llista d'historial de peticions.</li>
-                <li><strong>Data relativa</strong>: Les entrades de referència a l'historial informatiu de peticions ara figuren en "fa X temps" de forma orgànica enlloc d'estricta, amb una lògica calculada amb el calendari actual humà (hores, minuts i "ahir"). </li>
-                <li><strong>Sentence Case UI</strong>: Tots els títols de funcions, tabulacions i botons s'han re-estandarditzat en format català acadèmic deixant de banda el Title Case anglès innecessari.</li>
-                <li><strong>Plugins</strong>: Reanomenat oficial del terme "Extensions" integrades per "Plugins".</li>
-                <li><strong>Tema Solarized</strong>: S'ha rellevat i integrat manualment el perfil i els matisos de la variant de previsualització de color sèpia "Sepia" pel sistema "Solarized".</li>
+                <li>Correccions de permisos i metadades del manifest</li>
+                <li>Llegendes dels camps de plantilla afegides a les opcions</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1342,16 +1325,10 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Integració Obsidian (Fix Final)</strong>: Canvi d'estratègia tècnica. Substituït <code>window.open</code> per <code>browser.tabs.update</code> per evitar bloquejos de CSP en producció i garantir que l'URI <code>obsidian://</code> s'obre correctament.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.1.3
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Validació AMO</strong>: Corregit l'ID de l'extensió al <code>manifest.json</code> (<code>sergi@xaudiera.xyz</code>) per coincidir amb el registrat a Mozilla Add-ons, permetent la pujada de noves versions.</li>
+                <li>Correccions de la integració amb Obsidian</li>
+                <li><code>utils.js</code> refactoritzat</li>
+                <li>Lectura biònica millorada amb fixació configurable i algorisme basat en regles</li>
+                <li>Nous temes: Sépia i Gris Suau</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1360,69 +1337,26 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Integració Obsidian</strong>: Primera temptativa de solucionar l'error en producció eliminant l'<code>iframe</code> ocult i utilitzant <code>window.open</code> amb <code>_self</code>.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.0.4
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Filtre de Models (Sidebar)</strong>: Ara la barra lateral oculta correctament els models "preview", "pro-exp" i "embedding", alineant-se amb la configuració.</li>
-                <li><strong>Resum de YouTube</strong>: Millora en l'extracció de transcripcions (YouTube Transcript) per evitar l'error "Proporcioneu el text".</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.0.0
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Tauler d'Estadístiques</strong>: Nova pestanya a la configuració per monitorar l'ús de l'API (peticions, tokens, velocitat).</li>
-                <li><strong>Historial de Peticions</strong>: Registre detallat de les últimes 100 peticions, incloent títol, URL, model i cost en tokens.</li>
-                <li><strong>Extracció Intel·ligent</strong>: Suport especial per a Hacker News (<code>news.ycombinator.com</code>), incloent els 15 millors comentaris al resum.</li>
-                <li><strong>Càrrega Especulativa</strong>: Inici de l'extracció de text en segon pla només obrir la barra lateral per un inici instantani.</li>
-                <li><strong>Streaming Real</strong>: Respostes text-a-text en temps real (Server-Sent Events) per millorar la percepció de velocitat.</li>
-                <li>Optimització del rendiment de la interfície durant la generació de text (throttling a 10fps).</li>
-                <li>Reducció del consum de tokens eliminant elements de navegació innecessaris.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.2.0
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Nou disseny de la pàgina de configuració ("Web Clipper" style).</li>
-                <li>Configuració en pàgina completa (tab) per millorar la usabilitat.</li>
-                <li>Suggeriment automàtic de models alternatius quan s'excedeix la quota.</li>
-                <li>Límit de tokens intel·ligent per a models Gemma per evitar errors.</li>
-                <li>Actualitzat el prompt de sistema per defecte amb instruccions més detallades i estructurades.</li>
-                <li>Reorganitzat el menú de configuració per a més claredat.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.1.0
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Selector de models dinàmic al peu de la barra lateral.</li>
-                <li>Capacitat de personalitzar la plantilla d'exportació Markdown.</li>
-                <li>Suport complet per als models Gemma 3 i Gemini 2.0 Flash.</li>
-                <li>Errors en la selecció del model per defecte.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v0.1.0
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Versió inicial de l'extensió Resumir contingut.</li>
-                <li>Resum de pàgines web amb Google Gemini API.</li>
-                <li>Barra lateral integrada.</li>
+                <li>Exportació al vault d'Obsidian: llançament silenciós (sense diàleg de confirmació)</li>
+                <li>Neteja de la UI de la sidebar</li>
+                <li>Resumització de pàgines web usant l'API de Google Gemini (streaming SSE)</li>
+                <li>Sidebar de Firefox (Manifest V3 <code>sidebar_action</code>)</li>
+                <li>Mode de lectura biònica</li>
+                <li>Múltiples temes (sistema, clar, fosc)</li>
+                <li>Estadístiques d'ús (tokens diaris i quota)</li>
+                <li>Integració d'exportació a Obsidian</li>
+                <li>Sistema de plugins (activar/desactivar/reordenar)</li>
+                <li>Actualitza la versió a <code>package.json</code> en fer un bump de release</li>
+                <li>Afegeix una secció <code>## [X.Y.Z] - YYYY-MM-DD</code> a aquest fitxer</li>
+                <li>Usa <code>git tag vX.Y.Z</code> per als releases a <code>main</code></li>
+                <li>Segueix els <a href="https://www.conventionalcommits.org/">Conventional Commits</a></li>
+                <li><code>feat:</code> nova funcionalitat</li>
+                <li><code>fix:</code> correcció d'error</li>
+                <li><code>security:</code> millora de seguretat</li>
+                <li><code>docs:</code> documentació</li>
+                <li><code>chore:</code> manteniment, dependències</li>
+                <li><code>test:</code> millores de tests</li>
+                <li><code>perf:</code> millores de rendiment</li>
               </ul>
             </div>
             <!-- CHANGELOG_END -->

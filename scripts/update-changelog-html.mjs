@@ -103,7 +103,7 @@ function generateHtml(versions) {
 }
 
 // --- Main ---
-const changelogPath    = resolve(root, "CHANGELOG.md");
+const changelogPath    = resolve(root, "docs", "CHANGELOG.md");
 const settingsHtmlPath = resolve(root, "options", "settings.html");
 
 const changelog    = readFileSync(changelogPath, "utf8");

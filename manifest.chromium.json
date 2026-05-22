@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Resumir",
     "short_name": "Resumir",
-    "version": "2.2.5",
+    "version": "2.2.6",
     "author": "Sergi Xaudiera",
     "author_email": "sergi@xaudiera.xyz",
     "homepage_url": "https://github.com/xxxaau/extensio-resumir-contingut",
