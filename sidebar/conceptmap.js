@@ -199,22 +199,41 @@ function expandAll(container) {
 
 /**
  * Builds the PNG export filename for a concept map.
- * Format: YYYYMMDD_<title truncated to 20 chars>.png
- * Title is sanitised (no special chars) and truncated.
- * @param {string} pageTitle
+ * Format: YYYYMMDD_word1_word2.png from the map's root label.
+ * Delegates to the shared pure util at sidebar/conceptmap-filename.js when
+ * available; otherwise falls back to a minimal inline implementation so the
+ * sidebar still works if the script load order changes.
+ * @param {string} rootLabel
  * @returns {string}
  */
-function buildConceptMapFilename(pageTitle = "") {
-    const now = new Date();
+function buildConceptMapFilename(rootLabel = "") {
+    if (typeof window !== "undefined" && typeof window.buildConceptMapFilename === "function") {
+        return window.buildConceptMapFilename(rootLabel);
+    }
+    // Inline fallback (mirrors sidebar/conceptmap-filename.js logic).
+    const STOP = new Set([
+        "a","al","als","amb","de","del","dels","el","els","en","es","i","la","les","lo",
+        "o","per","que","un","una","uns","unes","com","si",
+        "con","las","los","por","y",
+        "an","and","at","by","for","in","of","on","or","the","to","with","is","it","as",
+    ]);
+    const d = new Date();
     const pad = (n) => String(n).padStart(2, "0");
-    const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-    const sanitised = pageTitle
-        .replace(/[/\\:*?"<>|]/g, "")   // strip chars invalid in filenames
-        .replace(/\s+/g, " ")
+    const date = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+    const norm = String(rootLabel || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
         .trim();
-    const short = sanitised.length > 20 ? sanitised.slice(0, 20).trimEnd() : sanitised;
-    const suffix = short ? `_${short}` : "";
-    return `${date}${suffix}.png`;
+    const tokens = norm.length === 0
+        ? []
+        : norm.split(/\s+/)
+            .filter(t => t.length > 1 && !STOP.has(t))
+            .map(t => t.slice(0, 20));
+    const picked = tokens.slice(0, 2);
+    if (picked.length === 0) return `${date}_mapa.png`;
+    return `${date}_${picked.join("_")}.png`;
 }
 
 function renderMarkmapInteractive(text, pageTitle = "") {
@@ -337,7 +356,13 @@ function renderMarkmapInteractive(text, pageTitle = "") {
             });
             downloadPngBtn.addEventListener("click", async () => {
                 try {
-                    const filename = buildConceptMapFilename(pageTitle);
+                    // Use the shared filename builder seeded with the root label.
+                    // Falls back to the legacy pageTitle-based name if the shared
+                    // util isn't loaded for some reason.
+                    const builder = typeof window.buildConceptMapFilename === "function"
+                        ? window.buildConceptMapFilename
+                        : (lbl) => buildConceptMapFilename(lbl || pageTitle);
+                    const filename = builder(root.label || pageTitle);
                     await window.markmapNative.exportToPNG(svg, filename, { backgroundColor: "#ffffff" });
                 } catch (error) {
                     console.error("Error exporting PNG:", error);
@@ -429,14 +454,17 @@ async function openFullPageView(text, pageTitle = "") {
  * IMPORTANT: this function is serialised to a string by executeScript and
  * executed in the host page context. It cannot reference any outer scope.
  */
-function fullscreenOverlayFunc(text, pageTitle) {
+function fullscreenOverlayFunc(text, _pageTitle) {
     try {
         // Remove existing overlay if any (re-open behaviour)
         const existing = document.getElementById('markmap-fullscreen-overlay');
         if (existing) existing.remove();
 
         const SVG_NS = 'http://www.w3.org/2000/svg';
-        const COLORS = ["#205ea6", "#5e409d", "#16a34a", "#dc2626", "#ea580c", "#0891b2"];
+        // NotebookLM-inspired pastel palette per depth.
+        const NODE_COLORS = ['#c5c8f7', '#c5dff7', '#a8e6cf', '#c8f0d5'];
+        const EDGE_COLORS = ['#a5a8e0', '#7fc8a9', '#7fc8a9', '#7fc8a9'];
+        const TEXT_COLOR  = '#1a1a1a';
 
         // ─── Parser ─────────────────────────────────────────────────────────
         function parseMarkdownTree(src) {
@@ -475,24 +503,41 @@ function fullscreenOverlayFunc(text, pageTitle) {
         }
 
         // ─── Layout ────────────────────────────────────────────────────────
-        const FONT_SIZE = 14, LINE_H = 1.3, PAD_X = 10, PAD_Y = 6;
-        const MAX_LABEL_W = 320, SPACING_X = 70, SPACING_Y = 12;
+        const FONT_SIZE = 14, LINE_H = 1.3, PAD_X = 14, PAD_Y = 8;
+        const MAX_LABEL_W = 280, SPACING_X = 50, SPACING_Y = 14;
+
+        // Canvas singleton for precise text measurement. Replaces the previous
+        // `length * avgChar` estimate that caused baseline/edge misalignment.
+        let _ctx = null;
+        function measureCtx() {
+            if (!_ctx) {
+                try {
+                    const canvas = document.createElement('canvas');
+                    _ctx = canvas.getContext('2d');
+                } catch { _ctx = null; }
+            }
+            if (_ctx) {
+                _ctx.font = `500 ${FONT_SIZE}px "Google Sans", system-ui, -apple-system, sans-serif`;
+            }
+            return _ctx;
+        }
 
         function measureLabel(textStr) {
-            const avgChar = FONT_SIZE * 0.55;
-            const natural = textStr.length * avgChar;
+            const ctx = measureCtx();
+            const measure = (s) => ctx ? ctx.measureText(s).width : s.length * FONT_SIZE * 0.55;
+            const natural = measure(textStr);
             if (natural <= MAX_LABEL_W) return { width: natural, lines: [textStr] };
             const words = textStr.split(/\s+/);
             const out = [];
             let cur = '';
             for (const w of words) {
                 const cand = cur ? cur + ' ' + w : w;
-                if (cand.length * avgChar <= MAX_LABEL_W) cur = cand;
+                if (measure(cand) <= MAX_LABEL_W) cur = cand;
                 else { if (cur) out.push(cur); cur = w; }
             }
             if (cur) out.push(cur);
-            const longest = out.reduce((m, l) => Math.max(m, l.length), 0);
-            return { width: longest * avgChar, lines: out };
+            const longest = out.reduce((m, l) => Math.max(m, measure(l)), 0);
+            return { width: longest, lines: out };
         }
 
         function computeLayout(root) {
@@ -596,9 +641,13 @@ function fullscreenOverlayFunc(text, pageTitle) {
         // An intra-SVG <style> with !important wins over external CSS.
         const styleEl = document.createElementNS(SVG_NS, 'style');
         styleEl.textContent = `
-            text { fill: #100f0f !important; font-family: system-ui, -apple-system, sans-serif !important; }
-            .markmap-node text { fill: #100f0f !important; }
-            line { stroke-opacity: 1 !important; }
+            text { fill: #1a1a1a !important;
+                   font-family: 'Google Sans', system-ui, -apple-system, sans-serif !important;
+                   font-weight: 500 !important; }
+            .markmap-node { cursor: default; }
+            .markmap-toggle { cursor: pointer; }
+            rect { fill-opacity: 1 !important; stroke: none !important; }
+            path { fill: none !important; }
         `;
         svg.appendChild(styleEl);
         content.appendChild(svg);
@@ -621,7 +670,8 @@ function fullscreenOverlayFunc(text, pageTitle) {
         viewport.setAttribute('class', 'markmap-viewport');
         svg.appendChild(viewport);
 
-        function colorFor(depth) { return COLORS[depth % COLORS.length]; }
+        function nodeColorFor(depth) { return NODE_COLORS[Math.min(depth, NODE_COLORS.length - 1)]; }
+        function edgeColorFor(depth) { return EDGE_COLORS[Math.min(depth, EDGE_COLORS.length - 1)]; }
         function curve(x1, y1, x2, y2) {
             const dx = Math.max(20, (x2 - x1) * 0.4);
             return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
@@ -640,60 +690,93 @@ function fullscreenOverlayFunc(text, pageTitle) {
 
             function walk(node) {
                 const visible = (!node.fold && node.children) ? node.children : [];
+                // Edges connect pill-to-pill laterally
                 for (const c of visible) {
                     const path = document.createElementNS(SVG_NS, 'path');
                     path.setAttribute('d', curve(node._x + node._width, node._y, c._x, c._y));
                     path.setAttribute('fill', 'none');
-                    path.setAttribute('stroke', colorFor(c.depth));
+                    path.setAttribute('stroke', edgeColorFor(c.depth));
                     path.setAttribute('stroke-width', '1.5');
-                    path.setAttribute('opacity', '0.6');
+                    path.setAttribute('opacity', '1');
                     linksG.appendChild(path);
                 }
                 const g = document.createElementNS(SVG_NS, 'g');
+                g.setAttribute('class', 'markmap-node');
                 g.setAttribute('transform', `translate(${node._x}, ${node._y - node._height / 2})`);
-                const color = colorFor(node.depth);
+                const fillColor = nodeColorFor(node.depth);
 
-                const baseline = document.createElementNS(SVG_NS, 'line');
-                baseline.setAttribute('x1', '0');
-                baseline.setAttribute('y1', String(node._height));
-                baseline.setAttribute('x2', String(node._width));
-                baseline.setAttribute('y2', String(node._height));
-                baseline.setAttribute('stroke', color);
-                baseline.setAttribute('stroke-width', '2');
-                g.appendChild(baseline);
+                // Pill background
+                const rect = document.createElementNS(SVG_NS, 'rect');
+                rect.setAttribute('x', '0');
+                rect.setAttribute('y', '0');
+                rect.setAttribute('width', String(node._width));
+                rect.setAttribute('height', String(node._height));
+                const radius = Math.min(12, node._height / 2);
+                rect.setAttribute('rx', String(radius));
+                rect.setAttribute('ry', String(radius));
+                rect.setAttribute('fill', fillColor);
+                rect.setAttribute('stroke', 'none');
+                g.appendChild(rect);
 
+                // Text — centred vertically inside pill
                 const textEl = document.createElementNS(SVG_NS, 'text');
                 textEl.setAttribute('x', String(PAD_X));
-                textEl.setAttribute('y', String(PAD_Y));
-                textEl.setAttribute('dominant-baseline', 'hanging');
+                textEl.setAttribute('y', String(node._height / 2));
+                textEl.setAttribute('dominant-baseline', 'central');
+                textEl.setAttribute('text-anchor', 'start');
                 textEl.setAttribute('font-size', String(FONT_SIZE));
-                textEl.setAttribute('font-family', 'system-ui, -apple-system, sans-serif');
-                textEl.setAttribute('fill', '#100f0f');
+                textEl.setAttribute('font-family', "'Google Sans', system-ui, -apple-system, sans-serif");
+                textEl.setAttribute('font-weight', '500');
+                textEl.setAttribute('fill', TEXT_COLOR);
                 textEl.style.userSelect = 'none';
+                const lineH = FONT_SIZE * LINE_H;
+                const N = node._lines.length;
                 node._lines.forEach((line, i) => {
                     const ts = document.createElementNS(SVG_NS, 'tspan');
                     ts.setAttribute('x', String(PAD_X));
-                    ts.setAttribute('dy', i === 0 ? '0' : String(FONT_SIZE * LINE_H));
+                    const dy = i === 0 ? -((N - 1) * lineH) / 2 : lineH;
+                    ts.setAttribute('dy', String(dy));
                     ts.textContent = line;
                     textEl.appendChild(ts);
                 });
                 g.appendChild(textEl);
 
+                // Toggle: white circle with < or > glyph
                 if (node.children && node.children.length > 0) {
+                    const tg = document.createElementNS(SVG_NS, 'g');
+                    tg.setAttribute('class', 'markmap-toggle');
+                    tg.style.cursor = 'pointer';
+                    const cx = node._width + 10;
+                    const cy = node._height / 2;
+
                     const toggle = document.createElementNS(SVG_NS, 'circle');
-                    toggle.setAttribute('cx', String(node._width + 6));
-                    toggle.setAttribute('cy', String(node._height));
-                    toggle.setAttribute('r', '5');
-                    toggle.setAttribute('fill', node.fold ? color : '#ffffff');
-                    toggle.setAttribute('stroke', color);
+                    toggle.setAttribute('cx', String(cx));
+                    toggle.setAttribute('cy', String(cy));
+                    toggle.setAttribute('r', '8');
+                    toggle.setAttribute('fill', '#ffffff');
+                    toggle.setAttribute('stroke', fillColor);
                     toggle.setAttribute('stroke-width', '1.5');
-                    toggle.style.cursor = 'pointer';
-                    toggle.addEventListener('click', (e) => {
+                    tg.appendChild(toggle);
+
+                    const glyph = document.createElementNS(SVG_NS, 'text');
+                    glyph.setAttribute('x', String(cx));
+                    glyph.setAttribute('y', String(cy));
+                    glyph.setAttribute('text-anchor', 'middle');
+                    glyph.setAttribute('dominant-baseline', 'central');
+                    glyph.setAttribute('font-size', '10');
+                    glyph.setAttribute('font-family', 'system-ui, -apple-system, sans-serif');
+                    glyph.setAttribute('font-weight', '700');
+                    glyph.setAttribute('fill', fillColor);
+                    glyph.style.userSelect = 'none';
+                    glyph.textContent = node.fold ? '>' : '<';
+                    tg.appendChild(glyph);
+
+                    tg.addEventListener('click', (e) => {
                         e.stopPropagation();
                         node.fold = !node.fold;
                         render();
                     });
-                    g.appendChild(toggle);
+                    g.appendChild(tg);
                 }
                 nodesG.appendChild(g);
                 for (const c of visible) walk(c);
@@ -783,13 +866,36 @@ function fullscreenOverlayFunc(text, pageTitle) {
         btnCollapse.addEventListener('click', () => { setFoldAll(true); render(); requestAnimationFrame(fit); });
 
         // ─── PNG Export ────────────────────────────────────────────────────
+        // Filename rule (mirrors sidebar/conceptmap-filename.js): YYYYMMDD_w1_w2.png
+        // where w1/w2 come from the root label (not pageTitle), normalised to
+        // ASCII lowercase, stop-words removed, ≤1-char tokens dropped, each
+        // truncated to 20 chars. Fallback "_mapa" if no significant words.
+        // Logic duplicated inline because this function is serialised to a
+        // string by executeScript and cannot reference outer scope.
         function buildFilename() {
-            const now = new Date();
+            const STOP = new Set([
+                'a','al','als','amb','de','del','dels','el','els','en','es','i','la','les','lo',
+                'o','per','que','un','una','uns','unes','com','si',
+                'con','las','los','por','y',
+                'an','and','at','by','for','in','of','on','or','the','to','with','is','it','as',
+            ]);
+            const d = new Date();
             const pad = (n) => String(n).padStart(2, '0');
-            const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-            const sanit = String(pageTitle || '').replace(/[/\\:*?"<>|]/g, '').replace(/\s+/g, ' ').trim();
-            const short = sanit.length > 20 ? sanit.slice(0, 20).trimEnd() : sanit;
-            return `${date}${short ? '_' + short : ''}.png`;
+            const date = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+            const norm = String(root.label || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, ' ')
+                .trim();
+            const tokens = norm.length === 0
+                ? []
+                : norm.split(/\s+/)
+                    .filter(t => t.length > 1 && !STOP.has(t))
+                    .map(t => t.slice(0, 20));
+            const picked = tokens.slice(0, 2);
+            if (picked.length === 0) return `${date}_mapa.png`;
+            return `${date}_${picked.join('_')}.png`;
         }
         btnPng.addEventListener('click', async () => {
             try {

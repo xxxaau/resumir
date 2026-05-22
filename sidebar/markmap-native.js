@@ -84,21 +84,41 @@
     // Calculates x/y for each node. Root at left, children flow right.
     // y is the vertical center of each node. x is horizontal column.
 
+    // Canvas singleton for precise text measurement. Cheaper and far more accurate
+    // than char-count estimation; eliminates the edge/text desencaix observed when
+    // baseline width was estimated as `text.length * avgChar`.
+    let _measureCtx = null;
+    function getMeasureCtx(fontSize) {
+        if (!_measureCtx) {
+            try {
+                const canvas = (typeof document !== "undefined")
+                    ? document.createElement("canvas") : null;
+                _measureCtx = canvas ? canvas.getContext("2d") : null;
+            } catch { _measureCtx = null; }
+        }
+        if (_measureCtx) {
+            _measureCtx.font = `500 ${fontSize}px "Google Sans", system-ui, -apple-system, sans-serif`;
+        }
+        return _measureCtx;
+    }
+
     function measureLabel(text, fontSize, maxWidth) {
-        // Approximation: characters * average width. We use a hidden SVG <text> for accuracy later.
-        // For now, estimate. Real measurement happens in render pass.
-        const avgChar = fontSize * 0.55;
-        const naturalWidth = text.length * avgChar;
+        const ctx = getMeasureCtx(fontSize);
+        const measure = (s) => ctx
+            ? ctx.measureText(s).width
+            : s.length * fontSize * 0.55; // fallback estimation if canvas unavailable
+
+        const naturalWidth = measure(text);
         if (naturalWidth <= maxWidth) {
             return { width: naturalWidth, lines: [text] };
         }
-        // Wrap by words
+        // Wrap by words, measuring each candidate line precisely.
         const words = text.split(/\s+/);
         const lines = [];
         let current = "";
         for (const w of words) {
             const candidate = current ? current + " " + w : w;
-            if (candidate.length * avgChar <= maxWidth) {
+            if (measure(candidate) <= maxWidth) {
                 current = candidate;
             } else {
                 if (current) lines.push(current);
@@ -106,8 +126,8 @@
             }
         }
         if (current) lines.push(current);
-        const longest = lines.reduce((m, l) => Math.max(m, l.length), 0);
-        return { width: longest * avgChar, lines };
+        const longest = lines.reduce((m, l) => Math.max(m, measure(l)), 0);
+        return { width: longest, lines };
     }
 
     function computeLayout(root, options) {
@@ -182,23 +202,25 @@
 
     // ─── Renderer ────────────────────────────────────────────────────────────
 
-    const DEFAULT_COLORS = [
-        "#205ea6", "#5e409d", "#16a34a", "#dc2626", "#ea580c", "#0891b2"
-    ];
+    // NotebookLM-inspired pastel palette per depth.
+    // Pills get NODE_COLORS[depth] as fill; edges entering depth N use EDGE_COLORS[depth].
+    const NODE_COLORS = ["#c5c8f7", "#c5dff7", "#a8e6cf", "#c8f0d5"];
+    const EDGE_COLORS = ["#a5a8e0", "#7fc8a9", "#7fc8a9", "#7fc8a9"];
+    const TEXT_COLOR  = "#1a1a1a";
 
     function createMindMap(svgElement, root, userOptions) {
         const options = Object.assign({
             fontSize: 14,
             lineHeight: 1.3,
-            paddingX: 10,
-            paddingY: 6,
+            paddingX: 14,
+            paddingY: 8,
             maxLabelWidth: 280,
-            spacingX: 60,
-            spacingY: 10,
-            colors: DEFAULT_COLORS,
+            spacingX: 50,
+            spacingY: 14,
+            colors: NODE_COLORS,
+            edgeColors: EDGE_COLORS,
             backgroundColor: null, // null = transparent
-            textColor: null,       // null = inherit via CSS (var(--text-color))
-            toggleBgColor: null,   // null = use computed background or white
+            textColor: TEXT_COLOR,
         }, userOptions || {});
 
         // Ensure svg has a viewport <g> for zoom/pan transforms
@@ -215,8 +237,11 @@
             bounds: null,
         };
 
-        function colorForDepth(depth) {
-            return options.colors[depth % options.colors.length];
+        function nodeColorFor(depth) {
+            return options.colors[Math.min(depth, options.colors.length - 1)];
+        }
+        function edgeColorFor(depth) {
+            return options.edgeColors[Math.min(depth, options.edgeColors.length - 1)];
         }
 
         function curve(x1, y1, x2, y2) {
@@ -240,7 +265,7 @@
 
             function walk(node) {
                 const visible = (!node.fold && node.children) ? node.children : [];
-                // Links to children
+                // Links to children — connect pill-to-pill laterally
                 for (const c of visible) {
                     const path = document.createElementNS(SVG_NS, "path");
                     const x1 = node._x + node._width;
@@ -249,70 +274,95 @@
                     const y2 = c._y;
                     path.setAttribute("d", curve(x1, y1, x2, y2));
                     path.setAttribute("fill", "none");
-                    path.setAttribute("stroke", colorForDepth(c.depth));
+                    path.setAttribute("stroke", edgeColorFor(c.depth));
                     path.setAttribute("stroke-width", "1.5");
-                    path.setAttribute("opacity", "0.6");
+                    path.setAttribute("opacity", "1");
                     linksGroup.appendChild(path);
                 }
 
-                // Node group
+                // Node group (translated so internal coords are 0..width/height)
                 const g = document.createElementNS(SVG_NS, "g");
                 g.setAttribute("class", "markmap-node");
                 g.setAttribute("transform", `translate(${node._x}, ${node._y - node._height / 2})`);
 
-                const color = colorForDepth(node.depth);
+                const fillColor = nodeColorFor(node.depth);
 
-                // Bottom border line (markmap-style)
-                const baseline = document.createElementNS(SVG_NS, "line");
-                baseline.setAttribute("x1", "0");
-                baseline.setAttribute("y1", node._height);
-                baseline.setAttribute("x2", node._width);
-                baseline.setAttribute("y2", node._height);
-                baseline.setAttribute("stroke", color);
-                baseline.setAttribute("stroke-width", "2");
-                g.appendChild(baseline);
+                // Pill background (NotebookLM-style rounded rectangle)
+                const rect = document.createElementNS(SVG_NS, "rect");
+                rect.setAttribute("x", "0");
+                rect.setAttribute("y", "0");
+                rect.setAttribute("width", String(node._width));
+                rect.setAttribute("height", String(node._height));
+                const radius = Math.min(12, node._height / 2);
+                rect.setAttribute("rx", String(radius));
+                rect.setAttribute("ry", String(radius));
+                rect.setAttribute("fill", fillColor);
+                rect.setAttribute("stroke", "none");
+                g.appendChild(rect);
 
-                // Text
+                // Text — vertically centred inside the pill
                 const text = document.createElementNS(SVG_NS, "text");
-                text.setAttribute("x", options.paddingX);
-                text.setAttribute("y", options.paddingY);
-                text.setAttribute("dominant-baseline", "hanging");
+                text.setAttribute("x", String(options.paddingX));
+                text.setAttribute("y", String(node._height / 2));
+                text.setAttribute("dominant-baseline", "central");
+                text.setAttribute("text-anchor", "start");
                 text.setAttribute("font-size", String(options.fontSize));
-                text.setAttribute("font-family", "system-ui, -apple-system, sans-serif");
-                // Only set fill if textColor explicitly provided; otherwise let CSS
-                // (`.markmap-container .markmap-node text { fill: var(--text-color) }`)
-                // control colour so theme switches work without re-render.
-                if (options.textColor) {
-                    text.setAttribute("fill", options.textColor);
-                }
+                text.setAttribute("font-family", "'Google Sans', system-ui, -apple-system, sans-serif");
+                text.setAttribute("font-weight", "500");
+                text.setAttribute("fill", options.textColor || TEXT_COLOR);
                 text.style.userSelect = "none";
 
+                // Multi-line: shift first tspan up by (N-1)/2 * lineHeight so the block centres.
+                const lineH = options.fontSize * options.lineHeight;
+                const N = node._lines.length;
                 node._lines.forEach((line, i) => {
                     const tspan = document.createElementNS(SVG_NS, "tspan");
                     tspan.setAttribute("x", String(options.paddingX));
-                    tspan.setAttribute("dy", i === 0 ? "0" : String(options.fontSize * options.lineHeight));
+                    const dy = i === 0 ? -((N - 1) * lineH) / 2 : lineH;
+                    tspan.setAttribute("dy", String(dy));
                     tspan.textContent = line;
                     text.appendChild(tspan);
                 });
                 g.appendChild(text);
 
-                // Fold toggle circle (only if has children)
+                // Fold toggle: small circle with < or > glyph
                 if (node.children && node.children.length > 0) {
+                    const tg = document.createElementNS(SVG_NS, "g");
+                    tg.setAttribute("class", "markmap-toggle");
+                    tg.style.cursor = "pointer";
+
+                    const cx = node._width + 10;
+                    const cy = node._height / 2;
+                    const toggleStroke = fillColor;
+
                     const toggle = document.createElementNS(SVG_NS, "circle");
-                    toggle.setAttribute("cx", String(node._width + 6));
-                    toggle.setAttribute("cy", String(node._height));
-                    toggle.setAttribute("r", "5");
-                    const openFill = options.toggleBgColor || "var(--bg-color, #ffffff)";
-                    toggle.setAttribute("fill", node.fold ? color : openFill);
-                    toggle.setAttribute("stroke", color);
+                    toggle.setAttribute("cx", String(cx));
+                    toggle.setAttribute("cy", String(cy));
+                    toggle.setAttribute("r", "8");
+                    toggle.setAttribute("fill", "#ffffff");
+                    toggle.setAttribute("stroke", toggleStroke);
                     toggle.setAttribute("stroke-width", "1.5");
-                    toggle.style.cursor = "pointer";
-                    toggle.addEventListener("click", (e) => {
+                    tg.appendChild(toggle);
+
+                    const glyph = document.createElementNS(SVG_NS, "text");
+                    glyph.setAttribute("x", String(cx));
+                    glyph.setAttribute("y", String(cy));
+                    glyph.setAttribute("text-anchor", "middle");
+                    glyph.setAttribute("dominant-baseline", "central");
+                    glyph.setAttribute("font-size", "10");
+                    glyph.setAttribute("font-family", "system-ui, -apple-system, sans-serif");
+                    glyph.setAttribute("font-weight", "700");
+                    glyph.setAttribute("fill", toggleStroke);
+                    glyph.style.userSelect = "none";
+                    glyph.textContent = node.fold ? ">" : "<";
+                    tg.appendChild(glyph);
+
+                    tg.addEventListener("click", (e) => {
                         e.stopPropagation();
                         node.fold = !node.fold;
                         render();
                     });
-                    g.appendChild(toggle);
+                    g.appendChild(tg);
                 }
 
                 nodesGroup.appendChild(g);

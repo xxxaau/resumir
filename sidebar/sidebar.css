@@ -862,8 +862,20 @@ body {
 
 .markmap-container svg .markmap-node,
 .markmap-fullpage-content svg .markmap-node {
-  cursor: pointer;
+  cursor: default;
   transition: all 0.2s ease;
+}
+
+.markmap-container svg .markmap-toggle,
+.markmap-fullpage-content svg .markmap-toggle {
+  cursor: pointer;
+}
+
+/* Pill background for NotebookLM-style nodes */
+.markmap-container .markmap-node rect,
+.markmap-fullpage-content .markmap-node rect {
+  fill-opacity: 1;
+  stroke: none;
 }
 
 /* Floating controls on the right side (like NotebookLM) */
@@ -934,18 +946,21 @@ body {
 
 /* Markmap node styling overrides */
 .markmap-container .markmap-node circle {
-  stroke-width: 2px;
+  stroke-width: 1.5px;
 }
 
 .markmap-container .markmap-node text {
-  font-family: var(--font-family, system-ui, sans-serif);
+  font-family: 'Google Sans', system-ui, -apple-system, sans-serif;
   font-size: 14px;
-  fill: var(--text-color);
+  font-weight: 500;
+  fill: #1a1a1a;
+  user-select: none;
 }
 
 .markmap-container .markmap-link {
-  stroke-width: 2px;
-  opacity: 0.6;
+  stroke-width: 1.5px;
+  fill: none;
+  opacity: 1;
 }
 
 /* Full page overlay - modal centrat */
