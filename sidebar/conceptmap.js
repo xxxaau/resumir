@@ -591,6 +591,16 @@ function fullscreenOverlayFunc(text, pageTitle) {
         svg.setAttribute('width', '100%');
         svg.setAttribute('height', '100%');
         svg.style.cssText = 'display:block!important;width:100%!important;height:100%!important;cursor:grab!important';
+        // Defensive: host page CSS may apply `svg text { fill: ... }` rules
+        // (Tailwind reset, design systems...) that would override our attribute fills.
+        // An intra-SVG <style> with !important wins over external CSS.
+        const styleEl = document.createElementNS(SVG_NS, 'style');
+        styleEl.textContent = `
+            text { fill: #100f0f !important; font-family: system-ui, -apple-system, sans-serif !important; }
+            .markmap-node text { fill: #100f0f !important; }
+            line { stroke-opacity: 1 !important; }
+        `;
+        svg.appendChild(styleEl);
         content.appendChild(svg);
 
         modal.appendChild(header);
