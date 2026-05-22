@@ -279,27 +279,138 @@ async function getPageContent() {
 
                 // Via B: fetch de la timedtext API des del sidebar (bypassa la CSP de YouTube).
                 // El MAIN world ens ha retornat captionBaseUrl; el sidebar té <all_urls> i pot fer-ho.
+                // Provem múltiples variants d'URL perquè per a vídeos amb només ASR (pista
+                // auto-generada), &fmt=json3 sovint retorna 200 amb body buit; en canvi
+                // &fmt=srv3 (XML) o la URL crua (XML per defecte) sí donen segments.
                 if (!transcriptText && meta.captionBaseUrl) {
-                    try {
-                        const resp = await fetch(meta.captionBaseUrl + '&fmt=json3');
-                        if (resp.ok) {
-                            const data = await resp.json();
-                            const lines = (data.events || [])
-                                .filter(e => e.segs)
-                                .map(e => e.segs.map(s => s.utf8 ?? '').join('').replace(/\n/g, ' ').trim())
-                                .filter(Boolean);
-                            const timedtextFetched = lines.join(' ');
-                            if (timedtextFetched.length > 50) {
+                    const variants = [
+                        meta.captionBaseUrl + '&fmt=json3',
+                        meta.captionBaseUrl + '&fmt=srv3',
+                        meta.captionBaseUrl,
+                    ];
+                    for (const url of variants) {
+                        try {
+                            const resp = await fetch(url);
+                            if (!resp.ok) continue;
+                            const raw = await resp.text();
+                            if (!raw || raw.length < 20) continue;
+                            let lines = [];
+                            if (url.includes('fmt=json3')) {
+                                try {
+                                    const data = JSON.parse(raw);
+                                    lines = (data.events || [])
+                                        .filter(e => e.segs)
+                                        .map(e => e.segs.map(s => s.utf8 ?? '').join('').replace(/\n/g, ' ').trim())
+                                        .filter(Boolean);
+                                } catch { /* malformed JSON — try next variant */ }
+                            } else {
+                                // XML (srv3 o per defecte): <text start="..." dur="...">contingut</text>
+                                try {
+                                    const doc = new DOMParser().parseFromString(raw, 'text/xml');
+                                    const nodes = doc.querySelectorAll('text, p');
+                                    lines = Array.from(nodes)
+                                        .map(n => (n.textContent || '')
+                                            .replace(/&amp;/g, '&')
+                                            .replace(/&lt;/g, '<')
+                                            .replace(/&gt;/g, '>')
+                                            .replace(/&quot;/g, '"')
+                                            .replace(/&#39;/g, "'")
+                                            .replace(/\n/g, ' ')
+                                            .trim())
+                                        .filter(Boolean);
+                                } catch { /* malformed XML — try next variant */ }
+                            }
+                            const fetched = lines.join(' ');
+                            if (fetched.length > 50) {
                                 if (resolvedTrack) {
                                     const lang = resolvedTrack.lang || '';
                                     const isAsr = !!resolvedTrack.isAsr;
-                                    transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${timedtextFetched}`;
+                                    transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${fetched}`;
                                 } else {
-                                    transcriptText = `[TRANSCRIPT]\n\n${timedtextFetched}`;
+                                    transcriptText = `[TRANSCRIPT]\n\n${fetched}`;
                                 }
+                                break;
+                            }
+                        } catch { /* fetch error — try next variant */ }
+                    }
+                }
+
+                // Via C: youtubei/v1/get_transcript — última via abans del DOM scraping.
+                // Útil per a vídeos amb només pista ASR on timedtext torna body buit.
+                // Executem al MAIN world per accedir a ytcfg (INNERTUBE_API_KEY/CONTEXT) i
+                // a getTranscriptEndpoint.params dins de ytInitialData.engagementPanels.
+                if (!transcriptText) {
+                    try {
+                        const innertubeResult = await executeScriptSafe({
+                            target: { tabId: tabId },
+                            world: "MAIN",
+                            func: async () => {
+                                try {
+                                    const cfg = window.ytcfg;
+                                    const apiKey = cfg?.get?.('INNERTUBE_API_KEY') || cfg?.data_?.INNERTUBE_API_KEY;
+                                    const ctx = cfg?.get?.('INNERTUBE_CONTEXT') || cfg?.data_?.INNERTUBE_CONTEXT;
+                                    if (!apiKey || !ctx) return { error: 'no innertube config' };
+
+                                    // Trobar el paràmetre del getTranscriptEndpoint dins
+                                    // d'engagementPanels (associat al panell de transcripció).
+                                    let params = null;
+                                    try {
+                                        const panels = window.ytInitialData?.engagementPanels || [];
+                                        for (const p of panels) {
+                                            const cmd = p?.engagementPanelSectionListRenderer?.content
+                                                ?.continuationItemRenderer?.continuationEndpoint
+                                                ?.getTranscriptEndpoint?.params
+                                                || p?.engagementPanelSectionListRenderer?.header
+                                                ?.engagementPanelTitleHeaderRenderer?.menu
+                                                ?.menuRenderer?.items?.[0]
+                                                ?.menuServiceItemRenderer?.serviceEndpoint
+                                                ?.getTranscriptEndpoint?.params;
+                                            if (cmd) { params = cmd; break; }
+                                        }
+                                    } catch { /* engagementPanels absent */ }
+
+                                    if (!params) return { error: 'no params' };
+
+                                    const resp = await fetch(
+                                        `/youtubei/v1/get_transcript?key=${encodeURIComponent(apiKey)}`,
+                                        {
+                                            method: 'POST',
+                                            credentials: 'same-origin',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ context: ctx, params }),
+                                        }
+                                    );
+                                    if (!resp.ok) return { error: `HTTP ${resp.status}` };
+                                    const data = await resp.json();
+
+                                    // Estructura: actions[0].updateEngagementPanelAction.content
+                                    //   .transcriptRenderer.content.transcriptSearchPanelRenderer
+                                    //   .body.transcriptSegmentListRenderer.initialSegments
+                                    const segs = data?.actions?.[0]?.updateEngagementPanelAction
+                                        ?.content?.transcriptRenderer?.content
+                                        ?.transcriptSearchPanelRenderer?.body
+                                        ?.transcriptSegmentListRenderer?.initialSegments || [];
+                                    const lines = segs
+                                        .map(s => s?.transcriptSegmentRenderer?.snippet?.runs
+                                            ?.map(r => r.text)?.join('') || '')
+                                        .filter(Boolean);
+                                    return { text: lines.join(' ') };
+                                } catch (e) { return { error: String(e) }; }
+                            }
+                        });
+                        const innertube = innertubeResult?.[0]?.result;
+                        if (innertube?.text && innertube.text.length > 50) {
+                            if (resolvedTrack) {
+                                const lang = resolvedTrack.lang || '';
+                                const isAsr = !!resolvedTrack.isAsr;
+                                transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${innertube.text}`;
+                            } else {
+                                transcriptText = `[TRANSCRIPT]\n\n${innertube.text}`;
                             }
                         }
-                    } catch { /* timedtext API no disponible — Step 2 com a fallback */ }
+                    } catch (e) {
+                        console.debug("YouTube Via C (youtubei) failed:", e?.message);
+                    }
                 }
 
                 // Step 2 — ISOLATED world: obrir descripció, clicar "Mostra la transcripció"
