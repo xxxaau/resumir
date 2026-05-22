@@ -853,33 +853,17 @@ body {
   background: var(--bg-color);
 }
 
-/* Pill-shaped node styling (NotebookLM style) */
-.markmap-container svg rect,
-.markmap-fullpage-content svg rect {
-  rx: 12px !important;
-  ry: 12px !important;
-  fill-opacity: 0.9 !important;
-  stroke-width: 0 !important;
-}
-
-.markmap-container svg text,
-.markmap-fullpage-content svg text {
-  font-family: 'Google Sans', system-ui, -apple-system, sans-serif !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  fill: white !important;
+/* Markmap link/edge styling (applies to both sidebar and fullpage overlay) */
+.markmap-container svg line,
+.markmap-fullpage-content svg line {
+  stroke-width: 2px !important;
+  stroke-opacity: 0.6 !important;
 }
 
 .markmap-container svg .markmap-node,
 .markmap-fullpage-content svg .markmap-node {
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.markmap-container svg line,
-.markmap-fullpage-content svg line {
-  stroke-width: 2px !important;
-  stroke-opacity: 0.6 !important;
 }
 
 /* Floating controls on the right side (like NotebookLM) */
