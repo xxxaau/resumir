@@ -38,6 +38,7 @@ const files = [
     resolve(root, "sidebar/cache.js"),
     resolve(root, "sidebar/stats.js"),
     resolve(root, "sidebar/ui.js"),
+    resolve(root, "sidebar/markmap-native.js"),
     resolve(root, "sidebar/conceptmap.js"),
     resolve(root, "sidebar/summary.js"),
     resolve(root, "sidebar/history.js"),
@@ -45,8 +46,8 @@ const files = [
 ];
 
 // Llista d'srcs que el bundle reemplaça. El patcher els elimina del HTML.
-// Els scripts NO inclosos aquí (theme.js, d3.min.js, markmap-lib.js, markmap-view.js)
-// es mantenen com a <script src=...> separats al HTML final.
+// Els scripts NO inclosos aquí (theme.js) es mantenen com a <script src=...>
+// separats al HTML final.
 const BUNDLED_SRCS = new Set([
     "../ext.js",
     "../shared/models.js",
@@ -58,6 +59,7 @@ const BUNDLED_SRCS = new Set([
     "cache.js",
     "stats.js",
     "ui.js",
+    "markmap-native.js",
     "conceptmap.js",
     "summary.js",
     "history.js",

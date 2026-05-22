@@ -51,9 +51,6 @@ const JS_FILES = collectFiles(root, (full, rel) =>
     extname(full) === ".js" &&
     !rel.includes("Readability") &&
     !rel.includes("defuddle") &&
-    !rel.includes("d3.min") &&
-    !rel.includes("markmap-lib") &&
-    !rel.includes("markmap-view") &&
     !full.endsWith(".bundle.js") &&
     !rel.startsWith("node_modules") &&
     !rel.startsWith("coverage")

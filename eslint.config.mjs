@@ -73,9 +73,8 @@ const extensionGlobals = {
     closeSourcePanel: "readonly",
     // defuddle.js (injectat com a script en runtime)
     Defuddle: "readonly",
-    // d3.js i markmap (llibreries de visualització)
-    d3: "readonly",
-    markmap: "readonly",
+    // sidebar/markmap-native.js (renderitzador SVG propi)
+    markmapNative: "readonly",
     // sidebar/stats.js
     getDailyStats: "readonly",
     getTodayRequestCount: "readonly",
@@ -149,9 +148,6 @@ export default [
         ignores: [
             "Readability.js",         // Llibreria de tercers (Mozilla)
             "defuddle.js",            // Llibreria de tercers (Defuddle)
-            "d3.min.js",              // Llibreria de tercers (D3.js)
-            "markmap-lib.js",         // Llibreria de tercers (Markmap)
-            "markmap-view.js",        // Llibreria de tercers (Markmap View)
             "background.bundle.js",   // Generat automàticament pel build
             "build_*/",
             "node_modules/",

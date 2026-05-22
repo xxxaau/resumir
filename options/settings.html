@@ -1120,6 +1120,21 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.9
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Mapa conceptual interactiu reescrit des de zero</strong>: substituïdes les llibreries de tercers <code>d3.min.js</code>, <code>markmap-lib.js</code> i <code>markmap-view.js</code> (~640 KB) per un renderitzador SVG natiu propi (<code>sidebar/markmap-native.js</code>, ~22 KB). Mateixa funcionalitat (zoom, pan, plegat de branques, exportació a PNG i pàgina completa) sense dependències externes.</li>
+                <li>Eliminat camp no estàndard <code>author_email</code> del manifest (Firefox emetia warning).</li>
+                <li>Eliminat <code>web_accessible_resources</code> del manifest Firefox (ja no calen els vendors a la pàgina).</li>
+                <li><strong>Zero warnings a la revisió d'AMO</strong>: el codi nou no utilitza <code>innerHTML</code> dinàmic, <code>eval()</code> ni <code>Function()</code> — totes operacions DOM via <code>createElementNS</code> i <code>DOMParser</code>. Això elimina els 6 warnings que retardaven la revisió de l'extensió.</li>
+                <li>Reducció significativa de superfície d'atac: tot el codi de visualització és auditable i prop de 95% més petit que les llibreries substituïdes.</li>
+                <li>Nou fitxer <code>sidebar/markmap-native.js</code> integrat al bundle del sidebar.</li>
+                <li><code>scripts/build.mjs</code>, <code>scripts/build-sidebar-bundle.mjs</code>, <code>scripts/pre-release-check.mjs</code> i <code>eslint.config.mjs</code> netejats de referències a vendors eliminats.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.8
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
               </div>

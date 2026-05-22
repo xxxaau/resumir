@@ -44,10 +44,7 @@ const commonFiles = [
   "Readability.js",
   "theme.js",
   "LICENSE",
-  "docs/PRIVACY_POLICY.md",
-  "d3.min.js",
-  "markmap-lib.js",
-  "markmap-view.js"
+  "docs/PRIVACY_POLICY.md"
 ];
 
 const commonDirs = [
@@ -215,7 +212,7 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
     );
     
     // Remove individual sidebar JS files (now in bundle)
-    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "content.js", "cache.js", "stats.js", "ui.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
+    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "content.js", "cache.js", "stats.js", "ui.js", "markmap-native.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
     for (const f of sidebarFiles) {
       const filePath = resolve(buildPath, "sidebar", f);
       if (existsSync(filePath)) {

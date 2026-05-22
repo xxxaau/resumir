@@ -12,6 +12,23 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [2.2.9] - 2026-05-22
+
+### Canviat
+- **Mapa conceptual interactiu reescrit des de zero**: substituïdes les llibreries de tercers `d3.min.js`, `markmap-lib.js` i `markmap-view.js` (~640 KB) per un renderitzador SVG natiu propi (`sidebar/markmap-native.js`, ~22 KB). Mateixa funcionalitat (zoom, pan, plegat de branques, exportació a PNG i pàgina completa) sense dependències externes.
+- Eliminat camp no estàndard `author_email` del manifest (Firefox emetia warning).
+- Eliminat `web_accessible_resources` del manifest Firefox (ja no calen els vendors a la pàgina).
+
+### Seguretat
+- **Zero warnings a la revisió d'AMO**: el codi nou no utilitza `innerHTML` dinàmic, `eval()` ni `Function()` — totes operacions DOM via `createElementNS` i `DOMParser`. Això elimina els 6 warnings que retardaven la revisió de l'extensió.
+- Reducció significativa de superfície d'atac: tot el codi de visualització és auditable i prop de 95% més petit que les llibreries substituïdes.
+
+### Intern
+- Nou fitxer `sidebar/markmap-native.js` integrat al bundle del sidebar.
+- `scripts/build.mjs`, `scripts/build-sidebar-bundle.mjs`, `scripts/pre-release-check.mjs` i `eslint.config.mjs` netejats de referències a vendors eliminats.
+
+---
+
 ## [2.2.8] - 2026-05-22
 
 ### Corregit

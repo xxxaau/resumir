@@ -2,9 +2,8 @@
     "manifest_version": 3,
     "name": "Resumir",
     "short_name": "Resumir",
-    "version": "2.2.8",
+    "version": "2.2.9",
     "author": "Sergi Xaudiera",
-    "author_email": "sergi@xaudiera.xyz",
     "homepage_url": "https://github.com/xxxaau/extensio-resumir-contingut",
     "description": "Resumeix text seleccionat amb Gemini.",
     "minimum_chrome_version": "142",
@@ -59,17 +58,5 @@
             "ext.js",
             "background.js"
         ]
-    },
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "d3.min.js",
-                "markmap-lib.js",
-                "markmap-view.js"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ]
+    }
 }
