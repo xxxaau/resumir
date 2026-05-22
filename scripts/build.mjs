@@ -191,8 +191,14 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
       const destPath = resolve(buildPath, dir);
       copyDir(srcPath, destPath);
     } else {
-      console.warn(`  âš ï¸  ${dir}/ not found`);
+      console.warn(`  ⚠️  ${dir}/ not found`);
     }
+  }
+
+  // Remove internal icon source subdirs from the build (dev/ and prod/ are not needed in the ZIP)
+  for (const sub of ["dev", "prod"]) {
+    const subPath = resolve(buildPath, "icons", sub);
+    if (existsSync(subPath)) rmSync(subPath, { recursive: true, force: true });
   }
   
   // Build sidebar bundle
