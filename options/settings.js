@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Handle "Live" Toggles in extension list
     // Nota: només actualitza la UI de la barra lateral de configuració;
     // la persistència real es fa quan l'usuari prem un botó de "Desar" explícit.
-    const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience"];
+    const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap"];
     extensionToggles.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Bind all save buttons to saveOptions
-    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience"].forEach(id => {
+    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap"].forEach(id => {
         bindClick(id, saveOptions);
     });
 
@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindClick("resetSystemPrompt", resetSystemPrompt);
     bindClick("resetDeepDive", resetDeepDivePrompt);
     bindClick("resetScience", resetSciencePrompt);
+    bindClick("resetConceptMap", resetConceptMapPrompt);
 
     // Model selection buttons
     bindClick("checkModels", listModels);

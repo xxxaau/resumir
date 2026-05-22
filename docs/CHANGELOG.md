@@ -12,6 +12,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.5] - 2026-05-22
+
+### Added
+- PNG export filename for concept maps now uses `YYYYMMDD_<title>.png` format (title truncated to 20 characters)
+
+### Changed
+- Extension renamed from "Resumir contingut" to "Resumir" (DEV mode: "Resumir (DEV)")
+- Concept map settings: removed depth, branches, auto-expand and show-descriptions options (controlled via prompt instead)
+- Bionic reading: default line height changed to 1.5, default bold weight changed to 600 (semi-bold)
+- Concept map icon in settings now matches the sidebar button icon
+
+### Removed
+- YouTube preferred languages option removed from settings (language selection is now automatic)
+
+---
+
 ## [2.2.4] - 2026-04-27
 
 ### Added

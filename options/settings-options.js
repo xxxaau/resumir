@@ -39,12 +39,13 @@ function saveOptions(e) {
 
     enableResum: document.querySelector("#enableResum").checked,
 
+    enableConceptMap: document.querySelector("#enableConceptMap").checked,
+    conceptMapPrompt: document.querySelector("#conceptMapPrompt").value,
+    conceptMapStyle: document.querySelector("#conceptMapStyle").value,
+
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder(),
 
-    // YouTube — idiomes preferits per a transcripcions, codis ISO 639-1 ordenats
-    youtubePreferredLangs: (document.querySelector("#youtubePreferredLangs").value || "")
-        .split(",").map(s => s.trim().toLowerCase()).filter(Boolean),
   };
 
 
@@ -65,8 +66,9 @@ function restoreOptions() {
     "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
     "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
     "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "enableDeepdive", "deepDivePrompt",
-    "enableScience", "sciencePrompt", "enableResum",
-    "extensionOrder", "youtubePreferredLangs"];
+    "enableScience", "sciencePrompt", "enableResum", "enableConceptMap", "conceptMapPrompt",
+    "conceptMapStyle",
+    "extensionOrder"];
 
   return Promise.all([
     ext.storage.sync.get(configKeys),
@@ -94,7 +96,7 @@ function restoreOptions() {
         savedFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     }
     fontSelect.value = savedFont;
-    document.querySelector("#bionicWeight").value = data.bionicWeight || "500";
+    document.querySelector("#bionicWeight").value = data.bionicWeight || "600";
     document.querySelector("#bionicFontSize").value = data.bionicFontSize || "1em";
     document.querySelector("#bionicLineHeight").value = data.bionicLineHeight || "1.5";
 
@@ -113,9 +115,13 @@ function restoreOptions() {
     // Resum: actiu per defecte
     document.querySelector("#enableResum").checked = data.enableResum !== false;
 
-    // YouTube: idiomes preferits (array) → string CSV per al camp de text
-    document.querySelector("#youtubePreferredLangs").value =
-        Array.isArray(data.youtubePreferredLangs) ? data.youtubePreferredLangs.join(", ") : "";
+    // Concept Map: inactiu per defecte
+    document.querySelector("#enableConceptMap").checked = data.enableConceptMap === true;
+
+    if (data.conceptMapPrompt !== undefined) document.querySelector("#conceptMapPrompt").value = data.conceptMapPrompt;
+    else document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
+
+    document.querySelector("#conceptMapStyle").value = data.conceptMapStyle || "interactive";
 
     if (data.extensionOrder && Array.isArray(data.extensionOrder)) {
         applyExtensionOrder(data.extensionOrder);
@@ -159,6 +165,10 @@ function resetDeepDivePrompt() {
 
 function resetSciencePrompt() {
     document.querySelector("#sciencePrompt").value = DEFAULT_SCIENCE_PROMPT;
+}
+
+function resetConceptMapPrompt() {
+    document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
 }
 
 function showStatus(text) {

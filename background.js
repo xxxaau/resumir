@@ -49,7 +49,7 @@ ext.runtime.onInstalled.addListener(async (details) => {
   });
   ext.menus.create({
     id: "summarize-page",
-    title: "Resumir contingut",
+    title: "Resumir",
     contexts: ["page", "all"]
   });
 });

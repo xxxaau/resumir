@@ -98,7 +98,21 @@ async function loadHistoryEntry(entry) {
         const syncData = await ext.storage.sync.get({ bionicFixation: 30 });
         fixation = syncData.bionicFixation / 100;
     }
-    contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
+    const CONCEPT_MAP_MARKER = "<!--conceptmap-->\n";
+    const isConceptMap = entry.summary.startsWith(CONCEPT_MAP_MARKER);
+
+    if (isConceptMap) {
+        const mapText = entry.summary.substring(CONCEPT_MAP_MARKER.length);
+        if (typeof renderMarkmapInteractive === "function" && typeof window.markmap !== "undefined") {
+            contentDiv.replaceChildren(renderMarkmapInteractive(mapText));
+        } else if (typeof parseConceptTree === "function") {
+            contentDiv.replaceChildren(parseConceptTree(mapText, {}));
+        } else {
+            contentDiv.replaceChildren(formatTextToFragment(mapText, bionicEnabled, fixation));
+        }
+    } else {
+        contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
+    }
     contentDiv.classList.remove("hidden");
 
     // Hide history panel without restoring previous state

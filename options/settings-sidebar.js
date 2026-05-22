@@ -72,7 +72,8 @@ function updateSidebar() {
         { id: "markdown", label: "Markdown", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7l4 5 4-5v10"/><path d="M15 7h2a5 5 0 0 1 0 10h-2V7z"/></svg>' },
         { id: "deepdive", label: "Aprofundiment", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>' },
         { id: "bionic", label: "Lectura biònica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' },
-        { id: "science", label: "Validació científica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/><path d="M9 2h6"/><path d="M14 15h-4"/><path d="M16 11h-4"/></svg>' }
+        { id: "science", label: "Validació científica", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-4.734 7.1A4 4 0 0 0 7 20h10a4 4 0 0 0 3.406-6.102l-4.734-7.1A4 4 0 0 1 15 4.789V2"/><path d="M9 2h6"/><path d="M14 15h-4"/><path d="M16 11h-4"/></svg>' },
+        { id: "conceptmap", label: "Mapa conceptual", icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M12 9V5" /><path d="M12 12l-7 5" /><path d="M12 12l7 5" /><path d="M12 5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M5 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M19 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg>' }
     ];
 
     const currentOrder = getCurrentExtensionOrder();
@@ -86,8 +87,16 @@ function updateSidebar() {
 
     let count = 0;
     extensions.forEach(ext => {
-        // Special case for ID construction if needed, but 'enableObsidian', 'enableMarkdown', 'enableDeepdive', 'enableBionic' match
-        const checkboxId = ext.id === "resum" ? "enableResum" : "enable" + ext.id.charAt(0).toUpperCase() + ext.id.slice(1);
+        // Build checkbox ID: resum → enableResum, conceptmap → enableConceptMap, etc.
+        let checkboxId;
+        if (ext.id === "resum") {
+            checkboxId = "enableResum";
+        } else if (ext.id === "conceptmap") {
+            checkboxId = "enableConceptMap";
+        } else {
+            checkboxId = "enable" + ext.id.charAt(0).toUpperCase() + ext.id.slice(1);
+        }
+        
         const checkbox = document.getElementById(checkboxId);
         
         if (checkbox && checkbox.checked) {

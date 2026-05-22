@@ -28,7 +28,7 @@ $base = Get-Content $basePath -Raw | ConvertFrom-Json
 
 if ($Mode -eq "dev") {
     Write-Host "Canviant a mode DESENVOLUPAMENT..." -ForegroundColor DarkYellow
-    $base.name = "Resumir contingut (DEV)"
+    $base.name = "Resumir (DEV)"
     Write-JsonFile $basePath $base
 
     # Use DEV patches
@@ -44,7 +44,7 @@ if ($Mode -eq "dev") {
 }
 elseif ($Mode -eq "prod") {
     Write-Host "Canviant a mode PRODUCCIO..." -ForegroundColor Cyan
-    $base.name = "Resumir contingut"
+    $base.name = "Resumir"
     Write-JsonFile $basePath $base
 
     # Use PROD patches if they exist, otherwise fallback to regular patches

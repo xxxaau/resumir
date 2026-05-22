@@ -49,6 +49,11 @@ function applyExtensionVisibility(config) {
         summarizeBtnEl.style.display = config.enableResum !== false ? "flex" : "none";
     }
 
+    const conceptMapBtnEl = document.getElementById("conceptMapBtn");
+    if (conceptMapBtnEl) {
+        conceptMapBtnEl.style.display = config.enableConceptMap ? "flex" : "none";
+    }
+
 }
 
 /**
@@ -61,7 +66,7 @@ function applyExtensionOrder(order) {
     // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
     // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
     if (!order.includes("resum")) {
-        order = ["resum", "science", "deepdive", "bionic", "obsidian", "markdown"];
+        order = ["resum", "science", "deepdive", "conceptmap", "bionic", "obsidian", "markdown"];
         ext.storage.sync.set({ extensionOrder: order });
     }
 
@@ -77,6 +82,7 @@ function applyExtensionOrder(order) {
         "deepdive": "deepDiveBtn",
         "bionic": "bionicBtn",
         "science": "scienceBtn",
+        "conceptmap": "conceptMapBtn",
     };
     
     const orderedButtons = [];

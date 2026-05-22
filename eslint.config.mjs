@@ -30,6 +30,14 @@ const extensionGlobals = {
     DEFAULT_SYSTEM_PROMPT: "readonly",
     DEFAULT_DEEP_DIVE_PROMPT: "readonly",
     DEFAULT_SCIENCE_PROMPT: "readonly",
+    DEFAULT_CONCEPTMAP_PROMPT: "readonly",
+    // sidebar/conceptmap.js
+    parseConceptTree: "readonly",
+    collapseAll: "readonly",
+    expandAll: "readonly",
+    renderMarkmapInteractive: "readonly",
+    exportMarkmapToPNG: "readonly",
+    openFullPageView: "readonly",
     // sidebar/summary.js
     startSummary: "readonly",
     classifyError: "readonly",
@@ -65,6 +73,9 @@ const extensionGlobals = {
     closeSourcePanel: "readonly",
     // defuddle.js (injectat com a script en runtime)
     Defuddle: "readonly",
+    // d3.js i markmap (llibreries de visualització)
+    d3: "readonly",
+    markmap: "readonly",
     // sidebar/stats.js
     getDailyStats: "readonly",
     getTodayRequestCount: "readonly",
@@ -85,6 +96,7 @@ const settingsGlobals = {
     DEFAULT_OBSIDIAN_TEMPLATE: "readonly",
     DEFAULT_DEEP_DIVE_PROMPT: "readonly",
     DEFAULT_SCIENCE_PROMPT: "readonly",
+    DEFAULT_CONCEPTMAP_PROMPT: "readonly",
     // settings-order.js
     getCurrentExtensionOrder: "readonly",
     applyExtensionOrder: "readonly",
@@ -120,6 +132,7 @@ const settingsGlobals = {
     resetSystemPrompt: "readonly",
     resetDeepDivePrompt: "readonly",
     resetSciencePrompt: "readonly",
+    resetConceptMapPrompt: "readonly",
     showStatus: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
@@ -136,6 +149,9 @@ export default [
         ignores: [
             "Readability.js",         // Llibreria de tercers (Mozilla)
             "defuddle.js",            // Llibreria de tercers (Defuddle)
+            "d3.min.js",              // Llibreria de tercers (D3.js)
+            "markmap-lib.js",         // Llibreria de tercers (Markmap)
+            "markmap-view.js",        // Llibreria de tercers (Markmap View)
             "background.bundle.js",   // Generat automàticament pel build
             "build_*/",
             "node_modules/",
@@ -158,6 +174,8 @@ export default [
         rules: {
             // Funcions cross-file: definides en un <script> i usades en un altre (globals)
             "no-unused-vars": ["warn", { varsIgnorePattern: crossFilePublicNamesPattern, argsIgnorePattern: "^_", caughtErrors: "none" }],
+            // Cap console.log en producció (console.error/console.warn/console.debug permesos)
+            "no-console": ["warn", { allow: ["error", "warn", "debug"] }],
             // Permetre catch buits: catch {} és un patró vàlid en extensions
             "no-empty": ["error", { allowEmptyCatch: true }],
         },

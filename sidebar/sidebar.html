@@ -104,6 +104,30 @@
           </svg>
         </button>
 
+        <!-- Concept Map Button (Hidden by default) -->
+        <button
+          id="conceptMapBtn"
+          class="icon-btn"
+          title="Mapa conceptual"
+          aria-label="Mapa conceptual"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            class="icon"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9V5" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12l-7 5" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12l7 5" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+          </svg>
+        </button>
+
         <!-- Scientific Validation Button (Hidden by default) -->
         <button
           id="scienceBtn"
@@ -246,6 +270,9 @@
       </div>
     </div>
     <script src="../ext.js"></script>
+    <script src="../d3.min.js"></script>
+    <script src="../markmap-lib.js"></script>
+    <script src="../markmap-view.js"></script>
     <script src="../shared/models.js"></script>
     <script src="../shared/defaults.js"></script>
     <script src="utils.js"></script>
@@ -255,6 +282,7 @@
     <script src="cache.js"></script>
     <script src="stats.js"></script>
     <script src="ui.js"></script>
+    <script src="conceptmap.js"></script>
     <script src="summary.js"></script>
     <script src="history.js"></script>
     <script src="sidebar.js"></script>

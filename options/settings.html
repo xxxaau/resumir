@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Resumir contingut - Configuració</title>
+    <title>Resumir - Configuració</title>
     <link rel="stylesheet" href="settings.css" />
     <script src="../theme.js"></script>
   </head>
@@ -87,27 +87,6 @@
           </div>
         </div>
 
-        <div class="section">
-          <h3>YouTube</h3>
-          <div class="form-group">
-            <label for="youtubePreferredLangs">Idiomes preferits per a transcripcions</label>
-            <input
-              type="text"
-              id="youtubePreferredLangs"
-              class="form-control"
-              placeholder="ca, es, en"
-            />
-            <div class="help-text">
-              Codis ISO 639-1 separats per comes, en ordre de preferència. Si el
-              vídeo no té cap pista en aquests idiomes, s'usa l'idioma del navegador
-              i, com a últim recurs, la primera pista disponible.
-              <br />
-              <strong>Nota:</strong> YouTube decideix internament quina pista mostra
-              al panell de transcripció. Aquesta preferència s'aplica només quan el
-              panell no ha decidit encara.
-            </div>
-          </div>
-        </div>
 
         <div class="section">
           <h3>Emmagatzematge i privadesa</h3>
@@ -393,6 +372,64 @@
                   <path
                     d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
                   ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Concept Map -->
+          <div class="extension-item">
+            <div class="extension-icon icon-orange">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                <path d="M12 9V5" />
+                <path d="M12 12l-7 5" />
+                <path d="M12 12l7 5" />
+                <path d="M12 5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                <path d="M5 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                <path d="M19 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+              </svg>
+            </div>
+            <div class="extension-info">
+              <div class="extension-name">Mapa conceptual</div>
+              <div class="extension-desc">
+                Genera un mapa conceptual interactiu amb nodes desplegables.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="conceptmap">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableConceptMap" />
+                <span class="slider round"></span>
+              </label>
+              <span class="sr-only">Mapa conceptual</span>
+              <button
+                class="btn-icon"
+                data-target="conceptmap"
+                title="Configuració"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                 </svg>
               </button>
             </div>
@@ -842,8 +879,8 @@
             <label for="bionicWeight">Gruix de la negreta</label>
             <select id="bionicWeight" class="form-control">
               <option value="400">Normal (400)</option>
-              <option value="500" selected>Mitjana (500)</option>
-              <option value="600">Semi-negreta (600)</option>
+              <option value="500">Mitjana (500)</option>
+              <option value="600" selected>Semi-negreta (600)</option>
               <option value="700">Negreta (700)</option>
               <option value="800">Extra-negreta (800)</option>
               <option value="900">Màxima (900)</option>
@@ -866,13 +903,50 @@
             <label for="bionicLineHeight">Interlineat</label>
             <select id="bionicLineHeight" class="form-control">
               <option value="1.2">Normal (1.2)</option>
-              <option value="1.5">Espaiat (1.5)</option>
+              <option value="1.5" selected>Espaiat (1.5)</option>
               <option value="2.0">Doble (2.0)</option>
             </select>
           </div>
 
           <div class="section-actions">
             <button id="saveBionic" class="btn btn-primary">Desar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Concept Map Config -->
+      <div id="tab-conceptmap" class="tab-pane">
+        <h1 class="page-title">Configuració del mapa conceptual</h1>
+        <div class="section">
+          <div class="form-group">
+            <label for="conceptMapPrompt">Prompt del mapa conceptual</label>
+            <textarea
+              id="conceptMapPrompt"
+              class="form-control"
+              rows="20"
+              placeholder="Ets un expert en organització del coneixement..."
+            ></textarea>
+            <div class="help-text">
+              Instruccions que s'enviaran al model per generar el mapa conceptual jeràrquic.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="conceptMapStyle">Estil de visualització</label>
+            <select id="conceptMapStyle" class="form-control">
+              <option value="interactive" selected>Interactiu (mapa visual amb zoom)</option>
+              <option value="tree">Arbre jeràrquic (llista desplegable)</option>
+              <option value="compact">Compacte (menys espai entre nodes)</option>
+              <option value="spacious">Espaiat (més espai entre nodes)</option>
+            </select>
+            <div class="help-text">
+              Controla la presentació visual del mapa conceptual. L'estil interactiu mostra un mapa visual navegable amb zoom i pan.
+            </div>
+          </div>
+
+          <div class="section-actions">
+            <button id="saveConceptMap" class="btn btn-primary">Desar</button>
+            <button id="resetConceptMap" class="btn btn-secondary">Restaurar per defecte</button>
           </div>
         </div>
       </div>
@@ -1028,7 +1102,7 @@
           <div class="app-info">
             <img src="../icons/icon.svg" width="64" height="64" alt="Logo" />
             <div>
-              <h3>Resumir contingut</h3>
+              <h3>Resumir</h3>
               <p>Versió <span id="appVersion">2.0.0</span></p>
             </div>
           </div>
@@ -1044,6 +1118,20 @@
           <h3>Historial de canvis</h3>
           <div class="changelog">
             <!-- CHANGELOG_START -->
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.5
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Renom de l'extensió</strong>: L'extensió passa a anomenar-se "Resumir" (mode DEV: "Resumir (DEV)").</li>
+                <li><strong>Icona mapa conceptual</strong>: La icona a configuració ara coincideix amb la del botó de la sidebar.</li>
+                <li><strong>Exportació PNG amb nom automàtic</strong>: El fitxer PNG del mapa conceptual es desa com <code>YYYYMMDD_titular.png</code> (titular abreujat a 20 caràcters).</li>
+                <li><strong>Configuració mapa conceptual simplificada</strong>: Eliminades les opcions de profunditat, branques, expandir tot i mostrar descripcions (ara es controlen des del prompt).</li>
+                <li><strong>Lectura biònica</strong>: Interlineat per defecte 1.5 i gruix de negreta per defecte Semi-negreta (600).</li>
+                <li><strong>Eliminada opció idiomes YouTube</strong>: La selecció d'idioma de transcripció es gestiona automàticament.</li>
+              </ul>
+            </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.4

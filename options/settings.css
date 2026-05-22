@@ -931,7 +931,9 @@ input:checked + .slider:before {
 .icon-green { color: #10b981; }
 .icon-red { color: #ef4444; }
 .icon-purple { color: #a855f7; }
+.icon-teal { color: #14b8a6; }
 .icon-gray { color: #666; }
+.icon-orange { color: #bc5215; }
 
 /* Stats Cards & KPIs */
 .stat-card {

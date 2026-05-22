@@ -1,7 +1,21 @@
 {
   "name": "resumir-contingut",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Browser extension to summarize web content using Gemini AI",
+  "author": "Sergi Xaudiera <sergi@xaudiera.xyz>",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ssjSergi/extensio-resumir-contingut.git"
+  },
+  "keywords": [
+    "browser-extension",
+    "gemini",
+    "ai",
+    "summarizer",
+    "catalan",
+    "webextension"
+  ],
   "private": true,
   "engines": {
     "node": ">=18.0.0",

@@ -52,10 +52,11 @@ function applyBionicStyles(element, isEnabled, config = {}) {
  * @param {boolean} isDeepDive - Whether this is a deep dive analysis
  * @param {boolean} isScience - Whether this is a scientific validation
  * @param {boolean} isUserInitiated - Whether user triggered this action
+ * @param {boolean} isConceptMap - Whether this is a concept map generation
  * @returns {AbortController} The abort controller for cancellation
  */
-async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false) {
-    if (!overrideText && !isDeepDive && !isScience && !isUserInitiated) {
+async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false) {
+    if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isUserInitiated) {
         return null;
     }
 
@@ -69,6 +70,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     let activeBtnId = "summarizeBtn";
     if (isDeepDive) activeBtnId = "deepDiveBtn";
     else if (isScience) activeBtnId = "scienceBtn";
+    else if (isConceptMap) activeBtnId = "conceptMapBtn";
     
     setGeneratingState(true, false, activeBtnId);
     
@@ -81,7 +83,13 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     try {
         // 1. Get Configuration
         const [config, localSecrets] = await Promise.all([
-            ext.storage.sync.get(["modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", "extensionOrder", "favoriteModels"]),
+            ext.storage.sync.get([
+                "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", 
+                "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", 
+                "enableConceptMap", "extensionOrder", "favoriteModels",
+                "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
+                "conceptMapStyle", "conceptMapAutoExpand"
+            ]),
             ext.storage.local.get(["apiKey"])
         ]);
         const apiKey = localSecrets.apiKey;
@@ -92,6 +100,20 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             systemPrompt = config.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT; 
         } else if (isScience) {
             systemPrompt = config.sciencePrompt || DEFAULT_SCIENCE_PROMPT; 
+        } else if (isConceptMap) {
+            // Build dynamic prompt based on config
+            const basePrompt = config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT;
+            const depth = config.conceptMapDepth || 4;
+            const branches = config.conceptMapBranches || 6;
+            const showDesc = config.conceptMapShowDescriptions !== false;
+            
+            systemPrompt = basePrompt
+                .replace(/Màxim \d+ nivells de profunditat\./, `Màxim ${depth} nivells de profunditat.`)
+                .replace(/Segon nivell: \d+-\d+ branques principals\./, `Segon nivell: ${Math.max(3, branches - 2)}-${branches} branques principals.`);
+            
+            if (!showDesc) {
+                systemPrompt = systemPrompt.replace(/9\. Opcionalment.*?: " \(dos punts \+ espai\)\.\n/, "");
+            }
         }
 
         applyExtensionVisibility(config);
@@ -113,7 +135,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         const isRefresh = (currentMetadata.url === currentUrl && currentMetadata.fromCache);
         
-        if (!isRefresh && !overrideText && !isDeepDive && !isScience) {
+        if (!isRefresh && !overrideText && !isDeepDive && !isScience && !isConceptMap) {
             const cachedEntry = await getSummaryCache(currentUrl);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
@@ -125,7 +147,24 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
                 }
 
-                contentDiv.replaceChildren(formatTextToFragment(cachedEntry.summary));
+                const cachedSummary = cachedEntry.summary;
+                const isCachedConceptMap = cachedSummary.startsWith("<!--conceptmap-->\n");
+                const displayText = isCachedConceptMap ? cachedSummary.substring("<!--conceptmap-->\n".length) : cachedSummary;
+                
+                const conceptMapOptions = {
+                    style: config.conceptMapStyle || "interactive",
+                    autoExpand: config.conceptMapAutoExpand === true
+                };
+                
+                if (isCachedConceptMap) {
+                    if (conceptMapOptions.style === "interactive") {
+                        contentDiv.replaceChildren(renderMarkmapInteractive(displayText));
+                    } else {
+                        contentDiv.replaceChildren(parseConceptTree(displayText, conceptMapOptions));
+                    }
+                } else {
+                    contentDiv.replaceChildren(formatTextToFragment(displayText));
+                }
                 contentDiv.classList.remove("hidden");
                 
                 
@@ -313,7 +352,20 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             throw new Error("[003] Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
         }
         
-        contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
+        const conceptMapOptions = {
+            style: config.conceptMapStyle || "interactive",
+            autoExpand: config.conceptMapAutoExpand === true
+        };
+        
+        if (isConceptMap) {
+            if (conceptMapOptions.style === "interactive") {
+                contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title));
+            } else {
+                contentDiv.replaceChildren(parseConceptTree(currentMetadata.summary, conceptMapOptions));
+            }
+        } else {
+            contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
+        }
         
         const cfg = ctx.getGlobalConfig() || {};
         applyBionicStyles(contentDiv, bionicEnabled, cfg);
@@ -327,7 +379,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
         const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
         
-        await saveSummaryCache(currentMetadata.url, currentMetadata.title, currentMetadata.summary, modelName, inputTokens, outputTokens);
+        const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary : currentMetadata.summary;
+        await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens);
         await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
         
         updateTokenStats(inputTokens, outputTokens, {

@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Bound summary starter (partially applied with ctx)
-    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated) => {
+    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap) => {
         if (isGenerating && abortController) {
             abortController.abort();
             abortController = null;
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         isGenerating = true;
-        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated).then(ctrl => {
+        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap).then(ctrl => {
             abortController = ctrl;
         }).finally(() => {
             isGenerating = false;
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })();
 
-    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
+    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
 
     ext.storage.sync
       .get(CONFIG_KEYS)
@@ -259,6 +259,13 @@ document.addEventListener("DOMContentLoaded", () => {
     scienceBtn.addEventListener("click", () => {
         doSummary(null, false, true, true);
     });
+
+    const conceptMapBtn = document.getElementById("conceptMapBtn");
+    if (conceptMapBtn) {
+        conceptMapBtn.addEventListener("click", () => {
+            doSummary(null, false, false, true, true);
+        });
+    }
 
     if (historyBtn) historyBtn.addEventListener("click", () => {
         const historyPanel = document.getElementById("history-panel");
