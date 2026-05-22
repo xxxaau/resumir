@@ -12,9 +12,10 @@
  */
 
 import { readFileSync, readdirSync, statSync } from "fs";
-import { resolve, dirname, relative, extname } from "path";
+import { resolve, dirname, relative, extname, posix } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
+import { inflateRawSync } from "zlib";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -309,6 +310,98 @@ check("Models: validació de CURATED_MODELS (estructura, pricing, deprecació)",
         throw new Error(lines.length > 0 ? lines.join(" | ") : "Models validation failed");
     }
 });
+
+// 13. ZIP smoke-test: tot <script src=...> als HTML del ZIP existeix dins el paquet
+check("ZIP: tot <script src=\"...\"> referenciat existeix al paquet", () => {
+    const pkg = readJson(resolve(root, "package.json"));
+    const ver = pkg.version;
+    const targets = ["firefox", "chromium"];
+    const errs = [];
+
+    for (const t of targets) {
+        const zipPath = resolve(root, "build", `resumir-contingut-v${ver}-${t}.zip`);
+        let zipMap;
+        try {
+            zipMap = readZipEntries(zipPath);
+        } catch (e) {
+            errs.push(`${t}: no s'ha pogut llegir el ZIP (${e.message})`);
+            continue;
+        }
+        const names = new Set(zipMap.keys());
+
+        // Per cada HTML al ZIP, verificar tots els <script src="X">
+        for (const [name, getData] of zipMap.entries()) {
+            if (!name.endsWith(".html")) continue;
+            const html = getData().toString("utf8");
+            const htmlDir = posix.dirname(name);
+            const re = /<script\s+[^>]*src="([^"]+)"/g;
+            let m;
+            while ((m = re.exec(html)) !== null) {
+                const src = m[1];
+                if (/^(https?:)?\/\//i.test(src)) continue; // ignora URLs externes
+                // Resol path relatiu dins el ZIP
+                const resolved = posix.normalize(posix.join(htmlDir, src));
+                if (!names.has(resolved)) {
+                    errs.push(`${t}: ${name} referencia '${src}' (resolt: ${resolved}) — NO existeix al ZIP`);
+                }
+            }
+        }
+    }
+
+    if (errs.length) throw new Error("\n  " + errs.join("\n  "));
+    pass('ZIP: tot <script src="..."> referenciat existeix al paquet');
+});
+
+// ─── ZIP helpers (lectura sense dependències) ────────────────────────────────
+
+/**
+ * Llegeix les entrades d'un ZIP i retorna un Map<name, () => Buffer>
+ * que descomprimeix on-demand. Suporta STORE (0) i DEFLATE (8).
+ */
+function readZipEntries(zipPath) {
+    const buf = readFileSync(zipPath);
+    // Localitza End of Central Directory (EOCD). Cerca des del final.
+    let eocd = -1;
+    const sig = 0x06054b50;
+    for (let i = buf.length - 22; i >= Math.max(0, buf.length - 65557); i--) {
+        if (buf.readUInt32LE(i) === sig) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error("EOCD no trobat");
+    const totalEntries = buf.readUInt16LE(eocd + 10);
+    const cdSize       = buf.readUInt32LE(eocd + 12);
+    const cdOffset     = buf.readUInt32LE(eocd + 16);
+
+    const entries = new Map();
+    let p = cdOffset;
+    for (let i = 0; i < totalEntries; i++) {
+        if (buf.readUInt32LE(p) !== 0x02014b50) throw new Error("Central dir signature invàlida");
+        const method     = buf.readUInt16LE(p + 10);
+        const compSize   = buf.readUInt32LE(p + 20);
+        const uncompSize = buf.readUInt32LE(p + 24);
+        const nameLen    = buf.readUInt16LE(p + 28);
+        const extraLen   = buf.readUInt16LE(p + 30);
+        const commentLen = buf.readUInt16LE(p + 32);
+        const localOff   = buf.readUInt32LE(p + 42);
+        const name       = buf.slice(p + 46, p + 46 + nameLen).toString("utf8");
+
+        // Salta si és directori
+        if (!name.endsWith("/")) {
+            entries.set(name, () => {
+                // Llegeix local file header per saber l'offset real de les dades
+                if (buf.readUInt32LE(localOff) !== 0x04034b50) throw new Error("Local header invàlid per " + name);
+                const lNameLen  = buf.readUInt16LE(localOff + 26);
+                const lExtraLen = buf.readUInt16LE(localOff + 28);
+                const dataStart = localOff + 30 + lNameLen + lExtraLen;
+                const data = buf.slice(dataStart, dataStart + compSize);
+                if (method === 0) return data;
+                if (method === 8) return inflateRawSync(data);
+                throw new Error("Mètode de compressió no suportat: " + method);
+            });
+        }
+        p += 46 + nameLen + extraLen + commentLen;
+    }
+    return entries;
+}
 
 // ─── Resum ───────────────────────────────────────────────────────────────────
 

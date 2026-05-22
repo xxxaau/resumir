@@ -12,6 +12,19 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [2.2.8] - 2026-05-22
+
+### Corregit
+- **Crític**: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7.
+- Les llibreries `d3.min.js`, `markmap-lib.js` i `markmap-view.js` ara s'inclouen al ZIP de release (abans referenciades al HTML però absents al paquet).
+- `conceptmap.js` integrat al bundle del sidebar per simplificar el manteniment i reduir el nombre de requests.
+
+### Intern
+- Nou patcher robust de `sidebar.html`: elimina explícitament els scripts del bundle (per llista coneguda) en lloc de dependre d'un regex frágil.
+- Nou check #13 al pre-release-check: smoke-test del ZIP verifica que tot script referenciat als HTML existeix dins del paquet abans de publicar.
+
+---
+
 ## [2.2.7] - 2026-05-22
 
 ### Corregit

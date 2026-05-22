@@ -38,10 +38,31 @@ const files = [
     resolve(root, "sidebar/cache.js"),
     resolve(root, "sidebar/stats.js"),
     resolve(root, "sidebar/ui.js"),
+    resolve(root, "sidebar/conceptmap.js"),
     resolve(root, "sidebar/summary.js"),
     resolve(root, "sidebar/history.js"),
     resolve(root, "sidebar/sidebar.js"),
 ];
+
+// Llista d'srcs que el bundle reemplaça. El patcher els elimina del HTML.
+// Els scripts NO inclosos aquí (theme.js, d3.min.js, markmap-lib.js, markmap-view.js)
+// es mantenen com a <script src=...> separats al HTML final.
+const BUNDLED_SRCS = new Set([
+    "../ext.js",
+    "../shared/models.js",
+    "../shared/defaults.js",
+    "utils.js",
+    "api.js",
+    "youtube-track-select.js",
+    "content.js",
+    "cache.js",
+    "stats.js",
+    "ui.js",
+    "conceptmap.js",
+    "summary.js",
+    "history.js",
+    "sidebar.js",
+]);
 
 const header = [
     "// sidebar.bundle.js - Auto-generated for production build",
@@ -67,16 +88,39 @@ for (const w of result.warnings) {
 writeFileSync(outFile, header + result.code, "utf8");
 console.log(`  Generated ${outFile.replace(root, ".")}${minify ? " (minified)" : ""}`);
 
-// Patch sidebar.html per referenciar el bundle en lloc dels scripts individuals
+// Patch sidebar.html: elimina els <script src=...> del bundle i insereix un sol
+// <script src="sidebar.bundle.js"></script> just abans del primer script
+// substituït (preservant l'ordre relatiu amb els scripts no-bundle).
 if (htmlFile) {
     let html = readFileSync(htmlFile, "utf8");
 
-    // Substitueix el bloc de <script> individuals per un sol <script> del bundle
-    html = html.replace(
-        /(\s*<script src="\.\.\/ext\.js"><\/script>\s*\n\s*<script src="\.\.\/shared\/models\.js"><\/script>[\s\S]*?<script src="sidebar\.js"><\/script>)/,
-        '\n    <script src="sidebar.bundle.js"></script>'
-    );
+    const scriptRegex = /[ \t]*<script\s+src="([^"]+)"\s*><\/script>\s*\r?\n?/g;
+    let firstBundledMatch = null;
+    const removed = [];
+
+    html = html.replace(scriptRegex, (match, src) => {
+        if (BUNDLED_SRCS.has(src)) {
+            if (firstBundledMatch === null) firstBundledMatch = match;
+            removed.push(src);
+            return "";
+        }
+        return match;
+    });
+
+    if (removed.length === 0) {
+        console.error("[build-sidebar-bundle] ERROR: cap script del bundle trobat a " + htmlFile);
+        console.error("  BUNDLED_SRCS esperats: " + [...BUNDLED_SRCS].join(", "));
+        process.exit(1);
+    }
+
+    // Insereix el bundle abans de </body>
+    const bundleTag = '    <script src="sidebar.bundle.js"></script>\n  ';
+    if (!html.includes("</body>")) {
+        console.error("[build-sidebar-bundle] ERROR: no s'ha trobat </body> a " + htmlFile);
+        process.exit(1);
+    }
+    html = html.replace("</body>", bundleTag + "</body>");
 
     writeFileSync(htmlFile, html, "utf8");
-    console.log(`  Patched ${htmlFile.replace(root, ".")}`);
+    console.log(`  Patched ${htmlFile.replace(root, ".")} (${removed.length} scripts -> bundle)`);
 }

@@ -44,7 +44,10 @@ const commonFiles = [
   "Readability.js",
   "theme.js",
   "LICENSE",
-  "docs/PRIVACY_POLICY.md"
+  "docs/PRIVACY_POLICY.md",
+  "d3.min.js",
+  "markmap-lib.js",
+  "markmap-view.js"
 ];
 
 const commonDirs = [
@@ -211,8 +214,8 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
       "Generated sidebar bundle"
     );
     
-    // Remove individual sidebar JS files
-    const sidebarFiles = ["utils.js", "api.js", "content.js", "cache.js", "stats.js", "ui.js", "summary.js", "sidebar.js"];
+    // Remove individual sidebar JS files (now in bundle)
+    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "content.js", "cache.js", "stats.js", "ui.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
     for (const f of sidebarFiles) {
       const filePath = resolve(buildPath, "sidebar", f);
       if (existsSync(filePath)) {
@@ -264,7 +267,7 @@ async function main() {
     }
     
     if (target === "chromium" || target === "all") {
-      await buildZip("chromium", "chromium", ["background.bundle.js"], []);
+      await buildZip("chromium", "chromium", ["ext.js", "background.bundle.js"], []);
     }
     
     console.log(`\nâœ¨ Build complete! v${version}\n`);

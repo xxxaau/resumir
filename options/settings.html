@@ -1120,6 +1120,19 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.2.8
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Crític</strong>: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7.</li>
+                <li>Les llibreries <code>d3.min.js</code>, <code>markmap-lib.js</code> i <code>markmap-view.js</code> ara s'inclouen al ZIP de release (abans referenciades al HTML però absents al paquet).</li>
+                <li><code>conceptmap.js</code> integrat al bundle del sidebar per simplificar el manteniment i reduir el nombre de requests.</li>
+                <li>Nou patcher robust de <code>sidebar.html</code>: elimina explícitament els scripts del bundle (per llista coneguda) en lloc de dependre d'un regex frágil.</li>
+                <li>Nou check #13 al pre-release-check: smoke-test del ZIP verifica que tot script referenciat als HTML existeix dins del paquet abans de publicar.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.7
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
               </div>
