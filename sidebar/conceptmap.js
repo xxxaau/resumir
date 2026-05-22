@@ -642,45 +642,11 @@ async function openFullPageView(text) {
         }
 
         if (!probe || !probe.ok || !probe.hasMarkmapClass) {
-            // CSP fallback: fetch the lib code and eval it in MAIN world via Function.
-            console.debug('[conceptmap] fullscreen: <script> tag path failed, trying fetch fallback');
-            const libCodes = [];
-            for (const u of libUrls) {
-                try {
-                    const r = await fetch(u);
-                    libCodes.push(await r.text());
-                } catch (e) {
-                    alert(`No s'ha pogut llegir la llibreria ${u}: ${e.message}`);
-                    return;
-                }
-            }
-            const fallbackResult = await executeScriptSafe({
-                target: { tabId },
-                world: "MAIN",
-                func: (codes) => {
-                    try {
-                        for (const code of codes) {
-                            // Indirect eval at global scope (avoids Function constructor).
-                            (0, eval)(code);
-                        }
-                        return {
-                            ok: true,
-                            hasMarkmapClass: !!(window.markmap && window.markmap.Markmap),
-                            hasTransformer: !!(window.markmap && window.markmap.Transformer)
-                        };
-                    } catch (e) {
-                        return { ok: false, error: e.message };
-                    }
-                },
-                args: [libCodes]
-            });
-            const fb = fallbackResult && fallbackResult[0] && fallbackResult[0].result;
-            console.debug('[conceptmap] fullscreen: fallback probe', fb);
-            if (!fb || !fb.ok || !fb.hasMarkmapClass) {
-                const detail = probe && probe.error ? probe.error : (fb && fb.error ? fb.error : 'desconegut');
-                alert(`No s'han pogut carregar les llibreries del mapa a la pàgina. La CSP del lloc pot estar bloquejant la injecció.\n\nDetall: ${detail}`);
-                return;
-            }
+            // Script tag loading failed (likely blocked by the page's CSP).
+            // We cannot fall back to eval/Function as that is disallowed by AMO policy.
+            const detail = probe && probe.error ? probe.error : 'desconegut';
+            alert(`No s'han pogut carregar les llibreries del mapa a la pàgina.\nLa política de seguretat (CSP) del lloc bloqueja la injecció d'scripts.\n\nDetall: ${detail}`);
+            return;
         }
 
         // 5) Inject the overlay into MAIN world.
