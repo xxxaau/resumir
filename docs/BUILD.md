@@ -6,7 +6,12 @@ This document describes how to build **Resumir contingut** from source. Required
 
 - **Node.js** 18 or higher
 - **npm** 9 or higher
-- **PowerShell** 5.1+ (pre-installed on Windows; available via `pwsh` on Linux/macOS)
+
+> Since **v2.2.10**, the build no longer depends on PowerShell. The
+> `npm run dev` and `npm run prod` commands use `scripts/set-mode.mjs`
+> (pure Node) instead of the previous `set_dev_mode.ps1` script. This
+> avoids issues on systems where PowerShell execution policy is
+> `Restricted` (e.g. managed Windows machines under `MachinePolicy`).
 
 ## Steps
 
@@ -22,8 +27,8 @@ npm run build
 ```
 
 This produces:
-- `resumir-contingut-vX.Y.Z-firefox.zip` — submit to AMO
-- `resumir-contingut-vX.Y.Z-chromium.zip` — submit to Chrome Web Store
+- `build/resumir-contingut-vX.Y.Z-firefox.zip` — submit to AMO
+- `build/resumir-contingut-vX.Y.Z-chromium.zip` — submit to Chrome Web Store
 
 ## Key dependencies
 
@@ -45,6 +50,10 @@ SHA-256 hashes for these files are recorded in `THIRD_PARTY.md` and verified by:
 npm run vendor:verify
 ```
 
+See [`VENDORS.md`](../VENDORS.md) for the full vendor history, including the
+libraries removed in v2.2.9 (`d3.min.js`, `markmap-lib.js`, `markmap-view.js`)
+when the native SVG renderer was introduced.
+
 ## Firefox-only build
 
 ```bash
@@ -60,7 +69,31 @@ npm run build:chromium
 ## Running tests
 
 ```bash
-npm test          # 207 unit + E2E tests
+npm test          # 222 unit + E2E tests
 npm run lint      # ESLint (0 warnings expected)
-npm run prerelease  # Full pre-release audit
+npm run prerelease  # Full pre-release audit (17 checks)
 ```
+
+## Development workflow
+
+```bash
+# Switch to DEV mode (orange icons, "Resumir (DEV)" name, separate gecko.id)
+npm run dev
+
+# Make changes, test in browser...
+
+# Switch back to PROD before bumping version
+npm run prod
+
+# Bump patch version (also regenerates manifests + updates settings.html changelog)
+npm version patch --no-git-tag-version
+
+# Verify everything is green
+npm run build
+npm run prerelease
+
+# Commit, tag, push, GitHub release
+```
+
+The `pre-push` git hook blocks pushes while the manifest contains
+`"Resumir (DEV)"` to avoid accidentally publishing the DEV build.

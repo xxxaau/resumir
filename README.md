@@ -13,6 +13,11 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 
 - **Resum amb IA** — un sol clic per obtenir un resum estructurat de qualsevol pàgina
 - **YouTube i Hacker News** — extracció intel·ligent de transcripcions i fils de comentaris
+  - Transcripcions YouTube amb 3 vies de fallback (`baseUrl` directe, variants `timedtext` json3/srv3/cru, `youtubei/v1/get_transcript`) per a vídeos amb subtítols automàtics
+- **Mapa conceptual interactiu** — visualització jeràrquica del resum en estil pill (NotebookLM)
+  - Vista al sidebar i en pantalla completa, idèntiques als 4 temes
+  - Pan, zoom, plegat/desplegat de branques, exportació a PNG
+  - Renderitzador SVG natiu propi (zero dependències de tercers, ~22 KB)
 - **Lectura biònica** — mode de lectura ràpida amb nivell de fixació configurable
 - **Exporta a Markdown** — copia directament o envia a [Obsidian](https://obsidian.md)
 - **Múltiples temes** — sistema, clar, fosc, solarized, gris
@@ -63,15 +68,18 @@ sidebar/
   sidebar.js                # Orquestrador principal
   summary.js                # Lògica de generació
   api.js                    # Client de streaming Gemini (SSE)
-  content.js                # Extracció de text (YouTube, HN, Readability)
+  content.js                # Extracció de text (YouTube amb 3 vies, HN, Readability)
   cache.js                  # Caché local i estadístiques
   history.js                # Historial de resums
+  markmap-native.js         # Renderitzador SVG natiu del mapa conceptual
+  conceptmap.js             # Orquestrador del mapa (sidebar + fullscreen)
+  conceptmap-filename.js    # Generador del nom de fitxer PNG (funció pura)
 options/                    # Pàgina de configuració
 shared/                     # Models i valors per defecte compartits
-tests/                      # Tests unitaris i d'integració
+tests/                      # 222 tests unitaris i d'integració
 ```
 
-Consulta [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md) per a mapa de projectes, o [docs/MODELS-WORKFLOW.md](docs/MODELS-WORKFLOW.md) per a detalls tècnics d'API i models.
+Consulta [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md) per a mapa de projectes, [docs/MODELS-WORKFLOW.md](docs/MODELS-WORKFLOW.md) per a detalls tècnics d'API i models, o [docs/CONCEPTMAP-FEATURES.md](docs/CONCEPTMAP-FEATURES.md) per al disseny del mapa conceptual.
 
 ---
 
