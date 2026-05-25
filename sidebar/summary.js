@@ -133,9 +133,24 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         if (tabs.length === 0) throw new Error("[002] No s'ha trobat cap pestanya activa.");
         const currentUrl = tabs[0].url;
 
-        const isRefresh = (currentMetadata.url === currentUrl && currentMetadata.fromCache);
+        // Check preload BEFORE cache (PDFs locals, etc.)
+        const contentPreload = ctx.getContentPreload();
+        let hasLocalPdf = false;
+        if (contentPreload) {
+            try {
+                const preloaded = await contentPreload;
+                if (preloaded && (preloaded.url === currentUrl || preloaded.url.startsWith("pdf-local:"))) {
+                    pageData = preloaded;
+                    if (preloaded.url.startsWith("pdf-local:")) hasLocalPdf = true;
+                }
+            } catch (e) {
+                console.warn("Preload failed, retrying fresh:", e);
+            }
+        }
+
+        const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache);
         
-        if (!isRefresh && !overrideText && !isDeepDive && !isScience && !isConceptMap) {
+        if (!isRefresh && !pageData && !overrideText && !isDeepDive && !isScience && !isConceptMap) {
             const cachedEntry = await getSummaryCache(currentUrl);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
@@ -202,18 +217,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 }).catch(() => { /* background preload failed silently */ });
                 
                 return abortController;
-            }
-        }
-
-        const contentPreload = ctx.getContentPreload();
-        if (contentPreload) {
-            try {
-                const preloaded = await contentPreload;
-                if (preloaded && preloaded.url === currentUrl) {
-                    pageData = preloaded;
-                }
-            } catch (e) {
-                console.warn("Preload failed, retrying fresh:", e);
             }
         }
 

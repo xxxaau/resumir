@@ -7,8 +7,35 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+### Corregit
+- **CORS en PDFs remots HTTPS:** el fetch directe des del sidebar fallava per CORS en servidors sense `Access-Control-Allow-Origin`. Ara se sol·licita el permís `<all_urls>` sota gest d'usuari i es reintenta; amb `host_permissions` concedit, Firefox/Chromium no apliquen CORS al fetch d'extensió.
+- **Local PDF: error [006] al obrir pestanya blob:** el resum de PDFs locals fallava perquè `getPageContent()` no podia extreure text de la pestanya blob. Solucionat: el text extret es passa via `contentPreload` amb prefix `pdf-local:`, i el pipeline l'usa directament sense dependre de la pestanya activa.
+- **Botó PDF en segona posició:** afegit `selectPdfBtn` al mapatge `extensionIdToButtonId` de `applyExtensionOrder` amb migració automàtica per a usuaris amb ordre desat.
+- **Preload abans que caché:** la comprovació del `contentPreload` es fa ara abans de la caché, evitant que un PDF local obtingui un resum en caché de la pàgina web activa.
+
+### Afegit
+- **Nova pestanya amb el PDF seleccionat:** en seleccionar un PDF local, s'obre una pestanya de fons amb el PDF per consultar-lo (limitació: Firefox no renderitza `blob:` URLs d'extensions al visor PDF nadiu).
+
 ### Seguretat
 - **Avís important per als usuaris anteriors a v2.2**: Si heu instal·lat l'extensió abans de la versió 2.2, la vostra clau API de Gemini pot haver estat emmagatzemada a `storage.sync` (sincronitzada entre dispositius). A partir de la v2.2, la clau es guarda exclusivament a `storage.local`. Es recomana **rotar la clau API** des de Google AI Studio com a precaució.
+
+---
+
+## [2.3.0] - 2026-05-25
+
+### Afegit
+- **Suport per resumir fitxers PDF amb capa de text** (issue: extensió no funcionava amb PDFs). Implementat amb pdf.js 3.11.174 (legacy UMD) vendoritzat a `vendor/`.
+  - **PDFs remots HTTPS:** detecció automàtica per extensió `.pdf` o per `Content-Type: application/pdf` (HEAD probe d'1 round-trip per URLs sospitoses sense extensió, p. ex. `arxiv.org/pdf/123`).
+  - **PDFs locals (`file://`) i HTTP:** nou botó "Selecciona PDF local" a la barra d'eines del sidebar (file picker via `<input type="file">` + `FileReader`, sense cap accés de xarxa).
+  - **Codis d'error UI:** `[PDF-010]` protegit, `[PDF-011]` invàlid, `[PDF-012]` escanejat (OCR no suportat), `[PDF-013]` massa gran, `[PDF-014]` timeout, `[PDF-015]` fetch fallit, `[PDF-016]` no-HTTPS (suggereix botó local amb pulse visual), `[PDF-019]` altres.
+  - **Límits:** màx 500 pàgines, 2M caràcters, timeout 60s d'extracció + 15s de fetch.
+
+### Canviat
+- **CSP `connect-src` relaxada amb `https:`** (afegit a `manifest.{base,json,chromium,firefox.patch,chromium.patch,firefox.prod.patch,chromium.prod.patch}.json`) per permetre descàrrega de PDFs remots des de qualsevol origen HTTPS. La política `file:` i `http:` queda explícitament exclosa per principi de mínim privilegi. Veure `docs/SECURITY.md` per a la justificació completa i mitigacions.
+
+### Seguretat
+- pdf.js configurat amb opcions CSP-safe: `isEvalSupported: false`, `disableFontFace: true`, `useSystemFonts: false`, `verbosity: 0`.
+- Worker pdf.js carregat des d'origen extensió (`runtime.getURL`), mai remot.
 
 ---
 

@@ -66,7 +66,16 @@ function applyExtensionOrder(order) {
     // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
     // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
     if (!order.includes("resum")) {
-        order = ["resum", "science", "deepdive", "conceptmap", "bionic", "obsidian", "markdown"];
+        order = ["resum", "selectpdf", "science", "deepdive", "conceptmap", "bionic", "obsidian", "markdown"];
+        ext.storage.sync.set({ extensionOrder: order });
+    } else if (!order.includes("selectpdf")) {
+        // Migrate older saved orders to include selectpdf in 2a posicio
+        const idx = order.indexOf("resum");
+        if (idx !== -1) {
+            order.splice(idx + 1, 0, "selectpdf");
+        } else {
+            order.unshift("selectpdf");
+        }
         ext.storage.sync.set({ extensionOrder: order });
     }
 
@@ -77,6 +86,7 @@ function applyExtensionOrder(order) {
 
     const extensionIdToButtonId = {
         "resum": "summarizeBtn",
+        "selectpdf": "selectPdfBtn",
         "obsidian": "obsidianBtn",
         "markdown": "copyBtn",
         "deepdive": "deepDiveBtn",

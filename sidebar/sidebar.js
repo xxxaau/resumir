@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const scienceBtn = document.getElementById("scienceBtn");
     const historyBtn = document.getElementById("historyBtn");
     const sourceTextBtn = document.getElementById("sourceTextBtn");
+    const selectPdfBtn = document.getElementById("selectPdfBtn");
+    const pdfFileInput = document.getElementById("pdfFileInput");
     const modelSelect = document.getElementById("model-select");
 
     let isGenerating = false;
@@ -156,6 +158,76 @@ document.addEventListener("DOMContentLoaded", () => {
     summarizeBtn.addEventListener("click", () => {
         doSummary(null, false, false, true);
     });
+
+    // --- Selector de PDF local ---
+    // Flux: l'usuari selecciona un PDF, l'extreim amb pdf.js, l'obrim en una
+    // pestanya nova (blob URL) i disparem el resum. contentPreload conte el
+    // text ja extret, indexat per la URL blob de la nova pestanya, de manera
+    // que el pipeline normal el consumeix sense haver de re-fetch-ar.
+    if (selectPdfBtn && pdfFileInput) {
+        // Pulsa el bot\u00f3 quan apareix l'error PDF-016 a l'errorDiv per fer-lo descobrible.
+        if (errorDiv && typeof MutationObserver !== "undefined") {
+            const obs = new MutationObserver(() => {
+                if (errorDiv.textContent && errorDiv.textContent.includes("[PDF-016]")) {
+                    selectPdfBtn.classList.add("pulse");
+                    setTimeout(() => selectPdfBtn.classList.remove("pulse"), 4000);
+                }
+            });
+            obs.observe(errorDiv, { childList: true, characterData: true, subtree: true });
+        }
+        selectPdfBtn.addEventListener("click", () => {
+            if (isGenerating) return;
+            pdfFileInput.click();
+        });
+        pdfFileInput.addEventListener("change", async (e) => {
+            const file = e.target.files && e.target.files[0];
+            // Reset perqu\u00e8 re-seleccionar el mateix fitxer torni a disparar change.
+            e.target.value = "";
+            if (!file) return;
+            if (isGenerating) return;
+            let blobUrl = null;
+            try {
+                showPageTitleStrip(file.name, `pdf-local:${file.name}`);
+                const buffer = await file.arrayBuffer();
+                if (typeof extractPdfText !== "function") {
+                    throw new Error("pdf-extract no carregat (vendor/pdf.min.js)");
+                }
+                const pdfResult = await extractPdfText(buffer);
+                // Obre el PDF en una pestanya per consultar-lo.
+                const b = new Blob([buffer], { type: "application/pdf" });
+                blobUrl = URL.createObjectURL(b);
+                ext.tabs.create({ url: blobUrl, active: true });
+                const tabUrl = `pdf-local:${file.name}`;
+                const pageData = {
+                    title: pdfResult.title || file.name,
+                    text: pdfResult.text,
+                    url: tabUrl,
+                };
+                // Injecta el contingut al pipeline normal de resum.
+                // summary.js comprovara si el URL comenca per "pdf-local:" i usara
+                // el preload directament (sense necessitat que coincideixi amb la pestanya activa).
+                contentPreload = Promise.resolve(pageData);
+                doSummary(null, false, false, true);
+            } catch (err) {
+                console.error("[PDF picker] error:", err);
+                if (blobUrl) {
+                    try { URL.revokeObjectURL(blobUrl); } catch { /* ignore */ }
+                }
+                const codeMap = {
+                    PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
+                    INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
+                    SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
+                    TOO_LARGE: "[PDF-013] PDF massa gran.",
+                    TIMEOUT: "[PDF-014] Timeout extraient el PDF.",
+                };
+                const msg = codeMap[err?.code] || `[PDF-019] Error obrint PDF: ${err?.message || err}`;
+                if (errorDiv) {
+                    errorDiv.textContent = msg;
+                    errorDiv.classList.remove("hidden");
+                }
+            }
+        });
+    }
 
     // Open links in content area in a new browser tab (extension sidebar context)
     contentDiv.addEventListener("click", (e) => {
