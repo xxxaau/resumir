@@ -48,6 +48,34 @@ async function getPageContent() {
 
     let text = "";
 
+    // PDF SPECIAL LOGIC
+    // Detecta PDFs (locals via file:// o remots via http/https) i extreu text
+    // amb pdf.js (vendor/pdf.min.js) carregat al bundle del sidebar.
+    // Guarda defensiva: si pdf-extract.js no està disponible (build antic o test),
+    // degradem en silenci a la lògica HTML normal.
+    if (typeof isPdfUrl === "function" && typeof extractPdfText === "function" && isPdfUrl(tabUrl)) {
+        try {
+            const pdfResult = await extractPdfText(tabUrl);
+            return {
+                title: pdfResult.title || tabTitle || "PDF",
+                text: pdfResult.text,
+                url: tabUrl,
+            };
+        } catch (e) {
+            // Propaguem amb codi llegible per l'UI (summary.js mostrarà el missatge).
+            const codeMap = {
+                PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
+                INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
+                SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
+                TOO_LARGE: "[PDF-013] PDF massa gran. Massa pàgines per processar.",
+                TIMEOUT: "[PDF-014] Timeout extraient el PDF. Prova amb un fitxer més petit.",
+                FETCH_FAILED: "[PDF-015] No s'ha pogut descarregar el PDF. Comprova els permisos d'accés a fitxers locals si és un file://.",
+            };
+            const friendly = codeMap[e?.code] || `[PDF-019] Error inesperat extraient PDF: ${e?.message || e}`;
+            throw new Error(friendly);
+        }
+    }
+
     // HACKER NEWS SPECIAL LOGIC
     if (tabUrl.includes("news.ycombinator.com/item")) {
         try {

@@ -1,0 +1,13 @@
+# Force LF line endings for source code (avoid CRLF on Windows).
+*.js     text eol=lf
+*.mjs    text eol=lf
+*.json   text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.md     text eol=lf
+
+# Treat vendored minified bundles as binary so Git won't normalize line endings.
+# Critical: scripts/verify-vendor.mjs hashes these files; CRLF conversion would
+# corrupt them and break verification.
+vendor/** binary
+Readability.js binary

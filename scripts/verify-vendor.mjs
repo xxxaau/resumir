@@ -22,6 +22,8 @@ const root = resolve(__dirname, "..");
 const EXPECTED = {
     "defuddle.js":   "029548317ef8e1151e293a6511021d996ad3c042d178dbfc0b8bf44a5f829f58",
     "Readability.js": "ea5ea61230d96011b5902414973e50511aa93edfc5ec982464c656f9e7326e7e",
+    "vendor/pdf.min.js":        "978fd1b2d134a98e98966186a97777bebf87d8e770dadab1ece3687e21a5aa6c",
+    "vendor/pdf.worker.min.js": "38cde5311957b86bc3669f93e7d2566de333a90055ed6635bef60d9bf00e96f2",
 };
 
 let allOk = true;
