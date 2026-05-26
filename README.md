@@ -14,6 +14,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 - **Resum amb IA** — un sol clic per obtenir un resum estructurat de qualsevol pàgina
 - **YouTube i Hacker News** — extracció intel·ligent de transcripcions i fils de comentaris
   - Transcripcions YouTube amb 3 vies de fallback (`baseUrl` directe, variants `timedtext` json3/srv3/cru, `youtubei/v1/get_transcript`) per a vídeos amb subtítols automàtics
+- **PDFs amb capa de text** — resum de PDFs HTTPS remots (descàrrega automàtica) i locals (`file://`/HTTP via botó "Selecciona PDF local"). Detecció per extensió o `Content-Type`. PDFs escanejats no suportats (cal OCR).
 - **Mapa conceptual interactiu** — visualització jeràrquica del resum en estil pill (NotebookLM)
   - Vista al sidebar i en pantalla completa, idèntiques als 4 temes
   - Pan, zoom, plegat/desplegat de branques, exportació a PNG

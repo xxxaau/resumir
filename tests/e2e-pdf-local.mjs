@@ -111,12 +111,12 @@ try {
 }
 
 const newUrl = newPage.url();
-if (!newUrl.startsWith("blob:")) {
-    console.error(`\u274c L'URL de la pestanya nova no es blob: ${newUrl}`);
+if (!newUrl.includes("/sidebar/pdf-viewer.html")) {
+    console.error(`\u274c L'URL de la pestanya nova no es el visor personalitzat: ${newUrl}`);
     await ctx.close();
     process.exit(1);
 }
-console.log(`\u2713 URL es blob:`);
+console.log(`\u2713 URL es el visor personalitzat: ${newUrl}`);
 
 // Espera uns moments perquè el sidebar acabi d'extreure i preparar el pipeline.
 await new Promise(r => setTimeout(r, 1500));
@@ -150,7 +150,7 @@ console.log(`Screenshot pestanya PDF: ${tabShotPath}`);
 // Veredicte.
 console.log(`\n=== VEREDICTE ===`);
 const checks = {
-    "Nova pestanya oberta amb blob:": newUrl.startsWith("blob:"),
+    "Nova pestanya oberta amb visor personalitzat": newUrl.includes("/sidebar/pdf-viewer.html"),
     "Sidebar sense error PDF-xxx": !sidebarState.errorText || !sidebarState.errorText.includes("[PDF-"),
     "Title strip mostra nom fitxer": (sidebarState.titleText || "").toLowerCase().includes("hello") ||
                                        (sidebarState.titleText || "").toLowerCase().includes("pdf"),

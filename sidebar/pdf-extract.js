@@ -55,6 +55,44 @@ function isPdfUrl(url) {
 }
 
 /**
+ * Fa una petició HEAD per detectar si una URL HTTPS retorna un PDF.
+ *
+ * Útil per URLs sense extensió `.pdf` (p. ex. https://arxiv.org/pdf/2401.12345,
+ * doi.org/... amb redirect, links amb Content-Disposition: inline).
+ *
+ * Mai llança: qualsevol error (xarxa, CORS, timeout, no-HTTPS) retorna `false`.
+ * Només dispara per a URLs HTTPS perquè HTTP/file estan bloquejats per CSP.
+ *
+ * @param {string} url
+ * @param {Object} [options]
+ * @param {number} [options.timeoutMs=5000]
+ * @returns {Promise<boolean>}
+ */
+async function looksLikePdfByHead(url, { timeoutMs = 5000 } = {}) {
+    if (!url || typeof url !== "string") return false;
+    if (!url.startsWith("https://")) return false;
+    let controller;
+    let timeoutId;
+    try {
+        controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        const resp = await fetch(url, {
+            method: "HEAD",
+            credentials: "omit",
+            signal: controller.signal,
+            redirect: "follow",
+        });
+        if (!resp.ok) return false;
+        const ct = (resp.headers.get("content-type") || "").toLowerCase();
+        return ct.startsWith("application/pdf");
+    } catch {
+        return false;
+    } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+    }
+}
+
+/**
  * Extreu text d'un PDF.
  *
  * @param {string|ArrayBuffer|Uint8Array} urlOrBuffer
@@ -209,5 +247,5 @@ async function extractPdfText(urlOrBuffer, options = {}) {
 
 // Export Node (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { isPdfUrl, extractPdfText, _resetWorkerInit: () => { _pdfWorkerInitialized = false; } };
+    module.exports = { isPdfUrl, looksLikePdfByHead, extractPdfText, _resetWorkerInit: () => { _pdfWorkerInitialized = false; } };
 }

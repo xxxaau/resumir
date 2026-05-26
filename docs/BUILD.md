@@ -39,12 +39,16 @@ This produces:
 
 ## Vendored files
 
-Two files are vendored (pre-built) in the repository:
+Four files are vendored (pre-built) in the repository:
 
-- `sidebar/defuddle.js` — built from [defuddle](https://github.com/kepano/defuddle) (`npm run vendor:update`)
-- `sidebar/Readability.js` — from [Mozilla/readability](https://github.com/mozilla/readability)
+| File | Source | Purpose |
+|------|--------|---------|
+| `sidebar/defuddle.js` | [defuddle](https://github.com/kepano/defuddle) | Twitter/X content extraction |
+| `sidebar/Readability.js` | [Mozilla/readability](https://github.com/mozilla/readability) | Article text extraction |
+| `vendor/pdf.min.js` | [pdf.js](https://mozilla.github.io/pdf.js/) v3.11.174 (legacy UMD) | PDF parsing (text layer extraction) |
+| `vendor/pdf.worker.min.js` | pdf.js v3.11.174 (legacy UMD) | PDF worker (CSP-safe, loaded via `runtime.getURL`) |
 
-SHA-256 hashes for these files are recorded in `THIRD_PARTY.md` and verified by:
+SHA-256 hashes for all these files are recorded in `THIRD_PARTY.md` and verified by:
 
 ```bash
 npm run vendor:verify

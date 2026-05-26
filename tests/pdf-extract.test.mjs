@@ -326,3 +326,84 @@ test("extractPdfText: respecta maxChars i marca truncated", async () => {
     assert.ok(result.metadata.extractedPages < 3, "no hauria d'haver processat les 3 pàgines");
     cleanupMocks();
 });
+
+// ---------------------------------------------------------------------------
+// looksLikePdfByHead
+// ---------------------------------------------------------------------------
+
+test("looksLikePdfByHead: retorna true si Content-Type es application/pdf", async () => {
+    const { looksLikePdfByHead } = require("../sidebar/pdf-extract.js");
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = async (url, opts) => {
+        assert.equal(opts.method, "HEAD");
+        return {
+            ok: true,
+            headers: { get: (k) => k.toLowerCase() === "content-type" ? "application/pdf" : null },
+        };
+    };
+    try {
+        const result = await looksLikePdfByHead("https://arxiv.org/pdf/2401.12345");
+        assert.equal(result, true);
+    } finally {
+        globalThis.fetch = origFetch;
+    }
+});
+
+test("looksLikePdfByHead: retorna false si Content-Type es text/html", async () => {
+    const { looksLikePdfByHead } = require("../sidebar/pdf-extract.js");
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = async () => ({
+        ok: true,
+        headers: { get: () => "text/html; charset=utf-8" },
+    });
+    try {
+        const result = await looksLikePdfByHead("https://example.com/page");
+        assert.equal(result, false);
+    } finally {
+        globalThis.fetch = origFetch;
+    }
+});
+
+test("looksLikePdfByHead: retorna false per URLs no-HTTPS sense fer fetch", async () => {
+    const { looksLikePdfByHead } = require("../sidebar/pdf-extract.js");
+    let fetchCalled = false;
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = async () => { fetchCalled = true; return {}; };
+    try {
+        assert.equal(await looksLikePdfByHead("http://example.com/foo"), false);
+        assert.equal(await looksLikePdfByHead("file:///tmp/x.pdf"), false);
+        assert.equal(await looksLikePdfByHead(""), false);
+        assert.equal(await looksLikePdfByHead(null), false);
+        assert.equal(fetchCalled, false, "no s'ha de cridar fetch per URLs no-HTTPS");
+    } finally {
+        globalThis.fetch = origFetch;
+    }
+});
+
+test("looksLikePdfByHead: retorna false (no llanca) si fetch falla", async () => {
+    const { looksLikePdfByHead } = require("../sidebar/pdf-extract.js");
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = async () => { throw new Error("network down"); };
+    try {
+        const result = await looksLikePdfByHead("https://example.com/x");
+        assert.equal(result, false);
+    } finally {
+        globalThis.fetch = origFetch;
+    }
+});
+
+test("looksLikePdfByHead: retorna false si resposta no-ok (404)", async () => {
+    const { looksLikePdfByHead } = require("../sidebar/pdf-extract.js");
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = async () => ({
+        ok: false,
+        status: 404,
+        headers: { get: () => "application/pdf" },
+    });
+    try {
+        const result = await looksLikePdfByHead("https://example.com/missing");
+        assert.equal(result, false);
+    } finally {
+        globalThis.fetch = origFetch;
+    }
+});

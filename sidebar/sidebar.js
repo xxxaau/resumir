@@ -1,6 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const contentDiv = document.getElementById("content");
     const errorDiv = document.getElementById("error");
@@ -185,18 +194,35 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.value = "";
             if (!file) return;
             if (isGenerating) return;
-            let blobUrl = null;
             try {
                 showPageTitleStrip(file.name, `pdf-local:${file.name}`);
                 const buffer = await file.arrayBuffer();
+                // Clonar el buffer abans de passar-lo a extractPdfText: pdf.js el pot
+                // transferir al worker (via postMessage) i detachar l'original.
+                const viewerBuffer = buffer.slice(0);
                 if (typeof extractPdfText !== "function") {
                     throw new Error("pdf-extract no carregat (vendor/pdf.min.js)");
                 }
                 const pdfResult = await extractPdfText(buffer);
-                // Obre el PDF en una pestanya per consultar-lo.
-                const b = new Blob([buffer], { type: "application/pdf" });
-                blobUrl = URL.createObjectURL(b);
-                ext.tabs.create({ url: blobUrl, active: true });
+                // Obre el PDF en una pestanya per consultar-lo via visor personalitzat.
+                // Usem storage.session (compartit entre pàgines d'extensió) per passar
+                // el buffer, ja que blob: URLs no funcionen al visor nadiu de Firefox.
+                let viewerKey = `pdfViewer:${Date.now()}`;
+                const b64 = arrayBufferToBase64(viewerBuffer);
+                try {
+                    await ext.storage.session.set({ [viewerKey]: b64 });
+                } catch (sessionErr) {
+                    console.warn("[PDF picker] storage.session.set failed, skipping viewer:", sessionErr);
+                    // Si storage.session no pot desar-lo (límit de mida), simplement no
+                    // obrim el visor. El resum es genera igualment.
+                    viewerKey = null;
+                }
+                if (viewerKey) {
+                    ext.tabs.create({
+                        url: ext.runtime.getURL(`sidebar/pdf-viewer.html?key=${encodeURIComponent(viewerKey)}`),
+                        active: true
+                    });
+                }
                 const tabUrl = `pdf-local:${file.name}`;
                 const pageData = {
                     title: pdfResult.title || file.name,
@@ -210,9 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 doSummary(null, false, false, true);
             } catch (err) {
                 console.error("[PDF picker] error:", err);
-                if (blobUrl) {
-                    try { URL.revokeObjectURL(blobUrl); } catch { /* ignore */ }
-                }
                 const codeMap = {
                     PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
                     INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
