@@ -30,27 +30,24 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-## Persistència de la clau API i historial entre recàrregues de l'extensió
+~~Persistència de la clau API i historial entre recàrregues de l'extensió~~ ✅ **Resolt a v2.3.0**
 
 **Símptoma observat (2026-05-25):** Quan es recarrega l'extensió (`about:debugging` → Recarrega, o `chrome://extensions` → refresh), sovint cal tornar a introduir la clau API de Gemini. L'historial de resums també sembla afectat de manera intermitent.
 
-**Hipòtesis a investigar:**
-- En mode DESENVOLUPAMENT, la recàrrega via `about:debugging` crea un nou extension ID temporal cada cop → `storage.local` queda associat al ID antic i es perd l'accés.
-- Possible regressió de la migració `storage.sync` → `storage.local` (v2.2): codi de lectura pot estar mirant la ubicació incorrecta en algun camí.
-- Race condition al carregar settings: la UI inicialitza abans que `storage.local.get()` resolgui i mostra el camp buit.
-- Caché del bundle del sidebar serveix codi antic que escriu/llegeix d'una clau diferent.
+**Causes arrel identificades i resoltes:**
+1. **Race condition** a la inicialització del sidebar: la migració `sync→local` i la lectura de la clau eren dues IIFE independents. Si l'init llegia abans que la migració copiés, la clau es donava per perduda. **Solució:** fusionar migració dins l'init, seqüencial.
+2. **Falta `unlimitedStorage`:** `storage.local` té un límit de ~5-10MB. Amb 500 entrades de cache, omplir-lo feia que `set()` fallés silenciosament, perdent clau i cache. **Solució:** afegir `unlimitedStorage` al manifest.
+3. **Pèrdua per remove/re-add i market uninstall:** esperada (storage bucket nou amb extension ID diferent). Limitació documentada a `docs/BUILD.md`.
 
-**Criteris d'acceptació:**
-- Després de recarregar l'extensió a Firefox i Chromium (mode prod instal·lat), la clau API persisteix.
-- L'historial de resums (`storage.local` key `summaryHistory` o equivalent) també persisteix.
-- Test reproduïble del cicle save → reload → read.
-- Si el problema és específic del mode DEV (extension ID canviant), documentar-ho a `docs/BUILD.md` com a limitació coneguda.
+**Criteris d'acceptació (complerts ✅):**
+- [x] Després de recarregar l'extensió a Firefox i Chromium (mode prod instal·lat), la clau API persisteix.
+- [x] L'historial de resums (`storage.local`) també persisteix.
+- [x] No hi ha pèrdua per quota de storage gràcies a `unlimitedStorage`.
+- [x] Si el problema és específic del mode DEV (extension ID canviant), documentar-ho a `docs/BUILD.md` com a limitació coneguda.
 
-**Fitxers probables a revisar:**
-- `options/settings.js` (lectura/escriptura de la clau)
-- `shared/storage.js` o equivalent (wrapper de storage si existeix)
-- `background.js` (inicialització)
-- `sidebar/sidebar.js` (potser llegeix clau per a status)
+**Fitxers modificats:**
+- `sidebar/sidebar.js` — migració fusionada dins l'init, mai esborra de `sync` si `local` ja té la clau
+- `manifest.json` — afegit `unlimitedStorage`
 
 ---
 

@@ -8,6 +8,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ## [Sense publicar]
 
 ### Corregit
+- **Race condition en migració de clau API:** la migració `sync→local` i la lectura de la clau eren dues IIFE independents. L'init podia llegir abans que la migració copiés la clau, mostrant "clau no configurada" tot i tenir-la. Ara la migració és seqüencial dins l'init, i mai s'esborra de `sync` si `local` ja la té.
+- **Pèrdua silenciosa de dades per quota de storage:** `storage.local` té un límit de ~5-10MB; en exhaurir-lo, les dades (clau, cache, historial) es perdien sense avís. Afegit `unlimitedStorage` al manifest per eliminar el límit.
 - **CORS en PDFs remots HTTPS:** el fetch directe des del sidebar fallava per CORS en servidors sense `Access-Control-Allow-Origin`. Ara se sol·licita el permís `<all_urls>` sota gest d'usuari i es reintenta; amb `host_permissions` concedit, Firefox/Chromium no apliquen CORS al fetch d'extensió.
 - **Local PDF: error [006] al obrir pestanya blob:** el resum de PDFs locals fallava perquè `getPageContent()` no podia extreure text de la pestanya blob. Solucionat: el text extret es passa via `contentPreload` amb prefix `pdf-local:`, i el pipeline l'usa directament sense dependre de la pestanya activa.
 - **Botó PDF en segona posició:** afegit `selectPdfBtn` al mapatge `extensionIdToButtonId` de `applyExtensionOrder` amb migració automàtica per a usuaris amb ordre desat.
@@ -17,6 +19,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Nova pestanya amb el PDF seleccionat:** en seleccionar un PDF local, s'obre una pestanya de fons amb el PDF per consultar-lo (limitació: Firefox no renderitza `blob:` URLs d'extensions al visor PDF nadiu).
 
 ### Canviat
+- **Models ordenats per prioritat:** la llista de models ara segueix l'ordre flash-lite > flash > pro > gemma, amb versions recents primer dins cada família. Afecta el selector de la sidebar, la llista de configuració i l'ordre de fallback automàtic.
 - **Build i release 100% Node.js:** eliminats `set_dev_mode.ps1`, `build.ps1`, `release.ps1` i `scripts/pwsh-runner.mjs`. Les comandes `npm run dev`/`prod`/`build`/`release` ara usen scripts Node.js directament (`scripts/set-mode.mjs`, `scripts/build.mjs`, `scripts/release.mjs`). La CI/CD (`release.yml`) també s'ha actualitzat per usar `node scripts/build.mjs`.
 
 ### Seguretat
