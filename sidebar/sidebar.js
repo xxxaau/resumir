@@ -81,27 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- Configuration Initialization & Migration ---
-    // API key lives only in storage.local to avoid sync across devices via browser account.
-    // Migration: if a legacy key sits in storage.sync, copy it to local then drop the sync copy.
-    // The apiKeyMigrated flag short-circuits subsequent runs and reduces the window where
-    // two concurrent sidebar instances would both run the migration.
-    (async () => {
-        try {
-            const local = await ext.storage.local.get(["apiKey", "apiKeyMigrated"]);
-            if (local.apiKeyMigrated) return;
-
-            const sync = await ext.storage.sync.get(["apiKey"]);
-            if (sync.apiKey && !local.apiKey) {
-                await ext.storage.local.set({ apiKey: sync.apiKey, apiKeyMigrated: true });
-                await ext.storage.sync.remove("apiKey");
-            } else {
-                await ext.storage.local.set({ apiKeyMigrated: true });
-                if (sync.apiKey) await ext.storage.sync.remove("apiKey");
-            }
-        } catch (e) {
-            console.warn("API key migration failed:", e);
-        }
-    })();
 
     const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
 
@@ -507,6 +486,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- On Load Init ---
     (async () => {
+        // 1. Migració de clau API: copy sync→local (només si cal)
+        try {
+            const local = await ext.storage.local.get(["apiKey", "apiKeyMigrated"]);
+            if (!local.apiKeyMigrated) {
+                const sync = await ext.storage.sync.get(["apiKey"]);
+                if (sync.apiKey && !local.apiKey) {
+                    await ext.storage.local.set({ apiKey: sync.apiKey, apiKeyMigrated: true });
+                    // Esborrem de sync només si l'hem copiada (no si ja era a local)
+                    await ext.storage.sync.remove("apiKey");
+                } else {
+                    // No hi ha clau per migrar o ja és a local — marquem com a fet
+                    await ext.storage.local.set({ apiKeyMigrated: true });
+                }
+            }
+        } catch (e) {
+            console.warn("API key migration failed:", e);
+        }
+
         // Purgar caché expirada en segon pla (no bloquejant)
         purgeStaleCacheEntries().catch(err => { console.warn("Purge cache failed:", err); });
         // Inicialitzar badge de caché per a la URL del tab actiu
