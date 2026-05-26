@@ -93,10 +93,12 @@ async function loadHistoryEntry(entry) {
     const contentDiv = document.getElementById("content");
     const localData = await ext.storage.local.get({ isBionicActive: false });
     const bionicEnabled = localData.isBionicActive === true;
+    let bionicConfig = {};
     let fixation = 0.45;
     if (bionicEnabled) {
-        const syncData = await ext.storage.sync.get({ bionicFixation: 30 });
-        fixation = syncData.bionicFixation / 100;
+        const syncData = await ext.storage.sync.get({ bionicFixation: 30, bionicFont: undefined, bionicFontSize: undefined, bionicLineHeight: undefined, bionicWeight: "700" });
+        bionicConfig = syncData;
+        fixation = (syncData.bionicFixation || 30) / 100;
     }
     const CONCEPT_MAP_MARKER = "<!--conceptmap-->\n";
     const isConceptMap = entry.summary.startsWith(CONCEPT_MAP_MARKER);
@@ -112,6 +114,16 @@ async function loadHistoryEntry(entry) {
         }
     } else {
         contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
+    }
+    if (bionicEnabled) {
+        contentDiv.style.fontFamily = bionicConfig.bionicFont || "inherit";
+        contentDiv.style.fontSize = bionicConfig.bionicFontSize || "inherit";
+        contentDiv.style.lineHeight = bionicConfig.bionicLineHeight || "1.5";
+        contentDiv.style.setProperty("--bionic-weight", bionicConfig.bionicWeight || "700");
+    } else {
+        contentDiv.style.fontFamily = "";
+        contentDiv.style.fontSize = "";
+        contentDiv.style.lineHeight = "";
     }
     contentDiv.classList.remove("hidden");
 

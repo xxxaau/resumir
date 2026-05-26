@@ -27,10 +27,12 @@ function applyBionicStyles(element, isEnabled, config = {}) {
     if (!element) return;
     if (isEnabled) {
         element.style.fontFamily = config.bionicFont || "inherit";
+        element.style.fontSize = config.bionicFontSize || "inherit";
         element.style.lineHeight = config.bionicLineHeight || "1.5";
         element.style.setProperty("--bionic-weight", config.bionicWeight || "700");
     } else {
         element.style.fontFamily = "";
+        element.style.fontSize = "";
         element.style.lineHeight = "";
     }
 }
