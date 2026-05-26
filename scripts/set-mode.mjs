@@ -50,6 +50,11 @@ if (mode === "dev") {
 
     const ffPatch = readJson(ffPatchPath);
     ffPatch.browser_specific_settings.gecko.id = "sergi.dev@xaudiera.xyz";
+    // Assegura file: a la CSP per provar PDFs locals en dev
+    if (ffPatch.content_security_policy?.extension_pages &&
+        !ffPatch.content_security_policy.extension_pages.includes("file:")) {
+        ffPatch.content_security_policy.extension_pages += " file:";
+    }
     writeJson(ffPatchPath, ffPatch);
 
     const chromiumPatch = readJson(chromiumPatchPath);

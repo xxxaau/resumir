@@ -7,11 +7,12 @@ This document describes how to build **Resumir contingut** from source. Required
 - **Node.js** 18 or higher
 - **npm** 9 or higher
 
-> Since **v2.2.10**, the build no longer depends on PowerShell. The
-> `npm run dev` and `npm run prod` commands use `scripts/set-mode.mjs`
-> (pure Node) instead of the previous `set_dev_mode.ps1` script. This
-> avoids issues on systems where PowerShell execution policy is
-> `Restricted` (e.g. managed Windows machines under `MachinePolicy`).
+> Since **v2.3.0**, the build and release pipeline use **pure Node.js**
+> scripts — no PowerShell dependency. The scripts `set-mode.mjs`,
+> `build.mjs`, and `release.mjs` replace the previous `set_dev_mode.ps1`,
+> `build.ps1`, and `release.ps1`. This avoids issues on systems where
+> PowerShell execution policy is `Restricted` (e.g. managed Windows
+> machines under `MachinePolicy`).
 
 ## Steps
 
@@ -78,7 +79,7 @@ npm run lint      # ESLint (0 warnings expected)
 npm run prerelease  # Full pre-release audit (17 checks)
 ```
 
-## Development workflow
+## Release workflow
 
 ```bash
 # Switch to DEV mode (orange icons, "Resumir (DEV)" name, separate gecko.id)
@@ -86,15 +87,19 @@ npm run dev
 
 # Make changes, test in browser...
 
-# Switch back to PROD before bumping version
-npm run prod
-
 # Bump patch version (also regenerates manifests + updates settings.html changelog)
 npm version patch --no-git-tag-version
 
 # Verify everything is green
 npm run build
 npm run prerelease
+
+# Full release: backup → set PROD → build → restore mode
+npm run release
+
+# Or release a single target
+npm run release:firefox
+npm run release:chromium
 
 # Commit, tag, push, GitHub release
 ```

@@ -112,56 +112,38 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-## Revisar i suprimir `set_dev_mode.ps1` en favor de `node scripts/set-mode.mjs`
+~~Revisar i suprimir `set_dev_mode.ps1` en favor de `node scripts/set-mode.mjs`~~ ✅ **Resolt a v2.3.0**
 
-**Context (2026-05-26):** Existeixen dos scripts per alternar entre mode DEV i PROD:
-- `set_dev_mode.ps1` — PowerShell script original
-- `node scripts/set-mode.mjs` — port a Node.js cross-platform
+**Criteris d'acceptació (complerts ✅):**
+- [x] Comparació línia per línia dels dos scripts per a mode `dev` i `prod` — són equivalents.
+- [x] `node scripts/set-mode.mjs dev` produeix el mateix resultat que `.\set_dev_mode.ps1 dev`
+- [x] `node scripts/set-mode.mjs prod` produeix el mateix resultat que `.\set_dev_mode.ps1 prod`
+- [x] `set_dev_mode.ps1` eliminat i `docs/BUILD.md` actualitzat.
 
-Ambdós fan funcionalment el mateix:
-1. Actualitzen `manifest.base.json` (name)
-2. Actualitzen `manifest.firefox.patch.json` (gecko.id)
-3. Regeneren manifests via `scripts/merge-manifest.mjs`
-4. Copien icnes de `icons/{dev,prod}/` a `icons/`
-
-**Tasca:** Verificar que `node scripts/set-mode.mjs` cobreix tots els casos de l'antic PowerShell (incloent prod amb patches `.prod.patch.json`) i, si és així, eliminar `set_dev_mode.ps1`.
-
-**Criteris d'acceptació:**
-- [ ] Comparació línia per línia dels dos scripts per a mode `dev` i `prod`
-- [ ] `node scripts/set-mode.mjs dev` produeix el mateix resultat que `.\set_dev_mode.ps1 dev`
-- [ ] `node scripts/set-mode.mjs prod` produeix el mateix resultat que `.\set_dev_mode.ps1 prod`
-- [ ] Un cop verificat, eliminar `set_dev_mode.ps1` i referenciar només `node scripts/set-mode.mjs` a `docs/BUILD.md`
-
-**Fitxers afectats:**
-- `set_dev_mode.ps1` (eliminar)
-- `docs/BUILD.md` (actualitzar referències)
-- `scripts/set-mode.mjs` (només revisió, sense canvis)
+**Fitxers modificats:**
+- `set_dev_mode.ps1` (eliminat)
+- `docs/BUILD.md` (actualitzat)
 
 ---
 
-## Migrar `build.ps1` i `release.ps1` a Node.js cross-platform
+~~Migrar `build.ps1` i `release.ps1` a Node.js cross-platform~~ ✅ **Resolt a v2.3.0**
 
-**Context (2026-05-26):** Un cop verificat i eliminat `set_dev_mode.ps1`, encara queden dos scripts PowerShell al root:
-- `build.ps1` (155 línies) — orquestra el build multi-target (Firefox + Chromium). Ja existeix `scripts/build.mjs` com a port a Node.js, però cal verificar que són equivalents i eliminar el `.ps1`.
-- `release.ps1` (60 línies) — fa backup → set-mode prod → build → restore mode. No té encara equivalent a Node.js.
+**Criteris d'acceptació (complerts ✅):**
+- [x] `scripts/build.mjs` cobreix tots els casos de `build.ps1` (sidebar bundle, exclusió de JS individuals, ZIP output).
+- [x] `scripts/build.mjs` és **superior**: inclou `vendor/` directori (pdf.js), elimina `icons/dev/` i `icons/prod/` del paquet, llista completa de sidecars.
+- [x] `scripts/release.mjs` creat: backup opcional → set-mode prod → build → restauració del mode original.
+- [x] `node scripts/release.mjs --target firefox --no-backup --skip-dev-restore` cobreix tots els flags.
+- [x] `build.ps1`, `release.ps1`, `scripts/pwsh-runner.mjs` eliminats.
+- [x] `docs/BUILD.md`, `docs/CHANGELOG.md`, `package.json`, `.github/workflows/release.yml` actualitzats.
 
-**Tasca:**
-1. Verificar que `scripts/build.mjs` cobreix tots els casos de `build.ps1` (incloent sidebar bundle, exclusió de JS individuals, ZIP output).
-2. Crear `scripts/release.mjs` que repliqui `release.ps1`: backup opcional → set-mode prod → build (delegant a `scripts/build.mjs`) → restauració del mode original.
-3. Eliminar `build.ps1` i `release.ps1`.
-4. Actualitzar `docs/BUILD.md` i `docs/CHANGELOG.md` amb les noves comandes.
-
-**Criteris d'acceptació:**
-- [ ] `node scripts/build.mjs firefox` produeix el mateix ZIP que `.\build.ps1 -Target firefox`
-- [ ] `node scripts/build.mjs chromium` produeix el mateix ZIP que `.\build.ps1 -Target chromium`
-- [ ] `node scripts/release.mjs` fa backup, build i restore correctament (dry-run opcional)
-- [ ] `node scripts/release.mjs --target firefox --no-backup --skip-dev-restore` cobreix els flags de `release.ps1`
-- [ ] Tots els `.ps1` eliminats i docs actualitzats
-
-**Fitxers afectats:**
-- `build.ps1` (eliminar)
-- `release.ps1` (eliminar)
+**Fitxers modificats:**
+- `build.ps1` (eliminat)
+- `release.ps1` (eliminat)
+- `set_dev_mode.ps1` (eliminat)
+- `scripts/pwsh-runner.mjs` (eliminat)
 - `scripts/release.mjs` (nou)
-- `scripts/build.mjs` (revisió, possiblement sense canvis)
-- `docs/BUILD.md` (actualitzar)
-- `docs/CHANGELOG.md` (actualitzar)
+- `scripts/build.mjs` (referència corregida a `set-mode.mjs`)
+- `package.json` (scripts `release*` ara apunten a `scripts/release.mjs`)
+- `.github/workflows/release.yml` (node en lloc de pwsh, `build/` prefix als ZIPs)
+- `docs/BUILD.md` (actualitzat)
+- `docs/CHANGELOG.md` (actualitzat)

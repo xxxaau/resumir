@@ -16,6 +16,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ### Afegit
 - **Nova pestanya amb el PDF seleccionat:** en seleccionar un PDF local, s'obre una pestanya de fons amb el PDF per consultar-lo (limitació: Firefox no renderitza `blob:` URLs d'extensions al visor PDF nadiu).
 
+### Canviat
+- **Build i release 100% Node.js:** eliminats `set_dev_mode.ps1`, `build.ps1`, `release.ps1` i `scripts/pwsh-runner.mjs`. Les comandes `npm run dev`/`prod`/`build`/`release` ara usen scripts Node.js directament (`scripts/set-mode.mjs`, `scripts/build.mjs`, `scripts/release.mjs`). La CI/CD (`release.yml`) també s'ha actualitzat per usar `node scripts/build.mjs`.
+
 ### Seguretat
 - **Avís important per als usuaris anteriors a v2.2**: Si heu instal·lat l'extensió abans de la versió 2.2, la vostra clau API de Gemini pot haver estat emmagatzemada a `storage.sync` (sincronitzada entre dispositius). A partir de la v2.2, la clau es guarda exclusivament a `storage.local`. Es recomana **rotar la clau API** des de Google AI Studio com a precaució.
 
