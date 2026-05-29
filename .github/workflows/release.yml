@@ -26,6 +26,9 @@ jobs:
       - name: Instal·lar dependències
         run: npm ci
 
+      - name: Build Firefox i Chromium ZIPs
+        run: node scripts/build.mjs all
+
       - name: Prerelease audit (17 checks)
         run: npm run prerelease
 
@@ -34,9 +37,6 @@ jobs:
 
       - name: web-ext lint (AMO compliance)
         run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.zip'
-
-      - name: Build Firefox i Chromium ZIPs
-        run: node scripts/build.mjs all
 
       - name: Crear GitHub Release amb els ZIPs
         uses: softprops/action-gh-release@v2
