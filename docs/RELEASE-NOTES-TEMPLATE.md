@@ -9,7 +9,7 @@ Copia i enganxa al cos de la release, actualitzant la versió i els canvis.
 
 ### Firefox
 L'extensió es distribueix via Mozilla Add-ons:
-[addons.mozilla.org/firefox/addon/resumir-contingut](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
+[addons.mozilla.org/en-US/firefox/addon/resumir](https://addons.mozilla.org/en-US/firefox/addon/resumir/)
 
 ### Chrome / Edge / Brave
 1. Baixa `resumir-contingut-vX.X.X-chromium.zip` dels fitxers adjunts

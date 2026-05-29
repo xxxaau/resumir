@@ -31,6 +31,24 @@ This produces:
 - `build/resumir-contingut-vX.Y.Z-firefox.zip` — submit to AMO
 - `build/resumir-contingut-vX.Y.Z-chromium.zip` — submit to Chrome Web Store
 
+## AMO submission note
+
+When AMO asks *"Do you use code generators, minifiers, bundlers, or code
+transformers in your extension?"* answer **Yes**. Reason:
+
+| Tool | What it does |
+|------|-------------|
+| **esbuild** | Minifies the sidebar bundle (18 files → `sidebar/sidebar.bundle.js`) and Chromium's background bundle |
+| **merge-manifest.mjs** | Generates `manifest.json` from base + platform patches |
+
+Provide these URLs in the AMO form:
+- **Source code:** `https://github.com/xxxaau/extensio-resumir-contingut`
+- **Build instructions:** `https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/BUILD.md`
+
+The build is fully reproducible: `npm run build` from a clean checkout produces
+byte-identical ZIPs. Source files are readable JS in the repo — only the final
+bundle is minified.
+
 ## Key dependencies
 
 | Package | Version | Purpose |

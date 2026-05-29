@@ -2,7 +2,7 @@
 
 Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — sense fer seguiment, sense telemetria, sense dades que pugin al núvol.
 
-[![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
+[![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/en-US/firefox/addon/resumir)
 [![Baixar de GitHub Releases](https://img.shields.io/badge/Chrome-Descarregar-4285F4?logo=googlechrome)](https://github.com/xxxaau/extensio-resumir-contingut/releases)
 [![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
 [![CI](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml)
@@ -34,7 +34,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 
 L'extensió es distribueix **exclusivament** via Mozilla Add-ons:
 
-1. Visita [addons.mozilla.org/firefox/addon/resumir-contingut](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
+1. Visita [addons.mozilla.org/en-US/firefox/addon/resumir](https://addons.mozilla.org/en-US/firefox/addon/resumir/)
 2. Fes clic a «Afegir a Firefox»
 
 > **Per a desenvolupament:** obre `about:debugging#/runtime/this-firefox`, clica «Carrega complement temporal» i selecciona `manifest.json`.

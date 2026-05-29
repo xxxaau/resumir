@@ -71,7 +71,7 @@ async function main() {
   console.log("=".repeat(60) + "\n");
 
   // ─── Step 1: Branch check ──────────────────────────────────────
-  console.log(yellow("[1/8]") + " Verificant branca...");
+  console.log(yellow("[1/9]") + " Verificant branca...");
   const branch = execSync("git rev-parse --abbrev-ref HEAD", { cwd: root })
     .toString().trim();
   if (branch !== "main") {
@@ -91,7 +91,7 @@ async function main() {
   }
 
   // ─── Step 2: Working tree clean ─────────────────────────────────
-  console.log(`\n${yellow("[2/8]")} Verificant working tree...`);
+  console.log(`\n${yellow("[2/9]")} Verificant working tree...`);
   const status = execSync("git status --porcelain", { cwd: root })
     .toString().trim();
   if (status) {
@@ -111,7 +111,7 @@ async function main() {
   }
 
   // ─── Step 3: MODE PROD ──────────────────────────────────────────
-  console.log(`\n${yellow("[3/8]")} Assegurant mode PROD...`);
+  console.log(`\n${yellow("[3/9]")} Assegurant mode PROD...`);
   const base = readJson(join(root, "manifest.base.json"));
   if (base.name.includes("(DEV)")) {
     console.log(yellow("  ! Mode DEV detectat"));
@@ -127,7 +127,7 @@ async function main() {
   }
 
   // ─── Step 4: Prerelease check ───────────────────────────────────
-  console.log(`\n${yellow("[4/8]")} Executant prerelease audit...`);
+  console.log(`\n${yellow("[4/9]")} Executant prerelease audit...`);
   const prereleaseOk = exec("npm run prerelease", "Prerelease audit (17 checks)");
 
   if (!prereleaseOk) {
@@ -137,7 +137,7 @@ async function main() {
   console.log(green("\n  ✓ Prerelease audit: 17/17 checks OK"));
 
   // ─── Step 5: Build ──────────────────────────────────────────────
-  console.log(`\n${yellow("[5/8]")} Build...`);
+  console.log(`\n${yellow("[5/9]")} Build...`);
   const buildOk = await confirm(`  Generar ZIPs de produccio?`);
   if (buildOk) {
     exec("npm run build", "Build Firefox + Chromium");
@@ -147,7 +147,7 @@ async function main() {
   }
 
   // ─── Step 6: Version bump ───────────────────────────────────────
-  console.log(`\n${yellow("[6/8]")} Version...`);
+  console.log(`\n${yellow("[6/9]")} Version...`);
   const pkg = readJson(join(root, "package.json"));
   console.log(`  Versio actual: ${pkg.version}`);
 
@@ -167,7 +167,7 @@ async function main() {
   }
 
   // ─── Step 7: Commit + tag ───────────────────────────────────────
-  console.log(`\n${yellow("[7/8]")} Commit i tag...`);
+  console.log(`\n${yellow("[7/9]")} Commit i tag...`);
   const newPkg = readJson(join(root, "package.json"));
   const newVer = newPkg.version;
   const tag = `v${newVer}`;
@@ -197,7 +197,7 @@ async function main() {
   }
 
   // ─── Step 8: Push ───────────────────────────────────────────────
-  console.log(`\n${yellow("[8/8]")} Push...`);
+  console.log(`\n${yellow("[8/9]")} Push...`);
   const pushOk = await confirm(`  Fer push a origin/main + tags?`);
   if (pushOk) {
     exec("git push origin main --tags", "Push a origin");
@@ -207,6 +207,19 @@ async function main() {
   } else {
     console.log(yellow("  ! Push omes. Quan vulguis:"));
     console.log(`    git push origin main --tags`);
+  }
+
+  // ─── Step 9: AMO publish ────────────────────────────────────────────
+  console.log(`\n${yellow("[9/9]")} Publicacio a AMO (Firefox Add-ons)...`);
+  console.log(`  El workflow ja ha generat el GitHub Release amb el ZIP.`);
+  console.log(`  Ara has de penjar manualment el ZIP a AMO:`);
+  console.log(`    ${bold("https://addons.mozilla.org/en-US/firefox/addon/resumir/")}`);
+  console.log(`  (Obre l'enllac, ves a «Versions» → «Puja una versio nova»)`);
+  const amoOk = await confirm(`  Has publicat la nova versio a AMO?`);
+  if (amoOk) {
+    console.log(green("  ✓ Publicacio a AMO completada"));
+  } else {
+    console.log(yellow("  ! Recorda fer-ho mes tard: puja el ZIP a AMO"));
   }
 
   // ─── Restore DEV mode hint ──────────────────────────────────────

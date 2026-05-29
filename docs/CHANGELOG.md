@@ -7,23 +7,30 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+*(buit)*
+
+---
+
+## [2.3.1] - 2026-05-29
+
+### Afegit
+- **Script interactiu de preparació de release:** `npm run prepare-release` guia
+  l'usuari pas a pas (branca, commit, PROD, prerelease, build, bump, tag, push)
+  amb confirmació a cada pas. (minor)
+- **Suport de GitHub Sponsors:** FUNDING.yml, badge al README i docs/SPONSORS.md. (minor)
+
+### Canviat
+- **Release pipeline (`release.yml`):** ara executa `prerelease` (17 checks) i
+  `vendor:verify` abans de crear el GitHub Release. (minor)
+- **`docs/BUILD.md`:** actualitzat amb el nou flux interactiu i test count. (minor)
+- **`docs/CONTRIBUTING.md`:** actualitzats requeriments, tests (233+) i estructura. (minor)
+- **`docs/PRIVACY_POLICY.md`:** actualitzada data i correcció storage.local. (minor)
+- **`docs/README.md`:** netejat — eliminades referències a fitxers inexistents. (minor)
+
 ### Eliminat
 - **Pestanya d'estadístiques eliminada:** s'han tret `options/settings-stats.js`,
   `tests/settings-stats.test.mjs` i `tests/stats-period.test.mjs` (codi no mantingut).
   Les estadístiques bàsiques (tokens, cache) es mostren al sidebar. (minor)
-
-### Afegit
-- **Cache multientry:** `summary_cache:{url}` ara pot contenir múltiples tipus
-  de contingut (`summary`, `deepdive`, `conceptmap`, `science`) en una sola entrada.
-  Migració silenciosa de caches antigues.
-- **Historial agrupat per URL a la sidebar:** les entrades del mateix URL es mostren
-  agrupades amb icones del tipus de contingut. Navegació per pestanyes dins l'entrada.
-
-### Canviat
-- **`sidebar/cache.js`**: nova estructura tipada (`_keyToUrl`, `_keyToType`). (minor)
-- **`sidebar/history.js`**: renderitzat amb agrupació i pestanyes. (minor)
-- **`sidebar/sidebar.js`**: flux de desat amb paràmetre de tipus. (minor)
-- **`shared/content-types.js`**: fitxer nou amb tipus de contingut centralitzats. (minor)
 
 ---
 
