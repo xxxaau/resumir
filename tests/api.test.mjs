@@ -22,9 +22,9 @@ const { getCuratedModelInfo } = require("../sidebar/api.js");
 // ---------------------------------------------------------------------------
 
 test("getCuratedModelInfo - model conegut retorna label i rpd correctes", () => {
-    const info = getCuratedModelInfo("gemini-2.0-flash");
-    assert.equal(info.label, "Gemini 2.0 Flash (deprecat)");
-    assert.equal(info.rpd, 1500);
+    const info = getCuratedModelInfo("gemini-3.1-flash-lite");
+    assert.equal(info.label, "Gemini 3.1 Flash Lite");
+    assert.equal(info.rpd, 2000);
     assert.ok(info.priceIn > 0, "priceIn ha de ser positiu");
     assert.ok(info.priceOut > 0, "priceOut ha de ser positiu");
 });
@@ -45,9 +45,9 @@ test("getCuratedModelInfo - gemini-2.5-pro té el RPD més baix (recursos limita
     assert.equal(info.rpd, 50);
 });
 
-test("getCuratedModelInfo - gemini-2.0-flash-lite té RPD pràcticament il·limitat", () => {
-    const info = getCuratedModelInfo("gemini-2.0-flash-lite");
-    assert.ok(info.rpd > 100000, "Flash Lite ha de tenir RPD molt elevat");
+test("getCuratedModelInfo - gemini-3.1-flash-lite té el RPD més alt dels models curats", () => {
+    const info = getCuratedModelInfo("gemini-3.1-flash-lite");
+    assert.equal(info.rpd, 2000);
 });
 
 // ---------------------------------------------------------------------------
@@ -56,7 +56,8 @@ test("getCuratedModelInfo - gemini-2.0-flash-lite té RPD pràcticament il·limi
 
 test("CURATED_MODELS conté els models clau esperats", () => {
     assert.ok(CURATED_MODELS.length >= 1, "Ha d'haver-hi almenys un model");
-    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-2.5-flash"), "Ha d'existir gemini-2.5-flash");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-3.5-flash"), "Ha d'existir gemini-3.5-flash");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-3.1-flash-lite"), "Ha d'existir gemini-3.1-flash-lite");
     assert.ok(CURATED_MODELS.some(m => m.id === "gemini-2.5-pro"), "Ha d'existir gemini-2.5-pro");
 });
 

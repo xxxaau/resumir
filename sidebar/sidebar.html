@@ -31,6 +31,29 @@
           </svg>
         </button>
         <button
+          id="selectPdfBtn"
+          class="action-btn secondary"
+          title="Obre i resumeix un PDF local (file:// o http://)"
+          aria-label="Selecciona PDF local"
+        >
+          <svg
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <text x="7" y="18" font-size="6" font-family="sans-serif" stroke="none" fill="currentColor">PDF</text>
+          </svg>
+        </button>
+        <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" hidden>
+        <button
           id="obsidianBtn"
           class="action-btn secondary"
           title="Guardar a Obsidian"
@@ -272,9 +295,12 @@
     <script src="../ext.js"></script>
     <script src="../shared/models.js"></script>
     <script src="../shared/defaults.js"></script>
+    <script src="../shared/content-types.js"></script>
     <script src="utils.js"></script>
     <script src="api.js"></script>
     <script src="youtube-track-select.js"></script>
+    <script src="../vendor/pdf.min.js"></script>
+    <script src="pdf-extract.js"></script>
     <script src="content.js"></script>
     <script src="cache.js"></script>
     <script src="stats.js"></script>

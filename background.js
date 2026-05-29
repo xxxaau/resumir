@@ -99,6 +99,7 @@ ext.menus.onClicked.addListener(async (info, tab) => {
 // Obrir la sidebar quan la pàgina de stats demana carregar un resum en caché.
 // pendingCacheLoad is set from a user-initiated click on the settings page,
 // which preserves the user gesture for sidebar.open() in Chromium.
+// Value can be a URL string (backward compat) or JSON.stringify({url, type}).
 ext.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.pendingCacheLoad?.newValue) {
         ext.sidebar.open().catch(err => {

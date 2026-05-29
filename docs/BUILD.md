@@ -1,17 +1,18 @@
 # Build Instructions
 
-This document describes how to build **Resumir contingut** from source. Required by AMO (addons.mozilla.org) for source code submission.
+This document describes how to build **Resumir** from source. Required by AMO (addons.mozilla.org) for source code submission.
 
 ## Requirements
 
 - **Node.js** 18 or higher
 - **npm** 9 or higher
 
-> Since **v2.2.10**, the build no longer depends on PowerShell. The
-> `npm run dev` and `npm run prod` commands use `scripts/set-mode.mjs`
-> (pure Node) instead of the previous `set_dev_mode.ps1` script. This
-> avoids issues on systems where PowerShell execution policy is
-> `Restricted` (e.g. managed Windows machines under `MachinePolicy`).
+> Since **v2.3.0**, the build and release pipeline use **pure Node.js**
+> scripts — no PowerShell dependency. The scripts `set-mode.mjs`,
+> `build.mjs`, and `release.mjs` replace the previous `set_dev_mode.ps1`,
+> `build.ps1`, and `release.ps1`. This avoids issues on systems where
+> PowerShell execution policy is `Restricted` (e.g. managed Windows
+> machines under `MachinePolicy`).
 
 ## Steps
 
@@ -39,12 +40,16 @@ This produces:
 
 ## Vendored files
 
-Two files are vendored (pre-built) in the repository:
+Four files are vendored (pre-built) in the repository:
 
-- `sidebar/defuddle.js` — built from [defuddle](https://github.com/kepano/defuddle) (`npm run vendor:update`)
-- `sidebar/Readability.js` — from [Mozilla/readability](https://github.com/mozilla/readability)
+| File | Source | Purpose |
+|------|--------|---------|
+| `sidebar/defuddle.js` | [defuddle](https://github.com/kepano/defuddle) | Twitter/X content extraction |
+| `sidebar/Readability.js` | [Mozilla/readability](https://github.com/mozilla/readability) | Article text extraction |
+| `vendor/pdf.min.js` | [pdf.js](https://mozilla.github.io/pdf.js/) v3.11.174 (legacy UMD) | PDF parsing (text layer extraction) |
+| `vendor/pdf.worker.min.js` | pdf.js v3.11.174 (legacy UMD) | PDF worker (CSP-safe, loaded via `runtime.getURL`) |
 
-SHA-256 hashes for these files are recorded in `THIRD_PARTY.md` and verified by:
+SHA-256 hashes for all these files are recorded in `THIRD_PARTY.md` and verified by:
 
 ```bash
 npm run vendor:verify
@@ -74,7 +79,7 @@ npm run lint      # ESLint (0 warnings expected)
 npm run prerelease  # Full pre-release audit (17 checks)
 ```
 
-## Development workflow
+## Release workflow
 
 ```bash
 # Switch to DEV mode (orange icons, "Resumir (DEV)" name, separate gecko.id)
@@ -82,15 +87,19 @@ npm run dev
 
 # Make changes, test in browser...
 
-# Switch back to PROD before bumping version
-npm run prod
-
 # Bump patch version (also regenerates manifests + updates settings.html changelog)
 npm version patch --no-git-tag-version
 
 # Verify everything is green
 npm run build
 npm run prerelease
+
+# Full release: backup → set PROD → build → restore mode
+npm run release
+
+# Or release a single target
+npm run release:firefox
+npm run release:chromium
 
 # Commit, tag, push, GitHub release
 ```

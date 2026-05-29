@@ -33,7 +33,7 @@ const version = manifest.version;
 // Guard: abort if in dev mode
 if (manifest.name.includes("(DEV)")) {
   console.error(`ERROR: manifest.name is in DEV mode: "${manifest.name}"`);
-  console.error("Run: node scripts/set_dev_mode.mjs prod");
+  console.error("Run: node scripts/set-mode.mjs prod");
   process.exit(1);
 }
 
@@ -51,7 +51,8 @@ const commonDirs = [
   "icons",
   "options",
   "shared",
-  "sidebar"
+  "sidebar",
+  "vendor"
 ];
 
 /**
@@ -212,7 +213,7 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
     );
     
     // Remove individual sidebar JS files (now in bundle)
-    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "content.js", "cache.js", "stats.js", "ui.js", "markmap-native.js", "conceptmap-filename.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
+    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "pdf-extract.js", "content.js", "cache.js", "stats.js", "ui.js", "markmap-native.js", "conceptmap-filename.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
     for (const f of sidebarFiles) {
       const filePath = resolve(buildPath, "sidebar", f);
       if (existsSync(filePath)) {

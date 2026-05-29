@@ -22,6 +22,8 @@ function makeEl(id = "") {
         textContent: "",
         href: "",
         className: "",
+        style: {},
+        dataset: {},
         classList: {
             _c: new Set(),
             add(...c)          { c.forEach(x => this._c.add(x)); },
@@ -100,7 +102,14 @@ function setupGlobals(dom) {
             sync:  storageMock,
         },
     };
+    global.CONTENT_TYPES = [
+        { id: "summary",    icon: "\u{1F4DD}", label: "Resum",            order: 1 },
+        { id: "deepdive",   icon: "\u{1F52C}", label: "Aprofundiment",    order: 2 },
+        { id: "conceptmap", icon: "\u{1F9E0}", label: "Mapa conceptual",  order: 3 },
+        { id: "science",    icon: "\u{1F4CA}", label: "Validaci\u00F3",   order: 4 },
+    ];
     global.listCachedSummaries = async () => [];
+    global.getSummaryCache = async () => null;
     global.formatTextToFragment = (text) => {
         const el = makeEl();
         el.textContent = text;
@@ -183,16 +192,17 @@ test("openHistoryPanel - renderitza les entrades de l'historial", async () => {
     const list = panel._children.find(c => c.className === "history-list");
     assert.ok(list, "Ha d'existir una history-list");
     assert.equal(list._children.length, 2, "Ha de tenir 2 ítems");
-    const titles = list._children.map(li =>
-        li._children.find(c => c.className === "history-item-title")?.textContent
-    );
+    const titles = list._children.map(li => {
+        const topRow = li._children.find(c => c.className === "history-item-top");
+        return topRow?._children.find(c => c.className === "history-item-title")?.textContent;
+    });
     assert.ok(titles.includes("Article A"), "Ha de mostrar 'Article A'");
     assert.ok(titles.includes("Article B"), "Ha de mostrar 'Article B'");
 });
 
-test("openHistoryPanel - trunca títols llargs a 50 caràcters", async () => {
+test("openHistoryPanel - trunca títols llargs a 120 caràcters", async () => {
     resetDOM();
-    const longTitle = "T".repeat(60);
+    const longTitle = "T".repeat(130);
     global.listCachedSummaries = async () => [
         { title: longTitle, url: "https://x.com", summary: "S", model: "m", timestamp: new Date().toISOString() },
     ];
@@ -200,9 +210,10 @@ test("openHistoryPanel - trunca títols llargs a 50 caràcters", async () => {
 
     const panel = dom.els["history-panel"];
     const list  = panel._children.find(c => c.className === "history-list");
-    const titleEl = list._children[0]._children.find(c => c.className === "history-item-title");
-    assert.ok(titleEl.textContent.length <= 52, // 50 + "…"
-        `Títol truncat ha de tenir ≤52 chars, té ${titleEl.textContent.length}`);
+    const topRow = list._children[0]._children.find(c => c.className === "history-item-top");
+    const titleEl = topRow?._children.find(c => c.className === "history-item-title");
+    assert.ok(titleEl.textContent.length <= 122, // 120 + "…"
+        `Títol truncat ha de tenir ≤122 chars, té ${titleEl.textContent.length}`);
     assert.ok(titleEl.textContent.endsWith("…"), "Ha d'acabar amb '…'");
 });
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * verify-vendor.mjs
- * Verifica els hashes SHA-256 dels fitxers vendor (defuddle.js, Readability.js).
- * Si els hashes no coincideixen, el procés surt amb codi 1.
+ * Verifica els hashes SHA-256 dels fitxers vendor + AMO-patched.
+ * Els hashes esperats corresponen als fitxers ja pedaçats per
+ * scripts/patch-vendor-amo.mjs.
  *
  * Usage:
  *   node scripts/verify-vendor.mjs
@@ -17,11 +18,14 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
-// Hashes SHA-256 esperats. Actualitza'ls amb `npm run vendor:update`.
+// Hashes SHA-256 esperats (dels fitxers JA pedaçats per patch-vendor-amo.mjs).
+// Actualitza després de: npm run vendor:update && npm run vendor:patch
 // Consulta THIRD_PARTY.md per a versions i fonts.
 const EXPECTED = {
     "defuddle.js":   "029548317ef8e1151e293a6511021d996ad3c042d178dbfc0b8bf44a5f829f58",
     "Readability.js": "ea5ea61230d96011b5902414973e50511aa93edfc5ec982464c656f9e7326e7e",
+    "vendor/pdf.min.js":        "e7104cd3620b7ac7189743605cfaa8ac8a3cb32035bf303bdee3d91379524001",
+    "vendor/pdf.worker.min.js": "588195df59e44ad75b7bf895afe2c60b419d1d193053094821cc4c6239562581",
 };
 
 let allOk = true;
@@ -44,7 +48,7 @@ for (const [filename, expectedHash] of Object.entries(EXPECTED)) {
         console.error(`✗ ${filename}: hash no coincideix`);
         console.error(`  esperat: ${expectedHash}`);
         console.error(`  obtingut: ${actualHash}`);
-        console.error(`  Actualitza EXPECTED a scripts/verify-vendor.mjs i THIRD_PARTY.md si has actualitzat la dependència.`);
+        console.error(`  Executa npm run vendor:patch && npm run vendor:verify si has actualitzat les dependències.`);
         allOk = false;
     }
 }

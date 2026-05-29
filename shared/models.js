@@ -12,23 +12,25 @@
 const EUR_RATE = 0.92; // 2026-Q2
 
 const CURATED_MODELS = [
-    // Tier: Flash Lite (més ràpids, més económics) — recomanat per a primer ús
-    { id: "gemini-3.1-flash-lite",     label: "Gemini 3.1 Flash Lite",  priceIn: 0.25,  priceOut: 1.50,   rpd: 2000,   contextWindow: 1_000_000, fallback: true  },
+    // Flash Lite — prioritat màxima (ràpids, econòmics)
+    { id: "gemini-3.1-flash-lite",     label: "Gemini 3.1 Flash Lite",    priceIn: 0.25,   priceOut: 1.50,   rpd: 2000,   contextWindow: 1_000_000, fallback: true  },
     
-    // Tier: Flash (estable, equilibrat)
-    { id: "gemini-3-flash-preview",    label: "Gemini 3 Flash",        priceIn: 0.50,  priceOut: 3.00,   rpd: 1000,   contextWindow: 1_048_576, fallback: true  },
-    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",      priceIn: 0.30,  priceOut: 2.50,   rpd: 500,    contextWindow: 1_000_000, fallback: false },
+    // Flash — equilibri velocitat/cost
+    { id: "gemini-3.5-flash",          label: "Gemini 3.5 Flash",         priceIn: 0.30,   priceOut: 2.50,   rpd: 1500,   contextWindow: 1_000_000, fallback: true  },
+    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",         priceIn: 0.30,   priceOut: 2.50,   rpd: 500,    contextWindow: 1_000_000, fallback: true  },
     
-    // Tier: Pro (més potent, més lent)
-    { id: "gemini-3.1-pro-preview",    label: "Gemini 3.1 Pro",        priceIn: 2.00,  priceOut: 12.00,  rpd: 100,    contextWindow: 1_048_576, fallback: false },
-    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",        priceIn: 1.25,  priceOut: 5.00,   rpd: 50,     contextWindow: 1_000_000, fallback: false },
+    // Gemma — open source, gratis, bon valor per resumir
+    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",            priceIn: 0.15,   priceOut: 0.15,   rpd: 2000,   contextWindow: 131_072,   fallback: true  },
+    { id: "gemma-3-12b-it",            label: "Gemma 3 (12B)",            priceIn: 0.10,   priceOut: 0.10,   rpd: 2000,   contextWindow: 131_072,   fallback: true  },
     
-    // Open models (alternativa sense cost)
-    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",         priceIn: 0.15,  priceOut: 0.15,   rpd: 2000,   contextWindow: 131_072,   fallback: true  },
+    // Flash Preview — per sobre de Pro (preu Flash, qualitat propera a Pro)
+    { id: "gemini-3-flash-preview",    label: "Gemini 3 Flash",           priceIn: 0.50,   priceOut: 3.00,   rpd: 1000,   contextWindow: 1_048_576, fallback: true  },
     
-    // DEPRECAT (mantinguts per a fallback de usuaris legacy, eliminació prevista 02/06/2026)
-    { id: "gemini-2.0-flash",          label: "Gemini 2.0 Flash (deprecat)", priceIn: 0.10, priceOut: 0.40, rpd: 1500, contextWindow: 1_000_000, fallback: true },
-    { id: "gemini-2.0-flash-lite",     label: "Gemini 2.0 Flash Lite (deprecat)", priceIn: 0.075, priceOut: 0.30, rpd: 999999, contextWindow: 1_000_000, fallback: true },
+    // Pro — màxima potència
+    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",           priceIn: 1.25,   priceOut: 5.00,   rpd: 50,     contextWindow: 1_000_000, fallback: false },
+    
+    // Pro Preview — última generació Pro
+    { id: "gemini-3.1-pro-preview",    label: "Gemini 3.1 Pro",           priceIn: 2.00,   priceOut: 12.00,  rpd: 100,    contextWindow: 1_048_576, fallback: false },
 ];
 
 /**
@@ -49,6 +51,51 @@ const DEFAULT_MODEL_INFO = {
     rpd: 1500,
     contextWindow: 1_000_000,
 };
+
+/**
+ * Ordena un array de models per prioritat:
+ *   1. Flash Lite (no preview)
+ *   2. Flash (no preview)
+ *   3. Gemma
+ *   4. Flash Preview (flash + preview — sobre Pro)
+ *   5. Pro (no preview)
+ *   6. Pro Preview (pro + preview)
+ *   7. Altres (image, specialized, etc.)
+ * Dins cada grup, versions més recents primer.
+ * @param {Array<{id:string}>|string[]} models
+ * @returns {Array} nova array ordenada
+ */
+function sortModelsByPriority(models) {
+    function key(m) {
+        const obj = typeof m === "string" ? null : m;
+        const id = (obj ? obj.id : m) || "";
+        const lower = id.toLowerCase();
+        const isPreview = lower.includes("preview");
+        let group;
+        if (!isPreview) {
+            if (lower.includes("flash-lite")) group = 1;
+            else if (lower.includes("flash")) group = 2;
+            else if (lower.includes("gemma")) group = 3;
+            else if (lower.includes("pro")) group = 5;
+            else group = 7;
+        } else {
+            if (lower.includes("flash")) group = 4;
+            else if (lower.includes("pro")) group = 6;
+            else group = 7;
+        }
+        const v = lower.match(/(\d+)[._]?(\d+)?/) || [];
+        const major = parseInt(v[1]) || 0;
+        const minor = parseInt(v[2]) || 0;
+        const revMajor = String(999 - major).padStart(3, "0");
+        const revMinor = String(999 - minor).padStart(3, "0");
+        return `${group}:${revMajor}:${revMinor}`;
+    }
+    return [...models].sort((a, b) => {
+        const ka = key(a);
+        const kb = key(b);
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+    });
+}
 
 /**
  * Assegura que favoriteModels existeix a storage.sync.
@@ -78,5 +125,5 @@ async function ensureFavoriteModels() {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID, DEFAULT_MODEL_INFO, EUR_RATE };
+    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID, DEFAULT_MODEL_INFO, EUR_RATE, sortModelsByPriority };
 }

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visor PDF</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; background: #1a1a2e; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; }
+      #header { display: flex; align-items: center; padding: 8px 16px; background: #16213e; border-bottom: 1px solid #0f3460; gap: 12px; min-height: 48px; flex-shrink: 0; }
+      #header .title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+      #header .close-btn { background: none; border: 1px solid #555; color: #ccc; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+      #header .close-btn:hover { background: #e74c3c; border-color: #e74c3c; color: #fff; }
+      #canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 16px; position: relative; }
+      #canvas-container canvas { box-shadow: 0 2px 20px rgba(0,0,0,0.5); background: #fff; }
+      #footer { display: flex; align-items: center; justify-content: center; padding: 8px 16px; background: #16213e; border-top: 1px solid #0f3460; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+      #footer button { background: #0f3460; border: none; color: #e0e0e0; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 14px; min-width: 36px; }
+      #footer button:hover { background: #1a5276; }
+      #footer button:disabled { opacity: 0.4; cursor: default; }
+      #footer .page-input { width: 50px; text-align: center; background: #0f3460; border: 1px solid #1a5276; color: #e0e0e0; padding: 4px 6px; border-radius: 4px; font-size: 14px; }
+      #footer .total-pages { font-size: 14px; }
+      #footer .zoom-control { display: flex; align-items: center; gap: 6px; }
+      #footer .zoom-label { font-size: 13px; min-width: 48px; text-align: center; }
+      #error { display: none; flex: 1; align-items: center; justify-content: center; padding: 40px; font-size: 16px; color: #e74c3c; text-align: center; }
+      #loading { display: flex; flex: 1; align-items: center; justify-content: center; font-size: 16px; color: #888; }
+      .spinner { width: 32px; height: 32px; border: 3px solid #333; border-top-color: #4a9eff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 12px; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="header">
+      <span class="title" id="doc-title">PDF</span>
+      <button class="close-btn" id="closeBtn">Tancar</button>
+    </div>
+    <div id="loading"><div class="spinner"></div>Carregant PDF...</div>
+    <div id="error"></div>
+    <div id="canvas-container" style="display:none">
+      <canvas id="pdf-canvas"></canvas>
+    </div>
+    <div id="footer" style="display:none">
+      <button id="prevBtn" title="Pàgina anterior">⏮</button>
+      <input type="number" id="pageInput" class="page-input" min="1" value="1" />
+      <span class="total-pages">/ <span id="totalPages">0</span></span>
+      <button id="nextBtn" title="Pàgina següent">⏭</button>
+      <span style="color:#555;margin:0 8px;">|</span>
+      <div class="zoom-control">
+        <button id="zoomOutBtn" title="Allunyar">−</button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+        <button id="zoomInBtn" title="Apropar">+</button>
+      </div>
+    </div>
+
+    <script src="../ext.js"></script>
+    <script src="../vendor/pdf.min.js"></script>
+    <script src="pdf-viewer.js"></script>
+  </body>
+</html>

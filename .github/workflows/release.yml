@@ -32,13 +32,27 @@ jobs:
       - name: web-ext lint
         run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.zip'
 
-      # pwsh (PowerShell Core) ve preinstal·lat a ubuntu-latest
       - name: Build Firefox i Chromium ZIPs
-        shell: pwsh
-        run: ./build.ps1 -Target all
+        run: node scripts/build.mjs all
 
       - name: Crear GitHub Release amb els ZIPs
         uses: softprops/action-gh-release@v2
         with:
-          files: resumir-contingut-*.zip
+          files: build/resumir-contingut-*.zip
+          body: |-
+            ## Instal·lació
+
+            ### Firefox
+            L'extensió es distribueix via Mozilla Add-ons:
+            https://addons.mozilla.org/firefox/addon/resumir-contingut
+
+            ### Chrome / Edge / Brave
+            1. Baixa el fitxer \`resumir-contingut-chromium.zip\` dels fitxers adjunts
+            2. Descomprimeix-lo en una carpeta
+            3. Obre \`chrome://extensions\`, activa el «Mode de desenvolupador»
+            4. Fes clic a «Carrega extensió desempaquetada» i selecciona la carpeta
+
+            ---
+
+            ## Novetats de la versió
           generate_release_notes: true

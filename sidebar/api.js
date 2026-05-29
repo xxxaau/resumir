@@ -207,10 +207,12 @@ async function loadModels(apiKey, currentModel) {
 
         modelSelect.replaceChildren();
 
-        // Mostrar només els favorits de l'usuari
-        const modelsToShow = favoriteIds
-            .map(id => cachedModels.find(m => m.id === id))
-            .filter(Boolean);
+        // Mostrar només els favorits de l'usuari, ordenats per prioritat
+        const modelsToShow = sortModelsByPriority(
+            favoriteIds
+                .map(id => cachedModels.find(m => m.id === id))
+                .filter(Boolean)
+        );
 
         modelsToShow.forEach(m => {
             const opt = document.createElement("option");

@@ -41,7 +41,6 @@ function saveOptions(e) {
 
     enableConceptMap: document.querySelector("#enableConceptMap").checked,
     conceptMapPrompt: document.querySelector("#conceptMapPrompt").value,
-    conceptMapStyle: document.querySelector("#conceptMapStyle").value,
 
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder(),
@@ -61,77 +60,46 @@ function saveOptions(e) {
   });
 }
 
-function restoreOptions() {
-  const configKeys = ["modelName", "theme", "systemPrompt",
-    "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
-    "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
-    "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "enableDeepdive", "deepDivePrompt",
-    "enableScience", "sciencePrompt", "enableResum", "enableConceptMap", "conceptMapPrompt",
-    "conceptMapStyle",
-    "extensionOrder"];
+function restoreOptions(syncData, localData) {
+    document.querySelector("#apiKey").value = (localData && localData.apiKey) || "";
+    document.querySelector("#modelName").value = (syncData && syncData.modelName) || DEFAULT_MODEL_ID;
+    document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
+    document.querySelector("#systemPrompt").value = (syncData && syncData.systemPrompt) || DEFAULT_SYSTEM_PROMPT;
 
-  return Promise.all([
-    ext.storage.sync.get(configKeys),
-    ext.storage.local.get(["apiKey"])
-  ]).then(([data, localData]) => {
-    document.querySelector("#apiKey").value = localData.apiKey || "";
-    document.querySelector("#modelName").value = data.modelName || DEFAULT_MODEL_ID;
-    document.querySelector("#themeSelect").value = data.theme || "system";
-    document.querySelector("#systemPrompt").value = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
-    
-    document.querySelector("#enableMarkdown").checked = data.enableMarkdown === true;
-    document.querySelector("#markdownTemplate").value = data.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
+    document.querySelector("#enableMarkdown").checked = syncData && syncData.enableMarkdown === true;
+    document.querySelector("#markdownTemplate").value = (syncData && syncData.markdownTemplate) || DEFAULT_MARKDOWN_TEMPLATE;
 
-    document.querySelector("#enableObsidian").checked = data.enableObsidian === true;
-    document.querySelector("#obsidianVault").value = data.obsidianVault || "Obsidian";
-    document.querySelector("#obsidianPath").value = data.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
-    document.querySelector("#obsidianTemplate").value = data.obsidianTemplate || DEFAULT_OBSIDIAN_TEMPLATE;
+    document.querySelector("#enableObsidian").checked = syncData && syncData.enableObsidian === true;
+    document.querySelector("#obsidianVault").value = (syncData && syncData.obsidianVault) || "Obsidian";
+    document.querySelector("#obsidianPath").value = (syncData && syncData.obsidianPath) || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
+    document.querySelector("#obsidianTemplate").value = (syncData && syncData.obsidianTemplate) || DEFAULT_OBSIDIAN_TEMPLATE;
 
-    document.querySelector("#enableBionic").checked = data.enableBionic === true;
-    document.querySelector("#bionicFixation").value = data.bionicFixation || 35;
-    document.querySelector("#bionicFixationValue").textContent = (data.bionicFixation || 35) + "%";
-    let savedFont = data.bionicFont || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    document.querySelector("#enableBionic").checked = syncData && syncData.enableBionic === true;
+    document.querySelector("#bionicFixation").value = (syncData && syncData.bionicFixation) || 35;
+    document.querySelector("#bionicFixationValue").textContent = ((syncData && syncData.bionicFixation) || 35) + "%";
+    let savedFont = (syncData && syncData.bionicFont) || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     const fontSelect = document.querySelector("#bionicFont");
     if (!Array.from(fontSelect.options).some(opt => opt.value === savedFont)) {
         savedFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     }
     fontSelect.value = savedFont;
-    document.querySelector("#bionicWeight").value = data.bionicWeight || "600";
-    document.querySelector("#bionicFontSize").value = data.bionicFontSize || "1em";
-    document.querySelector("#bionicLineHeight").value = data.bionicLineHeight || "1.5";
+    document.querySelector("#bionicWeight").value = (syncData && syncData.bionicWeight) || "600";
+    document.querySelector("#bionicFontSize").value = (syncData && syncData.bionicFontSize) || "1em";
+    document.querySelector("#bionicLineHeight").value = (syncData && syncData.bionicLineHeight) || "1.5";
 
-    // Handle migration/fallback for Deep Dive
-    document.querySelector("#enableDeepdive").checked = data.enableDeepdive === true;
+    document.querySelector("#enableDeepdive").checked = syncData && syncData.enableDeepdive === true;
+    document.querySelector("#deepDivePrompt").value = (syncData && syncData.deepDivePrompt !== undefined) ? syncData.deepDivePrompt : DEFAULT_DEEP_DIVE_PROMPT;
 
-    if (data.deepDivePrompt !== undefined) document.querySelector("#deepDivePrompt").value = data.deepDivePrompt;
-    else document.querySelector("#deepDivePrompt").value = DEFAULT_DEEP_DIVE_PROMPT; // Default if not set
+    document.querySelector("#enableScience").checked = syncData ? syncData.enableScience === true : false;
+    document.querySelector("#sciencePrompt").value = (syncData && syncData.sciencePrompt !== undefined) ? syncData.sciencePrompt : DEFAULT_SCIENCE_PROMPT;
 
-    if (data.enableScience !== undefined) document.querySelector("#enableScience").checked = data.enableScience;
-    else document.querySelector("#enableScience").checked = false; // Default to false if not set
+    document.querySelector("#enableResum").checked = syncData ? syncData.enableResum !== false : true;
+    document.querySelector("#enableConceptMap").checked = syncData && syncData.enableConceptMap === true;
+    document.querySelector("#conceptMapPrompt").value = (syncData && syncData.conceptMapPrompt !== undefined) ? syncData.conceptMapPrompt : DEFAULT_CONCEPTMAP_PROMPT;
 
-    if (data.sciencePrompt !== undefined) document.querySelector("#sciencePrompt").value = data.sciencePrompt;
-    else document.querySelector("#sciencePrompt").value = DEFAULT_SCIENCE_PROMPT;
-
-    // Resum: actiu per defecte
-    document.querySelector("#enableResum").checked = data.enableResum !== false;
-
-    // Concept Map: inactiu per defecte
-    document.querySelector("#enableConceptMap").checked = data.enableConceptMap === true;
-
-    if (data.conceptMapPrompt !== undefined) document.querySelector("#conceptMapPrompt").value = data.conceptMapPrompt;
-    else document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
-
-    document.querySelector("#conceptMapStyle").value = data.conceptMapStyle || "interactive";
-
-    if (data.extensionOrder && Array.isArray(data.extensionOrder)) {
-        applyExtensionOrder(data.extensionOrder);
+    if (syncData && syncData.extensionOrder && Array.isArray(syncData.extensionOrder)) {
+        applyExtensionOrder(syncData.extensionOrder);
     }
-
-    return true; // Signal completion
-  }).catch(err => {
-    console.error("Error restoring options:", err);
-    return false;
-  });
 }
 
 function initializeSettingsPageUI() {
@@ -169,6 +137,16 @@ function resetSciencePrompt() {
 
 function resetConceptMapPrompt() {
     document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
+}
+
+function resetBionic() {
+    document.querySelector("#bionicFixation").value = "35";
+    document.querySelector("#bionicFixationValue").textContent = "35%";
+    document.querySelector("#bionicFont").value = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    document.querySelector("#bionicWeight").value = "600";
+    document.querySelector("#bionicFontSize").value = "1em";
+    document.querySelector("#bionicLineHeight").value = "1.5";
+    showStatus("Valors de lectura biònica restaurats als valors per defecte.");
 }
 
 function showStatus(text) {

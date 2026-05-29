@@ -11,13 +11,13 @@ Summarize any web page with Google Gemini AI. Supports YouTube, Hacker News, Twi
 
 ## Long Description (English)
 
-**Resumir Contingut** summarizes any web page using Google Gemini AI, directly inside a sidebar — no copy-pasting required.
+**Resumir** summarizes any web page using Google Gemini AI, directly inside a sidebar — no copy-pasting required.
 
 ### Features
 
 - **One-click summarization** — click the toolbar button or right-click any page to get an AI summary in the sidebar
 - **Streaming responses** — text appears in real time as the AI generates it
-- **Smart content extraction** — specialized extractors for YouTube (transcript), Hacker News (article + comments), Twitter/X (Defuddle), and standard pages (Readability.js)
+- **Smart content extraction** — specialized extractors for YouTube (transcript), Hacker News (article + comments), Twitter/X (Defuddle), **PDF files** (text layer via pdf.js), and standard pages (Readability.js)
 - **Bionic Reading** — configurable fixation mode to improve reading speed
 - **Multiple themes** — system default, light, dark, solarized, sepia, soft gray
 - **Summary cache** — previously summarized pages load instantly from local cache (30-day TTL)

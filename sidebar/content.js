@@ -48,6 +48,123 @@ async function getPageContent() {
 
     let text = "";
 
+    // PDF SPECIAL LOGIC
+    // Detecta PDFs HTTPS i extreu text amb pdf.js (vendor/pdf.min.js).
+    //
+    // Arquitectura del fetch:
+    //  - Primer intent: fetch directe des del sidebar (moz-extension://).
+    //    Requereix que la CSP de l'extensió permeti `connect-src https:`.
+    //  - Si el directe falla per CORS (el servidor no envia ACAO), demanem
+    //    el permís opcional `<all_urls>` a l'usuari. A Firefox/Chromium,
+    //    amb host_permissions, el fetch() des de l'extensió NO té
+    //    restriccions CORS. El permís es demana sota gest d'usuari
+    //    (clic a "Resum" o obertura del sidebar), no a l'instal·lació.
+    //  - Per a PDFs `file://`, es demana permís `<all_urls>` i es reintenta.
+    //    Cal `file:` a connect-src CSP (Firefox). Si encara falla (per
+    //    restriccions de Firefox a file://), l'usuari usa el botó local.
+    //  - Per a PDFs `http://` (no HTTPS), el fetch és insegur. L'usuari
+    //    ha d'usar el botó "Selecciona PDF local" del sidebar.
+    //  - No usem content script injection perquè a Firefox el fetch dels
+    //    content scripts (ISOLATED o MAIN world) també està subjecte a CORS
+    //    sense host_permissions explícites.
+    //  - No usem background fetch perquè background i sidebar comparteixen
+    //    la mateixa CSP extension_pages a MV3 (no es pot diferenciar).
+    //
+    // Guarda defensiva: si pdf-extract.js no està disponible (build antic o test),
+    // degradem en silenci a la lògica HTML normal.
+    if (typeof isPdfUrl === "function" && typeof extractPdfText === "function") {
+        // Detecci\u00f3 r\u00e0pida per extensi\u00f3 .pdf (sense xarxa).
+        let isPdf = isPdfUrl(tabUrl);
+        // Fallback HEAD: URLs HTTPS sense .pdf poden ser PDFs (arxiv.org/pdf/123, etc.).
+        if (!isPdf && tabUrl && tabUrl.startsWith("https://") && typeof looksLikePdfByHead === "function") {
+            try {
+                isPdf = await looksLikePdfByHead(tabUrl);
+                if (isPdf) console.debug("[PDF] Detectat via HEAD Content-Type:", tabUrl);
+            } catch { /* defensiu */ }
+        }
+        if (isPdf) {
+            console.debug("[PDF] Detectat PDF:", tabUrl);
+        try {
+            // Pas 1: fetch del PDF. Primer intent des del sidebar (directe).
+            // La CSP permet `connect-src https:` (vegeu manifest base).
+            // Si falla per CORS, demanem <all_urls> i reintentem.
+            console.debug("[PDF] Fetch directe...");
+            let buffer;
+            try {
+                const resp = await fetch(tabUrl, { credentials: "omit" });
+                if (!resp.ok) {
+                    throw Object.assign(
+                        new Error(`HTTP ${resp.status} descarregant el PDF`),
+                        { code: "FETCH_FAILED" }
+                    );
+                }
+                buffer = await resp.arrayBuffer();
+            } catch (fetchErr) {
+                // Intent 2: demanar permís d'amplitud total (<all_urls>) i
+                // reintentar el fetch directe. A Firefox, amb host_permissions,
+                // el fetch() des del sidebar NO té restriccions CORS.
+                // El permís es demana ara (amb gest d'usuari) en lloc de
+                // a l'instal·lació (on falla per manca de gest).
+                if (tabUrl && (tabUrl.startsWith("https://") || tabUrl.startsWith("file://"))) {
+                    console.debug("[PDF] Fetch directe ha fallat, demanant permís <all_urls>...");
+                    try {
+                        const granted = await ext.permissions.request({
+                            permissions: [],
+                            origins: ["<all_urls>"]
+                        });
+                        if (granted) {
+                            console.debug("[PDF] Permís <all_urls> concedit, reintentant fetch...");
+                            const resp2 = await fetch(tabUrl, { credentials: "omit" });
+                            if (resp2.ok) {
+                                buffer = await resp2.arrayBuffer();
+                                console.debug("[PDF] Fetch amb permís OK, bytes:", buffer.byteLength);
+                            }
+                        } else {
+                            console.debug("[PDF] Permís <all_urls> denegat per l'usuari");
+                        }
+                    } catch (permErr) {
+                        console.debug("[PDF] No es pot demanar permís (sense gest):", permErr?.message);
+                    }
+                }
+
+                if (!buffer) {
+                    const isLocal = tabUrl && (tabUrl.startsWith("file://") || tabUrl.startsWith("http://"));
+                    throw Object.assign(
+                        new Error(isLocal
+                            ? "Fetch d'URL local/HTTP bloquejat. Usa el bot\u00f3 'Selecciona PDF local'."
+                            : "Fetch del PDF ha fallat: " + (fetchErr.message || fetchErr)),
+                        { code: isLocal ? "NON_HTTPS" : "FETCH_FAILED" }
+                    );
+                }
+            }
+            console.debug("[PDF] Bytes descarregats:", buffer.byteLength);
+
+            // Pas 2: parsing amb pdf.js.
+            console.debug("[PDF] Cridant extractPdfText...");
+            const pdfResult = await extractPdfText(buffer);
+            console.debug("[PDF] Extraccio OK,", pdfResult.pageCount, "pags,", pdfResult.text.length, "chars");
+            return {
+                title: pdfResult.title || tabTitle || "PDF",
+                text: pdfResult.text,
+                url: tabUrl,
+            };
+        } catch (e) {
+            console.error("[PDF] Error final:", e?.code, e?.message, e);
+            const codeMap = {
+                PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
+                INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
+                SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
+                TOO_LARGE: "[PDF-013] PDF massa gran. Massa pàgines per processar.",
+                TIMEOUT: "[PDF-014] Timeout extraient el PDF. Prova amb un fitxer més petit.",
+                FETCH_FAILED: "[PDF-015] No s'ha pogut descarregar el PDF.",
+                NON_HTTPS: "[PDF-016] PDFs locals i HTTP no es poden descarregar directament. Usa el bot\u00f3 'Selecciona PDF local' al sidebar.",
+            };
+            const friendly = codeMap[e?.code] || `[PDF-019] Error inesperat extraient PDF: ${e?.message || e}`;
+            throw new Error(friendly);
+        }
+        } // end if (isPdf)
+    }
+
     // HACKER NEWS SPECIAL LOGIC
     if (tabUrl.includes("news.ycombinator.com/item")) {
         try {

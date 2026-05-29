@@ -1,14 +1,33 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
- * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
-// sidebar/cache.js
-// Handles local storage operations for summaries, sessions, and statistics
-
 const CACHE_TTL_DAYS = 30;
 const SUMMARY_CACHE_INDEX_KEY = "summary_cache_index";
 
-function getSummaryCacheKey(url) {
-    return `summary_cache:${url}`;
+function getCacheKey(url, type) {
+    return `summary_cache:${url}:${type}`;
+}
+
+function _keyToUrl(key) {
+    const prefix = "summary_cache:";
+    if (!key.startsWith(prefix)) return null;
+    const rest = key.slice(prefix.length);
+    for (const ct of CONTENT_TYPES) {
+        const suffix = `:${ct.id}`;
+        if (rest.endsWith(suffix)) {
+            return rest.slice(0, -suffix.length);
+        }
+    }
+    return rest;
+}
+
+function _keyToType(key) {
+    const prefix = "summary_cache:";
+    if (!key.startsWith(prefix)) return null;
+    const rest = key.slice(prefix.length);
+    for (const ct of CONTENT_TYPES) {
+        if (rest.endsWith(`:${ct.id}`)) {
+            return ct.id;
+        }
+    }
+    return "summary";
 }
 
 async function getSummaryCacheIndex() {
@@ -16,9 +35,6 @@ async function getSummaryCacheIndex() {
     if (Array.isArray(data[SUMMARY_CACHE_INDEX_KEY])) {
         return data[SUMMARY_CACHE_INDEX_KEY];
     }
-
-    // Fallback to enumerating existing cache keys if the index is missing.
-    // This is a safe fallback for older storage states and unit tests.
     try {
         const allData = await ext.storage.local.get(null);
         return Object.keys(allData).filter(key => key.startsWith("summary_cache:"));
@@ -28,21 +44,27 @@ async function getSummaryCacheIndex() {
     }
 }
 
-/**
- * Checks local storage for a cached summary of the given URL.
- */
-async function getSummaryCache(url) {
+async function getSummaryCache(url, type) {
     if (!url || typeof url !== 'string') return null;
+    if (!type) type = "summary";
     try {
-        const cacheKey = `summary_cache:${url}`;
+        const cacheKey = getCacheKey(url, type);
         const cachedData = await ext.storage.local.get(cacheKey);
-        const entry = cachedData[cacheKey];
+        let entry = cachedData[cacheKey];
+
+        if (!entry && type === "summary") {
+            const legacyKey = `summary_cache:${url}`;
+            const legacyData = await ext.storage.local.get(legacyKey);
+            entry = legacyData[legacyKey];
+            if (entry) entry._legacy = true;
+        }
+
         if (!entry) return null;
         if (!entry.summary || typeof entry.summary !== 'string') return null;
-        // Verificar TTL — entrades sense timestamp es consideren expirades (igual que purgeStaleCacheEntries)
         if (!entry.timestamp) return null;
         const ageMs = Date.now() - new Date(entry.timestamp).getTime();
         if (ageMs > CACHE_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
+        if (!entry.type) entry.type = "summary";
         return entry;
     } catch (e) {
         console.error("Cache check failed:", e);
@@ -50,12 +72,10 @@ async function getSummaryCache(url) {
     }
 }
 
-/**
- * Saves a generated summary to local storage cache.
- */
-async function saveSummaryCache(url, title, summary, modelName, inputTokens, outputTokens) {
+async function saveSummaryCache(url, title, summary, modelName, inputTokens, outputTokens, type) {
+    if (!type) type = "summary";
     try {
-        const cacheKey = getSummaryCacheKey(url);
+        const cacheKey = getCacheKey(url, type);
         const cacheEntry = {
             url: url,
             title: title,
@@ -63,7 +83,8 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
             model: modelName,
             timestamp: new Date().toISOString(),
             version: "1.0",
-            stats: { input: inputTokens, output: outputTokens }
+            stats: { input: inputTokens, output: outputTokens },
+            type: type,
         };
 
         const cacheIndex = await getSummaryCacheIndex();
@@ -71,7 +92,6 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
             cacheIndex.push(cacheKey);
         }
 
-        // Cap index to 500 entries — remove oldest entries if over limit
         const MAX_CACHE_ENTRIES = 500;
         if (cacheIndex.length > MAX_CACHE_ENTRIES) {
             const toRemove = cacheIndex.splice(0, cacheIndex.length - MAX_CACHE_ENTRIES);
@@ -89,11 +109,6 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
     }
 }
 
-/**
- * Elimina les entrades de caché més velles que CACHE_TTL_DAYS.
- * Usa storage.local.get(null) per enumerar totes les claus.
- * @returns {number} Nombre d'entrades eliminades.
- */
 async function purgeStaleCacheEntries() {
     try {
         const cacheIndex = await getSummaryCacheIndex();
@@ -123,11 +138,6 @@ async function purgeStaleCacheEntries() {
     }
 }
 
-/**
- * Retorna totes les entrades de caché vàlides (amb timestamp i dins TTL),
- * ordenades per data descendent (més recent primer).
- * @returns {Array<{url, title, model, timestamp, summary}>}
- */
 async function listCachedSummaries() {
     try {
         const cacheIndex = await getSummaryCacheIndex();
@@ -142,12 +152,14 @@ async function listCachedSummaries() {
             if (!value?.timestamp) continue;
             const ts = new Date(value.timestamp).getTime();
             if (ts < cutoff) continue;
+            const type = value.type || _keyToType(key) || "summary";
             entries.push({
                 url: value.url,
                 title: value.title,
                 model: value.model,
                 timestamp: value.timestamp,
                 summary: value.summary,
+                type: type,
             });
         }
         entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -158,12 +170,56 @@ async function listCachedSummaries() {
     }
 }
 
-/**
- * Saves usage statistics and history for a generated summary.
- */
-async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, latency, title, url, cacheTokens = 0) {
+async function getAvailableTypes(url) {
+    if (!url) return [];
     try {
-        // Read stats, history and daily counters in a single call
+        const cacheIndex = await getSummaryCacheIndex();
+        const relevant = cacheIndex.filter(key => _keyToUrl(key) === url);
+        if (relevant.length === 0) {
+            const legacyKey = `summary_cache:${url}`;
+            const legacyData = await ext.storage.local.get(legacyKey);
+            if (legacyData[legacyKey]?.timestamp && legacyData[legacyKey]?.summary) {
+                return ["summary"];
+            }
+            return [];
+        }
+        const allData = await ext.storage.local.get(relevant);
+        const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+        const types = [];
+        for (const key of relevant) {
+            const value = allData[key];
+            if (!value?.timestamp) continue;
+            const ts = new Date(value.timestamp).getTime();
+            if (ts < cutoff) continue;
+            types.push(_keyToType(key));
+        }
+        return types;
+    } catch (e) {
+        console.error("Error getting available types:", e);
+        return [];
+    }
+}
+
+async function deleteSummaryCache(url, type) {
+    if (!type) type = "summary";
+    try {
+        const cacheKey = getCacheKey(url, type);
+        const cacheIndex = await getSummaryCacheIndex();
+        const newIndex = cacheIndex.filter(k => k !== cacheKey);
+        if (newIndex.length === cacheIndex.length) return false;
+        await ext.storage.local.remove(cacheKey);
+        await ext.storage.local.set({ [SUMMARY_CACHE_INDEX_KEY]: newIndex });
+        return true;
+    } catch (e) {
+        console.error("Error deleting cache entry:", e);
+        return false;
+    }
+}
+
+async function saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, title, url, cacheTokens) {
+    if (!contentType) contentType = "summary";
+    if (cacheTokens === undefined) cacheTokens = 0;
+    try {
         const data = await ext.storage.local.get(["stats", "usageHistory", "dailyStats"]);
         const currentStats = data.stats || { articles: 0, tokens: 0 };
 
@@ -180,17 +236,15 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
             inputTokens: Math.round(inputTokens),
             outputTokens: Math.round(outputTokens),
             cacheTokens: Math.round(cacheTokens),
-            type: (isDeepDive || modelName.includes("pro")) ? "deep" : "lite",
+            type: contentType,
             latency: latency
         };
 
         const history = data.usageHistory || [];
         history.unshift(historyEntry);
 
-        // Keep last 1000 entries (~300 dies a 3 resums/dia, ~200KB storage)
         if (history.length > 1000) history.pop();
 
-        // Compact daily counter — not limited by history cap
         const todayKey = new Date().toISOString().slice(0, 10);
         const dailyStats = data.dailyStats || {};
         dailyStats[todayKey] = (dailyStats[todayKey] || 0) + 1;
@@ -203,7 +257,6 @@ async function saveUsageStats(inputTokens, outputTokens, isDeepDive, modelName, 
     }
 }
 
-// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, listCachedSummaries };
+    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, listCachedSummaries, getAvailableTypes, deleteSummaryCache, getCacheKey };
 }

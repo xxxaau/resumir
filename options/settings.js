@@ -7,42 +7,34 @@
 // IMPORTANT: Tothom ha d'estar dins DOMContentLoaded!
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Restore saved options on page load and wait for completion
-    await restoreOptions();
-    
-    // Initialize UI elements that depend on restored data
-    if (typeof initializeSettingsPageUI === 'function') {
-        initializeSettingsPageUI();
-    }
-    
-    // Update sidebar with active plugins
-    if (typeof updateSidebar === 'function') {
-        updateSidebar();
-    }
-    
-    // Update cache info and load statistics
-    if (typeof updateCacheInfo === 'function') {
-        updateCacheInfo();
-    }
-    if (typeof loadStatistics === 'function') {
-        loadStatistics();
-    }
-    
-    // Initialize sidebar navigation (needs to be after DOM is fully ready)
-    if (typeof initializeSidebarNavigation === 'function') {
-        initializeSidebarNavigation();
-    }
+    // Single batch — read all settings once (elimina 3 lectures storage redundants)
+    const ALL_CONFIG_KEYS = [
+        "modelName", "theme", "systemPrompt",
+        "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
+        "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
+        "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight",
+        "enableDeepdive", "deepDivePrompt",
+        "enableScience", "sciencePrompt",
+        "enableResum", "enableConceptMap", "conceptMapPrompt",
+        "extensionOrder"
+    ];
+    const [localData, syncData] = await Promise.all([
+        ext.storage.local.get(["apiKey"]),
+        ext.storage.sync.get(ALL_CONFIG_KEYS)
+    ]);
 
+    // Populate all fields from single batch
+    restoreOptions(syncData, localData);
+    if (typeof updateSidebar === 'function') updateSidebar();
+    if (typeof initializeSidebarNavigation === 'function') initializeSidebarNavigation();
+    if (typeof initializeSettingsPageUI === 'function') initializeSettingsPageUI();
+
+    // Bind event listeners
     const getEl = id => document.getElementById(id);
     const bindClick = (id, handler) => {
         const el = getEl(id);
         if (el) el.addEventListener('click', handler);
     };
-    const bindChange = (id, handler) => {
-        const el = getEl(id);
-        if (el) el.addEventListener('change', handler);
-    };
-
     // Real-time fixation value update
     const bionicFixation = getEl("bionicFixation");
     if (bionicFixation) {
@@ -61,9 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Handle "Live" Toggles in extension list
-    // Nota: només actualitza la UI de la barra lateral de configuració;
-    // la persistència real es fa quan l'usuari prem un botó de "Desar" explícit.
-    const extensionToggles = ["enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap"];
+    const extensionToggles = ["enableResum", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap"];
     extensionToggles.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -77,73 +67,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         bindClick(id, saveOptions);
     });
 
-    // Reset buttons (with null checks)
+    // Reset buttons
     bindClick("resetTemplate", resetTemplate);
     bindClick("resetObsidianTemplate", resetObsidianTemplate);
     bindClick("resetSystemPrompt", resetSystemPrompt);
     bindClick("resetDeepDive", resetDeepDivePrompt);
     bindClick("resetScience", resetSciencePrompt);
     bindClick("resetConceptMap", resetConceptMapPrompt);
+    bindClick("resetBionic", resetBionic);
 
     // Model selection buttons
     bindClick("checkModels", listModels);
     bindClick("refreshModels", refreshModels);
 
-    // Cache and history buttons
-    bindClick("clearHistory", clearHistory);
+    // Cache buttons
     bindClick("clearCache", clearCache);
-
-    // Pagination Event Listeners
-    const prevPage = document.getElementById("prevPage");
-    if (prevPage) {
-        prevPage.addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage--;
-                loadStatistics();
-            }
-        });
-    }
-
-    const nextPage = document.getElementById("nextPage");
-    if (nextPage) {
-        nextPage.addEventListener("click", () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadStatistics();
-            }
-        });
-    }
-
-    // Pagination for grouped table
-    const groupedPrevPage = document.getElementById("groupedPrevPage");
-    if (groupedPrevPage) {
-        groupedPrevPage.addEventListener("click", () => {
-            if (groupedCurrentPage > 1) {
-                groupedCurrentPage--;
-                renderGroupedPage();
-            }
-        });
-    }
-
-    const groupedNextPage = document.getElementById("groupedNextPage");
-    if (groupedNextPage) {
-        groupedNextPage.addEventListener("click", () => {
-            if (groupedCurrentPage < groupedTotalPages) {
-                groupedCurrentPage++;
-                renderGroupedPage();
-            }
-        });
-    }
-
-    bindChange("pageSizeSelect", (e) => {
-        const selected = parseInt(e.target.value, 10);
-        if (Number.isInteger(selected) && selected > 0) {
-            PAGE_SIZE = selected;
-            ext.storage.local.set({ pageSize: PAGE_SIZE });
-            currentPage = 1;
-            loadStatistics();
-        }
-    });
 
     // Reordering Event Delegation
     const extensionsList = document.querySelector(".extensions-list");
@@ -183,17 +121,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Period selector
-    document.querySelectorAll(".period-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            currentPeriod = btn.dataset.period;
-            document.querySelectorAll(".period-btn").forEach(b =>
-                b.classList.toggle("active", b === btn)
-            );
-            currentPage = 1; // Reset paginació quan canvia el període
-            loadStatistics();
-        });
-    });
 });
 
 // Sync model selection with sidebar changes in real-time

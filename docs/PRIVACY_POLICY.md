@@ -1,8 +1,8 @@
-# Política de Privadesa - Resumir contingut
+# Política de Privadesa - Resumir
 
-**Última actualització:** 25 de Febrer de 2026
+**Última actualització:** 29 de Maig de 2026
 
-La teva privadesa és important per a nosaltres. Aquesta política explica com l'extensió **Resumir contingut** gestiona les teves dades.
+La teva privadesa és important per a nosaltres. Aquesta política explica com l'extensió **Resumir** gestiona les teves dades.
 
 ## 1. Recollida de Dades
 
@@ -10,7 +10,7 @@ L'extensió **NO** recopila ni comparteix dades personals amb els desenvolupador
 
 ### Dades Locals
 
-Les següents dades s'emmagatzemen exclusivament al teu navegador (`browser.storage.sync` i `browser.storage.local`):
+Les següents dades s'emmagatzemen exclusivament al teu navegador (`browser.storage.local`):
 
 - **API Key de Google Gemini**: Necessària per connectar amb el servei d'IA. Aquesta clau es guarda localment i s'envia només en headers HTTP a la crida de l'API.
 - **Memòria cau de Resums**: Títol, URL, text del resum, model i data de generació.
@@ -41,7 +41,7 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 | `storage` | Guardar la teva API Key, preferències, memòria cau i historial d'ús localment |
 | `scripting` | Injectar el parser de contingut (Readability.js) per extreure text net |
 | `tabs` | Consultar la pestanya activa, obrir links en noves pestanyes i gestionar integracions |
-| `menus` / `contextMenus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir contingut") |
+| `menus` / `contextMenus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir") |
 | `sidePanel` | Obrir el panell lateral natiu a navegadors basats en Chromium |
 | `<all_urls>` (opcional) | Permís host demanat dinàmicament per executar scripts de lectura en qualsevol pàgina |
 

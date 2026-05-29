@@ -105,12 +105,7 @@ function updateSidebar() {
             btn.className = "nav-item dynamic-extension";
             btn.setAttribute("data-tab", ext.id);
 
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(ext.icon, "image/svg+xml");
-            const svgEl = svgDoc.documentElement;
-            if (ext.color) {
-                svgEl.style.color = ext.color;
-            }
+            const svgEl = new DOMParser().parseFromString(ext.icon, "text/html").body.firstElementChild;
             btn.appendChild(svgEl);
             btn.appendChild(document.createTextNode(ext.label));
             

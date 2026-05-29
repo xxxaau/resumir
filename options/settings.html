@@ -12,7 +12,6 @@
       <div class="sidebar-header">Configuració</div>
       <button class="nav-item active" data-tab="general">General</button>
       <button class="nav-item" data-tab="extensions">Plugins</button>
-      <button class="nav-item" data-tab="stats">Estadístiques</button>
       <button class="nav-item" data-tab="about">Sobre l'extensió</button>
 
       <div
@@ -84,6 +83,7 @@
               <option value="solarized">Crema</option>
               <option value="soft-gray">Gris clar</option>
             </select>
+            <div class="help-text">Tria l'aparença visual de la interfície de l'extensió.</div>
           </div>
         </div>
 
@@ -92,11 +92,11 @@
           <h3>Emmagatzematge i privadesa</h3>
           <div class="form-group">
             <label>Memòria cau local</label>
-            <p class="text-muted-small">
+            <div class="help-text">
               L'extensió guarda còpies locals dels resums per estalviar costos i
               millorar la velocitat. Aquesta informació no surt mai del teu
               ordinador.
-            </p>
+            </div>
             <div class="flex-row-gap">
               <button
                 id="clearCache"
@@ -104,15 +104,13 @@
               >
                 Buidar memòria cau
               </button>
-              <span id="cacheStatus" class="text-small-muted"
-                >Calculant...</span
-              >
+              
             </div>
           </div>
         </div>
 
         <div class="section-actions">
-          <button id="save" class="btn btn-primary">Desar canvis</button>
+          <button id="save" class="btn btn-primary">Desar</button>
         </div>
       </div>
 
@@ -139,8 +137,8 @@
         </div>
 
         <div class="section-actions">
-          <button id="saveCustom" class="btn btn-primary">Desar canvis</button>
-          <button id="resetSystemPrompt" class="btn btn-secondary">Restaurar per defecte</button>
+          <button id="saveCustom" class="btn btn-primary">Desar</button>
+          <button id="resetSystemPrompt" class="btn btn-secondary">Restaurar</button>
         </div>
       </div>
 
@@ -693,7 +691,7 @@
 
           <div class="section-actions">
             <button id="saveExtensions" class="btn btn-primary">
-              Desar canvis
+              Desar
             </button>
           </div>
         </div>
@@ -712,6 +710,7 @@
               class="form-control"
               placeholder="ex: Obsidian (Per defecte)"
             />
+            <div class="help-text">Nom exacte del vault d'Obsidian on es desaran les notes.</div>
           </div>
 
           <div class="form-group">
@@ -748,11 +747,12 @@
                 <code>{{summary}}</code></span
               >
             </div>
+            <div class="help-text">Defineix l'estructura del contingut de la nota que es crearà a Obsidian.</div>
           </div>
           <div class="section-actions">
             <button id="saveObsidian" class="btn btn-primary">Desar</button>
             <button id="resetObsidianTemplate" class="btn btn-secondary">
-              Restaurar plantilla
+              Restaurar
             </button>
           </div>
         </div>
@@ -775,11 +775,12 @@
                 <code>{{summary}}</code></span
               >
             </div>
+            <div class="help-text">Defineix l'estructura del document Markdown exportat.</div>
           </div>
           <div class="section-actions">
             <button id="saveMarkdown" class="btn btn-primary">Desar</button>
             <button id="resetTemplate" class="btn btn-secondary">
-              Restaurar per defecte
+              Restaurar
             </button>
           </div>
         </div>
@@ -804,7 +805,7 @@
           </div>
           <div class="section-actions">
             <button id="saveDeepDive" class="btn btn-primary">Desar</button>
-            <button id="resetDeepDive" class="btn btn-secondary">Restaurar per defecte</button>
+            <button id="resetDeepDive" class="btn btn-secondary">Restaurar</button>
           </div>
         </div>
       </div>
@@ -828,7 +829,7 @@
           </div>
           <div class="section-actions">
             <button id="saveScience" class="btn btn-primary">Desar</button>
-            <button id="resetScience" class="btn btn-secondary">Restaurar per defecte</button>
+            <button id="resetScience" class="btn btn-secondary">Restaurar</button>
           </div>
         </div>
       </div>
@@ -873,6 +874,7 @@
               <option class="os-font os-mac" value="Helvetica, sans-serif">Helvetica</option>
               <option class="os-font os-mac" value="Geneva, sans-serif">Geneva</option>
             </select>
+            <div class="help-text">Selecciona la família tipogràfica per al text en mode biònic.</div>
           </div>
 
           <div class="form-group">
@@ -885,6 +887,7 @@
               <option value="800">Extra-negreta (800)</option>
               <option value="900">Màxima (900)</option>
             </select>
+            <div class="help-text">Controla el gruix de les lletres ressaltades.</div>
           </div>
           <div class="form-group">
             <label for="bionicFontSize">Mida de la lletra</label>
@@ -897,6 +900,7 @@
               <option value="1.4em">Extra gran (1.4em)</option>
               <option value="1.6em">Màxim (1.6em)</option>
             </select>
+            <div class="help-text">Ajusta la mida del text per a una lectura còmoda.</div>
           </div>
 
           <div class="form-group">
@@ -906,10 +910,12 @@
               <option value="1.5" selected>Espaiat (1.5)</option>
               <option value="2.0">Doble (2.0)</option>
             </select>
+            <div class="help-text">Controla l'espaiat vertical entre línies de text.</div>
           </div>
 
           <div class="section-actions">
             <button id="saveBionic" class="btn btn-primary">Desar</button>
+            <button id="resetBionic" class="btn btn-secondary">Restaurar</button>
           </div>
         </div>
       </div>
@@ -931,165 +937,9 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="conceptMapStyle">Estil de visualització</label>
-            <select id="conceptMapStyle" class="form-control">
-              <option value="interactive" selected>Interactiu (mapa visual amb zoom)</option>
-              <option value="tree">Arbre jeràrquic (llista desplegable)</option>
-              <option value="compact">Compacte (menys espai entre nodes)</option>
-              <option value="spacious">Espaiat (més espai entre nodes)</option>
-            </select>
-            <div class="help-text">
-              Controla la presentació visual del mapa conceptual. L'estil interactiu mostra un mapa visual navegable amb zoom i pan.
-            </div>
-          </div>
-
           <div class="section-actions">
             <button id="saveConceptMap" class="btn btn-primary">Desar</button>
-            <button id="resetConceptMap" class="btn btn-secondary">Restaurar per defecte</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab: Statistics -->
-      <div id="tab-stats" class="tab-pane">
-        <h1 class="page-title">Estadístiques d'ús</h1>
-
-        <!-- Period Selector -->
-        <div class="period-selector">
-          <button class="period-btn active" data-period="7d">7d</button>
-          <button class="period-btn" data-period="30d">30d</button>
-          <button class="period-btn" data-period="6m">6m</button>
-          <button class="period-btn" data-period="1a">1a</button>
-        </div>
-
-        <!-- KPI Cards -->
-        <div class="section">
-          <div class="section-header">
-            <h3>Activitat global</h3>
-            <div class="date-filter" id="kpiDateFilter">Sempre</div>
-          </div>
-          <div class="stats-grid">
-            <div class="stat-card stat-icon-blue">
-              <div
-                class="stat-value"
-                id="statsArticles"
-              >
-                0
-              </div>
-              <div class="stat-label">Pàgines resumides</div>
-            </div>
-            <div class="stat-card stat-icon-green">
-              <div
-                class="stat-value"
-                id="kpiTimeSaved"
-              >
-                0h 0m
-              </div>
-              <div class="stat-label">Temps estalviat aprox.</div>
-            </div>
-            <div class="stat-card">
-              <div class="flex-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="#5bb8f5" aria-hidden="true">
-                  <path d="M7 2l-1.5 15A3.5 3.5 0 0 0 9 21h6a3.5 3.5 0 0 0 3.5-4L17 2H7zm0 0"/>
-                  <path fill="#87CEEB" d="M7.2 4h9.6l.8 8H6.4l.8-8z"/>
-                </svg>
-                <div
-                  class="stat-value stat-icon-light-blue"
-                  id="kpiWaterToday"
-                >
-                  0 ml
-                </div>
-              </div>
-              <div class="stat-label">Consum d&rsquo;aigua avui</div>
-              <div id="kpiWaterTotal" class="kpi-water-total">Total acumulat: 0 ml</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bar Chart -->
-        <div class="section">
-          <h3 id="chartTitle">Resums per dia (últims 7 dies)</h3>
-          <div id="dailyChartContainer">
-            <!-- Bars injected by JS -->
-          </div>
-        </div>
-
-        <!-- History Table -->
-        <div class="section">
-          <h3>Historial de peticions</h3>
-          <div class="table-container">
-            <table class="history-table">
-              <thead>
-                <tr>
-                  <th class="table-col-date">Data</th>
-                  <th>Article</th>
-                </tr>
-              </thead>
-              <tbody id="historyTableBody">
-                <!-- Populated by JS -->
-              </tbody>
-            </table>
-          </div>
-          <div class="table-footer">
-            <div class="pagination-controls">
-              <button id="prevPage" class="btn btn-secondary btn-sm" disabled>
-                &larr; Anterior
-              </button>
-              <span id="pageInfo">Pàgina 1</span>
-              <button id="nextPage" class="btn btn-secondary btn-sm" disabled>
-                Següent &rarr;
-              </button>
-            </div>
-
-            <div class="table-footer-right">
-              <select id="pageSizeSelect" class="form-control">
-                <option value="20" selected>20 per pàgina</option>
-                <option value="50">50 per pàgina</option>
-                <option value="100">100 per pàgina</option>
-              </select>
-              <button
-                id="clearHistory"
-                class="btn btn-secondary btn-sm error-button"
-              >
-                Esborrar historial
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Grouped History Table -->
-        <div class="section">
-          <h3>Resums per model i dia</h3>
-          <div class="table-container">
-            <table class="history-table">
-              <thead class="table-sticky-header">
-                <tr>
-                  <th id="groupedTableDateHeader" class="text-right">Data</th>
-                  <th>Model</th>
-                  <th class="text-right">Peticions</th>
-                  <th class="text-right" title="Tokens d'entrada (suma)">In tok</th>
-                  <th class="text-right" title="Tokens de sortida (suma)">Out tok</th>
-                  <th class="text-right" title="Tokens de caché (suma)">Caché</th>
-                  <th class="text-right" title="Latència mitjana">ms∅</th>
-                  <th class="text-right">Aigua (ml)</th>
-                </tr>
-              </thead>
-              <tbody id="groupedTableBody">
-                <!-- Populated by JS -->
-              </tbody>
-            </table>
-          </div>
-          <div class="table-footer">
-            <div class="pagination-controls">
-              <button id="groupedPrevPage" class="btn btn-secondary btn-sm" disabled>
-                &larr; Anterior
-              </button>
-              <span id="groupedPageInfo"></span>
-              <button id="groupedNextPage" class="btn btn-secondary btn-sm" disabled>
-                Següent &rarr;
-              </button>
-            </div>
+            <button id="resetConceptMap" class="btn btn-secondary">Restaurar</button>
           </div>
         </div>
       </div>
@@ -1120,17 +970,23 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
               <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
+                v2.3.0
+                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
+              </div>
+              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
+                <li><strong>Suport per resumir fitxers PDF amb capa de text</strong> (issue: extensió no funcionava amb PDFs). Implementat amb pdf.js 3.11.174 (legacy UMD) vendoritzat a <code>vendor/</code>.</li>
+                <li><strong>Models ordenats per prioritat:</strong> la llista de models ara segueix l'ordre flash-lite > flash > pro > gemma, amb versions recents primer dins cada família. Afecta el selector de la sidebar, la llista de configuració i l'ordre de fallback automàtic.</li>
+                <li><strong>Avís important per als usuaris anteriors a v2.2</strong>: Si heu instal·lat l'extensió abans de la versió 2.2, la vostra clau API de Gemini pot haver estat emmagatzemada a <code>storage.sync</code> (sincronitzada entre dispositius). A partir de la v2.2, la clau es guarda exclusivament a <code>storage.local</code>. Es recomana <strong>rotar la clau API</strong> des de Google AI Studio com a precaució.</li>
+              </ul>
+            </div>
+            <div class="version-entry" style="margin-bottom: 25px; position: relative">
+              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
                 v2.2.10
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li><strong>Bug 1 — Llegibilitat del mapa conceptual en tema fosc</strong>: el text dels nodes ara és sempre llegible a tots els temes (clar, fosc, sèpia, gris). Les opcions <code>textColor</code>/<code>toggleBgColor</code> es resolen des de variables CSS i s'incrusten directament al SVG exportat a PNG.</li>
                 <li><strong>Bug 2 — Mapa conceptual redissenyat amb estil pill (NotebookLM)</strong>:</li>
                 <li><strong>Bug 3 — Transcripcions de YouTube tornen a funcionar</strong>: afegides Via B (variants <code>json3</code>/<code>srv3</code>/<code>cru</code> del timedtext) i Via C (<code>youtubei/v1/get_transcript</code> amb <code>INNERTUBE_API_KEY</code> i <code>INNERTUBE_CONTEXT</code> extrets del DOM). Quan els subtítols no es poden carregar pel mètode habitual, l'extensió ara prova rutes alternatives abans de fallar.</li>
-                <li><strong>Nou format del nom de fitxer del PNG del mapa conceptual</strong>: <code>YYYYMMDD_word1_word2.png</code> derivat del títol arrel del mapa (no del títol de la pestanya). Normalització NFD + strip diacrítics + lowercase + alfanumèric, amb stop-words ca/es/en filtrats. Fallback <code>_mapa.png</code> si cap token vàlid.</li>
-                <li>Nou fitxer <code>sidebar/conceptmap-filename.js</code> amb la funció pura compartida entre sidebar i overlay de pantalla completa.</li>
-                <li>15 nous tests unitaris per a la generació de noms de fitxer (<code>tests/conceptmap-filename.test.mjs</code>). Suite total: 222/222 passen.</li>
-                <li>Nou <code>scripts/set-mode.mjs</code> (port Node de <code>set_dev_mode.ps1</code>) per evitar restriccions de <code>MachinePolicy</code> a PowerShell. Els scripts npm <code>dev</code>/<code>prod</code> ara hi apunten.</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1140,12 +996,7 @@
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
                 <li><strong>Mapa conceptual interactiu reescrit des de zero</strong>: substituïdes les llibreries de tercers <code>d3.min.js</code>, <code>markmap-lib.js</code> i <code>markmap-view.js</code> (~640 KB) per un renderitzador SVG natiu propi (<code>sidebar/markmap-native.js</code>, ~22 KB). Mateixa funcionalitat (zoom, pan, plegat de branques, exportació a PNG i pàgina completa) sense dependències externes.</li>
-                <li>Eliminat camp no estàndard <code>author_email</code> del manifest (Firefox emetia warning).</li>
-                <li>Eliminat <code>web_accessible_resources</code> del manifest Firefox (ja no calen els vendors a la pàgina).</li>
                 <li><strong>Zero warnings a la revisió d'AMO</strong>: el codi nou no utilitza <code>innerHTML</code> dinàmic, <code>eval()</code> ni <code>Function()</code> — totes operacions DOM via <code>createElementNS</code> i <code>DOMParser</code>. Això elimina els 6 warnings que retardaven la revisió de l'extensió.</li>
-                <li>Reducció significativa de superfície d'atac: tot el codi de visualització és auditable i prop de 95% més petit que les llibreries substituïdes.</li>
-                <li>Nou fitxer <code>sidebar/markmap-native.js</code> integrat al bundle del sidebar.</li>
-                <li><code>scripts/build.mjs</code>, <code>scripts/build-sidebar-bundle.mjs</code>, <code>scripts/pre-release-check.mjs</code> i <code>eslint.config.mjs</code> netejats de referències a vendors eliminats.</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1155,32 +1006,6 @@
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
                 <li><strong>Crític</strong>: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7.</li>
-                <li>Les llibreries <code>d3.min.js</code>, <code>markmap-lib.js</code> i <code>markmap-view.js</code> ara s'inclouen al ZIP de release (abans referenciades al HTML però absents al paquet).</li>
-                <li><code>conceptmap.js</code> integrat al bundle del sidebar per simplificar el manteniment i reduir el nombre de requests.</li>
-                <li>Nou patcher robust de <code>sidebar.html</code>: elimina explícitament els scripts del bundle (per llista coneguda) en lloc de dependre d'un regex frágil.</li>
-                <li>Nou check #13 al pre-release-check: smoke-test del ZIP verifica que tot script referenciat als HTML existeix dins del paquet abans de publicar.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.2.7
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Afegit <code>web_accessible_resources</code> al manifest Firefox per permetre la injecció de les llibreries del mapa conceptual (<code>d3.min.js</code>, <code>markmap-lib.js</code>, <code>markmap-view.js</code>) a pàgines web externes. Sense aquesta declaració, Firefox bloquejava la injecció i el mode pantalla completa del mapa conceptual fallava amb error CSP.</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.2.6
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Eliminat <code>incognito: "split"</code> del manifest (no suportat per Firefox)</li>
-                <li>Substituït el constructor <code>Function</code> per <code>eval</code> indirecte a <code>conceptmap.js</code> (millora de seguretat)</li>
-                <li>Restaurades les icones blaves de producció a <code>icons/prod/</code> i <code>icons/</code></li>
-                <li>Les subcarpetes <code>icons/dev/</code> i <code>icons/prod/</code> ja no s'inclouen als ZIPs de release</li>
-                <li>Ruta del <code>CHANGELOG.md</code> corregida a <code>docs/CHANGELOG.md</code> als scripts de build</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1189,12 +1014,7 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Maig 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>El nom del fitxer PNG exportat del mapa conceptual ara usa el format <code>YYYYMMDD_<titular>.png</code> (titular abreujat a 20 caràcters)</li>
                 <li>L'extensió passa a anomenar-se "Resumir" (mode DEV: "Resumir (DEV)")</li>
-                <li>Configuració del mapa conceptual: eliminades les opcions de profunditat, branques, expandir tot i mostrar descripcions (ara es controlen des del prompt)</li>
-                <li>Lectura biònica: interlineat per defecte canviat a 1.5, gruix de negreta per defecte canviat a 600 (semi-negreta)</li>
-                <li>La icona del mapa conceptual a configuració ara coincideix amb el botó de la sidebar</li>
-                <li>Eliminada l'opció d'idiomes preferits de YouTube a configuració (la selecció d'idioma ara és automàtica)</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1203,74 +1023,8 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Indicador de càrrega animat amb punts durant la generació del resum</li>
-                <li>Refactorització de l'extracció de transcripcions de YouTube: extracció MAIN world (Pas 1) + fallback via API (Pas 2)</li>
-                <li>Suport per a <code>prerenderedText</code> quan <code>playerCaptionsTracklistRenderer</code> és buit</li>
-                <li>Lectura directa de la transcripció des de <code>ytInitialData</code> sense obrir el panell</li>
-                <li>Protecció contra injecció de prompts: embolcall <code><UNTRUSTED_CONTENT></code> al prompt del sistema</li>
-                <li>Clau API migrada de <code>storage.sync</code> a <code>storage.local</code> per millor aïllament de seguretat</li>
-                <li>El panell de transcripció de YouTube no s'obria en navegar a un vídeo</li>
-                <li>Detecció de la transcripció de YouTube molt més robusta</li>
-                <li>Els punts de càrrega ara s'amaguen en rebre el primer chunk d'streaming (sense parpelleig d'estat buit)</li>
-                <li>La toolbar es manté visible en visualitzar entrades de l'historial de caché</li>
-                <li>La barra de tornada s'amaga en tancar panells per tornar a la vista principal</li>
-                <li>Alineació de la barra del botó de tornada amb la toolbar; menú amagat en visualitzar panells</li>
-                <li>Disposició reordenada en visualitzar un resum de caché</li>
-                <li>La classe CSS <code>.hidden</code> ara sempre amaga elements independentment de l'especificitat</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.2.3
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Millores a l'extracció de transcripcions ASR (autogenerades) de YouTube</li>
-                <li>Comptador diari per a estadístiques precises per període</li>
-                <li>Límit de l'historial d'estadístiques augmentat de 100 a 1.000 entrades</li>
-                <li>Tests de persistència: validen la integritat de les dades entre actualitzacions de versió</li>
-                <li>Lectura de transcripcions de YouTube des de <code>ytInitialData</code> (suport ASR complet)</li>
-                <li>Detecció de la pista activa en l'extracció de transcripcions de YouTube</li>
-                <li>Gestor <code>onInstalled</code>: evita menús contextuals duplicats en actualitzar</li>
-                <li>Fuites de memòria en la caché i els bindings de botons</li>
-                <li>Fallback del model API ampliat; missatges d'error de l'API millorats</li>
-                <li>Temps d'inici de la sidebar millorat</li>
-                <li>Crides API: afegits timeouts i fiabilitat millorada</li>
-                <li>Estadístiques: lectures de <code>getDailyStats</code> unificades en una sola crida <code>storage.get</code></li>
-                <li>Nom al manifest de producció corregit (ja no inclou l'etiqueta <code>DEV</code>)</li>
-                <li>Globals d'ESLint corregits; hook de lint pre-commit afegit</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.2.2
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Les operacions de caché ara usen un índex de resums per a purga i llistat més ràpids</li>
-                <li>Embolcall de PowerShell multiplataforma (<code>build.ps1</code>) amb comprovació d'existència de l'script</li>
-                <li>Changelog injectat automàticament a <code>settings.html</code> en fer un bump de versió (script <code>postversion</code>)</li>
-                <li>Ordres de build i release per a Firefox/Chromium documentades a <code>BUILD.md</code></li>
-                <li>Fallback de l'índex de caché: purga i llistat funcionen correctament quan falta l'índex</li>
-                <li>Bindings de botons de la pàgina d'opcions corregits</li>
-                <li>El manifest de producció de Chromium ja no conté la clau de Chrome incrustada</li>
-                <li>Estil biònic extret en un helper dedicat; renderització del resum endurit</li>
-                <li>Bindings d'esdeveniments de settings refactoritzats; gestió del pageSize endurit</li>
-                <li>El flux de release conserva el mode dev/prod original i escriu fitxers de patch JSON sense BOM</li>
-                <li>Directoris de còpia de seguretat del build (<code>build_*/</code>) exclosos de git</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v2.2.1
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Barra inferior millorada: visualització de l'ús de tokens amb millores d'UX</li>
-                <li>Globals d'ESLint per als prompts per defecte corregits</li>
-                <li>Ús de stream a <code>summary.js</code> corregit</li>
-                <li>Settings refactoritzades: valors per defecte i UI simplificats</li>
-                <li>Manifests regenerats en mode PROD (el nom ja no conté <code>DEV</code>)</li>
+                <li><strong>Protecció contra injecció de prompts</strong>: embolcall <code><UNTRUSTED_CONTENT></code> al prompt del sistema</li>
+                <li><strong>Clau API migrada de <code>storage.sync</code> a <code>storage.local</code></strong> per millor aïllament de seguretat</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1279,31 +1033,9 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Abril 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Panell de text font: visualitza el text pla enviat a la IA per a la resumització</li>
-                <li>Extracció de contingut de Twitter/X via la biblioteca Defuddle amb fallback de scraping DOM</li>
-                <li>Hacker News: eliminat el límit de comentaris; afegida la càrrega de l'article enllaçat</li>
-                <li>Readability.js carregat en el context de la sidebar per a la càrrega d'articles de HN</li>
-                <li>Insígnia de caché: insígnia clicable que mostra l'estat de caché a la toolbar</li>
-                <li>Estadístiques: selector de període (7d / 30d / 6m / 1a) per a KPIs, gràfic i taula</li>
-                <li>Estadístiques: columnes per a tokens d'entrada, tokens de sortida, encerts de caché i ms mitjans</li>
-                <li>Comptatge real de tokens des de <code>usageMetadata</code> de l'API de Gemini (substitueix les estimacions)</li>
-                <li>Historial d'estadístiques: càrrega de resum de caché directament a la sidebar (no només obre l'URL)</li>
-                <li>Barra de títol de pàgina: barra adhesiva que mostra el títol de la pàgina actual durant la resumització</li>
-                <li>Panell d'historial: llista navegable de resums anteriors a la sidebar</li>
-                <li><code>listCachedSummaries</code> per al panell d'historial</li>
-                <li>Caché: TTL de 30 dies amb <code>purgeStaleCacheEntries</code> per a entrades caducades</li>
-                <li>Caché: <code>clearCache</code> ara esborra totes les claus <code>summary_cache:*</code>, no només les indexades</li>
-                <li>Resum: div de contingut visible durant l'streaming (estava amagat fins al final)</li>
-                <li>Resum: el fallback de quota respecta els models favorits i evita els models cars</li>
-                <li>Models: límit de tokens per model via <code>contextWindow</code>; <code>EUR_RATE</code> mogut a <code>shared/models.js</code></li>
-                <li>Sidebar: condicional duplicat eliminat del listener <code>apiKey</code></li>
-                <li>Estadístiques: guardia per a dates invàlides; format <code>toLocaleString</code> per als tokens</li>
-                <li>Estadístiques: funcions d'agrupació setmanal/mensual (<code>getMondayOfWeek</code>, <code>filterHistoryByPeriod</code>)</li>
-                <li>Streaming: text pla durant l'streaming, renderització completa de Markdown en finalitzar</li>
-                <li>Caché: dues lectures seqüencials de <code>saveUsageStats</code> combinades en una sola <code>storage.get</code></li>
-                <li>Models: <code>favoriteModels</code> llegit a la inicialització, evitant una crida extra a <code>storage.sync</code></li>
-                <li><code>defuddle</code> afegit com a dependència npm de vendor (fixat a <code>^0.14.0</code>)</li>
-                <li>El bundle de la sidebar inclou <code>history.js</code></li>
+                <li><strong>Extracció de contingut de Twitter/X</strong> via la biblioteca Defuddle amb fallback de scraping DOM</li>
+                <li><strong>Comptatge real de tokens des de <code>usageMetadata</code></strong> de l'API de Gemini (substitueix les estimacions)</li>
+                <li><strong>Panell d'historial</strong>: llista navegable de resums anteriors a la sidebar</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1312,21 +1044,7 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Març 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Sistema de models favorits: fixa els models de Gemini preferits al capdamunt de la llista</li>
-                <li>Script de comprovació pre-release (<code>scripts/pre-release-check.mjs</code>) amb auditoria automatitzada</li>
-                <li>Bundle de la sidebar per a Chromium amb esbuild (<code>scripts/build-sidebar-bundle.mjs</code>)</li>
-                <li>CI/CD: fluxos de treball de GitHub Actions per a lint, tests i release</li>
-                <li>ESLint integrat a tot el projecte; executor de tests natiu de Node.js (56 tests, 0 errors)</li>
-                <li><code>CURATED_MODELS</code> unificat a <code>shared/models.js</code> com a font de veritat única</li>
-                <li>Estat biònic gestionat via classe CSS (sense estils inline)</li>
-                <li>Icones pregenerides a <code>img/</code>; <code>set_dev_mode.ps1</code> millorat</li>
-                <li><code>shared/defaults.js</code> extret per als valors de prompt per defecte</li>
-                <li><code>getCuratedModelInfo</code> corregit per a variants de model</li>
-                <li>Compatibilitat de build per a Linux (GitHub Actions <code>ubuntu-latest</code>)</li>
-                <li><code>settings.js</code> dividit en 8 submòduls temàtics</li>
-                <li>Creació de ZIP en Node.js pur (eliminada la dependència de Python)</li>
-                <li>Estratègia de manifest: <code>manifest.base.json</code> + fitxers de patch per objectiu</li>
-                <li>Procediment de release simplificat amb <code>npm run prerelease</code></li>
+                <li><strong>Sistema de models favorits</strong>: fixa els models de Gemini preferits al capdamunt de la llista</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1335,21 +1053,7 @@
                 <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Suport per a Chromium (Chrome, Edge, Brave) amb <code>side_panel</code> de Manifest V3</li>
-                <li>Build dual-objectiu: ZIPs separats per a Firefox i Chromium</li>
-                <li>Empaquetat ZIP compatible amb AMO (separadors de ruta amb barra endavant)</li>
-                <li><code>ext.js</code>: capa d'abstracció cross-browser unificada (Firefox <code>browser.<em></code> / Chromium <code>chrome.</em></code>)</li>
-                <li>Bundle esbuild per al service worker en segon pla (requisit de Chromium per a mòduls ES)</li>
-                <li>Extensió portada de Firefox-only a MV3 cross-browser complet</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.2.1
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Correccions menors i millores d'estabilitat abans de la reescriptura 2.0</li>
+                <li><strong>Suport per a Chromium (Chrome, Edge, Brave)</strong> amb <code>side_panel</code> de Manifest V3</li>
               </ul>
             </div>
             <div class="version-entry" style="margin-bottom: 25px; position: relative">
@@ -1359,56 +1063,6 @@
               </div>
               <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
                 <li>Plugin de Validació Científica</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.1.5
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Correccions de permisos i metadades del manifest</li>
-                <li>Llegendes dels camps de plantilla afegides a les opcions</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.1.4
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Correccions de la integració amb Obsidian</li>
-                <li><code>utils.js</code> refactoritzat</li>
-                <li>Lectura biònica millorada amb fixació configurable i algorisme basat en regles</li>
-                <li>Nous temes: Sépia i Gris Suau</li>
-              </ul>
-            </div>
-            <div class="version-entry" style="margin-bottom: 25px; position: relative">
-              <div class="version-title" style="font-weight: bold; margin-bottom: 5px">
-                v1.1.2
-                <span class="version-date" style="font-weight: normal; color: #666; font-size: 13px; margin-left: 8px">Febrer 2026</span>
-              </div>
-              <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">
-                <li>Exportació al vault d'Obsidian: llançament silenciós (sense diàleg de confirmació)</li>
-                <li>Neteja de la UI de la sidebar</li>
-                <li>Resumització de pàgines web usant l'API de Google Gemini (streaming SSE)</li>
-                <li>Sidebar de Firefox (Manifest V3 <code>sidebar_action</code>)</li>
-                <li>Mode de lectura biònica</li>
-                <li>Múltiples temes (sistema, clar, fosc)</li>
-                <li>Estadístiques d'ús (tokens diaris i quota)</li>
-                <li>Integració d'exportació a Obsidian</li>
-                <li>Sistema de plugins (activar/desactivar/reordenar)</li>
-                <li>Actualitza la versió a <code>package.json</code> en fer un bump de release</li>
-                <li>Afegeix una secció <code>## [X.Y.Z] - YYYY-MM-DD</code> a aquest fitxer</li>
-                <li>Usa <code>git tag vX.Y.Z</code> per als releases a <code>main</code></li>
-                <li>Segueix els <a href="https://www.conventionalcommits.org/">Conventional Commits</a></li>
-                <li><code>feat:</code> nova funcionalitat</li>
-                <li><code>fix:</code> correcció d'error</li>
-                <li><code>security:</code> millora de seguretat</li>
-                <li><code>docs:</code> documentació</li>
-                <li><code>chore:</code> manteniment, dependències</li>
-                <li><code>test:</code> millores de tests</li>
-                <li><code>perf:</code> millores de rendiment</li>
               </ul>
             </div>
             <!-- CHANGELOG_END -->
@@ -1426,16 +1080,15 @@
 
     <div id="status" class="toast">Configuració guardada correctament!</div>
 
-    <script src="../ext.js"></script>
-    <script src="../shared/models.js"></script>
-    <script src="../shared/defaults.js"></script>
-    <script src="settings-defaults.js"></script>
-    <script src="settings-order.js"></script>
-    <script src="settings-cache.js"></script>
-    <script src="settings-stats.js"></script>
-    <script src="settings-models.js"></script>
-    <script src="settings-options.js"></script>
-    <script src="settings-sidebar.js"></script>
-    <script src="settings.js"></script>
+    <script defer src="../ext.js"></script>
+    <script defer src="../shared/models.js"></script>
+    <script defer src="../shared/defaults.js"></script>
+    <script defer src="settings-defaults.js"></script>
+    <script defer src="settings-order.js"></script>
+    <script defer src="settings-cache.js"></script>
+    <script defer src="settings-models.js"></script>
+    <script defer src="settings-options.js"></script>
+    <script defer src="settings-sidebar.js"></script>
+    <script defer src="settings.js"></script>
   </body>
 </html>

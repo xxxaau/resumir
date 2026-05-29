@@ -78,24 +78,25 @@ test("classifyError - error genèric retorna missatge original sense config", ()
 // ---------------------------------------------------------------------------
 
 test("buildFallbackList - el model preferit va primer", () => {
-    const list = buildFallbackList("gemini-2.5-pro", ["gemini-2.0-flash", "gemini-2.5-flash"]);
+    const list = buildFallbackList("gemini-2.5-pro", ["gemini-2.5-flash", "gemini-3.5-flash"]);
     assert.equal(list[0], "gemini-2.5-pro");
 });
 
 test("buildFallbackList - no duplica el model preferit", () => {
-    const list = buildFallbackList("gemini-2.0-flash", ["gemini-2.0-flash", "gemini-2.5-flash"]);
-    const occurrences = list.filter(m => m === "gemini-2.0-flash").length;
+    const list = buildFallbackList("gemini-2.5-flash", ["gemini-2.5-flash", "gemini-3.5-flash"]);
+    const occurrences = list.filter(m => m === "gemini-2.5-flash").length;
     assert.equal(occurrences, 1, "El model preferit no ha d'aparèixer duplicat");
 });
 
 test("buildFallbackList - no inclou models sense fallback:true", () => {
-    const list = buildFallbackList("gemini-2.0-flash", ["gemini-2.0-flash"]);
+    const list = buildFallbackList("gemini-2.5-flash", ["gemini-2.5-flash"]);
     assert.ok(!list.includes("gemini-2.5-pro"), "gemini-2.5-pro no ha d'estar al fallback");
 });
 
 test("buildFallbackList - inclou models de CURATED_MODELS amb fallback:true com a darrer recurs", () => {
     // Si l'únic favorit és gemini-2.5-pro, els fallbacks de CURATED_MODELS s'afegeixen
     const list = buildFallbackList("gemini-2.5-pro", ["gemini-2.5-pro"]);
-    assert.ok(list.includes("gemini-2.0-flash"), "Ha d'incloure flash com a fallback de CURATED_MODELS");
-    assert.ok(list.includes("gemini-2.0-flash-lite"), "Ha d'incloure flash-lite com a fallback");
+    assert.ok(list.includes("gemini-3.1-flash-lite"), "Ha d'incloure flash-lite com a fallback de CURATED_MODELS");
+    assert.ok(list.includes("gemini-2.5-flash"), "Ha d'incloure flash com a fallback");
+    assert.ok(list.includes("gemini-3.5-flash"), "Ha d'incloure 3.5 flash com a fallback");
 });

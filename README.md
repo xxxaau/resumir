@@ -1,9 +1,9 @@
-# ![Icona](icons/icon-48.png) Resumir contingut
+# ![Icona](icons/icon-48.png) Resumir
 
 Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — sense fer seguiment, sense telemetria, sense dades que pugin al núvol.
 
 [![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/firefox/addon/resumir-contingut)
-[![Disponible a Chrome Web Store](https://img.shields.io/badge/Chrome-Pròximament-4285F4?logo=googlechrome)](#)
+[![Baixar de GitHub Releases](https://img.shields.io/badge/Chrome-Descarregar-4285F4?logo=googlechrome)](https://github.com/xxxaau/extensio-resumir-contingut/releases)
 [![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
 [![CI](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml)
 
@@ -14,6 +14,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 - **Resum amb IA** — un sol clic per obtenir un resum estructurat de qualsevol pàgina
 - **YouTube i Hacker News** — extracció intel·ligent de transcripcions i fils de comentaris
   - Transcripcions YouTube amb 3 vies de fallback (`baseUrl` directe, variants `timedtext` json3/srv3/cru, `youtubei/v1/get_transcript`) per a vídeos amb subtítols automàtics
+- **PDFs amb capa de text** — resum de PDFs HTTPS remots (descàrrega automàtica) i locals (`file://`/HTTP via botó "Selecciona PDF local"). Detecció per extensió o `Content-Type`. PDFs escanejats no suportats (cal OCR).
 - **Mapa conceptual interactiu** — visualització jeràrquica del resum en estil pill (NotebookLM)
   - Vista al sidebar i en pantalla completa, idèntiques als 4 temes
   - Pan, zoom, plegat/desplegat de branques, exportació a PNG
@@ -30,29 +31,31 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 
 ### Firefox
 
-**Via Mozilla Add-ons** (recomanat):
-1. Visita [addons.mozilla.org/firefox/addon/resumir-contingut](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
-2. Clica «Afegir a Firefox»
+L'extensió es distribueix **exclusivament** via Mozilla Add-ons:
 
-**Per a desenvolupament** (temporal):
-1. Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
-2. Obre `about:debugging#/runtime/this-firefox`
-3. Clica «Carrega complement temporal» i selecciona `manifest.json`
+1. Visita [addons.mozilla.org/firefox/addon/resumir-contingut](https://addons.mozilla.org/firefox/addon/resumir-contingut/)
+2. Fes clic a «Afegir a Firefox»
+
+> **Per a desenvolupament:** obre `about:debugging#/runtime/this-firefox`, clica «Carrega complement temporal» i selecciona `manifest.json`.
 
 ### Chrome / Edge / Brave
 
-**Via Chrome Web Store** (pròximament disponible):
+L'extensió **no està al Chrome Web Store**. Per instal·lar-la:
 
-**Per a desenvolupament** (temporal):
-1. Clona el repo: `git clone https://github.com/xxxaau/extensio-resumir-contingut.git`
-2. Obre `chrome://extensions` i activa el «Mode de desenvolupador»
-3. Clica «Carrega extensió desempaquetada» i selecciona la carpeta del repo
+1. Ves a la secció **Releases** del GitHub:
+   https://github.com/xxxaau/extensio-resumir-contingut/releases
+2. Baixa el fitxer `resumir-contingut-vX.X.X-chromium.zip` de l'última versió
+3. Descomprimeix-lo en una carpeta
+4. Obre `chrome://extensions` i activa el «Mode de desenvolupador»
+5. Fes clic a «Carrega extensió desempaquetada» i selecciona la carpeta
+
+> **Consell:** Després de cada actualització, repeteix el procés amb el nou ZIP. Les dades (clau API, historial, preferències) es conserven.
 
 ---
 
 ## Configuració
 
-1. Obre la barra lateral o vés a **Extensions › Resumir contingut › Opcions**
+1. Obre la barra lateral o vés a **Extensions › Resumir › Opcions**
 2. Enganxa la teva **API Key de Google Gemini** (gratuïta a [aistudio.google.com](https://aistudio.google.com/app/apikey))
 3. Desa els canvis i comença a resumir
 
@@ -76,7 +79,7 @@ sidebar/
   conceptmap-filename.js    # Generador del nom de fitxer PNG (funció pura)
 options/                    # Pàgina de configuració
 shared/                     # Models i valors per defecte compartits
-tests/                      # 222 tests unitaris i d'integració
+tests/                      # 233 tests unitaris i d'integració
 ```
 
 Consulta [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md) per a mapa de projectes, [docs/MODELS-WORKFLOW.md](docs/MODELS-WORKFLOW.md) per a detalls tècnics d'API i models, o [docs/CONCEPTMAP-FEATURES.md](docs/CONCEPTMAP-FEATURES.md) per al disseny del mapa conceptual.
@@ -117,7 +120,18 @@ Llegeix la [Política de privadesa](docs/PRIVACY_POLICY.md) per a més detalls.
 
 ## Contribucions
 
-Les contribucions són benvingudes. Llegeix [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) per saber com participar.
+Les contribucions són benvingudes! Consulta:
+
+- [Guia de contribució](docs/CONTRIBUTING.md) — com començar
+- [Codi de conducta](docs/CODE_OF_CONDUCT.md) — normes de la comunitat
+- [Backlog de millores](docs/BACKLOG.md) — funcionalitats pendents
+- [Issues](https://github.com/xxxaau/extensio-resumir-contingut/issues) — reporta bugs o demana funcionalitats
+- [Discussions](https://github.com/xxxaau/extensio-resumir-contingut/discussions) — preguntes generals
+
+## Reportar bugs
+
+Si trobes un error, obre una [issue](https://github.com/xxxaau/extensio-resumir-contingut/issues/new/choose)
+i inclou: navegador/versió, passos per reproduir, comportament real vs. esperat.
 
 ---
 

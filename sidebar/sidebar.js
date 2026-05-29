@@ -1,6 +1,15 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const contentDiv = document.getElementById("content");
     const errorDiv = document.getElementById("error");
@@ -13,6 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const scienceBtn = document.getElementById("scienceBtn");
     const historyBtn = document.getElementById("historyBtn");
     const sourceTextBtn = document.getElementById("sourceTextBtn");
+    const selectPdfBtn = document.getElementById("selectPdfBtn");
+    const pdfFileInput = document.getElementById("pdfFileInput");
     const modelSelect = document.getElementById("model-select");
 
     let isGenerating = false;
@@ -70,27 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // --- Configuration Initialization & Migration ---
-    // API key lives only in storage.local to avoid sync across devices via browser account.
-    // Migration: if a legacy key sits in storage.sync, copy it to local then drop the sync copy.
-    // The apiKeyMigrated flag short-circuits subsequent runs and reduces the window where
-    // two concurrent sidebar instances would both run the migration.
-    (async () => {
-        try {
-            const local = await ext.storage.local.get(["apiKey", "apiKeyMigrated"]);
-            if (local.apiKeyMigrated) return;
-
-            const sync = await ext.storage.sync.get(["apiKey"]);
-            if (sync.apiKey && !local.apiKey) {
-                await ext.storage.local.set({ apiKey: sync.apiKey, apiKeyMigrated: true });
-                await ext.storage.sync.remove("apiKey");
-            } else {
-                await ext.storage.local.set({ apiKeyMigrated: true });
-                if (sync.apiKey) await ext.storage.sync.remove("apiKey");
-            }
-        } catch (e) {
-            console.warn("API key migration failed:", e);
-        }
-    })();
 
     const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
 
@@ -156,6 +146,90 @@ document.addEventListener("DOMContentLoaded", () => {
     summarizeBtn.addEventListener("click", () => {
         doSummary(null, false, false, true);
     });
+
+    // --- Selector de PDF local ---
+    // Flux: l'usuari selecciona un PDF, l'extreim amb pdf.js, l'obrim en una
+    // pestanya nova (blob URL) i disparem el resum. contentPreload conte el
+    // text ja extret, indexat per la URL blob de la nova pestanya, de manera
+    // que el pipeline normal el consumeix sense haver de re-fetch-ar.
+    if (selectPdfBtn && pdfFileInput) {
+        // Pulsa el bot\u00f3 quan apareix l'error PDF-016 a l'errorDiv per fer-lo descobrible.
+        if (errorDiv && typeof MutationObserver !== "undefined") {
+            const obs = new MutationObserver(() => {
+                if (errorDiv.textContent && errorDiv.textContent.includes("[PDF-016]")) {
+                    selectPdfBtn.classList.add("pulse");
+                    setTimeout(() => selectPdfBtn.classList.remove("pulse"), 4000);
+                }
+            });
+            obs.observe(errorDiv, { childList: true, characterData: true, subtree: true });
+        }
+        selectPdfBtn.addEventListener("click", () => {
+            if (isGenerating) return;
+            pdfFileInput.click();
+        });
+        pdfFileInput.addEventListener("change", async (e) => {
+            const file = e.target.files && e.target.files[0];
+            // Reset perqu\u00e8 re-seleccionar el mateix fitxer torni a disparar change.
+            e.target.value = "";
+            if (!file) return;
+            if (isGenerating) return;
+            try {
+                showPageTitleStrip(file.name, `pdf-local:${file.name}`);
+                const buffer = await file.arrayBuffer();
+                // Clonar el buffer abans de passar-lo a extractPdfText: pdf.js el pot
+                // transferir al worker (via postMessage) i detachar l'original.
+                const viewerBuffer = buffer.slice(0);
+                if (typeof extractPdfText !== "function") {
+                    throw new Error("pdf-extract no carregat (vendor/pdf.min.js)");
+                }
+                const pdfResult = await extractPdfText(buffer);
+                // Obre el PDF en una pestanya per consultar-lo via visor personalitzat.
+                // Usem storage.session (compartit entre pàgines d'extensió) per passar
+                // el buffer, ja que blob: URLs no funcionen al visor nadiu de Firefox.
+                let viewerKey = `pdfViewer:${Date.now()}`;
+                const b64 = arrayBufferToBase64(viewerBuffer);
+                try {
+                    await ext.storage.session.set({ [viewerKey]: b64 });
+                } catch (sessionErr) {
+                    console.warn("[PDF picker] storage.session.set failed, skipping viewer:", sessionErr);
+                    // Si storage.session no pot desar-lo (límit de mida), simplement no
+                    // obrim el visor. El resum es genera igualment.
+                    viewerKey = null;
+                }
+                if (viewerKey) {
+                    ext.tabs.create({
+                        url: ext.runtime.getURL(`sidebar/pdf-viewer.html?key=${encodeURIComponent(viewerKey)}`),
+                        active: true
+                    });
+                }
+                const tabUrl = `pdf-local:${file.name}`;
+                const pageData = {
+                    title: pdfResult.title || file.name,
+                    text: pdfResult.text,
+                    url: tabUrl,
+                };
+                // Injecta el contingut al pipeline normal de resum.
+                // summary.js comprovara si el URL comenca per "pdf-local:" i usara
+                // el preload directament (sense necessitat que coincideixi amb la pestanya activa).
+                contentPreload = Promise.resolve(pageData);
+                doSummary(null, false, false, true);
+            } catch (err) {
+                console.error("[PDF picker] error:", err);
+                const codeMap = {
+                    PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
+                    INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
+                    SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
+                    TOO_LARGE: "[PDF-013] PDF massa gran.",
+                    TIMEOUT: "[PDF-014] Timeout extraient el PDF.",
+                };
+                const msg = codeMap[err?.code] || `[PDF-019] Error obrint PDF: ${err?.message || err}`;
+                if (errorDiv) {
+                    errorDiv.textContent = msg;
+                    errorDiv.classList.remove("hidden");
+                }
+            }
+        });
+    }
 
     // Open links in content area in a new browser tab (extension sidebar context)
     contentDiv.addEventListener("click", (e) => {
@@ -299,28 +373,53 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!badge) return;
             if (!url || url.startsWith("seleccio:")) {
                 badge.style.visibility = "hidden";
+                badge.replaceChildren();
                 badge.removeAttribute("data-clickable");
+                badge.removeAttribute("data-types");
                 return;
             }
-            const cached = await getSummaryCache(url);
-            if (cached) {
+            const types = await getAvailableTypes(url);
+            if (types.length > 0) {
+                badge.replaceChildren();
+                for (const ct of CONTENT_TYPES) {
+                    if (types.includes(ct.id)) {
+                        const icon = document.createElement("span");
+                        icon.className = "cache-badge-type";
+                        icon.textContent = ct.icon;
+                        icon.title = ct.label;
+                        icon.dataset.type = ct.id;
+                        badge.appendChild(icon);
+                    }
+                }
                 badge.style.visibility = "visible";
                 badge.dataset.clickable = "true";
+                badge.dataset.types = types.join(",");
             } else {
+                badge.replaceChildren();
                 badge.style.visibility = "hidden";
                 badge.removeAttribute("data-clickable");
+                badge.removeAttribute("data-types");
             }
         }, 150);
     }
 
     const cacheBadge = document.getElementById("cache-badge");
     if (cacheBadge) {
-        cacheBadge.addEventListener("click", async () => {
+        cacheBadge.addEventListener("click", async (e) => {
             if (cacheBadge.dataset.clickable !== "true") return;
             const tabs = await ext.tabs.query({ active: true, currentWindow: true });
             if (!tabs[0]?.url) return;
-            const entry = await getSummaryCache(tabs[0].url);
-            if (entry) loadHistoryEntry(entry);
+            const url = tabs[0].url;
+            const typeIcon = e.target.closest(".cache-badge-type");
+            if (typeIcon) {
+                const entry = await getSummaryCache(url, typeIcon.dataset.type);
+                if (entry) loadHistoryEntry(entry);
+            } else {
+                const types = (cacheBadge.dataset.types || "").split(",").filter(Boolean);
+                const preferred = types.includes("summary") ? "summary" : types[0];
+                const entry = await getSummaryCache(url, preferred);
+                if (entry) loadHistoryEntry(entry);
+            }
         });
     }
 
@@ -378,14 +477,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    function _handlePendingCacheLoad(value) {
+        ext.storage.local.remove("pendingCacheLoad");
+        let url = value;
+        let type = "summary";
+        if (typeof value === "string" && value.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(value);
+                if (parsed.url) { url = parsed.url; type = parsed.type || "summary"; }
+            } catch {}
+        }
+        getSummaryCache(url, type).then(entry => {
+            if (entry) loadHistoryEntry(entry);
+        });
+    }
+
     // Check for pending cache load on init (settings page wrote key while sidebar was closed)
     ext.storage.local.get("pendingCacheLoad").then(data => {
         if (data.pendingCacheLoad) {
-            const url = data.pendingCacheLoad;
-            ext.storage.local.remove("pendingCacheLoad");
-            getSummaryCache(url).then(entry => {
-                if (entry) loadHistoryEntry(entry);
-            });
+            _handlePendingCacheLoad(data.pendingCacheLoad);
         }
     });
 
@@ -396,11 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ext.storage.local.remove("pendingSummary");
         }
         if (area === "local" && changes.pendingCacheLoad?.newValue) {
-            const url = changes.pendingCacheLoad.newValue;
-            ext.storage.local.remove("pendingCacheLoad");
-            getSummaryCache(url).then(entry => {
-                if (entry) loadHistoryEntry(entry);
-            });
+            _handlePendingCacheLoad(changes.pendingCacheLoad.newValue);
         }
     });
 
@@ -412,6 +518,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- On Load Init ---
     (async () => {
+        // 1. Migració de clau API: copy sync→local (només si cal)
+        try {
+            const local = await ext.storage.local.get(["apiKey", "apiKeyMigrated"]);
+            if (!local.apiKeyMigrated) {
+                const sync = await ext.storage.sync.get(["apiKey"]);
+                if (sync.apiKey && !local.apiKey) {
+                    await ext.storage.local.set({ apiKey: sync.apiKey, apiKeyMigrated: true });
+                    // Esborrem de sync només si l'hem copiada (no si ja era a local)
+                    await ext.storage.sync.remove("apiKey");
+                } else {
+                    // No hi ha clau per migrar o ja és a local — marquem com a fet
+                    await ext.storage.local.set({ apiKeyMigrated: true });
+                }
+            }
+        } catch (e) {
+            console.warn("API key migration failed:", e);
+        }
+
         // Purgar caché expirada en segon pla (no bloquejant)
         purgeStaleCacheEntries().catch(err => { console.warn("Purge cache failed:", err); });
         // Inicialitzar badge de caché per a la URL del tab actiu

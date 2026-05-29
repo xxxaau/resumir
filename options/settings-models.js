@@ -77,8 +77,8 @@ function renderModelList(allModels, favoriteIds, currentModel, container) {
     // Netejar només les files de models (preservar info divs)
     container.querySelectorAll(".models-section-title, .model-item-row").forEach(el => el.remove());
 
-    const favorites = allModels.filter(m => favoriteIds.includes(m.id));
-    const others    = allModels.filter(m => !favoriteIds.includes(m.id));
+    const favorites = sortModelsByPriority(allModels.filter(m => favoriteIds.includes(m.id)));
+    const others    = sortModelsByPriority(allModels.filter(m => !favoriteIds.includes(m.id)));
 
     if (favorites.length > 0) {
         const title = document.createElement("div");
@@ -177,10 +177,10 @@ async function refreshModels(e) {
             }))
             .filter(m => !curatedIds.has(m.id));
 
-        const mergedModels = [
+        const mergedModels = sortModelsByPriority([
             ...CURATED_MODELS.map(cm => ({ id: cm.id, label: cm.label, curated: true })),
             ...apiModels.map(m => ({ id: m.id, label: m.label, curated: false }))
-        ];
+        ]);
 
         await ext.storage.local.set({
             availableModels: mergedModels,

@@ -53,3 +53,14 @@ docs/marketplace/
 
 # Coverage reports
 coverage/
+
+# Spike / PoC material (temporary)
+spike/
+
+# Playwright local artifacts
+.pw-userdata/
+.pw-extension/
+scripts/toolbar-shot.png
+tests/pdf-flow-*.png
+test-results/
+playwright-report/

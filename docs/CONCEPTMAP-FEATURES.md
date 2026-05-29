@@ -1,6 +1,6 @@
 ﻿# Mapa Conceptual Interactiu
 
-Disseny i implementació del mapa conceptual de l'extensió **Resumir contingut**.
+Disseny i implementació del mapa conceptual de l'extensió **Resumir**.
 
 > A partir de la **v2.2.10**, el mapa s'ha redissenyat completament en estil
 > pill (similar a Google NotebookLM). Aquest document descriu l'estat actual.

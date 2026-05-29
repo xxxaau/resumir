@@ -7,7 +7,52 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+### Eliminat
+- **Pestanya d'estadístiques eliminada:** s'han tret `options/settings-stats.js`,
+  `tests/settings-stats.test.mjs` i `tests/stats-period.test.mjs` (codi no mantingut).
+  Les estadístiques bàsiques (tokens, cache) es mostren al sidebar. (minor)
+
+### Afegit
+- **Cache multientry:** `summary_cache:{url}` ara pot contenir múltiples tipus
+  de contingut (`summary`, `deepdive`, `conceptmap`, `science`) en una sola entrada.
+  Migració silenciosa de caches antigues.
+- **Historial agrupat per URL a la sidebar:** les entrades del mateix URL es mostren
+  agrupades amb icones del tipus de contingut. Navegació per pestanyes dins l'entrada.
+
+### Canviat
+- **`sidebar/cache.js`**: nova estructura tipada (`_keyToUrl`, `_keyToType`). (minor)
+- **`sidebar/history.js`**: renderitzat amb agrupació i pestanyes. (minor)
+- **`sidebar/sidebar.js`**: flux de desat amb paràmetre de tipus. (minor)
+- **`shared/content-types.js`**: fitxer nou amb tipus de contingut centralitzats. (minor)
+
+---
+
+## [2.3.0] - 2026-05-25
+
+### Afegit
+- **Suport per resumir fitxers PDF amb capa de text** (issue: extensió no funcionava amb PDFs). Implementat amb pdf.js 3.11.174 (legacy UMD) vendoritzat a `vendor/`.
+  - **PDFs remots HTTPS:** detecció automàtica per extensió `.pdf` o per `Content-Type: application/pdf` (HEAD probe d'1 round-trip per URLs sospitoses sense extensió, p. ex. `arxiv.org/pdf/123`).
+  - **PDFs locals (`file://`) i HTTP:** nou botó "Selecciona PDF local" a la barra d'eines del sidebar (file picker via `<input type="file">` + `FileReader`, sense cap accés de xarxa).
+  - **Codis d'error UI:** `[PDF-010]` protegit, `[PDF-011]` invàlid, `[PDF-012]` escanejat (OCR no suportat), `[PDF-013]` massa gran, `[PDF-014]` timeout, `[PDF-015]` fetch fallit, `[PDF-016]` no-HTTPS (suggereix botó local amb pulse visual), `[PDF-019]` altres.
+  - **Límits:** màx 500 pàgines, 2M caràcters, timeout 60s d'extracció + 15s de fetch.
+- **Nova pestanya amb el PDF seleccionat:** en seleccionar un PDF local, s'obre una pestanya de fons amb el PDF per consultar-lo (limitació: Firefox no renderitza `blob:` URLs d'extensions al visor PDF nadiu). (minor)
+
+### Corregit
+- **Race condition en migració de clau API:** la migració `sync→local` i la lectura de la clau eren dues IIFE independents. L'init podia llegir abans que la migració copiés la clau, mostrant "clau no configurada" tot i tenir-la. Ara la migració és seqüencial dins l'init, i mai s'esborra de `sync` si `local` ja la té. (minor)
+- **Pèrdua silenciosa de dades per quota de storage:** `storage.local` té un límit de ~5-10MB; en exhaurir-lo, les dades (clau, cache, historial) es perdien sense avís. Afegit `unlimitedStorage` al manifest per eliminar el límit. (minor)
+- **CORS en PDFs remots HTTPS:** el fetch directe des del sidebar fallava per CORS en servidors sense `Access-Control-Allow-Origin`. Ara se sol·licita el permís `<all_urls>` sota gest d'usuari i es reintenta; amb `host_permissions` concedit, Firefox/Chromium no apliquen CORS al fetch d'extensió. (minor)
+- **Local PDF: error [006] al obrir pestanya blob:** el resum de PDFs locals fallava perquè `getPageContent()` no podia extreure text de la pestanya blob. Solucionat: el text extret es passa via `contentPreload` amb prefix `pdf-local:`, i el pipeline l'usa directament sense dependre de la pestanya activa. (minor)
+- **Botó PDF en segona posició:** afegit `selectPdfBtn` al mapatge `extensionIdToButtonId` de `applyExtensionOrder` amb migració automàtica per a usuaris amb ordre desat. (minor)
+- **Preload abans que caché:** la comprovació del `contentPreload` es fa ara abans de la caché, evitant que un PDF local obtingui un resum en caché de la pàgina web activa. (minor)
+
+### Canviat
+- **CSP `connect-src` relaxada amb `https:`** (afegit a `manifest.{base,json,chromium,firefox.patch,chromium.patch,firefox.prod.patch,chromium.prod.patch}.json`) per permetre descàrrega de PDFs remots des de qualsevol origen HTTPS. La política `file:` i `http:` queda explícitament exclosa per principi de mínim privilegi. Veure `docs/SECURITY.md` per a la justificació completa i mitigacions. (minor)
+- **Models ordenats per prioritat:** la llista de models ara segueix l'ordre flash-lite > flash > pro > gemma, amb versions recents primer dins cada família. Afecta el selector de la sidebar, la llista de configuració i l'ordre de fallback automàtic.
+- **Build i release 100% Node.js:** eliminats `set_dev_mode.ps1`, `build.ps1`, `release.ps1` i `scripts/pwsh-runner.mjs`. Les comandes `npm run dev`/`prod`/`build`/`release` ara usen scripts Node.js directament (`scripts/set-mode.mjs`, `scripts/build.mjs`, `scripts/release.mjs`). La CI/CD (`release.yml`) també s'ha actualitzat per usar `node scripts/build.mjs`. (minor)
+
 ### Seguretat
+- pdf.js configurat amb opcions CSP-safe: `isEvalSupported: false`, `disableFontFace: true`, `useSystemFonts: false`, `verbosity: 0`. (minor)
+- Worker pdf.js carregat des d'origen extensió (`runtime.getURL`), mai remot. (minor)
 - **Avís important per als usuaris anteriors a v2.2**: Si heu instal·lat l'extensió abans de la versió 2.2, la vostra clau API de Gemini pot haver estat emmagatzemada a `storage.sync` (sincronitzada entre dispositius). A partir de la v2.2, la clau es guarda exclusivament a `storage.local`. Es recomana **rotar la clau API** des de Google AI Studio com a precaució.
 
 ---
@@ -15,7 +60,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ## [2.2.10] - 2026-05-22
 
 ### Corregit
-- **Bug 1 — Llegibilitat del mapa conceptual en tema fosc**: el text dels nodes ara és sempre llegible a tots els temes (clar, fosc, sèpia, gris). Les opcions `textColor`/`toggleBgColor` es resolen des de variables CSS i s'incrusten directament al SVG exportat a PNG.
+- **Bug 1 — Llegibilitat del mapa conceptual en tema fosc**: el text dels nodes ara és sempre llegible a tots els temes (clar, fosc, sèpia, gris). Les opcions `textColor`/`toggleBgColor` es resolen des de variables CSS i s'incrusten directament al SVG exportat a PNG. (minor)
 - **Bug 2 — Mapa conceptual redissenyat amb estil pill (NotebookLM)**:
   - Substituïts els nodes baseline + text per pills `<rect>` arrodonits estil NotebookLM.
   - Paleta pastel jeràrquica idèntica a tots els temes: lila (root) → blau → verd clar → verd menta.
@@ -27,12 +72,12 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Bug 3 — Transcripcions de YouTube tornen a funcionar**: afegides Via B (variants `json3`/`srv3`/`cru` del timedtext) i Via C (`youtubei/v1/get_transcript` amb `INNERTUBE_API_KEY` i `INNERTUBE_CONTEXT` extrets del DOM). Quan els subtítols no es poden carregar pel mètode habitual, l'extensió ara prova rutes alternatives abans de fallar.
 
 ### Canviat
-- **Nou format del nom de fitxer del PNG del mapa conceptual**: `YYYYMMDD_word1_word2.png` derivat del títol arrel del mapa (no del títol de la pestanya). Normalització NFD + strip diacrítics + lowercase + alfanumèric, amb stop-words ca/es/en filtrats. Fallback `_mapa.png` si cap token vàlid.
+- **Nou format del nom de fitxer del PNG del mapa conceptual**: `YYYYMMDD_word1_word2.png` derivat del títol arrel del mapa (no del títol de la pestanya). Normalització NFD + strip diacrítics + lowercase + alfanumèric, amb stop-words ca/es/en filtrats. Fallback `_mapa.png` si cap token vàlid. (minor)
 
 ### Intern
-- Nou fitxer `sidebar/conceptmap-filename.js` amb la funció pura compartida entre sidebar i overlay de pantalla completa.
-- 15 nous tests unitaris per a la generació de noms de fitxer (`tests/conceptmap-filename.test.mjs`). Suite total: 222/222 passen.
-- Nou `scripts/set-mode.mjs` (port Node de `set_dev_mode.ps1`) per evitar restriccions de `MachinePolicy` a PowerShell. Els scripts npm `dev`/`prod` ara hi apunten.
+- Nou fitxer `sidebar/conceptmap-filename.js` amb la funció pura compartida entre sidebar i overlay de pantalla completa. (minor)
+- 15 nous tests unitaris per a la generació de noms de fitxer (`tests/conceptmap-filename.test.mjs`). Suite total: 222/222 passen. (minor)
+- Nou `scripts/set-mode.mjs` (port Node de `set_dev_mode.ps1`) per evitar restriccions de `MachinePolicy` a PowerShell. Els scripts npm `dev`/`prod` ara hi apunten. (minor)
 
 ---
 
@@ -40,16 +85,16 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ### Canviat
 - **Mapa conceptual interactiu reescrit des de zero**: substituïdes les llibreries de tercers `d3.min.js`, `markmap-lib.js` i `markmap-view.js` (~640 KB) per un renderitzador SVG natiu propi (`sidebar/markmap-native.js`, ~22 KB). Mateixa funcionalitat (zoom, pan, plegat de branques, exportació a PNG i pàgina completa) sense dependències externes.
-- Eliminat camp no estàndard `author_email` del manifest (Firefox emetia warning).
-- Eliminat `web_accessible_resources` del manifest Firefox (ja no calen els vendors a la pàgina).
+- Eliminat camp no estàndard `author_email` del manifest (Firefox emetia warning). (minor)
+- Eliminat `web_accessible_resources` del manifest Firefox (ja no calen els vendors a la pàgina). (minor)
 
 ### Seguretat
 - **Zero warnings a la revisió d'AMO**: el codi nou no utilitza `innerHTML` dinàmic, `eval()` ni `Function()` — totes operacions DOM via `createElementNS` i `DOMParser`. Això elimina els 6 warnings que retardaven la revisió de l'extensió.
-- Reducció significativa de superfície d'atac: tot el codi de visualització és auditable i prop de 95% més petit que les llibreries substituïdes.
+- Reducció significativa de superfície d'atac: tot el codi de visualització és auditable i prop de 95% més petit que les llibreries substituïdes. (minor)
 
 ### Intern
-- Nou fitxer `sidebar/markmap-native.js` integrat al bundle del sidebar.
-- `scripts/build.mjs`, `scripts/build-sidebar-bundle.mjs`, `scripts/pre-release-check.mjs` i `eslint.config.mjs` netejats de referències a vendors eliminats.
+- Nou fitxer `sidebar/markmap-native.js` integrat al bundle del sidebar. (minor)
+- `scripts/build.mjs`, `scripts/build-sidebar-bundle.mjs`, `scripts/pre-release-check.mjs` i `eslint.config.mjs` netejats de referències a vendors eliminats. (minor)
 
 ---
 
@@ -57,215 +102,215 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ### Corregit
 - **Crític**: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7.
-- Les llibreries `d3.min.js`, `markmap-lib.js` i `markmap-view.js` ara s'inclouen al ZIP de release (abans referenciades al HTML però absents al paquet).
-- `conceptmap.js` integrat al bundle del sidebar per simplificar el manteniment i reduir el nombre de requests.
+- Les llibreries `d3.min.js`, `markmap-lib.js` i `markmap-view.js` ara s'inclouen al ZIP de release (abans referenciades al HTML però absents al paquet). (minor)
+- `conceptmap.js` integrat al bundle del sidebar per simplificar el manteniment i reduir el nombre de requests. (minor)
 
 ### Intern
-- Nou patcher robust de `sidebar.html`: elimina explícitament els scripts del bundle (per llista coneguda) en lloc de dependre d'un regex frágil.
-- Nou check #13 al pre-release-check: smoke-test del ZIP verifica que tot script referenciat als HTML existeix dins del paquet abans de publicar.
+- Nou patcher robust de `sidebar.html`: elimina explícitament els scripts del bundle (per llista coneguda) en lloc de dependre d'un regex frágil. (minor)
+- Nou check #13 al pre-release-check: smoke-test del ZIP verifica que tot script referenciat als HTML existeix dins del paquet abans de publicar. (minor)
 
 ---
 
 ## [2.2.7] - 2026-05-22
 
 ### Corregit
-- Afegit `web_accessible_resources` al manifest Firefox per permetre la injecció de les llibreries del mapa conceptual (`d3.min.js`, `markmap-lib.js`, `markmap-view.js`) a pàgines web externes. Sense aquesta declaració, Firefox bloquejava la injecció i el mode pantalla completa del mapa conceptual fallava amb error CSP.
+- Afegit `web_accessible_resources` al manifest Firefox per permetre la injecció de les llibreries del mapa conceptual (`d3.min.js`, `markmap-lib.js`, `markmap-view.js`) a pàgines web externes. Sense aquesta declaració, Firefox bloquejava la injecció i el mode pantalla completa del mapa conceptual fallava amb error CSP. (minor)
 
 ---
 
 ## [2.2.6] - 2026-05-22
 
 ### Corregit
-- Eliminat `incognito: "split"` del manifest (no suportat per Firefox)
-- Substituït el constructor `Function` per `eval` indirecte a `conceptmap.js` (millora de seguretat)
-- Restaurades les icones blaves de producció a `icons/prod/` i `icons/`
-- Les subcarpetes `icons/dev/` i `icons/prod/` ja no s'inclouen als ZIPs de release
-- Ruta del `CHANGELOG.md` corregida a `docs/CHANGELOG.md` als scripts de build
+- Eliminat `incognito: "split"` del manifest (no suportat per Firefox) (minor)
+- Substituït el constructor `Function` per `eval` indirecte a `conceptmap.js` (millora de seguretat) (minor)
+- Restaurades les icones blaves de producció a `icons/prod/` i `icons/` (minor)
+- Les subcarpetes `icons/dev/` i `icons/prod/` ja no s'inclouen als ZIPs de release (minor)
+- Ruta del `CHANGELOG.md` corregida a `docs/CHANGELOG.md` als scripts de build (minor)
 
 ---
 
 ## [2.2.5] - 2026-05-22
 
 ### Afegit
-- El nom del fitxer PNG exportat del mapa conceptual ara usa el format `YYYYMMDD_<titular>.png` (titular abreujat a 20 caràcters)
+- El nom del fitxer PNG exportat del mapa conceptual ara usa el format `YYYYMMDD_<titular>.png` (titular abreujat a 20 caràcters) (minor)
 
 ### Canviat
 - L'extensió passa a anomenar-se "Resumir" (mode DEV: "Resumir (DEV)")
-- Configuració del mapa conceptual: eliminades les opcions de profunditat, branques, expandir tot i mostrar descripcions (ara es controlen des del prompt)
-- Lectura biònica: interlineat per defecte canviat a 1.5, gruix de negreta per defecte canviat a 600 (semi-negreta)
-- La icona del mapa conceptual a configuració ara coincideix amb el botó de la sidebar
+- Configuració del mapa conceptual: eliminades les opcions de profunditat, branques, expandir tot i mostrar descripcions (ara es controlen des del prompt) (minor)
+- Lectura biònica: interlineat per defecte canviat a 1.5, gruix de negreta per defecte canviat a 600 (semi-negreta) (minor)
+- La icona del mapa conceptual a configuració ara coincideix amb el botó de la sidebar (minor)
 
 ### Eliminat
-- Eliminada l'opció d'idiomes preferits de YouTube a configuració (la selecció d'idioma ara és automàtica)
+- Eliminada l'opció d'idiomes preferits de YouTube a configuració (la selecció d'idioma ara és automàtica) (minor)
 
 ---
 
 ## [2.2.4] - 2026-04-27
 
 ### Afegit
-- Indicador de càrrega animat amb punts durant la generació del resum
-- Refactorització de l'extracció de transcripcions de YouTube: extracció MAIN world (Pas 1) + fallback via API (Pas 2)
-- Suport per a `prerenderedText` quan `playerCaptionsTracklistRenderer` és buit
-- Lectura directa de la transcripció des de `ytInitialData` sense obrir el panell
-- Protecció contra injecció de prompts: embolcall `<UNTRUSTED_CONTENT>` al prompt del sistema
-- Clau API migrada de `storage.sync` a `storage.local` per millor aïllament de seguretat
+- Indicador de càrrega animat amb punts durant la generació del resum (minor)
+- Refactorització de l'extracció de transcripcions de YouTube: extracció MAIN world (Pas 1) + fallback via API (Pas 2) (minor)
+- Suport per a `prerenderedText` quan `playerCaptionsTracklistRenderer` és buit (minor)
+- Lectura directa de la transcripció des de `ytInitialData` sense obrir el panell (minor)
+- **Protecció contra injecció de prompts**: embolcall `<UNTRUSTED_CONTENT>` al prompt del sistema
+- **Clau API migrada de `storage.sync` a `storage.local`** per millor aïllament de seguretat
 
 ### Corregit
-- El panell de transcripció de YouTube no s'obria en navegar a un vídeo
-- Detecció de la transcripció de YouTube molt més robusta
-- Els punts de càrrega ara s'amaguen en rebre el primer chunk d'streaming (sense parpelleig d'estat buit)
-- La toolbar es manté visible en visualitzar entrades de l'historial de caché
-- La barra de tornada s'amaga en tancar panells per tornar a la vista principal
-- Alineació de la barra del botó de tornada amb la toolbar; menú amagat en visualitzar panells
+- El panell de transcripció de YouTube no s'obria en navegar a un vídeo (minor)
+- Detecció de la transcripció de YouTube molt més robusta (minor)
+- Els punts de càrrega ara s'amaguen en rebre el primer chunk d'streaming (sense parpelleig d'estat buit) (minor)
+- La toolbar es manté visible en visualitzar entrades de l'historial de caché (minor)
+- La barra de tornada s'amaga en tancar panells per tornar a la vista principal (minor)
+- Alineació de la barra del botó de tornada amb la toolbar; menú amagat en visualitzar panells (minor)
 
 ### Canviat
-- Disposició reordenada en visualitzar un resum de caché
-- La classe CSS `.hidden` ara sempre amaga elements independentment de l'especificitat
+- Disposició reordenada en visualitzar un resum de caché (minor)
+- La classe CSS `.hidden` ara sempre amaga elements independentment de l'especificitat (minor)
 
 ---
 
 ## [2.2.3] - 2026-04-23
 
 ### Afegit
-- Millores a l'extracció de transcripcions ASR (autogenerades) de YouTube
-- Comptador diari per a estadístiques precises per període
-- Límit de l'historial d'estadístiques augmentat de 100 a 1.000 entrades
-- Tests de persistència: validen la integritat de les dades entre actualitzacions de versió
+- Millores a l'extracció de transcripcions ASR (autogenerades) de YouTube (minor)
+- Comptador diari per a estadístiques precises per període (minor)
+- Límit de l'historial d'estadístiques augmentat de 100 a 1.000 entrades (minor)
+- Tests de persistència: validen la integritat de les dades entre actualitzacions de versió (minor)
 
 ### Corregit
-- Lectura de transcripcions de YouTube des de `ytInitialData` (suport ASR complet)
-- Detecció de la pista activa en l'extracció de transcripcions de YouTube
-- Gestor `onInstalled`: evita menús contextuals duplicats en actualitzar
-- Fuites de memòria en la caché i els bindings de botons
-- Fallback del model API ampliat; missatges d'error de l'API millorats
+- Lectura de transcripcions de YouTube des de `ytInitialData` (suport ASR complet) (minor)
+- Detecció de la pista activa en l'extracció de transcripcions de YouTube (minor)
+- Gestor `onInstalled`: evita menús contextuals duplicats en actualitzar (minor)
+- Fuites de memòria en la caché i els bindings de botons (minor)
+- Fallback del model API ampliat; missatges d'error de l'API millorats (minor)
 
 ### Rendiment
-- Temps d'inici de la sidebar millorat
-- Crides API: afegits timeouts i fiabilitat millorada
-- Estadístiques: lectures de `getDailyStats` unificades en una sola crida `storage.get`
+- Temps d'inici de la sidebar millorat (minor)
+- Crides API: afegits timeouts i fiabilitat millorada (minor)
+- Estadístiques: lectures de `getDailyStats` unificades en una sola crida `storage.get` (minor)
 
 ### Canviat
-- Nom al manifest de producció corregit (ja no inclou l'etiqueta `DEV`)
-- Globals d'ESLint corregits; hook de lint pre-commit afegit
+- Nom al manifest de producció corregit (ja no inclou l'etiqueta `DEV`) (minor)
+- Globals d'ESLint corregits; hook de lint pre-commit afegit (minor)
 
 ---
 
 ## [2.2.2] - 2026-04-22
 
 ### Afegit
-- Les operacions de caché ara usen un índex de resums per a purga i llistat més ràpids
-- Embolcall de PowerShell multiplataforma (`build.ps1`) amb comprovació d'existència de l'script
-- Changelog injectat automàticament a `settings.html` en fer un bump de versió (script `postversion`)
-- Ordres de build i release per a Firefox/Chromium documentades a `BUILD.md`
+- Les operacions de caché ara usen un índex de resums per a purga i llistat més ràpids (minor)
+- Embolcall de PowerShell multiplataforma (`build.ps1`) amb comprovació d'existència de l'script (minor)
+- Changelog injectat automàticament a `settings.html` en fer un bump de versió (script `postversion`) (minor)
+- Ordres de build i release per a Firefox/Chromium documentades a `BUILD.md` (minor)
 
 ### Corregit
-- Fallback de l'índex de caché: purga i llistat funcionen correctament quan falta l'índex
-- Bindings de botons de la pàgina d'opcions corregits
-- El manifest de producció de Chromium ja no conté la clau de Chrome incrustada
-- Estil biònic extret en un helper dedicat; renderització del resum endurit
-- Bindings d'esdeveniments de settings refactoritzats; gestió del pageSize endurit
+- Fallback de l'índex de caché: purga i llistat funcionen correctament quan falta l'índex (minor)
+- Bindings de botons de la pàgina d'opcions corregits (minor)
+- El manifest de producció de Chromium ja no conté la clau de Chrome incrustada (minor)
+- Estil biònic extret en un helper dedicat; renderització del resum endurit (minor)
+- Bindings d'esdeveniments de settings refactoritzats; gestió del pageSize endurit (minor)
 
 ### Canviat
-- El flux de release conserva el mode dev/prod original i escriu fitxers de patch JSON sense BOM
-- Directoris de còpia de seguretat del build (`build_*/`) exclosos de git
+- El flux de release conserva el mode dev/prod original i escriu fitxers de patch JSON sense BOM (minor)
+- Directoris de còpia de seguretat del build (`build_*/`) exclosos de git (minor)
 
 ---
 
 ## [2.2.1] - 2026-04-07
 
 ### Afegit
-- Barra inferior millorada: visualització de l'ús de tokens amb millores d'UX
+- Barra inferior millorada: visualització de l'ús de tokens amb millores d'UX (minor)
 
 ### Corregit
-- Globals d'ESLint per als prompts per defecte corregits
-- Ús de stream a `summary.js` corregit
+- Globals d'ESLint per als prompts per defecte corregits (minor)
+- Ús de stream a `summary.js` corregit (minor)
 
 ### Canviat
-- Settings refactoritzades: valors per defecte i UI simplificats
-- Manifests regenerats en mode PROD (el nom ja no conté `DEV`)
+- Settings refactoritzades: valors per defecte i UI simplificats (minor)
+- Manifests regenerats en mode PROD (el nom ja no conté `DEV`) (minor)
 
 ---
 
 ## [2.2.0] - 2026-04-01
 
 ### Afegit
-- Panell de text font: visualitza el text pla enviat a la IA per a la resumització
-- Extracció de contingut de Twitter/X via la biblioteca Defuddle amb fallback de scraping DOM
-- Hacker News: eliminat el límit de comentaris; afegida la càrrega de l'article enllaçat
-- Readability.js carregat en el context de la sidebar per a la càrrega d'articles de HN
-- Insígnia de caché: insígnia clicable que mostra l'estat de caché a la toolbar
-- Estadístiques: selector de període (7d / 30d / 6m / 1a) per a KPIs, gràfic i taula
-- Estadístiques: columnes per a tokens d'entrada, tokens de sortida, encerts de caché i ms mitjans
-- Comptatge real de tokens des de `usageMetadata` de l'API de Gemini (substitueix les estimacions)
-- Historial d'estadístiques: càrrega de resum de caché directament a la sidebar (no només obre l'URL)
-- Barra de títol de pàgina: barra adhesiva que mostra el títol de la pàgina actual durant la resumització
-- Panell d'historial: llista navegable de resums anteriors a la sidebar
-- `listCachedSummaries` per al panell d'historial
+- Panell de text font: visualitza el text pla enviat a la IA per a la resumització (minor)
+- **Extracció de contingut de Twitter/X** via la biblioteca Defuddle amb fallback de scraping DOM
+- Hacker News: eliminat el límit de comentaris; afegida la càrrega de l'article enllaçat (minor)
+- Readability.js carregat en el context de la sidebar per a la càrrega d'articles de HN (minor)
+- Insígnia de caché: insígnia clicable que mostra l'estat de caché a la toolbar (minor)
+- Estadístiques: selector de període (7d / 30d / 6m / 1a) per a KPIs, gràfic i taula (minor)
+- Estadístiques: columnes per a tokens d'entrada, tokens de sortida, encerts de caché i ms mitjans (minor)
+- **Comptatge real de tokens des de `usageMetadata`** de l'API de Gemini (substitueix les estimacions)
+- Historial d'estadístiques: càrrega de resum de caché directament a la sidebar (no només obre l'URL) (minor)
+- Barra de títol de pàgina: barra adhesiva que mostra el títol de la pàgina actual durant la resumització (minor)
+- **Panell d'historial**: llista navegable de resums anteriors a la sidebar
+- `listCachedSummaries` per al panell d'historial (minor)
 
 ### Corregit
-- Caché: TTL de 30 dies amb `purgeStaleCacheEntries` per a entrades caducades
-- Caché: `clearCache` ara esborra totes les claus `summary_cache:*`, no només les indexades
-- Resum: div de contingut visible durant l'streaming (estava amagat fins al final)
-- Resum: el fallback de quota respecta els models favorits i evita els models cars
-- Models: límit de tokens per model via `contextWindow`; `EUR_RATE` mogut a `shared/models.js`
-- Sidebar: condicional duplicat eliminat del listener `apiKey`
-- Estadístiques: guardia per a dates invàlides; format `toLocaleString` per als tokens
-- Estadístiques: funcions d'agrupació setmanal/mensual (`getMondayOfWeek`, `filterHistoryByPeriod`)
+- Caché: TTL de 30 dies amb `purgeStaleCacheEntries` per a entrades caducades (minor)
+- Caché: `clearCache` ara esborra totes les claus `summary_cache:*`, no només les indexades (minor)
+- Resum: div de contingut visible durant l'streaming (estava amagat fins al final) (minor)
+- Resum: el fallback de quota respecta els models favorits i evita els models cars (minor)
+- Models: límit de tokens per model via `contextWindow`; `EUR_RATE` mogut a `shared/models.js` (minor)
+- Sidebar: condicional duplicat eliminat del listener `apiKey` (minor)
+- Estadístiques: guardia per a dates invàlides; format `toLocaleString` per als tokens (minor)
+- Estadístiques: funcions d'agrupació setmanal/mensual (`getMondayOfWeek`, `filterHistoryByPeriod`) (minor)
 
 ### Rendiment
-- Streaming: text pla durant l'streaming, renderització completa de Markdown en finalitzar
-- Caché: dues lectures seqüencials de `saveUsageStats` combinades en una sola `storage.get`
-- Models: `favoriteModels` llegit a la inicialització, evitant una crida extra a `storage.sync`
+- Streaming: text pla durant l'streaming, renderització completa de Markdown en finalitzar (minor)
+- Caché: dues lectures seqüencials de `saveUsageStats` combinades en una sola `storage.get` (minor)
+- Models: `favoriteModels` llegit a la inicialització, evitant una crida extra a `storage.sync` (minor)
 
 ### Canviat
-- `defuddle` afegit com a dependència npm de vendor (fixat a `^0.14.0`)
-- El bundle de la sidebar inclou `history.js`
+- `defuddle` afegit com a dependència npm de vendor (fixat a `^0.14.0`) (minor)
+- El bundle de la sidebar inclou `history.js` (minor)
 
 ---
 
 ## [2.1.0] - 2026-03-04
 
 ### Afegit
-- Sistema de models favorits: fixa els models de Gemini preferits al capdamunt de la llista
-- Script de comprovació pre-release (`scripts/pre-release-check.mjs`) amb auditoria automatitzada
-- Bundle de la sidebar per a Chromium amb esbuild (`scripts/build-sidebar-bundle.mjs`)
-- CI/CD: fluxos de treball de GitHub Actions per a lint, tests i release
-- ESLint integrat a tot el projecte; executor de tests natiu de Node.js (56 tests, 0 errors)
-- `CURATED_MODELS` unificat a `shared/models.js` com a font de veritat única
-- Estat biònic gestionat via classe CSS (sense estils inline)
-- Icones pregenerides a `img/`; `set_dev_mode.ps1` millorat
-- `shared/defaults.js` extret per als valors de prompt per defecte
+- **Sistema de models favorits**: fixa els models de Gemini preferits al capdamunt de la llista
+- Script de comprovació pre-release (`scripts/pre-release-check.mjs`) amb auditoria automatitzada (minor)
+- Bundle de la sidebar per a Chromium amb esbuild (`scripts/build-sidebar-bundle.mjs`) (minor)
+- CI/CD: fluxos de treball de GitHub Actions per a lint, tests i release (minor)
+- ESLint integrat a tot el projecte; executor de tests natiu de Node.js (56 tests, 0 errors) (minor)
+- `CURATED_MODELS` unificat a `shared/models.js` com a font de veritat única (minor)
+- Estat biònic gestionat via classe CSS (sense estils inline) (minor)
+- Icones pregenerides a `img/`; `set_dev_mode.ps1` millorat (minor)
+- `shared/defaults.js` extret per als valors de prompt per defecte (minor)
 
 ### Corregit
-- `getCuratedModelInfo` corregit per a variants de model
-- Compatibilitat de build per a Linux (GitHub Actions `ubuntu-latest`)
+- `getCuratedModelInfo` corregit per a variants de model (minor)
+- Compatibilitat de build per a Linux (GitHub Actions `ubuntu-latest`) (minor)
 
 ### Canviat
-- `settings.js` dividit en 8 submòduls temàtics
-- Creació de ZIP en Node.js pur (eliminada la dependència de Python)
-- Estratègia de manifest: `manifest.base.json` + fitxers de patch per objectiu
-- Procediment de release simplificat amb `npm run prerelease`
+- `settings.js` dividit en 8 submòduls temàtics (minor)
+- Creació de ZIP en Node.js pur (eliminada la dependència de Python) (minor)
+- Estratègia de manifest: `manifest.base.json` + fitxers de patch per objectiu (minor)
+- Procediment de release simplificat amb `npm run prerelease` (minor)
 
 ---
 
 ## [2.0.0] - 2026-02-26
 
 ### Afegit
-- Suport per a Chromium (Chrome, Edge, Brave) amb `side_panel` de Manifest V3
-- Build dual-objectiu: ZIPs separats per a Firefox i Chromium
-- Empaquetat ZIP compatible amb AMO (separadors de ruta amb barra endavant)
-- `ext.js`: capa d'abstracció cross-browser unificada (Firefox `browser.*` / Chromium `chrome.*`)
-- Bundle esbuild per al service worker en segon pla (requisit de Chromium per a mòduls ES)
+- **Suport per a Chromium (Chrome, Edge, Brave)** amb `side_panel` de Manifest V3
+- Build dual-objectiu: ZIPs separats per a Firefox i Chromium (minor)
+- Empaquetat ZIP compatible amb AMO (separadors de ruta amb barra endavant) (minor)
+- `ext.js`: capa d'abstracció cross-browser unificada (Firefox `browser.*` / Chromium `chrome.*`) (minor)
+- Bundle esbuild per al service worker en segon pla (requisit de Chromium per a mòduls ES) (minor)
 
 ### Canviat
-- Extensió portada de Firefox-only a MV3 cross-browser complet
+- Extensió portada de Firefox-only a MV3 cross-browser complet (minor)
 
 ---
 
 ## [1.2.1] - 2026-02-26
 
 ### Corregit
-- Correccions menors i millores d'estabilitat abans de la reescriptura 2.0
+- Correccions menors i millores d'estabilitat abans de la reescriptura 2.0 (minor)
 
 ---
 
@@ -279,28 +324,28 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ## [1.1.5] - 2026-02-23
 
 ### Corregit
-- Correccions de permisos i metadades del manifest
-- Llegendes dels camps de plantilla afegides a les opcions
+- Correccions de permisos i metadades del manifest (minor)
+- Llegendes dels camps de plantilla afegides a les opcions (minor)
 
 ---
 
 ## [1.1.4] - 2026-02-13
 
 ### Corregit
-- Correccions de la integració amb Obsidian
-- `utils.js` refactoritzat
-- Lectura biònica millorada amb fixació configurable i algorisme basat en regles
-- Nous temes: Sépia i Gris Suau
+- Correccions de la integració amb Obsidian (minor)
+- `utils.js` refactoritzat (minor)
+- Lectura biònica millorada amb fixació configurable i algorisme basat en regles (minor)
+- Nous temes: Sépia i Gris Suau (minor)
 
 ---
 
 ## [1.1.2] - 2026-02-13
 
 ### Afegit
-- Exportació al vault d'Obsidian: llançament silenciós (sense diàleg de confirmació)
+- Exportació al vault d'Obsidian: llançament silenciós (sense diàleg de confirmació) (minor)
 
 ### Canviat
-- Neteja de la UI de la sidebar
+- Neteja de la UI de la sidebar (minor)
 
 ---
 
