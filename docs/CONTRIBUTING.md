@@ -1,12 +1,12 @@
 # Guia de Contribució
 
-Gràcies per l'interès en contribuir a **Resumir contingut**! Aquesta guia explica com arribar a una conclusió.
+Gràcies per l'interès en contribuir a **Resumir**! Aquesta guia explica com arribar a una conclusió.
 
 ## Requesits de desenvolupament
 
 - **Node.js** 18+
-- **PowerShell** 5.1+ (és la plataforma de script de build)
-- **Firefox** 115+ o **Chromium** 116+ (testing manual)
+- **npm** 9+
+- **Firefox** 142+ o **Chromium** 142+ (testing manual)
 - Una clau de **Google Gemini API** (gratuïta a [aistudio.google.com](https://aistudio.google.com/app/apikey))
 
 ## Flux de desenvolupament
@@ -52,7 +52,7 @@ npm run dev
 ### Qualitat
 
 - **Lint:** ESLint sense avisos (0 warnings). Corregeix els errors; afegeix `// eslint-disable-line` si un avís és justificat.
-- **Tests:** La suite actual té 207 tests. Qualsevol funcionalitat nova requereix els seus tests corresponents.
+- **Tests:** La suite actual té 233+ tests. Qualsevol funcionalitat nova requereix els seus tests corresponents.
 - **Noms:** utilitza camelCase per a variables/funcions, kebab-case per a fitxers. Preferiblement en català per als comentaris.
 
 ### Commit
@@ -85,11 +85,13 @@ npm run dev
 ├── sidebar/                 # Interfície (UI principal)
 │   ├── sidebar.js          # Orquestrador
 │   ├── api.js              # Client Gemini (SSE)
-│   ├── content.js          # Extracció de text (YouTube, HN, Readability)
+│   ├── content.js          # Extracció de text (YouTube, HN, Readability, PDF)
 │   ├── ui.js               # Renderitzador DOM
 │   ├── cache.js            # Memòria local
-│   ├── stats.js            # Estadístiques
-│   └── youtube-track-select.js  # Selector de pista YouTube
+│   ├── history.js          # Historial de resums
+│   ├── pdf-viewer.html/js  # Visor PDF personalitzat
+│   ├── markmap-native.js   # Renderitzador SVG natiu del mapa conceptual
+│   └── conceptmap*.js      # Orquestrador del mapa conceptual
 │
 ├── options/                # Pàgina de configuració
 │   ├── settings.js         # Orquestrador
@@ -97,18 +99,24 @@ npm run dev
 │
 ├── shared/                 # Codi compartit
 │   ├── defaults.js         # Prompts per defecte
-│   └── models.js           # Model curated array
+│   ├── models.js           # Model curated array
+│   └── content-types.js    # Tipus de contingut centralitzats
 │
-├── tests/                  # Tests unitaris
+├── vendor/                 # Llibreries vendoritzades
+│   ├── pdf.min.js          # pdf.js (extracció de text PDF)
+│   └── pdf.worker.min.js   # Worker pdf.js
+│
+├── tests/                  # 233+ tests unitaris i E2E
 │   └── *.test.mjs          # Node.js built-in test runner
 │
-└── scripts/                # Build + release
+└── scripts/                # Build + release (tot Node.js)
+    ├── build.mjs           # Build multi-target
     ├── build-sidebar-bundle.mjs
     ├── merge-manifest.mjs
-    └── ...
+    ├── release.mjs         # Release workflow
+    ├── set-mode.mjs        # Dev/Prod mode
+    └── pre-release-check.mjs # Auditoria pre-release
 ```
-
-Veure `CLAUDE.md` per a més detalls arquitectònics (fitxer intern, no inclòs al ZIP de release).
 
 ## Reportar bugs
 
