@@ -38,6 +38,7 @@
     "version:sync": "node scripts/bump-version.mjs",
     "postversion": "node scripts/bump-version.mjs && node scripts/update-changelog-html.mjs && git add manifest.base.json manifest.json manifest.chromium.json options/settings.html docs/CHANGELOG.md",
     "prerelease": "node scripts/pre-release-check.mjs",
+    "prepare-release": "node scripts/prepare-release.mjs",
     "vendor:update": "node scripts/copy-vendor.mjs",
     "vendor:verify": "node scripts/verify-vendor.mjs",
     "models:check": "node scripts/update-models-check.mjs",

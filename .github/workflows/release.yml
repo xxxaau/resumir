@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-release:
     name: Build i publicar release
@@ -13,23 +16,23 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
 
-      - name: Instal·lar dependències de dev
+      - name: Instal·lar dependències
         run: npm ci
 
-      - name: Tests unitaris
-        run: npm test
+      - name: Prerelease audit (17 checks)
+        run: npm run prerelease
 
-      - name: Lint (ESLint)
-        run: npm run lint
+      - name: Verificar vendors (SHA-256)
+        run: npm run vendor:verify
 
-      - name: web-ext lint
+      - name: web-ext lint (AMO compliance)
         run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.zip'
 
       - name: Build Firefox i Chromium ZIPs
