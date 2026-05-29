@@ -6,6 +6,7 @@ Extensió de navegador que resumeix pàgines web amb **Google Gemini AI** — se
 [![Baixar de GitHub Releases](https://img.shields.io/badge/Chrome-Descarregar-4285F4?logo=googlechrome)](https://github.com/xxxaau/extensio-resumir-contingut/releases)
 [![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
 [![CI](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/xxxaau)
 
 ---
 
@@ -132,6 +133,17 @@ Les contribucions són benvingudes! Consulta:
 
 Si trobes un error, obre una [issue](https://github.com/xxxaau/extensio-resumir-contingut/issues/new/choose)
 i inclou: navegador/versió, passos per reproduir, comportament real vs. esperat.
+
+---
+
+## Sponsors
+
+Resumir és programari lliure i gratuït. Si l'extensió et resulta útil,
+considera fer una donació per donar suport al seu desenvolupament:
+
+[![Sponsor](https://img.shields.io/badge/GitHub_Sponsors-xxxaau-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/xxxaau)
+
+Consulta [docs/SPONSORS.md](docs/SPONSORS.md) per a més informació.
 
 ---
 
