@@ -11,7 +11,7 @@ Summarize any web page with Google Gemini AI. Supports YouTube, Hacker News, Twi
 
 ## Long Description (English)
 
-**Resumir Contingut** summarizes any web page using Google Gemini AI, directly inside a sidebar — no copy-pasting required.
+**Resumir** summarizes any web page using Google Gemini AI, directly inside a sidebar — no copy-pasting required.
 
 ### Features
 

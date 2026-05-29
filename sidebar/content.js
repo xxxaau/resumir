@@ -79,16 +79,16 @@ async function getPageContent() {
         if (!isPdf && tabUrl && tabUrl.startsWith("https://") && typeof looksLikePdfByHead === "function") {
             try {
                 isPdf = await looksLikePdfByHead(tabUrl);
-                if (isPdf) console.log("[PDF] Detectat via HEAD Content-Type:", tabUrl);
+                if (isPdf) console.debug("[PDF] Detectat via HEAD Content-Type:", tabUrl);
             } catch { /* defensiu */ }
         }
         if (isPdf) {
-            console.log("[PDF] Detectat PDF:", tabUrl);
+            console.debug("[PDF] Detectat PDF:", tabUrl);
         try {
             // Pas 1: fetch del PDF. Primer intent des del sidebar (directe).
             // La CSP permet `connect-src https:` (vegeu manifest base).
             // Si falla per CORS, demanem <all_urls> i reintentem.
-            console.log("[PDF] Fetch directe...");
+            console.debug("[PDF] Fetch directe...");
             let buffer;
             try {
                 const resp = await fetch(tabUrl, { credentials: "omit" });
@@ -106,24 +106,24 @@ async function getPageContent() {
                 // El permís es demana ara (amb gest d'usuari) en lloc de
                 // a l'instal·lació (on falla per manca de gest).
                 if (tabUrl && (tabUrl.startsWith("https://") || tabUrl.startsWith("file://"))) {
-                    console.log("[PDF] Fetch directe ha fallat, demanant permís <all_urls>...");
+                    console.debug("[PDF] Fetch directe ha fallat, demanant permís <all_urls>...");
                     try {
                         const granted = await ext.permissions.request({
                             permissions: [],
                             origins: ["<all_urls>"]
                         });
                         if (granted) {
-                            console.log("[PDF] Permís <all_urls> concedit, reintentant fetch...");
+                            console.debug("[PDF] Permís <all_urls> concedit, reintentant fetch...");
                             const resp2 = await fetch(tabUrl, { credentials: "omit" });
                             if (resp2.ok) {
                                 buffer = await resp2.arrayBuffer();
-                                console.log("[PDF] Fetch amb permís OK, bytes:", buffer.byteLength);
+                                console.debug("[PDF] Fetch amb permís OK, bytes:", buffer.byteLength);
                             }
                         } else {
-                            console.log("[PDF] Permís <all_urls> denegat per l'usuari");
+                            console.debug("[PDF] Permís <all_urls> denegat per l'usuari");
                         }
                     } catch (permErr) {
-                        console.log("[PDF] No es pot demanar permís (sense gest):", permErr?.message);
+                        console.debug("[PDF] No es pot demanar permís (sense gest):", permErr?.message);
                     }
                 }
 
@@ -137,12 +137,12 @@ async function getPageContent() {
                     );
                 }
             }
-            console.log("[PDF] Bytes descarregats:", buffer.byteLength);
+            console.debug("[PDF] Bytes descarregats:", buffer.byteLength);
 
             // Pas 2: parsing amb pdf.js.
-            console.log("[PDF] Cridant extractPdfText...");
+            console.debug("[PDF] Cridant extractPdfText...");
             const pdfResult = await extractPdfText(buffer);
-            console.log("[PDF] Extraccio OK,", pdfResult.pageCount, "pags,", pdfResult.text.length, "chars");
+            console.debug("[PDF] Extraccio OK,", pdfResult.pageCount, "pags,", pdfResult.text.length, "chars");
             return {
                 title: pdfResult.title || tabTitle || "PDF",
                 text: pdfResult.text,

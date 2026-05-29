@@ -373,28 +373,53 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!badge) return;
             if (!url || url.startsWith("seleccio:")) {
                 badge.style.visibility = "hidden";
+                badge.replaceChildren();
                 badge.removeAttribute("data-clickable");
+                badge.removeAttribute("data-types");
                 return;
             }
-            const cached = await getSummaryCache(url);
-            if (cached) {
+            const types = await getAvailableTypes(url);
+            if (types.length > 0) {
+                badge.replaceChildren();
+                for (const ct of CONTENT_TYPES) {
+                    if (types.includes(ct.id)) {
+                        const icon = document.createElement("span");
+                        icon.className = "cache-badge-type";
+                        icon.textContent = ct.icon;
+                        icon.title = ct.label;
+                        icon.dataset.type = ct.id;
+                        badge.appendChild(icon);
+                    }
+                }
                 badge.style.visibility = "visible";
                 badge.dataset.clickable = "true";
+                badge.dataset.types = types.join(",");
             } else {
+                badge.replaceChildren();
                 badge.style.visibility = "hidden";
                 badge.removeAttribute("data-clickable");
+                badge.removeAttribute("data-types");
             }
         }, 150);
     }
 
     const cacheBadge = document.getElementById("cache-badge");
     if (cacheBadge) {
-        cacheBadge.addEventListener("click", async () => {
+        cacheBadge.addEventListener("click", async (e) => {
             if (cacheBadge.dataset.clickable !== "true") return;
             const tabs = await ext.tabs.query({ active: true, currentWindow: true });
             if (!tabs[0]?.url) return;
-            const entry = await getSummaryCache(tabs[0].url);
-            if (entry) loadHistoryEntry(entry);
+            const url = tabs[0].url;
+            const typeIcon = e.target.closest(".cache-badge-type");
+            if (typeIcon) {
+                const entry = await getSummaryCache(url, typeIcon.dataset.type);
+                if (entry) loadHistoryEntry(entry);
+            } else {
+                const types = (cacheBadge.dataset.types || "").split(",").filter(Boolean);
+                const preferred = types.includes("summary") ? "summary" : types[0];
+                const entry = await getSummaryCache(url, preferred);
+                if (entry) loadHistoryEntry(entry);
+            }
         });
     }
 
@@ -452,14 +477,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    function _handlePendingCacheLoad(value) {
+        ext.storage.local.remove("pendingCacheLoad");
+        let url = value;
+        let type = "summary";
+        if (typeof value === "string" && value.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(value);
+                if (parsed.url) { url = parsed.url; type = parsed.type || "summary"; }
+            } catch {}
+        }
+        getSummaryCache(url, type).then(entry => {
+            if (entry) loadHistoryEntry(entry);
+        });
+    }
+
     // Check for pending cache load on init (settings page wrote key while sidebar was closed)
     ext.storage.local.get("pendingCacheLoad").then(data => {
         if (data.pendingCacheLoad) {
-            const url = data.pendingCacheLoad;
-            ext.storage.local.remove("pendingCacheLoad");
-            getSummaryCache(url).then(entry => {
-                if (entry) loadHistoryEntry(entry);
-            });
+            _handlePendingCacheLoad(data.pendingCacheLoad);
         }
     });
 
@@ -470,11 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ext.storage.local.remove("pendingSummary");
         }
         if (area === "local" && changes.pendingCacheLoad?.newValue) {
-            const url = changes.pendingCacheLoad.newValue;
-            ext.storage.local.remove("pendingCacheLoad");
-            getSummaryCache(url).then(entry => {
-                if (entry) loadHistoryEntry(entry);
-            });
+            _handlePendingCacheLoad(changes.pendingCacheLoad.newValue);
         }
     });
 

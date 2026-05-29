@@ -1,18 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
- * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
-// sidebar/history.js
-// History panel: browse and reload cached summaries from the sidebar
-
-/** Stores which element was visible before the panel opened, for restoration. */
 let _previousVisible = null;
-/** Stores whether the page-title-strip was visible before the panel opened. */
 let _previousTitleStripVisible = false;
 
-/**
- * Opens the history panel.
- * Hides current content areas, loads cached summaries, renders the list.
- */
 async function openHistoryPanel() {
     const historyPanel  = document.getElementById("history-panel");
     const contentDiv    = document.getElementById("content");
@@ -21,50 +9,38 @@ async function openHistoryPanel() {
     const backBar       = document.getElementById("history-back-bar");
     const toolbar       = document.querySelector(".toolbar");
 
-    // Hide back bar (in case we're returning from detail view)
     if (backBar) backBar.classList.add("hidden");
-    // Hide toolbar (no summarize/plugins while viewing history)
     if (toolbar) toolbar.classList.add("hidden");
 
     const titleStrip = document.getElementById("page-title-strip");
     _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
 
-    // Snapshot visible element (content or error) for restoration on close
     _previousVisible = null;
     if (!contentDiv.classList.contains("hidden")) _previousVisible = contentDiv;
     else if (!errorDiv.classList.contains("hidden")) _previousVisible = errorDiv;
 
-    // Hide all content areas
     contentDiv.classList.add("hidden");
     loadingDiv.classList.add("hidden");
     errorDiv.classList.add("hidden");
 
-    // Build and show panel
     const entries = await listCachedSummaries();
     _renderHistoryPanel(historyPanel, entries);
     historyPanel.classList.remove("hidden");
 }
 
-/**
- * Closes a panel element and restores the previously visible element.
- * @param {HTMLElement} panelEl
- */
 function _closePanel(panelEl) {
     panelEl.classList.add("hidden");
     panelEl.replaceChildren();
-    // Show toolbar again, hide back bar (only visible when in history detail view)
     const toolbar = document.querySelector(".toolbar");
     if (toolbar) toolbar.classList.remove("hidden");
     const backBar = document.getElementById("history-back-bar");
     if (backBar) backBar.classList.add("hidden");
 
-    // Restore original element order: toolbar → page-title-strip → history-back-bar → content
     const container = document.getElementById("container");
     const titleStrip = document.getElementById("page-title-strip");
     const contentDiv = document.getElementById("content");
     if (container && titleStrip && backBar && contentDiv && toolbar) {
-        // Ensure order: toolbar is first, then title strip, then back bar, then content
         container.insertBefore(titleStrip, backBar);
         container.insertBefore(backBar, contentDiv);
     }
@@ -77,18 +53,10 @@ function _closePanel(panelEl) {
     _previousTitleStripVisible = false;
 }
 
-/**
- * Closes the history panel and restores the previously visible element.
- */
 function closeHistoryPanel() {
     _closePanel(document.getElementById("history-panel"));
 }
 
-/**
- * Loads a cached entry into the content area with current bionic settings,
- * then closes the history panel.
- * @param {{summary: string}} entry
- */
 async function loadHistoryEntry(entry) {
     const contentDiv = document.getElementById("content");
     const localData = await ext.storage.local.get({ isBionicActive: false });
@@ -105,7 +73,7 @@ async function loadHistoryEntry(entry) {
 
     if (isConceptMap) {
         const mapText = entry.summary.substring(CONCEPT_MAP_MARKER.length);
-        if (typeof renderMarkmapInteractive === "function" && typeof window.markmap !== "undefined") {
+        if (typeof renderMarkmapInteractive === "function" && typeof window.markmapNative !== "undefined") {
             contentDiv.replaceChildren(renderMarkmapInteractive(mapText));
         } else if (typeof parseConceptTree === "function") {
             contentDiv.replaceChildren(parseConceptTree(mapText, {}));
@@ -127,12 +95,10 @@ async function loadHistoryEntry(entry) {
     }
     contentDiv.classList.remove("hidden");
 
-    // Hide history panel without restoring previous state
     const historyPanel = document.getElementById("history-panel");
     historyPanel.classList.add("hidden");
     historyPanel.replaceChildren();
 
-    // Hide toolbar and show back bar (consistent whether coming from history list or cache badge)
     const toolbar = document.querySelector(".toolbar");
     if (toolbar) toolbar.classList.add("hidden");
     const backBar = document.getElementById("history-back-bar");
@@ -145,20 +111,13 @@ async function loadHistoryEntry(entry) {
         titleStrip.classList.remove("hidden");
     }
 
-    // Reorder elements: toolbar → back bar → title strip → content
     const container = document.getElementById("container");
     if (container && backBar && titleStrip && toolbar) {
-        // Move back bar after toolbar, title strip after back bar
         container.insertBefore(backBar, toolbar.nextSibling);
         container.insertBefore(titleStrip, contentDiv);
     }
 }
 
-/**
- * Renders the history panel DOM with a back button and entry list.
- * @param {HTMLElement} panel
- * @param {Array} entries
- */
 function _renderHistoryPanel(panel, entries) {
     panel.replaceChildren();
 
@@ -179,34 +138,99 @@ function _renderHistoryPanel(panel, entries) {
         return;
     }
 
+    const groups = _groupEntriesByUrl(entries);
     const list = document.createElement("ul");
     list.className = "history-list";
-    for (const entry of entries) {
+
+    for (const group of groups) {
         const li = document.createElement("li");
         li.className = "history-item";
 
+        const topRow = document.createElement("div");
+        topRow.className = "history-item-top";
+
         const titleEl = document.createElement("span");
         titleEl.className = "history-item-title";
-        const rawTitle = entry.title || entry.url || "Sense t\xEDtol";
-        titleEl.textContent = rawTitle.length > 50 ? rawTitle.slice(0, 50) + "\u2026" : rawTitle;
+        const rawTitle = group.title || group.url || "Sense t\xedtol";
+        titleEl.textContent = rawTitle.length > 120 ? rawTitle.slice(0, 120) + "\u2026" : rawTitle;
+
+        topRow.appendChild(titleEl);
+
+        const sortedTypes = CONTENT_TYPES.filter(ct => group.types.includes(ct.id)).sort((a, b) => a.order - b.order);
+        if (sortedTypes.length > 0) {
+            const typesRow = document.createElement("span");
+            typesRow.className = "history-entry-types";
+            for (const ct of sortedTypes) {
+                const typeIcon = document.createElement("span");
+                typeIcon.className = "type-icon";
+                typeIcon.textContent = ct.icon;
+                typeIcon.title = ct.label;
+                typeIcon.dataset.type = ct.id;
+                typeIcon.dataset.url = group.url;
+                typeIcon.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    _loadTypeFromCache(group.url, ct.id);
+                });
+                typesRow.appendChild(typeIcon);
+            }
+            topRow.appendChild(typesRow);
+        }
+
+        li.appendChild(topRow);
 
         const metaEl = document.createElement("span");
         metaEl.className = "history-item-meta";
-        metaEl.textContent = _relativeTime(entry.timestamp) + " \xB7 " + (entry.model || "");
-
-        li.appendChild(titleEl);
+        metaEl.textContent = _relativeTime(group.latestTimestamp);
         li.appendChild(metaEl);
-        li.addEventListener("click", () => loadHistoryEntry(entry));
+
+        li.addEventListener("click", () => {
+            const preferredType = group.types.includes("summary") ? "summary" : group.types[0];
+            _loadTypeFromCache(group.url, preferredType);
+        });
+
         list.appendChild(li);
     }
     panel.appendChild(list);
 }
 
-/**
- * Returns a human-readable relative time string for an ISO timestamp.
- * @param {string} isoString
- * @returns {string}
- */
+async function _loadTypeFromCache(url, type) {
+    const entry = await getSummaryCache(url, type);
+    if (entry) {
+        loadHistoryEntry(entry);
+    } else {
+        console.warn("No cache entry found for", url, type);
+        const errorDiv = document.getElementById("error");
+        if (errorDiv) {
+            errorDiv.textContent = "No s'ha trobat l'entrada a la memòria cau per a aquest tipus de contingut.";
+            errorDiv.classList.remove("hidden");
+        }
+    }
+}
+
+function _groupEntriesByUrl(entries) {
+    const map = new Map();
+    for (const entry of entries) {
+        const existing = map.get(entry.url);
+        if (existing) {
+            existing.types.add(entry.type || "summary");
+            if (entry.timestamp > existing.latestTimestamp) {
+                existing.latestTimestamp = entry.timestamp;
+                existing.title = entry.title || existing.title;
+            }
+        } else {
+            map.set(entry.url, {
+                url: entry.url,
+                title: entry.title,
+                latestTimestamp: entry.timestamp,
+                types: new Set([entry.type || "summary"]),
+            });
+        }
+    }
+    return Array.from(map.values())
+        .map(g => ({ ...g, types: Array.from(g.types) }))
+        .sort((a, b) => new Date(b.latestTimestamp) - new Date(a.latestTimestamp));
+}
+
 function _relativeTime(isoString) {
     const diffMs = Date.now() - new Date(isoString).getTime();
     const diffMin = Math.floor(diffMs / 60000);
@@ -218,10 +242,6 @@ function _relativeTime(isoString) {
     return `fa ${diffD} dies`;
 }
 
-/**
- * Obre el panell de text planer enviat a resumir.
- * @param {string} text - Text planer a mostrar
- */
 function openSourcePanel(text) {
     const sourcePanel  = document.getElementById("source-panel");
     const historyPanel = document.getElementById("history-panel");
@@ -232,17 +252,14 @@ function openSourcePanel(text) {
     const titleStrip   = document.getElementById("page-title-strip");
     const toolbar      = document.querySelector(".toolbar");
 
-    // Tancar history panel si estava obert (sense restaurar estat)
     historyPanel.classList.add("hidden");
     historyPanel.replaceChildren();
 
     if (backBar) backBar.classList.add("hidden");
-    // Hide toolbar (no summarize/plugins while viewing source)
     if (toolbar) toolbar.classList.add("hidden");
     _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
 
-    // Capturar element visible per a restauració
     _previousVisible = null;
     if (!contentDiv.classList.contains("hidden")) _previousVisible = contentDiv;
     else if (!errorDiv.classList.contains("hidden")) _previousVisible = errorDiv;
@@ -251,7 +268,6 @@ function openSourcePanel(text) {
     loadingDiv.classList.add("hidden");
     errorDiv.classList.add("hidden");
 
-    // Construir panell
     sourcePanel.replaceChildren();
 
     const header = document.createElement("div");
@@ -277,14 +293,10 @@ function openSourcePanel(text) {
     sourcePanel.classList.remove("hidden");
 }
 
-/**
- * Tanca el panell de text planer i restaura la vista anterior.
- */
 function closeSourcePanel() {
     _closePanel(document.getElementById("source-panel"));
 }
 
-// Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
     module.exports = { openHistoryPanel, closeHistoryPanel, loadHistoryEntry, openSourcePanel, closeSourcePanel };
 }

@@ -39,4 +39,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/resumir-contingut-*.zip
+          body: |-
+            ## Instal·lació
+
+            ### Firefox
+            L'extensió es distribueix via Mozilla Add-ons:
+            https://addons.mozilla.org/firefox/addon/resumir-contingut
+
+            ### Chrome / Edge / Brave
+            1. Baixa el fitxer \`resumir-contingut-chromium.zip\` dels fitxers adjunts
+            2. Descomprimeix-lo en una carpeta
+            3. Obre \`chrome://extensions\`, activa el «Mode de desenvolupador»
+            4. Fes clic a «Carrega extensió desempaquetada» i selecciona la carpeta
+
+            ---
+
+            ## Novetats de la versió
           generate_release_notes: true

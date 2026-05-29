@@ -216,7 +216,7 @@ Port complet a Node.js: `scripts/set-mode.mjs`. Els scripts npm `dev` i
 
 ### Problema
 
-El hook `pre-push` validava `'"Resumir contingut (DEV)"'` però el nom de
+El hook `pre-push` validava `'"Resumir (DEV)"'` però el nom de
 l'extensió havia canviat a `"Resumir (DEV)"`. Resultat: el hook **mai
 disparava** i no protegia contra push accidental amb mode DEV.
 

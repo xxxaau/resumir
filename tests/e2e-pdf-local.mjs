@@ -178,7 +178,7 @@ await sidebar2.waitForLoadState("domcontentloaded");
 
 // Set API key dummy via storage.local.
 await sidebar2.evaluate(async () => {
-    await chrome.storage.local.set({
+    await chrome.storage.local.set({ // eslint-disable-line no-undef
         apiKey: "DUMMY_KEY_FOR_TEST",
         model: "gemini-2.5-flash",
     });
@@ -213,6 +213,7 @@ await sidebar2.locator("#pdfFileInput").setInputFiles(fixturePdf);
 try {
     const _p2 = await newPagePromise2;
     console.log(`\u2713 Test 2: pestanya PDF oberta`);
+    void _p2;
 } catch {
     console.log(`\u2713 Test 2: pestanya PDF NO oberta (pot ser duplicat, OK)`);
 }

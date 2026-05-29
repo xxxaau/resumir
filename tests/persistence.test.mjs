@@ -32,6 +32,13 @@ global.ext = {
     }
 };
 
+global.CONTENT_TYPES = [
+    { id: "summary",    icon: "\u{1F4DD}", label: "Resum",            order: 1 },
+    { id: "deepdive",   icon: "\u{1F52C}", label: "Aprofundiment",    order: 2 },
+    { id: "conceptmap", icon: "\u{1F9E0}", label: "Mapa conceptual",  order: 3 },
+    { id: "science",    icon: "\u{1F4CA}", label: "Validaci\u00F3",   order: 4 },
+];
+
 const {
     getSummaryCache,
     saveSummaryCache,
@@ -153,7 +160,7 @@ test("Actualització — stats i usageHistory es preserven", async () => {
     localMock._inject({ stats: existingStats, usageHistory: existingHistory });
 
     // Simular una nova generació (com passaria just després de l'actualització)
-    await saveUsageStats(300, 150, false, "gemini-2.0-flash-lite", 1500, "Nou article", "https://new.com", 0);
+    await saveUsageStats(300, 150, "summary", "gemini-2.0-flash-lite", 1500, "Nou article", "https://new.com", 0);
 
     // Stats s'incrementen, NO es reinicien
     const data = await localMock.get(["stats", "usageHistory"]);

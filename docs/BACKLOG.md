@@ -51,64 +51,6 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-## Historial agrupat per URL amb icones de tipus de contingut
-
-**Context (2026-05-26):** Actualment l'historial del sidebar (`summary_cache:*`) i el de settings (`usageHistory`) són independents i plans. Quan l'usuari fa múltiples accions sobre una mateixa URL (resum + mapa conceptual + aprofundiment + validació), cada acció genera una entrada separada sense cap connexió. El tipus de contingut no es guarda explícitament — només un `type: "lite"|"deep"` binari al usageHistory (sense distingir entre resum, deep dive, validació) i un prefix `<!--conceptmap-->` textual a la cache per als mapes conceptuals.
-
-**Objectiu:** Agrupar tot el contingut generat per a una mateixa URL en una sola entrada, tant al sidebar com a settings, i mostrar icones a la dreta indicant quins tipus de contingut conté.
-
-**Comportament esperat:**
-- Si l'usuari fa Resum + Mapa Conceptual + Validació per a la mateixa URL, al historial es veu **una sola fila** amb el títol de l'article i les icones 📝🕸️🔬 a la dreta.
-- En clicar l'entrada, es mostra el contingut seleccionable per pestanyes (o menú desplegable) per triar quin tipus veure.
-- A settings → Estadístiques: la taula d'historial també agrupa per URL amb icones.
-- La llista d'articles es manté plana (no calen filtres nous); les icones informen visualment del contingut de cada entrada.
-
-**Evolució de dades (proposta):**
-- Evolucionar `summary_cache:{url}` a estructura multientry:
-  ```json
-  {
-    "url": "https://...",
-    "title": "Títol de la pàgina",
-    "types": ["summary", "conceptmap", "deepdive", "science"],
-    "entries": {
-      "summary":    { "content": "...", "model": "...", "timestamp": "..." },
-      "conceptmap": { "content": "<!--conceptmap-->...", "model": "...", "timestamp": "..." },
-      "deepdive":   { "content": "...", "model": "...", "timestamp": "..." },
-      "science":    { "content": "...", "model": "...", "timestamp": "..." }
-    },
-    "latestTimestamp": "2026-05-26T12:00:00.000Z",
-    "version": "2.0"
-  }
-  ```
-- `summary_cache_index` es manté com a llista de claus `summary_cache:{url}`.
-- En llegir caches antigues (versió 1.0), convertir a la nova estructura.
-- `usageHistory` guanya un camp `type` explícit (`"summary"|"conceptmap"|"deepdive"|"science"` en lloc de `"lite"|"deep"`).
-- Compatibilitat enrere amb dades existents.
-
-**Icones proposades:**
-- 📝 Resum executiu
-- 🕸️ Mapa conceptual
-- ➕ Aprofundiment (deep dive)
-- 🔬 Validació acadèmica/científica
-
-**Criteris d'acceptació:**
-- [ ] En generar un segon tipus de contingut per a la mateixa URL, no es crea una nova entrada sinó que s'afegeix a l'existent.
-- [ ] L'entrada agrupada mostra icones a la dreta indicant quins tipus conté.
-- [ ] En clicar l'entrada, es pot navegar entre els diferents continguts (pestanyes o selector).
-- [ ] El mateix comportament a settings → Estadístiques.
-- [ ] Migració silenciosa de dades antigues (versió 1.0 → 2.0) sense pèrdua d'informació.
-- [ ] No hi ha regressió en el funcionament actual (TTL, purga, límit d'entrades, cache badge ⚡).
-- [ ] `usageHistory` distingeix correctament els 4 tipus de contingut.
-
-**Fitxers probables a modificar:**
-- `sidebar/cache.js` (estructura de dades, migració, escriptura, lectura)
-- `sidebar/history.js` (renderització agrupada amb icones, navegació per pestanyes)
-- `sidebar/sidebar.js` (crida a cache amb paràmetre de tipus, flux de desat)
-- `options/settings-stats.js` (lectura del nou `usageHistory`, icones a la taula)
-- `options/settings.html` (si calen canvis UI a la taula d'historial)
-
----
-
 ~~Revisar i suprimir `set_dev_mode.ps1` en favor de `node scripts/set-mode.mjs`~~ ✅ **Resolt a v2.3.0**
 
 **Criteris d'acceptació (complerts ✅):**
@@ -144,3 +86,51 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 - `.github/workflows/release.yml` (node en lloc de pwsh, `build/` prefix als ZIPs)
 - `docs/BUILD.md` (actualitzat)
 - `docs/CHANGELOG.md` (actualitzat)
+
+---
+
+## Interfície d'usuari multidioma (i18n)
+
+**Context (2026-05-27):** Actualment tota la interfície d'usuari està en català dur — ~200+ cadenes repartides entre ~18 fitxers (3 HTML + 15 JS). No existeix cap infraestructura d'internacionalització: ni `_locales/`, ni `default_locale` als manifests, ni `chrome.i18n`, ni `__MSG__` als HTML.
+
+La decisió d'idioma ja es va identificar com a pendent al TO-DO.md (veure «Decisions estratègiques», punt 3), i el README descriu l'extensió com a catalana. L'objectiu és habilitar contribucions externes d'idiomes i preparar l'extensió per a un públic internacional.
+
+**Comportament esperat:**
+- L'extensió detecta l'idioma del navegador i mostra la UI en l'idioma corresponent.
+- Si l'idioma del navegador no està disponible, es mostra el català (idioma per defecte).
+- Totes les cadenes visibles a la UI són traduïbles: sidebar, settings, visor PDF, botons, etiquetes, missatges d'error, menús contextuals, nom/descripció del manifest.
+- Els system prompts de l'IA (`shared/defaults.js`) es mantenen en català (instrueixen la IA en català independentment de l'idioma UI) o es tradueixen segons decisió de disseny.
+
+**Abast:**
+- `_locales/ca/messages.json` — traducció catalana (completa)
+- `_locales/en/messages.json` — traducció anglesa (completa)
+- `_locales/es/messages.json` — traducció castellana (opcional, fase 2)
+
+**Evolució tècnica (proposta):**
+1. Crear `_locales/{ca,en}/messages.json` amb totes les claus de traducció.
+2. Afegir `"default_locale": "ca"` a tots els manifests (`manifest.base.json`, `manifest.chromium.json`, patches).
+3. Substituir cadenes en HTML per `__MSG_*__` (sidebar/sidebar.html, options/settings.html, sidebar/pdf-viewer.html).
+4. Afegir `ext.i18n.getMessage(key, ...args)` a `ext.js` com a wrapper cross-browser de `chrome.i18n.getMessage`.
+5. Substituir cadenes hardcoded als JS per crides a `ext.i18n.getMessage()`.
+6. Decidir el tractament dels system prompts de l'IA (mantenir en català o traduir-los).
+7. Actualitzar build pipeline per validar que totes les claus `__MSG__` existeixin als messages.json.
+
+**Criteris d'acceptació:**
+- [ ] `_locales/` creat amb `ca` i `en` (mínim).
+- [ ] `default_locale` present a tots els manifests.
+- [ ] Totes les cadenes UI són substituïdes per claus i18n.
+- [ ] L'extensió funciona correctament en navegador configurat en català i en anglès.
+- [ ] No hi ha regressió visual ni funcional.
+- [ ] Les cadenes noves es poden afegir sense tocar codi (només afegir clau als messages.json).
+- [ ] Els tests existents continuen passant (207/207).
+
+**Fitxers probables a modificar:**
+- `_locales/ca/messages.json` (nou)
+- `_locales/en/messages.json` (nou)
+- `ext.js` (wrapper `ext.i18n.getMessage`)
+- `sidebar/sidebar.html`, `options/settings.html`, `sidebar/pdf-viewer.html`
+- `sidebar/ui.js`, `sidebar/summary.js`, `sidebar/sidebar.js`, `sidebar/history.js`, `sidebar/content.js`, `sidebar/api.js`, `sidebar/pdf-viewer.js`, `sidebar/cache.js`, `background.js`
+- `options/settings-options.js`, `options/settings-cache.js`, `options/settings-models.js`
+- `shared/content-types.js`
+- `manifest.base.json` (+ patches)
+- `scripts/pre-release-check.mjs` (validació de claus i18n)

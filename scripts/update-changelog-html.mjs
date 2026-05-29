@@ -47,6 +47,14 @@ function parseChangelog(md) {
             continue;
         }
 
+        // Saltar capçaleres de versió sense data (p. ex. "Versió inicial" o guia)
+        if (line.startsWith("## ")) {
+            if (current) versions.push(current);
+            current = null;
+            currentSection = null;
+            continue;
+        }
+
         if (!current) continue;
 
         const sectionMatch = line.match(/^### (.+)/);
@@ -72,9 +80,17 @@ function parseChangelog(md) {
     return versions;
 }
 
+function isMinor(item) {
+    return item.endsWith("(minor)");
+}
+
 function generateHtml(versions) {
     const ind = "            "; // 12 espais — indentació dins <div class="changelog">
     return versions.map(v => {
+        const allItems = v.sections.flatMap(s => s.items).filter(item => !isMinor(item));
+        // Saltar versions sense items majors
+        if (allItems.length === 0) return "";
+
         const dateStr = isoToMonthYear(v.date);
         const lines = [];
 
@@ -88,18 +104,15 @@ function generateHtml(versions) {
             lines.push(`${ind}  <p style="margin: 4px 0 6px; color: #555; font-size: 0.9em">${v.milestone}</p>`);
         }
 
-        const allItems = v.sections.flatMap(s => s.items);
-        if (allItems.length > 0) {
-            lines.push(`${ind}  <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">`);
-            for (const item of allItems) {
-                lines.push(`${ind}    <li>${item}</li>`);
-            }
-            lines.push(`${ind}  </ul>`);
+        lines.push(`${ind}  <ul class="version-list" style="margin: 5px 0; padding-left: 20px; color: #444">`);
+        for (const item of allItems) {
+            lines.push(`${ind}    <li>${item.replace(/\s*\(minor\)\s*$/, "")}</li>`);
         }
+        lines.push(`${ind}  </ul>`);
 
         lines.push(`${ind}</div>`);
         return lines.join("\n");
-    }).join("\n");
+    }).filter(Boolean).join("\n");
 }
 
 // --- Main ---

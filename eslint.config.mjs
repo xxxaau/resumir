@@ -65,6 +65,18 @@ const extensionGlobals = {
     saveUsageStats: "readonly",
     purgeStaleCacheEntries: "readonly",
     listCachedSummaries: "readonly",
+    getAvailableTypes: "readonly",
+    getCacheKey: "readonly",
+    // shared/models.js
+    sortModelsByPriority: "readonly",
+    // shared/content-types.js
+    CONTENT_TYPES: "readonly",
+    // sidebar/content.js
+    isPdfUrl: "readonly",
+    looksLikePdfByHead: "readonly",
+    extractPdfText: "readonly",
+    // sidebar/pdf-extract.js, sidebar/pdf-viewer.js
+    pdfjsLib: "readonly",
     // sidebar/history.js
     openHistoryPanel: "readonly",
     closeHistoryPanel: "readonly",
@@ -102,22 +114,7 @@ const settingsGlobals = {
     moveExtension: "readonly",
     updateMoveButtonsState: "readonly",
     // settings-cache.js
-    updateCacheInfo: "readonly",
     clearCache: "readonly",
-    // settings-stats.js
-    PAGE_SIZE: "writable",
-    currentPage: "writable",
-    currentPeriod: "writable",
-    totalPages: "writable",
-    loadStatistics: "readonly",
-    getRelativeTime: "readonly",
-    renderDailyChart: "readonly",
-    renderGroupedHistoryTable: "readonly",
-    renderGroupedPage: "readonly",
-    renderHistoryTable: "readonly",
-    clearHistory: "readonly",
-    groupedCurrentPage: "writable",
-    groupedTotalPages: "writable",
     // settings-models.js
     modelNote: "readonly",
     listModels: "readonly",
@@ -132,6 +129,7 @@ const settingsGlobals = {
     resetDeepDivePrompt: "readonly",
     resetSciencePrompt: "readonly",
     resetConceptMapPrompt: "readonly",
+    resetBionic: "readonly",
     showStatus: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
@@ -149,10 +147,12 @@ export default [
             "Readability.js",         // Llibreria de tercers (Mozilla)
             "defuddle.js",            // Llibreria de tercers (Defuddle)
             "background.bundle.js",   // Generat automàticament pel build
-            "build_*/",
-            "node_modules/",
-            "scripts/",               // Scripts d'utilitat (no part de l'extensió)
-            "coverage/",              // Reports de cobertura generats
+            "build*/**",
+            "node_modules/**",
+            "vendor/**",
+            "scripts/**",             // Scripts d'utilitat (no part de l'extensió)
+            "coverage/**",            // Reports de cobertura generats
+            "**/.pw-extension/**",    // Playwright auto-generated test artifacts
         ],
     },
     {

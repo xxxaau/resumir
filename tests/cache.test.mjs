@@ -1,9 +1,3 @@
-/**
- * tests/cache.test.mjs
- * Tests unitaris per a sidebar/cache.js
- * Execució: node --test tests/cache.test.mjs
- */
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -14,14 +8,16 @@ const require = createRequire(import.meta.url);
 const storageMock = createStorageMock();
 global.ext = { storage: { local: storageMock } };
 
-const { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries } = require("../sidebar/cache.js");
+global.CONTENT_TYPES = [
+    { id: "summary",    icon: "\u{1F4DD}", label: "Resum",            order: 1 },
+    { id: "deepdive",   icon: "\u{1F52C}", label: "Aprofundiment",    order: 2 },
+    { id: "conceptmap", icon: "\u{1F9E0}", label: "Mapa conceptual",  order: 3 },
+    { id: "science",    icon: "\u{1F4CA}", label: "Validaci\u00F3",   order: 4 },
+];
 
-// Neteja la memòria entre tests
+const { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, getAvailableTypes, deleteSummaryCache, getCacheKey } = require("../sidebar/cache.js");
+
 function clearStorage() { storageMock._clear(); }
-
-// ---------------------------------------------------------------------------
-// getSummaryCache
-// ---------------------------------------------------------------------------
 
 test("getSummaryCache - retorna null si no hi ha entrada a la cache", async () => {
     clearStorage();
@@ -40,10 +36,6 @@ test("getSummaryCache - retorna l'entrada si existeix", async () => {
     assert.equal(result.summary, "Resum de prova");
 });
 
-// ---------------------------------------------------------------------------
-// saveSummaryCache
-// ---------------------------------------------------------------------------
-
 test("saveSummaryCache - desa l'estructura correcta", async () => {
     clearStorage();
     const url = "https://test.com/page";
@@ -59,114 +51,119 @@ test("saveSummaryCache - desa l'estructura correcta", async () => {
     assert.ok(entry.timestamp, "Ha de tenir timestamp");
     assert.equal(entry.stats.input, 200);
     assert.equal(entry.stats.output, 80);
+    assert.equal(entry.type, "summary");
 });
 
-test("saveSummaryCache - clau de cache basada en la URL", async () => {
+test("saveSummaryCache - clau de cache basada en la URL i tipus", async () => {
     clearStorage();
-    const urlA = "https://a.com";
-    const urlB = "https://b.com";
-    await saveSummaryCache(urlA, "A", "Resum A", "model-a", 10, 5);
-    await saveSummaryCache(urlB, "B", "Resum B", "model-b", 20, 10);
+    const url = "https://a.com";
+    await saveSummaryCache(url, "Resum", "Resum A", "model-a", 10, 5, "summary");
+    await saveSummaryCache(url, "Deep", "Deep A", "model-a", 10, 5, "deepdive");
+    await saveSummaryCache(url, "Science", "Science A", "model-a", 10, 5, "science");
 
-    const entryA = await getSummaryCache(urlA);
-    const entryB = await getSummaryCache(urlB);
-    assert.equal(entryA.title, "A");
-    assert.equal(entryB.title, "B");
+    const entrySummary = await getSummaryCache(url, "summary");
+    const entryDeep = await getSummaryCache(url, "deepdive");
+    const entryScience = await getSummaryCache(url, "science");
+
+    assert.equal(entrySummary.title, "Resum");
+    assert.equal(entryDeep.title, "Deep");
+    assert.equal(entryScience.title, "Science");
 });
 
-test("saveSummaryCache - sobreescriu entrada existent per la mateixa URL", async () => {
+test("saveSummaryCache - sobreescriu entrada existent per la mateixa URL i tipus", async () => {
     clearStorage();
     const url = "https://overwrite.com";
-    await saveSummaryCache(url, "Primer", "Resum inicial", "model-1", 10, 5);
-    await saveSummaryCache(url, "Segon", "Resum actualitzat", "model-2", 20, 10);
+    await saveSummaryCache(url, "Primer", "Resum inicial", "model-1", 10, 5, "deepdive");
+    await saveSummaryCache(url, "Segon", "Resum actualitzat", "model-2", 20, 10, "deepdive");
 
-    const entry = await getSummaryCache(url);
+    const entry = await getSummaryCache(url, "deepdive");
     assert.equal(entry.title, "Segon");
     assert.equal(entry.summary, "Resum actualitzat");
     assert.equal(entry.model, "model-2");
 });
 
-// ---------------------------------------------------------------------------
-// saveUsageStats
-// ---------------------------------------------------------------------------
-
-test("saveUsageStats - crea una entrada a l'historial", async () => {
+test("saveSummaryCache - diferents tipus per la mateixa URL no s'afecten", async () => {
     clearStorage();
-    const result = await saveUsageStats(100, 50, false, "gemini-2.0-flash", 1200, "Article test", "https://test.com");
-    assert.ok(result !== null);
-    assert.equal(result.articles, 1);
-    assert.equal(result.tokens, 150);
+    const url = "https://multi.com";
+    await saveSummaryCache(url, "Resum", "Contingut resum", "model-a", 10, 5, "summary");
+    await saveSummaryCache(url, "Deep", "Contingut deep", "model-b", 20, 10, "deepdive");
+
+    const sum = await getSummaryCache(url, "summary");
+    const deep = await getSummaryCache(url, "deepdive");
+
+    assert.equal(sum.title, "Resum");
+    assert.equal(deep.title, "Deep");
 });
 
-test("saveUsageStats - incrementa el comptador d'articles i tokens", async () => {
+test("getAvailableTypes - retorna els tipus disponibles per una URL", async () => {
     clearStorage();
-    await saveUsageStats(100, 50, false, "model-a", 1000, "A", "https://a.com");
-    const result = await saveUsageStats(200, 100, false, "model-b", 2000, "B", "https://b.com");
-    assert.equal(result.articles, 2);
-    assert.equal(result.tokens, 450);
+    const url = "https://multi-types.com";
+    await saveSummaryCache(url, "Resum", "R", "model-a", 10, 5, "summary");
+    await saveSummaryCache(url, "Deep", "D", "model-b", 20, 10, "deepdive");
+
+    const types = await getAvailableTypes(url);
+    assert.ok(types.includes("summary"));
+    assert.ok(types.includes("deepdive"));
+    assert.equal(types.length, 2);
 });
 
-test("saveUsageStats - l'entrada de l'historial té els camps correctes", async () => {
+test("getAvailableTypes - retorna array buit per URL sense cache", async () => {
     clearStorage();
-    await saveUsageStats(80, 40, true, "gemini-2.5-pro", 3000, "Titular", "https://pro.com");
-
-    const data = await storageMock.get("usageHistory");
-    const history = data.usageHistory;
-    assert.equal(history.length, 1);
-    const entry = history[0];
-    assert.equal(entry.model, "gemini-2.5-pro");
-    assert.equal(entry.inputTokens, 80);
-    assert.equal(entry.outputTokens, 40);
-    assert.equal(entry.type, "deep");
-    assert.equal(entry.latency, 3000);
-    assert.equal(entry.title, "Titular");
-    assert.equal(entry.url, "https://pro.com");
-    assert.equal(entry.cacheTokens, 0); // default quan no es passa
+    const types = await getAvailableTypes("https://no-cache.com");
+    assert.deepEqual(types, []);
 });
 
-test("saveUsageStats - l'entrada és 'lite' per a models no-pro sense isDeepDive", async () => {
-    clearStorage();
-    await saveUsageStats(50, 25, false, "gemini-2.0-flash", 500, "T", "https://t.com");
-    const data = await storageMock.get("usageHistory");
-    assert.equal(data.usageHistory[0].type, "lite");
+test("getCacheKey - genera la clau correcta", () => {
+    assert.equal(getCacheKey("https://example.com", "summary"), "summary_cache:https://example.com:summary");
+    assert.equal(getCacheKey("https://example.com", "deepdive"), "summary_cache:https://example.com:deepdive");
+    assert.equal(getCacheKey("https://example.com", "science"), "summary_cache:https://example.com:science");
 });
 
-test("saveUsageStats - l'historial es limita a 1000 entrades (no creix indefinidament)", async () => {
+test("deleteSummaryCache - elimina una entrada especifica", async () => {
     clearStorage();
-    // Omplim 1001 entrades
-    for (let i = 0; i < 1001; i++) {
-        await saveUsageStats(10, 5, false, "model-x", 100, `Article ${i}`, `https://test.com/${i}`);
-    }
-    const data = await storageMock.get("usageHistory");
-    assert.equal(data.usageHistory.length, 1000);
+    const url = "https://delete.com";
+    await saveSummaryCache(url, "Resum", "R", "model", 10, 5, "summary");
+    await saveSummaryCache(url, "Deep", "D", "model", 10, 5, "deepdive");
+
+    const deleted = await deleteSummaryCache(url, "deepdive");
+    assert.equal(deleted, true);
+
+    const entry = await getSummaryCache(url, "deepdive");
+    assert.equal(entry, null);
+
+    const remaining = await getSummaryCache(url, "summary");
+    assert.ok(remaining !== null);
 });
 
-test("saveUsageStats - l'entrada més recent va primer (unshift)", async () => {
+test("deleteSummaryCache - retorna false si l'entrada no existeix", async () => {
     clearStorage();
-    await saveUsageStats(10, 5, false, "model-a", 100, "Primer", "https://first.com");
-    await saveUsageStats(20, 10, false, "model-b", 200, "Segon", "https://second.com");
-    const data = await storageMock.get("usageHistory");
-    assert.equal(data.usageHistory[0].title, "Segon");
-    assert.equal(data.usageHistory[1].title, "Primer");
+    const deleted = await deleteSummaryCache("https://no-exist.com", "summary");
+    assert.equal(deleted, false);
 });
 
-// ---------------------------------------------------------------------------
-// TTL i purgeStaleCacheEntries
-// ---------------------------------------------------------------------------
+test("getSummaryCache - llegir clau legacy (sense tipus) funciona com summary", async () => {
+    clearStorage();
+    const url = "https://legacy.com";
+    await storageMock.set({
+        [`summary_cache:${url}`]: { url, title: "Legacy", summary: "Old format", model: "m", timestamp: new Date().toISOString(), version: "1.0", stats: {} }
+    });
+    const entry = await getSummaryCache(url, "summary");
+    assert.ok(entry !== null);
+    assert.equal(entry.title, "Legacy");
+});
 
-test("getSummaryCache - retorna null per a entrades més velles que el TTL", async () => {
+test("getSummaryCache - retorna null per a entrades mes velles que el TTL", async () => {
     clearStorage();
     const url = "https://old-article.com";
-    // Desar una entrada amb timestamp de fa 31 dies
     const oldTimestamp = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
     await storageMock.set({
-        [`summary_cache:${url}`]: { url, title: "Vell", summary: "Antic", timestamp: oldTimestamp, version: "1.0", stats: {} }
+        [`summary_cache:${url}:summary`]: { url, title: "Vell", summary: "Antic", timestamp: oldTimestamp, version: "1.0", stats: {} }
     });
     const result = await getSummaryCache(url);
     assert.equal(result, null, "Ha de retornar null per entrades expirades");
 });
 
-test("getSummaryCache - retorna l'entrada si és dins el TTL", async () => {
+test("getSummaryCache - retorna l'entrada si es dins el TTL", async () => {
     clearStorage();
     const url = "https://fresh-article.com";
     await saveSummaryCache(url, "Fresc", "Resum fresc", "model", 10, 5);
@@ -178,11 +175,10 @@ test("purgeStaleCacheEntries - elimina entrades antigues i retorna el nombre eli
     clearStorage();
     const oldTs = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
     const freshTs = new Date().toISOString();
-    // Cal injectar l'índex perquè getSummaryCacheIndex el trobi
     await storageMock.set({
-        "summary_cache_index": ["summary_cache:https://old.com", "summary_cache:https://fresh.com"],
-        "summary_cache:https://old.com": { url: "https://old.com", title: "Vell", summary: "X", timestamp: oldTs, version: "1.0", stats: {} },
-        "summary_cache:https://fresh.com": { url: "https://fresh.com", title: "Fresc", summary: "Y", timestamp: freshTs, version: "1.0", stats: {} },
+        "summary_cache_index": ["summary_cache:https://old.com:summary", "summary_cache:https://fresh.com:summary"],
+        "summary_cache:https://old.com:summary": { url: "https://old.com", title: "Vell", summary: "X", timestamp: oldTs, version: "1.0", stats: {} },
+        "summary_cache:https://fresh.com:summary": { url: "https://fresh.com", title: "Fresc", summary: "Y", timestamp: freshTs, version: "1.0", stats: {} },
         "stats": { articles: 5, tokens: 1000 },
     });
     const removed = await purgeStaleCacheEntries();
@@ -204,7 +200,7 @@ test("getSummaryCache - retorna null per entrades sense timestamp (considerades 
     clearStorage();
     const url = "https://no-ts.com";
     await storageMock.set({
-        [`summary_cache:${url}`]: { url, title: "No TS", summary: "X" }
+        [`summary_cache:${url}:summary`]: { url, title: "No TS", summary: "X" }
     });
     const result = await getSummaryCache(url);
     assert.equal(result, null, "Ha de retornar null per entrades sense timestamp");
@@ -213,49 +209,114 @@ test("getSummaryCache - retorna null per entrades sense timestamp (considerades 
 test("purgeStaleCacheEntries - elimina entrades sense timestamp (considerades expirades)", async () => {
     clearStorage();
     await storageMock.set({
-        "summary_cache_index": ["summary_cache:https://no-ts.com"],
-        "summary_cache:https://no-ts.com": { url: "https://no-ts.com", title: "X", summary: "Y" }
+        "summary_cache_index": ["summary_cache:https://no-ts.com:summary"],
+        "summary_cache:https://no-ts.com:summary": { url: "https://no-ts.com", title: "X", summary: "Y" }
     });
     const removed = await purgeStaleCacheEntries();
     assert.equal(removed, 1, "Ha d'eliminar l'entrada sense timestamp");
 });
 
+test("saveUsageStats - crea una entrada a l'historial", async () => {
+    clearStorage();
+    const result = await saveUsageStats(100, 50, "summary", "gemini-2.0-flash", 1200, "Article test", "https://test.com");
+    assert.ok(result !== null);
+    assert.equal(result.articles, 1);
+    assert.equal(result.tokens, 150);
+});
+
+test("saveUsageStats - incrementa el comptador d'articles i tokens", async () => {
+    clearStorage();
+    await saveUsageStats(100, 50, "summary", "model-a", 1000, "A", "https://a.com");
+    const result = await saveUsageStats(200, 100, "summary", "model-b", 2000, "B", "https://b.com");
+    assert.equal(result.articles, 2);
+    assert.equal(result.tokens, 450);
+});
+
+test("saveUsageStats - l'entrada de l'historial te els camps correctes", async () => {
+    clearStorage();
+    await saveUsageStats(80, 40, "deepdive", "gemini-2.5-pro", 3000, "Titular", "https://pro.com");
+
+    const data = await storageMock.get("usageHistory");
+    const history = data.usageHistory;
+    assert.equal(history.length, 1);
+    const entry = history[0];
+    assert.equal(entry.model, "gemini-2.5-pro");
+    assert.equal(entry.inputTokens, 80);
+    assert.equal(entry.outputTokens, 40);
+    assert.equal(entry.type, "deepdive");
+    assert.equal(entry.latency, 3000);
+    assert.equal(entry.title, "Titular");
+    assert.equal(entry.url, "https://pro.com");
+    assert.equal(entry.cacheTokens, 0);
+});
+
+test("saveUsageStats - el tipus summary per defecte", async () => {
+    clearStorage();
+    await saveUsageStats(50, 25, "summary", "gemini-2.0-flash", 500, "T", "https://t.com");
+    const data = await storageMock.get("usageHistory");
+    assert.equal(data.usageHistory[0].type, "summary");
+});
+
+test("saveUsageStats - suporta contentType deepdive, science, conceptmap", async () => {
+    clearStorage();
+    await saveUsageStats(10, 5, "deepdive", "m-a", 100, "A", "https://a.com");
+    await saveUsageStats(10, 5, "science", "m-b", 100, "B", "https://b.com");
+    await saveUsageStats(10, 5, "conceptmap", "m-c", 100, "C", "https://c.com");
+    const data = await storageMock.get("usageHistory");
+    assert.equal(data.usageHistory[0].type, "conceptmap");
+    assert.equal(data.usageHistory[1].type, "science");
+    assert.equal(data.usageHistory[2].type, "deepdive");
+});
+
+test("saveUsageStats - l'historial es limita a 1000 entrades", async () => {
+    clearStorage();
+    for (let i = 0; i < 1001; i++) {
+        await saveUsageStats(10, 5, "summary", "model-x", 100, `Article ${i}`, `https://test.com/${i}`);
+    }
+    const data = await storageMock.get("usageHistory");
+    assert.equal(data.usageHistory.length, 1000);
+});
+
+test("saveUsageStats - l'entrada mes recent va primer (unshift)", async () => {
+    clearStorage();
+    await saveUsageStats(10, 5, "summary", "model-a", 100, "Primer", "https://first.com");
+    await saveUsageStats(20, 10, "summary", "model-b", 200, "Segon", "https://second.com");
+    const data = await storageMock.get("usageHistory");
+    assert.equal(data.usageHistory[0].title, "Segon");
+    assert.equal(data.usageHistory[1].title, "Primer");
+});
+
 test("saveUsageStats - cacheTokens es guarda correctament", async () => {
     clearStorage();
-    await saveUsageStats(100, 50, false, "gemini-2.0-flash", 1000, "T", "https://t.com", 25);
+    await saveUsageStats(100, 50, "summary", "gemini-2.0-flash", 1000, "T", "https://t.com", 25);
     const data = await storageMock.get("usageHistory");
     assert.equal(data.usageHistory[0].cacheTokens, 25);
 });
 
-// ---------------------------------------------------------------------------
-// dailyStats
-// ---------------------------------------------------------------------------
-
 test("saveUsageStats - dailyStats incrementa el comptador del dia actual", async () => {
     clearStorage();
     const todayKey = new Date().toISOString().slice(0, 10);
-    await saveUsageStats(100, 50, false, "gemini-2.0-flash", 1000, "T", "https://t.com");
+    await saveUsageStats(100, 50, "summary", "gemini-2.0-flash", 1000, "T", "https://t.com");
     const data = await storageMock.get("dailyStats");
-    assert.equal(data.dailyStats[todayKey], 1, "Ha de comptar 1 per avui");
+    assert.equal(data.dailyStats[todayKey], 1);
 });
 
-test("saveUsageStats - dailyStats acumula múltiples resums del mateix dia", async () => {
+test("saveUsageStats - dailyStats acumula multiples resums del mateix dia", async () => {
     clearStorage();
     const todayKey = new Date().toISOString().slice(0, 10);
-    await saveUsageStats(100, 50, false, "model-a", 1000, "A", "https://a.com");
-    await saveUsageStats(200, 80, false, "model-b", 1200, "B", "https://b.com");
-    await saveUsageStats(150, 60, false, "model-c", 900, "C", "https://c.com");
+    await saveUsageStats(100, 50, "summary", "model-a", 1000, "A", "https://a.com");
+    await saveUsageStats(200, 80, "summary", "model-b", 1200, "B", "https://b.com");
+    await saveUsageStats(150, 60, "summary", "model-c", 900, "C", "https://c.com");
     const data = await storageMock.get("dailyStats");
-    assert.equal(data.dailyStats[todayKey], 3, "Ha d'acumular 3 resums per avui");
+    assert.equal(data.dailyStats[todayKey], 3);
 });
 
 test("saveUsageStats - dailyStats preserva comptadors d'altres dies", async () => {
     clearStorage();
     const todayKey = new Date().toISOString().slice(0, 10);
     const yesterdayKey = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-    // Injectar un comptador d'ahir
     await storageMock.set({ dailyStats: { [yesterdayKey]: 5 } });
-    await saveUsageStats(100, 50, false, "model-a", 1000, "T", "https://t.com");
+    await saveUsageStats(100, 50, "summary", "model-a", 1000, "T", "https://t.com");
     const data = await storageMock.get("dailyStats");
     assert.equal(data.dailyStats[yesterdayKey], 5, "El comptador d'ahir s'ha de preservar");
     assert.equal(data.dailyStats[todayKey], 1, "El comptador d'avui ha de ser 1");

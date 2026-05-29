@@ -90,7 +90,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", 
                 "enableConceptMap", "extensionOrder", "favoriteModels",
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
-                "conceptMapStyle", "conceptMapAutoExpand"
+                "conceptMapAutoExpand"
             ]),
             ext.storage.local.get(["apiKey"])
         ]);
@@ -168,17 +168,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 const isCachedConceptMap = cachedSummary.startsWith("<!--conceptmap-->\n");
                 const displayText = isCachedConceptMap ? cachedSummary.substring("<!--conceptmap-->\n".length) : cachedSummary;
                 
-                const conceptMapOptions = {
-                    style: config.conceptMapStyle || "interactive",
-                    autoExpand: config.conceptMapAutoExpand === true
-                };
-                
                 if (isCachedConceptMap) {
-                    if (conceptMapOptions.style === "interactive") {
-                        contentDiv.replaceChildren(renderMarkmapInteractive(displayText));
-                    } else {
-                        contentDiv.replaceChildren(parseConceptTree(displayText, conceptMapOptions));
-                    }
+                    contentDiv.replaceChildren(renderMarkmapInteractive(displayText));
                 } else {
                     contentDiv.replaceChildren(formatTextToFragment(displayText));
                 }
@@ -357,17 +348,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             throw new Error("[003] Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
         }
         
-        const conceptMapOptions = {
-            style: config.conceptMapStyle || "interactive",
-            autoExpand: config.conceptMapAutoExpand === true
-        };
-        
         if (isConceptMap) {
-            if (conceptMapOptions.style === "interactive") {
-                contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title));
-            } else {
-                contentDiv.replaceChildren(parseConceptTree(currentMetadata.summary, conceptMapOptions));
-            }
+            contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title));
         } else {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
         }
@@ -384,9 +366,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
         const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
         
+        const contentType = isConceptMap ? "conceptmap" : isScience ? "science" : isDeepDive ? "deepdive" : "summary";
         const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary : currentMetadata.summary;
-        await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens);
-        await saveUsageStats(inputTokens, outputTokens, isDeepDive || isScience, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
+        await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens, contentType);
+        await saveUsageStats(inputTokens, outputTokens, contentType, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
         
         updateTokenStats(inputTokens, outputTokens, {
             inputEstimated: false,

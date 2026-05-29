@@ -15,7 +15,6 @@
     const errorDiv = document.getElementById("error");
     const loadingDiv = document.getElementById("loading");
     const footerDiv = document.getElementById("footer");
-    const docTitleEl = document.getElementById("doc-title");
 
     let pdfDoc = null;
     let pageNum = 1;

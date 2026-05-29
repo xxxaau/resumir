@@ -53,7 +53,8 @@ const JS_FILES = collectFiles(root, (full, rel) =>
     !rel.includes("defuddle") &&
     !full.endsWith(".bundle.js") &&
     !rel.startsWith("node_modules") &&
-    !rel.startsWith("coverage")
+    !rel.startsWith("coverage") &&
+    !rel.startsWith("vendor")
 );
 
 /** Fitxers HTML propis */
@@ -130,9 +131,11 @@ check("AMO: no 'eval()' ni 'new Function('", () => {
         const src = readText(f);
         const lines = src.split("\n");
         lines.forEach((line, i) => {
+            // Elimina comentaris de línia per evitar falsos positius en comentaris
+            const code = line.replace(/\/\/.*$/, "");
             // Allow indirect eval pattern (0, eval)(...) which is safe and AMO-accepted
-            const hasDirectEval = /\beval\s*\(/.test(line) && !/\(\s*0\s*,\s*eval\s*\)/.test(line);
-            const hasNewFunction = /new\s+Function\s*\(/.test(line);
+            const hasDirectEval = /\beval\s*\(/.test(code) && !/\(\s*0\s*,\s*eval\s*\)/.test(code);
+            const hasNewFunction = /new\s+Function\s*\(/.test(code);
             if (hasDirectEval || hasNewFunction) {
                 hits.push(`${relative(root, f)}:${i + 1} → ${line.trim()}`);
             }

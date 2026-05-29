@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Resumir (DEV)",
+    "name": "Resumir",
     "short_name": "Resumir",
     "version": "2.3.0",
     "author": "Sergi Xaudiera",
@@ -9,7 +9,6 @@
     "minimum_chrome_version": "142",
     "permissions": [
         "storage",
-        "unlimitedStorage",
         "activeTab",
         "scripting",
         "tabs",
@@ -32,14 +31,14 @@
         "open_in_tab": true
     },
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https: file:"
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https:"
     },
     "optional_permissions": [
         "<all_urls>"
     ],
     "browser_specific_settings": {
         "gecko": {
-            "id": "sergi.dev@xaudiera.xyz",
+            "id": "sergi@xaudiera.xyz",
             "strict_min_version": "142.0",
             "data_collection_permissions": {
                 "required": [

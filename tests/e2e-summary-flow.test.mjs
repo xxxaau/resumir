@@ -96,6 +96,12 @@ function setupE2EGlobals() {
         },
         runtime: { openOptionsPage: () => {} },
     };
+    global.CONTENT_TYPES = [
+        { id: "summary",    icon: "\u{1F4DD}", label: "Resum",            order: 1 },
+        { id: "deepdive",   icon: "\u{1F52C}", label: "Aprofundiment",    order: 2 },
+        { id: "conceptmap", icon: "\u{1F9E0}", label: "Mapa conceptual",  order: 3 },
+        { id: "science",    icon: "\u{1F4CA}", label: "Validaci\u00F3",   order: 4 },
+    ];
 
     global.CURATED_MODELS = [
         { id: "gemini-2.0-flash", fallback: true,  contextWindow: 100_000 },

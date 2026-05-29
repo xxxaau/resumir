@@ -1,6 +1,6 @@
 # Build Instructions
 
-This document describes how to build **Resumir contingut** from source. Required by AMO (addons.mozilla.org) for source code submission.
+This document describes how to build **Resumir** from source. Required by AMO (addons.mozilla.org) for source code submission.
 
 ## Requirements
 

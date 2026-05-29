@@ -666,6 +666,38 @@ body {
 .history-item-title {
   font-size: 0.9em;
   color: var(--text-color);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-item-top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-entry-types {
+  flex-shrink: 0;
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.type-icon {
+  cursor: pointer;
+  font-size: 0.85em;
+  line-height: 1;
+  padding: 1px;
+  border-radius: 3px;
+}
+
+.type-icon:hover {
+  background: var(--button-hover);
 }
 
 .history-item-meta {
@@ -816,35 +848,6 @@ body {
 
 .concept-map details details details > summary {
   color: var(--text-color);
-}
-
-/* Style variants */
-.concept-map-compact ul {
-  margin: 0.15em 0;
-  padding-left: 1em;
-}
-
-.concept-map-compact details {
-  margin: 0.1em 0;
-}
-
-.concept-map-compact summary,
-.concept-map-compact li {
-  padding: 0.1em 0.3em;
-}
-
-.concept-map-spacious ul {
-  margin: 0.5em 0;
-  padding-left: 1.5em;
-}
-
-.concept-map-spacious details {
-  margin: 0.4em 0;
-}
-
-.concept-map-spacious summary,
-.concept-map-spacious li {
-  padding: 0.3em 0.5em;
 }
 
 /* ── Markmap Interactive Visualization ──────────────────────── */

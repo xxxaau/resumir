@@ -14,7 +14,7 @@ Explica breument el canvi i per què és necessari.
 
 Descriu les proves realitzades:
 
-- [ ] `npm test` passa (207+ tests)
+- [ ] `npm test` passa (233+ tests)
 - [ ] `npm run lint` sense errors
 - [ ] Provat manualment a Firefox
 - [ ] Provat manualment a Chromium
