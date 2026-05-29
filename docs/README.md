@@ -1,6 +1,6 @@
 # 📚 Documentation Structure
 
-This directory contains **user-facing, developer, and architectural documentation** for the **Resumir contingut** browser extension.
+This directory contains **user-facing, developer, and architectural documentation** for the **Resumir** browser extension.
 
 ## 📑 Directory Organization
 
@@ -12,27 +12,14 @@ This directory contains **user-facing, developer, and architectural documentatio
 ### 🏗️ [`architecture/`](./architecture/)
 **System design & technical architecture** for developers.
 - **ARCHITECTURE.md** — Overall design & component graph
-- **API-INTEGRATION.md** — Gemini API & fallback strategies
-- **STORAGE-STRATEGY.md** — Data persistence & sync model
-- **SECURITY-POSTURE.md** — CSP, permissions, content isolation
 
 ### 👥 [`user-guide/`](./user-guide/)
-**User-facing tutorials & feature documentation**.
+**User-facing documentation**.
 - **GETTING-STARTED.md** — Installation & first run
-- **FEATURES.md** — Feature overview & usage
-- **YOUTUBE-SETUP.md** — YouTube transcript setup
-- **HN-SETUP.md** — Hacker News setup
-- **THEMES.md** — Theme gallery & customization
-- **BIONIC-READING.md** — Speed reading mode
-- **OBSIDIAN-EXPORT.md** — Markdown export guide
 
 ### 👨‍💻 [`developer/`](./developer/)
 **Contributing & extension development documentation**.
-- **DEVELOPMENT.md** — Local dev environment setup
-- **EXTENSION-API.md** — Internal messaging & APIs
-- **CONTENT-SCRIPTS.md** — Content script patterns
-- **VENDOR-MANAGEMENT.md** — Updating defuddle.js & Readability.js
-- **TESTING-STRATEGY.md** — Test architecture & practices
+*(en construcció — consulta [`../CONTRIBUTING.md`](../CONTRIBUTING.md) i [`../BUILD.md`](../BUILD.md))*
 
 ### 🛍️ [`listing/`](./listing/)
 **Store listing & marketing content** (for Firefox AMO, Chrome CWS).
@@ -44,11 +31,10 @@ This directory contains **user-facing, developer, and architectural documentatio
 
 | Role | Start Here | Then Read |
 |------|-----------|-----------|
-| **End User** | [`user-guide/GETTING-STARTED.md`](./user-guide/GETTING-STARTED.md) | [`user-guide/FEATURES.md`](./user-guide/FEATURES.md) |
-| **Contributor** | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | [`developer/DEVELOPMENT.md`](./developer/DEVELOPMENT.md) |
+| **End User** | [`../README.md`](../README.md) | [`user-guide/GETTING-STARTED.md`](./user-guide/GETTING-STARTED.md) |
+| **Contributor** | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | [`../BUILD.md`](../BUILD.md) |
 | **Maintainer** | [`../README.md`](../README.md) | [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) |
-| **Release Manager** | [`../TO-DO.md`](../TO-DO.md) | [`../.superpowers/metrics/RELEASE-CRITERIA.md`](../.superpowers/metrics/RELEASE-CRITERIA.md) |
-| **Security Auditor** | [`architecture/SECURITY-POSTURE.md`](./architecture/SECURITY-POSTURE.md) | [`../.superpowers/threats/THREAT-MODEL.md`](../.superpowers/threats/THREAT-MODEL.md) |
+| **Security Auditor** | [`../SECURITY.md`](../SECURITY.md) | [`../docs/THIRD_PARTY.md`](../docs/THIRD_PARTY.md) |
 
 ---
 
@@ -62,4 +48,4 @@ This directory contains **user-facing, developer, and architectural documentatio
 
 ---
 
-**Last Updated**: 2026-05-18
+**Last Updated**: 2026-05-29
