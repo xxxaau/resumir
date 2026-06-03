@@ -19,6 +19,10 @@ const PROMPT_DEFAULTS_VERSION = 1;
 //
 // 1. DEFINEIX LA CONSTANT AQUÍ (ex: const DEFAULT_MYPLUGIN_PROMPT = `...`)
 //
+// 1b. REGISTRA LA CONSTANT COM A GLOBAL a eslint.config.mjs → extensionGlobals
+//     Afegeix: DEFAULT_MYPLUGIN_PROMPT: "readonly",
+//     (Si no, ESLint donarà no-undef als fitxers que l'usin via <script>)
+//
 // 2. REGISTRA LA CLAU a options/settings.js → ALL_CONFIG_KEYS
 //    Afegeix: "myPluginPrompt", "myPluginPromptCustomized", "myPluginPromptUpdateAvailable"
 //
