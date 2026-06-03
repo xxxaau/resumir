@@ -52,6 +52,7 @@ npm run dev
 ### Qualitat
 
 - **Lint:** ESLint sense avisos (0 warnings). Corregeix els errors; afegeix `// eslint-disable-line` si un avís és justificat.
+- **Globals cross-file:** L'extensió usa `<script>` tags (no mòduls). Les constants/funcions compartides entre fitxers s'han de registrar a `eslint.config.mjs` → `extensionGlobals` o `settingsGlobals`. Si no, ESLint donarà falsos `no-undef`. Les variables registrades s'ignoren automàticament a `no-unused-vars`.
 - **Tests:** La suite actual té 233+ tests. Qualsevol funcionalitat nova requereix els seus tests corresponents.
 - **Noms:** utilitza camelCase per a variables/funcions, kebab-case per a fitxers. Preferiblement en català per als comentaris.
 

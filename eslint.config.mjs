@@ -1,7 +1,11 @@
 import js from "@eslint/js";
 import globals from "globals";
 
-/** Globals compartides entre els fitxers JS de l'extensió (carregats via <script> al navegador) */
+/** Globals compartides entre els fitxers JS de l'extensió (carregats via <script> al navegador)
+ *  IMPORTANT: Quan afegeixis una constant global nova (p.e. a shared/defaults.js),
+ *  REGISTRA-LA AQUÍ per evitar falsos no-undef als fitxers que l'usin via <script>;
+ *  sense export/import, ESLint desconeix l'existència de la variable.
+ */
 const extensionGlobals = {
     // APIs de WebExtensions (Firefox: browser.*, Chromium: chrome.*)
     browser: "readonly",
