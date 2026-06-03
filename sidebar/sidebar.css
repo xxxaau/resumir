@@ -1057,3 +1057,52 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
 }
+
+/* ── Prompt Update Banner ─────────────────────────────── */
+.prompt-update-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin: 0 12px 8px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #6d4c00;
+  line-height: 1.4;
+}
+
+[data-actual-theme="dark"] .prompt-update-banner {
+  background: #332b00;
+  border-color: #665500;
+  color: #ffd54f;
+}
+
+.prompt-update-banner a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.prompt-update-banner a:hover {
+  color: var(--primary-hover);
+}
+
+.prompt-update-dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 4px;
+}
+
+.prompt-update-dismiss:hover {
+  opacity: 1;
+}

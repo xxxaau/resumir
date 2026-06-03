@@ -13,10 +13,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
         "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
         "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight",
-        "enableDeepdive", "deepDivePrompt",
-        "enableScience", "sciencePrompt",
-        "enableResum", "enableConceptMap", "conceptMapPrompt",
-        "extensionOrder"
+        "enableDeepdive", "deepDivePrompt", "deepDivePromptCustomized", "deepDivePromptUpdateAvailable",
+        "enableScience", "sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable",
+        "enableResum", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
+        "extensionOrder", "promptDefaultsVersion"
     ];
     const [localData, syncData] = await Promise.all([
         ext.storage.local.get(["apiKey"]),

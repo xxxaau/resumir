@@ -33,20 +33,28 @@ function saveOptions(e) {
 
     enableDeepdive: document.querySelector("#enableDeepdive").checked,
     deepDivePrompt: document.querySelector("#deepDivePrompt").value,
-    
+    deepDivePromptCustomized: document.querySelector("#deepDivePrompt").value !== DEFAULT_DEEP_DIVE_PROMPT,
+
     enableScience: document.querySelector("#enableScience").checked,
     sciencePrompt: document.querySelector("#sciencePrompt").value,
+    sciencePromptCustomized: document.querySelector("#sciencePrompt").value !== DEFAULT_SCIENCE_PROMPT,
 
     enableResum: document.querySelector("#enableResum").checked,
 
     enableConceptMap: document.querySelector("#enableConceptMap").checked,
     conceptMapPrompt: document.querySelector("#conceptMapPrompt").value,
+    conceptMapPromptCustomized: document.querySelector("#conceptMapPrompt").value !== DEFAULT_CONCEPTMAP_PROMPT,
 
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder(),
 
   };
 
+
+  // Netejar flags d'actualització en desar (l'usuari ja ha vist l'avís)
+  settings.deepDivePromptUpdateAvailable = false;
+  settings.sciencePromptUpdateAvailable = false;
+  settings.conceptMapPromptUpdateAvailable = false;
 
   Promise.all([
       ext.storage.sync.set(settings),
@@ -97,8 +105,25 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#enableConceptMap").checked = syncData && syncData.enableConceptMap === true;
     document.querySelector("#conceptMapPrompt").value = (syncData && syncData.conceptMapPrompt !== undefined) ? syncData.conceptMapPrompt : DEFAULT_CONCEPTMAP_PROMPT;
 
+    // Mostrar banners d'actualització de prompts si n'hi ha
+    if (syncData) {
+        showPromptUpdateBanner("deepdive", syncData.deepDivePromptUpdateAvailable);
+        showPromptUpdateBanner("science", syncData.sciencePromptUpdateAvailable);
+        showPromptUpdateBanner("conceptmap", syncData.conceptMapPromptUpdateAvailable);
+    }
+
     if (syncData && syncData.extensionOrder && Array.isArray(syncData.extensionOrder)) {
         applyExtensionOrder(syncData.extensionOrder);
+    }
+}
+
+function showPromptUpdateBanner(type, isAvailable) {
+    const banner = document.getElementById(type + "UpdateBanner");
+    if (!banner) return;
+    if (isAvailable) {
+        banner.style.display = "block";
+    } else {
+        banner.style.display = "none";
     }
 }
 
@@ -129,14 +154,26 @@ function resetSystemPrompt() {
 
 function resetDeepDivePrompt() {
     document.querySelector("#deepDivePrompt").value = DEFAULT_DEEP_DIVE_PROMPT;
+    dismissPromptUpdate("deepdive");
 }
 
 function resetSciencePrompt() {
     document.querySelector("#sciencePrompt").value = DEFAULT_SCIENCE_PROMPT;
+    dismissPromptUpdate("science");
+}
+
+function dismissPromptUpdate(type) {
+    const banner = document.getElementById(type + "UpdateBanner");
+    if (banner) banner.style.display = "none";
+    const updateKey = type === "deepdive" ? "deepDivePromptUpdateAvailable"
+        : type === "science" ? "sciencePromptUpdateAvailable"
+        : "conceptMapPromptUpdateAvailable";
+    ext.storage.sync.set({ [updateKey]: false }).catch(() => {});
 }
 
 function resetConceptMapPrompt() {
     document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
+    dismissPromptUpdate("conceptmap");
 }
 
 function resetBionic() {

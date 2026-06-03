@@ -4,6 +4,67 @@
 // shared/defaults.js
 // Font de veritat única per als prompts per defecte.
 // Carregat tant per la sidebar com per la pàgina d'opcions.
+//
+// ── VERSIÓ DE PROMPTS ───────────────────────────────────────────────────────
+// Incrementa PROMPT_DEFAULTS_VERSION quan modifiquis qualsevol DEFAULT_*_PROMPT.
+// Això fa que la migració a sidebar.js es torni a executar per als usuaris
+// existents, actualitzant automàticament els no personalitzats i mostrant
+// la notificació d'actualització als personalitzats.
+const PROMPT_DEFAULTS_VERSION = 1;
+
+// ── GUIA: COM AFEGIR UN NOU PLUGIN AMB PROMPT ──────────────────────────────
+// Quan modificuis un DEFAULT_*_PROMPT existent, incrementa PROMPT_DEFAULTS_VERSION
+// perquè la migració es torni a executar. Quan afegeixis un plugin NOU:
+//
+//
+// 1. DEFINEIX LA CONSTANT AQUÍ (ex: const DEFAULT_MYPLUGIN_PROMPT = `...`)
+//
+// 2. REGISTRA LA CLAU a options/settings.js → ALL_CONFIG_KEYS
+//    Afegeix: "myPluginPrompt", "myPluginPromptCustomized", "myPluginPromptUpdateAvailable"
+//
+// 3. DESA EL FLAG DE PERSONALITZACIÓ a options/settings-options.js → saveOptions()
+//    settings.myPluginPrompt = valor;
+//    settings.myPluginPromptCustomized = (valor !== DEFAULT_MYPLUGIN_PROMPT);
+//
+// 4. CARREGA EL VALOR a options/settings-options.js → restoreOptions()
+//    Amb el patró: (syncData && syncData.myPluginPrompt !== undefined)
+//        ? syncData.myPluginPrompt : DEFAULT_MYPLUGIN_PROMPT
+//
+// 5. MOSTRA BANNER D'ACTUALITZACIÓ a options/settings-options.js → restoreOptions()
+//    showPromptUpdateBanner("myplugin", syncData.myPluginPromptUpdateAvailable);
+//
+// 6. AFEGEIX EL BANNER HTML a options/settings.html
+//    <div id="mypluginUpdateBanner" class="update-banner" style="display:none">
+//      <p>Hi ha una nova versió del prompt de ... per defecte.</p>
+//      <div class="update-banner-actions">
+//        <button class="btn btn-secondary btn-sm"
+//          onclick="resetMyPluginPrompt(); document.querySelector('#saveMyPlugin').click()">
+//          Restaurar prompt per defecte
+//        </button>
+//        <button class="btn btn-ghost" onclick="dismissPromptUpdate('myplugin')">
+//          Mantenir el meu prompt
+//        </button>
+//      </div>
+//    </div>
+//
+// 7. REGISTRA LA MIGRACIÓ a sidebar/sidebar.js (bloc On Load Init)
+//    Afegeix l'objecte al array promptDefs:
+//    { key: "myPluginPrompt", defaultVal: DEFAULT_MYPLUGIN_PROMPT,
+//      customizedKey: "myPluginPromptCustomized",
+//      updateKey: "myPluginPromptUpdateAvailable" }
+//
+// 8. REGISTRA EL BOTÓ + NOTIFICACIÓ a sidebar/sidebar.js
+//    Al click handler del botó, usa checkPromptUpdate():
+//    checkPromptUpdate("nom del plugin", "myPluginPromptUpdateAvailable",
+//      () => { doSummary(...) });
+//
+// 9. AFEGEIX EL BOTÓ DE RESET a options/settings-options.js
+//    function resetMyPluginPrompt() {
+//      document.querySelector("#myPluginPrompt").value = DEFAULT_MYPLUGIN_PROMPT;
+//      dismissPromptUpdate("myplugin");
+//    }
+//    I vincula'l a options/settings.js amb bindClick("resetMyPlugin", resetMyPluginPrompt);
+//
 
 const DEFAULT_SYSTEM_PROMPT = `Ets un assistent expert en resumir contingut web. La teva tasca és analitzar el text i generar un resum en CATALÀ.
 
@@ -43,6 +104,7 @@ REGLES DE RESPOSTA:
 - Rigor Crític: Assenyala directament qualsevol desviació del consens científic o manca de rigor metodològic en el text analitzat.
 - Sigues molt acurat i estigues segur de la resposta encara que tardis més temps.
 - Alhora d'indicar la url tingues en compte que hi ha DOI que poden contenir . en la mateixa url
+- Articles recents: Si la data de publicació de l'article és posterior al teu tall de coneixement, NO el rebutgis automàticament. Avalua'l basant-te en: (1) principis metodològics generals, (2) coherència interna de l'argumentació, (3) versemblança amb el consens científic previ que coneixes, i (4) qualitat de les referències citades. Si escau, indica que l'article és recent i que la validació es fonamenta en aquests criteris.
 
 ESTRUCTURA DE LA RESPOSTA:
 [Escriu aquí directament el paràgraf de síntesi crítica, màxim 150 paraules, centrat en la validesa científica del contingut]

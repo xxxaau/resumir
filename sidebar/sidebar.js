@@ -326,18 +326,74 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- Prompt Update Notification ---
+    const promptUpdateBanner = document.getElementById("prompt-update-notification");
+    const promptUpdateText = document.getElementById("prompt-update-text");
+    const promptUpdateLink = document.getElementById("prompt-update-link");
+    const promptUpdateDismiss = document.getElementById("prompt-update-dismiss");
+
+    let _currentUpdateKey = null;
+    let _currentCallback = null;
+
+    function showPromptUpdateBanner(type, updateKey, callback) {
+        if (!promptUpdateBanner || !promptUpdateText || !promptUpdateLink) return;
+        _currentUpdateKey = updateKey;
+        _currentCallback = callback;
+        promptUpdateText.textContent = `Nova versió del prompt de ${type} disponible. `;
+        promptUpdateLink.onclick = (e) => {
+            e.preventDefault();
+            ext.storage.sync.set({ [updateKey]: false }).catch(() => {});
+            promptUpdateBanner.classList.add("hidden");
+            ext.runtime.openOptionsPage();
+        };
+        promptUpdateBanner.classList.remove("hidden");
+    }
+
+    function dismissAndContinue() {
+        if (!promptUpdateBanner) { if (_currentCallback) _currentCallback(); return; }
+        promptUpdateBanner.classList.add("hidden");
+        if (_currentUpdateKey) {
+            ext.storage.sync.set({ [_currentUpdateKey]: false }).catch(() => {});
+        }
+        const cb = _currentCallback;
+        _currentUpdateKey = null;
+        _currentCallback = null;
+        if (cb) cb();
+    }
+
+    function checkPromptUpdate(type, updateKey, callback) {
+        if (!promptUpdateBanner) { callback(); return; }
+        ext.storage.sync.get(updateKey).then(result => {
+            if (result[updateKey]) {
+                showPromptUpdateBanner(type, updateKey, callback);
+            } else {
+                callback();
+            }
+        }).catch(() => callback());
+    }
+
+    if (promptUpdateDismiss) {
+        promptUpdateDismiss.addEventListener("click", dismissAndContinue);
+    }
+
     deepDiveBtn.addEventListener("click", () => {
-        doSummary(null, true, false, true);
+        checkPromptUpdate("aprofundiment", "deepDivePromptUpdateAvailable", () => {
+            doSummary(null, true, false, true);
+        });
     });
 
     scienceBtn.addEventListener("click", () => {
-        doSummary(null, false, true, true);
+        checkPromptUpdate("validació científica", "sciencePromptUpdateAvailable", () => {
+            doSummary(null, false, true, true);
+        });
     });
 
     const conceptMapBtn = document.getElementById("conceptMapBtn");
     if (conceptMapBtn) {
         conceptMapBtn.addEventListener("click", () => {
-            doSummary(null, false, false, true, true);
+            checkPromptUpdate("mapa conceptual", "conceptMapPromptUpdateAvailable", () => {
+                doSummary(null, false, false, true, true);
+            });
         });
     }
 
@@ -534,6 +590,65 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (e) {
             console.warn("API key migration failed:", e);
+        }
+
+        // 2. Migració de prompts: detectar prompts personalitzats vs per defecte
+        try {
+            const promptKeys = [
+                "sciencePrompt", "deepDivePrompt", "conceptMapPrompt",
+                "sciencePromptCustomized", "deepDivePromptCustomized", "conceptMapPromptCustomized",
+                "sciencePromptUpdateAvailable", "deepDivePromptUpdateAvailable", "conceptMapPromptUpdateAvailable",
+                "promptDefaultsVersion"
+            ];
+            const promptConfig = await ext.storage.sync.get(promptKeys);
+
+            // Si la versió coincideix, la migració ja s'ha executat per aquests defaults
+            if (promptConfig.promptDefaultsVersion === PROMPT_DEFAULTS_VERSION) {
+                // Netejar flags d'actualització òrfans si el prompt desat ja no és personalitzat
+                const cleanupNeeded = [];
+                const promptDefs = [
+                    { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized" },
+                    { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized" },
+                    { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized" },
+                ];
+                for (const { key, defaultVal, customizedKey } of promptDefs) {
+                    const saved = promptConfig[key];
+                    const flag = promptConfig[customizedKey];
+                    if (flag && saved !== undefined && saved === defaultVal) {
+                        cleanupNeeded.push(customizedKey);
+                    }
+                }
+                if (cleanupNeeded.length) {
+                    await ext.storage.sync.remove(cleanupNeeded);
+                }
+            } else {
+                const toRemove = [];
+                const toSet = { promptDefaultsVersion: PROMPT_DEFAULTS_VERSION };
+
+                const promptDefs = [
+                    { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized", updateKey: "sciencePromptUpdateAvailable" },
+                    { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized", updateKey: "deepDivePromptUpdateAvailable" },
+                    { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized", updateKey: "conceptMapPromptUpdateAvailable" },
+                ];
+
+                for (const { key, defaultVal, customizedKey, updateKey } of promptDefs) {
+                    const saved = promptConfig[key];
+
+                    if (saved === undefined || saved === defaultVal) {
+                        if (saved === defaultVal) toRemove.push(key);
+                        toSet[customizedKey] = false;
+                        toSet[updateKey] = false;
+                    } else {
+                        toSet[customizedKey] = true;
+                        toSet[updateKey] = true;
+                    }
+                }
+
+                if (toRemove.length) await ext.storage.sync.remove(toRemove);
+                if (Object.keys(toSet).length) await ext.storage.sync.set(toSet);
+            }
+        } catch (e) {
+            console.warn("Prompt migration failed:", e);
         }
 
         // Purgar caché expirada en segon pla (no bloquejant)

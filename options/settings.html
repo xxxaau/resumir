@@ -789,6 +789,13 @@
       <!-- Tab: Deep Dive Config -->
       <div id="tab-deepdive" class="tab-pane">
         <h1 class="page-title">Configuració de l'aprofundiment</h1>
+        <div id="deepdiveUpdateBanner" class="update-banner" style="display:none">
+          <p>Hi ha una nova versió del prompt d'aprofundiment per defecte.</p>
+          <div class="update-banner-actions">
+            <button class="btn btn-secondary btn-sm" onclick="resetDeepDivePrompt(); document.querySelector('#saveDeepDive').click()">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" onclick="dismissPromptUpdate('deepdive')">Mantenir el meu prompt</button>
+          </div>
+        </div>
         <div class="section">
           <div class="form-group">
             <label for="deepDivePrompt">Prompt d'aprofundiment</label>
@@ -813,6 +820,13 @@
       <!-- Tab: Scientific Validation Config -->
       <div id="tab-science" class="tab-pane">
         <h1 class="page-title">Configuració de validació científica</h1>
+        <div id="scienceUpdateBanner" class="update-banner" style="display:none">
+          <p>Hi ha una nova versió del prompt de validació científica per defecte.</p>
+          <div class="update-banner-actions">
+            <button class="btn btn-secondary btn-sm" onclick="resetSciencePrompt(); document.querySelector('#saveScience').click()">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" onclick="dismissPromptUpdate('science')">Mantenir el meu prompt</button>
+          </div>
+        </div>
         <div class="section">
           <div class="form-group">
             <label for="sciencePrompt">Prompt de validació científica</label>
@@ -923,6 +937,13 @@
       <!-- Tab: Concept Map Config -->
       <div id="tab-conceptmap" class="tab-pane">
         <h1 class="page-title">Configuració del mapa conceptual</h1>
+        <div id="conceptmapUpdateBanner" class="update-banner" style="display:none">
+          <p>Hi ha una nova versió del prompt de mapa conceptual per defecte.</p>
+          <div class="update-banner-actions">
+            <button class="btn btn-secondary btn-sm" onclick="resetConceptMapPrompt(); document.querySelector('#saveConceptMap').click()">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" onclick="dismissPromptUpdate('conceptmap')">Mantenir el meu prompt</button>
+          </div>
+        </div>
         <div class="section">
           <div class="form-group">
             <label for="conceptMapPrompt">Prompt del mapa conceptual</label>
