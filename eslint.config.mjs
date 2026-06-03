@@ -31,6 +31,7 @@ const extensionGlobals = {
     DEFAULT_DEEP_DIVE_PROMPT: "readonly",
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
+    PROMPT_DEFAULTS_VERSION: "readonly",
     // sidebar/conceptmap.js
     parseConceptTree: "readonly",
     collapseAll: "readonly",
