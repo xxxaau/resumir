@@ -126,6 +126,28 @@ test("formatTextToFragment - URL bare no inclou el punt final d'una frase", () =
     assert.equal(a.href, "https://example.com/", "El punt final no ha de formar part de la URL");
 });
 
+test("formatTextToFragment - DOI amb punts es captura sencer", () => {
+    const frag = formatTextToFragment("DOI: 10.1126/science.aei2409");
+    const a = frag.querySelector("a");
+    assert.ok(a, "Ha de generar <a> per al DOI");
+    assert.equal(a.href, "https://doi.org/10.1126/science.aei2409");
+    assert.match(a.textContent, /10\.1126\/science\.aei2409/);
+});
+
+test("formatTextToFragment - DOI sense punts també funciona", () => {
+    const frag = formatTextToFragment("DOI: 10.1234/simple");
+    const a = frag.querySelector("a");
+    assert.ok(a, "Ha de generar <a> per al DOI simple");
+    assert.equal(a.href, "https://doi.org/10.1234/simple");
+});
+
+test("formatTextToFragment - DOI amb punt final no l'inclou", () => {
+    const frag = formatTextToFragment("Referència. DOI: 10.1000/foo.");
+    const a = frag.querySelector("a");
+    assert.ok(a, "Ha de generar <a>");
+    assert.equal(a.href, "https://doi.org/10.1000/foo", "El punt final no ha de formar part del DOI");
+});
+
 test("formatTextToFragment - mode biònic actiu afegeix <b> a les paraules", () => {
     const frag = formatTextToFragment("Paraula test", true);
     const boldElements = frag.querySelectorAll("b");
