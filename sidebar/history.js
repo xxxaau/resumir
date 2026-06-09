@@ -62,11 +62,11 @@ async function loadHistoryEntry(entry) {
     const localData = await ext.storage.local.get({ isBionicActive: false });
     const bionicEnabled = localData.isBionicActive === true;
     let bionicConfig = {};
-    let fixation = 0.45;
+    let fixation = DEFAULT_BIONIC.fixation / 100;
     if (bionicEnabled) {
-        const syncData = await ext.storage.sync.get({ bionicFixation: 30, bionicFont: undefined, bionicFontSize: undefined, bionicLineHeight: undefined, bionicWeight: "700" });
+        const syncData = await ext.storage.sync.get({ bionicFixation: DEFAULT_BIONIC.fixation, bionicFont: undefined, bionicFontSize: undefined, bionicLineHeight: undefined, bionicWeight: DEFAULT_BIONIC.weight });
         bionicConfig = syncData;
-        fixation = (syncData.bionicFixation || 30) / 100;
+        fixation = (syncData.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
     }
     const CONCEPT_MAP_MARKER = "<!--conceptmap-->\n";
     const isConceptMap = entry.summary.startsWith(CONCEPT_MAP_MARKER);
@@ -84,14 +84,15 @@ async function loadHistoryEntry(entry) {
         contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
     }
     if (bionicEnabled) {
-        contentDiv.style.fontFamily = bionicConfig.bionicFont || "inherit";
-        contentDiv.style.fontSize = bionicConfig.bionicFontSize || "inherit";
-        contentDiv.style.lineHeight = bionicConfig.bionicLineHeight || "1.5";
-        contentDiv.style.setProperty("--bionic-weight", bionicConfig.bionicWeight || "700");
+        contentDiv.style.fontFamily = bionicConfig.bionicFont || DEFAULT_BIONIC.font;
+        contentDiv.style.fontSize = bionicConfig.bionicFontSize || DEFAULT_BIONIC.fontSize;
+        contentDiv.style.lineHeight = bionicConfig.bionicLineHeight || DEFAULT_BIONIC.lineHeight;
+        contentDiv.style.setProperty("--bionic-weight", bionicConfig.bionicWeight || DEFAULT_BIONIC.weight);
     } else {
         contentDiv.style.fontFamily = "";
         contentDiv.style.fontSize = "";
         contentDiv.style.lineHeight = "";
+        contentDiv.style.removeProperty("--bionic-weight");
     }
     contentDiv.classList.remove("hidden");
 

@@ -6,11 +6,11 @@
         "<all_urls>"
     ],
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https:"
+        "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https:"
     },
     "browser_specific_settings": {
         "gecko": {
-            "id": "sergi@xaudiera.xyz",
+            "id": "sergi.dev@xaudiera.xyz",
             "strict_min_version": "142.0",
             "data_collection_permissions": {
                 "required": [

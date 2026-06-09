@@ -860,16 +860,16 @@
               <input
                 type="range"
                 id="bionicFixation"
-                min="20"
-                max="80"
+                min="5"
+                max="60"
                 step="5"
-                value="35"
+                value="20"
                 class="flex-grow"
               />
               <span
                 id="bionicFixationValue"
                 class="input-label-bold"
-                >35%</span
+                >20%</span
               >
             </div>
             <div class="help-text">
@@ -881,25 +881,21 @@
             <label for="bionicFont">Tipografia</label>
             <select id="bionicFont" class="form-control">
               <option value="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Sistema (Per defecte)</option>
-              <option class="os-font os-windows" value="Verdana, sans-serif">Verdana</option>
-              <option class="os-font os-windows" value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
-              <option class="os-font os-windows" value="Arial, sans-serif">Arial</option>
-              <option class="os-font os-mac" value="'Helvetica Neue', Helvetica, sans-serif">Helvetica Neue</option>
-              <option class="os-font os-mac" value="Helvetica, sans-serif">Helvetica</option>
-              <option class="os-font os-mac" value="Geneva, sans-serif">Geneva</option>
+              <option value="Verdana, Tahoma, 'DejaVu Sans', sans-serif">Alta distinció (Verdana)</option>
+              <option value="Georgia, 'Liberation Serif', 'DejaVu Serif', serif">Serif de lectura (Georgia)</option>
+              <option value="'Helvetica Neue', Arial, 'Liberation Sans', sans-serif">Neutra clàssica (Helvetica/Arial)</option>
+              <option value="Consolas, 'DejaVu Sans Mono', monospace">Monospace (Consolas)</option>
             </select>
-            <div class="help-text">Selecciona la família tipogràfica per al text en mode biònic.</div>
+            <div class="help-text">Selecciona la família tipogràfica per al text en mode biònic. Cada opció funciona a Windows, macOS i Linux (si la font no hi és, recau en una d'equivalent).</div>
           </div>
 
           <div class="form-group">
             <label for="bionicWeight">Gruix de la negreta</label>
             <select id="bionicWeight" class="form-control">
-              <option value="400">Normal (400)</option>
               <option value="500">Mitjana (500)</option>
               <option value="600" selected>Semi-negreta (600)</option>
               <option value="700">Negreta (700)</option>
               <option value="800">Extra-negreta (800)</option>
-              <option value="900">Màxima (900)</option>
             </select>
             <div class="help-text">Controla el gruix de les lletres ressaltades.</div>
           </div>
@@ -908,9 +904,9 @@
             <select id="bionicFontSize" class="form-control">
               <option value="0.85em">Molt petit (0.85em)</option>
               <option value="0.9em">Petit (0.9em)</option>
-              <option value="1em" selected>Normal (1em)</option>
+              <option value="1em">Normal (1em)</option>
               <option value="1.1em">Gran (1.1em)</option>
-              <option value="1.2em">Molt gran (1.2em)</option>
+              <option value="1.2em" selected>Molt gran (1.2em)</option>
               <option value="1.4em">Extra gran (1.4em)</option>
               <option value="1.6em">Màxim (1.6em)</option>
             </select>

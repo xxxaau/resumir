@@ -23,7 +23,7 @@ const require = createRequire(import.meta.url);
 function makeEl() {
     return {
         textContent: "",
-        style: {},
+        style: { setProperty() {}, removeProperty() {} },
         classList: {
             _c: new Set(),
             add(...c)    { c.forEach(x => this._c.add(x)); },
@@ -111,6 +111,7 @@ function setupE2EGlobals() {
     global.DEFAULT_SYSTEM_PROMPT    = "Resumeix el contingut.";
     global.DEFAULT_DEEP_DIVE_PROMPT = "Anàlisi profunda.";
     global.DEFAULT_SCIENCE_PROMPT   = "Validació científica.";
+    global.DEFAULT_BIONIC = { fixation: 20, font: "system-ui, sans-serif", weight: "600", fontSize: "1.2em", lineHeight: "1.5" };
 
     // getPageContent mockat (evita scripting.executeScript del navegador)
     global.getPageContent = async () => ({

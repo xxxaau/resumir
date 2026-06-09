@@ -27,24 +27,7 @@ async function getDailyStats(modelId) {
   }
 }
 
-/** @deprecated Usa getDailyStats(modelId).byModel */
-async function getTodayRequestCount(modelId) {
-  return (await getDailyStats(modelId)).byModel;
-}
-
-/** @deprecated Usa getDailyStats(modelId).total */
-async function getTotalTodayCount() {
-  return (await getDailyStats("")).total;
-}
-
-/**
- * Refreshes water indicator + remaining requests when model changes.
- */
-async function refreshRemainingOnModelChange(_modelId) {
-  // Water indicator removed; no display to refresh
-}
-
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getDailyStats, getTodayRequestCount, getTotalTodayCount };
+    module.exports = { getDailyStats };
 }

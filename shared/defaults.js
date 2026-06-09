@@ -10,7 +10,19 @@
 // Això fa que la migració a sidebar.js es torni a executar per als usuaris
 // existents, actualitzant automàticament els no personalitzats i mostrant
 // la notificació d'actualització als personalitzats.
-const PROMPT_DEFAULTS_VERSION = 1;
+const PROMPT_DEFAULTS_VERSION = 2;
+
+// ── DEFAULTS DE LECTURA BIÒNICA ─────────────────────────────────────────────
+// Font de veritat única per als valors per defecte del mode bionic. Tots els
+// consumidors (options, summary.js, sidebar.js, history.js) han de referenciar
+// aquestes constants en lloc de literals, per evitar divergències.
+const DEFAULT_BIONIC = {
+    fixation: 20,                                                                                    // % de cada paraula en negreta (paraules > 3 lletres)
+    font: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",           // tipografia del sistema
+    weight: "600",                                                                                   // gruix de la part ressaltada
+    fontSize: "1.2em",
+    lineHeight: "1.5",
+};
 
 // ── GUIA: COM AFEGIR UN NOU PLUGIN AMB PROMPT ──────────────────────────────
 // Quan modificuis un DEFAULT_*_PROMPT existent, incrementa PROMPT_DEFAULTS_VERSION
@@ -134,10 +146,11 @@ REGLES DE FORMAT:
 4. El primer nivell és el TEMA CENTRAL (1 sola entrada).
 5. Segon nivell: 3-6 branques principals.
 6. Tercer nivell: 2-4 sub-branques per branca.
-7. Màxim 4 nivells de profunditat.
-8. Cada node ha de ser concís: 3-8 paraules.
-9. Opcionalment, afegeix una descripció curta després de ": " (dos punts + espai).
-10. Usa 2 espais per nivell d'indentació.
+7. Quart nivell: detalls, exemples o matisos concrets sota les sub-branques quan el contingut aporti prou informació.
+8. Desenvolupa el mapa fins a 4 nivells sempre que sigui possible. Màxim 4 nivells de profunditat.
+9. Cada node ha de ser concís: 3-8 paraules.
+10. Opcionalment, afegeix una descripció curta després de ": " (dos punts + espai).
+11. Usa 2 espais per nivell d'indentació.
 
 EXEMPLE DE FORMAT:
 - Tema Central

@@ -22,7 +22,7 @@ function makeEl(id = "") {
         textContent: "",
         href: "",
         className: "",
-        style: {},
+        style: { setProperty() {}, removeProperty() {} },
         dataset: {},
         classList: {
             _c: new Set(),
@@ -110,6 +110,7 @@ function setupGlobals(dom) {
     ];
     global.listCachedSummaries = async () => [];
     global.getSummaryCache = async () => null;
+    global.DEFAULT_BIONIC = { fixation: 20, font: "system-ui, sans-serif", weight: "600", fontSize: "1.2em", lineHeight: "1.5" };
     global.formatTextToFragment = (text) => {
         const el = makeEl();
         el.textContent = text;

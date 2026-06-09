@@ -57,6 +57,9 @@ coverage/
 # Spike / PoC material (temporary)
 spike/
 
+# Captures i material temporal de treball (fora de git)
+temp/
+
 # Playwright local artifacts
 .pw-userdata/
 .pw-extension/

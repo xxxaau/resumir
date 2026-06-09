@@ -259,6 +259,13 @@ del conceptmap):
 - Retornar **valors serialitzables** (strings, números, booleans) -- mai objectes complexos
 - Firefox requereix que el retorn sigui "structured-clonable"
 
+> ⚠️ **Duplicació del renderer del mapa conceptual.** Com que la funció injectada
+> al món MAIN (p.ex. `fullscreenOverlayFunc` a `conceptmap.js`) NO pot accedir a
+> `window.markmapNative`, el renderer del mapa està **duplicat** entre
+> `sidebar/markmap-native.js` (sidebar) i la còpia inline de `conceptmap.js`
+> (pantalla completa). **Tot canvi de render/colors/fold/clic s'ha d'aplicar als
+> dos llocs** o les vistes divergiran. Vegeu el detall a `docs/LEARNINGS.md`.
+
 ```javascript
 await executeScriptSafe({
     target: { tabId },
@@ -284,6 +291,16 @@ await executeScriptSafe({
 - Controls de plugin: classe `markmap-control-btn` per botons circulars estil Material
 - Usar variables CSS existents (`--text-color`, `--bg-color`, `--error-color`)
 - Assignar un color d'icona propi a `sidebar/sidebar.css` usant l'escala Flexoki (p.ex. `#conceptMapBtn { color: #bc5215; /* Flexoki Orange */ }`).
+
+### Icones
+
+Totes les icones segueixen l'estil **Lucide**: 24×24, stroke-width 2, round caps/joins, `fill="none"`, `stroke="currentColor"`.
+
+Les icones compartides entre múltiples components van a **`shared/icons.js`** (carregat automàticament a la sidebar). Consulta la skill [`creating-icons`](../.opencode/skills/creating-icons/SKILL.md) per la guia completa de:
+- Patró `makeBtn()` per botons de control amb SVG
+- Com passar icones a funcions serialitzades (fullscreen overlay)
+- Diferència entre icones compartides vs inline
+- Checklist per afegir una icona nova
 
 ### Lint i tests
 

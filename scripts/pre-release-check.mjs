@@ -124,6 +124,17 @@ check("Manifests: Chromium té 'side_panel' i 'contextMenus'", () => {
     pass("Manifests: Chromium té 'side_panel' i 'contextMenus'");
 });
 
+check("CSP: 'img-src' i 'font-src' presents als manifests generats", () => {
+    const errs = [];
+    for (const m of ["manifest.json", "manifest.chromium.json"]) {
+        const csp = readJson(resolve(root, m))?.content_security_policy?.extension_pages ?? "";
+        if (!/\bimg-src\b/.test(csp))  errs.push(`${m}: falta 'img-src' a la CSP`);
+        if (!/\bfont-src\b/.test(csp)) errs.push(`${m}: falta 'font-src' a la CSP`);
+    }
+    if (errs.length) throw new Error(errs.join(" | "));
+    pass("CSP: 'img-src' i 'font-src' presents als manifests generats");
+});
+
 // 2. AMO: no eval() ni new Function()
 check("AMO: no 'eval()' ni 'new Function('", () => {
     const hits = [];

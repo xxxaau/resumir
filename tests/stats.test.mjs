@@ -16,7 +16,7 @@ const storageMock = createStorageMock();
 storageMock._setHistory = (entries) => storageMock._set({ usageHistory: entries });
 global.ext = { storage: { local: storageMock } };
 
-const { getDailyStats, getTodayRequestCount, getTotalTodayCount } = require("../sidebar/stats.js");
+const { getDailyStats } = require("../sidebar/stats.js");
 
 // Helpers
 const TODAY = new Date().toISOString();
@@ -27,109 +27,6 @@ function makeEntry(model, date = TODAY) {
 }
 
 function clearStorage() { storageMock._clear(); }
-
-// ---------------------------------------------------------------------------
-// getTodayRequestCount
-// ---------------------------------------------------------------------------
-
-test("getTodayRequestCount - retorna 0 si l'historial és buit", async () => {
-    clearStorage();
-    const count = await getTodayRequestCount("gemini-2.0-flash");
-    assert.equal(count, 0);
-});
-
-test("getTodayRequestCount - compta les entrades d'avui per al model especificat", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        makeEntry("gemini-2.0-flash"),
-        makeEntry("gemini-2.0-flash"),
-        makeEntry("gemini-2.5-pro"),
-    ]);
-    const count = await getTodayRequestCount("gemini-2.0-flash");
-    assert.equal(count, 2);
-});
-
-test("getTodayRequestCount - ignora entrades d'altres models", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        makeEntry("gemini-2.5-pro"),
-        makeEntry("gemini-2.5-pro"),
-    ]);
-    const count = await getTodayRequestCount("gemini-2.0-flash");
-    assert.equal(count, 0);
-});
-
-test("getTodayRequestCount - ignora entrades d'ahir", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        makeEntry("gemini-2.0-flash", YESTERDAY),
-        makeEntry("gemini-2.0-flash", TODAY),
-    ]);
-    const count = await getTodayRequestCount("gemini-2.0-flash");
-    assert.equal(count, 1);
-});
-
-test("getTodayRequestCount - accepta camp 'timestamp' com a alternativa a 'date'", async () => {
-    clearStorage();
-    // Alguns entrades antigues poden usar 'timestamp' en comptes de 'date'
-    storageMock._setHistory([
-        { model: "gemini-2.0-flash", timestamp: TODAY, inputTokens: 10 },
-        { model: "gemini-2.0-flash", timestamp: YESTERDAY, inputTokens: 10 },
-    ]);
-    const count = await getTodayRequestCount("gemini-2.0-flash");
-    assert.equal(count, 1);
-});
-
-test("getTodayRequestCount - retorna 0 si l'entrada no té cap data", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        { model: "gemini-2.0-flash", inputTokens: 10 }, // sense data
-    ]);
-    const count = await getTodayRequestCount("gemini-2.0-flash");
-    assert.equal(count, 0);
-});
-
-// ---------------------------------------------------------------------------
-// getTotalTodayCount
-// ---------------------------------------------------------------------------
-
-test("getTotalTodayCount - retorna 0 si l'historial és buit", async () => {
-    clearStorage();
-    const count = await getTotalTodayCount();
-    assert.equal(count, 0);
-});
-
-test("getTotalTodayCount - compta totes les entrades d'avui (tots els models)", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        makeEntry("gemini-2.0-flash"),
-        makeEntry("gemini-2.5-pro"),
-        makeEntry("gemma-3-27b-it"),
-    ]);
-    const count = await getTotalTodayCount();
-    assert.equal(count, 3);
-});
-
-test("getTotalTodayCount - ignora entrades d'ahir", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        makeEntry("gemini-2.0-flash", TODAY),
-        makeEntry("gemini-2.5-pro", YESTERDAY),
-        makeEntry("gemma-3-27b-it", YESTERDAY),
-    ]);
-    const count = await getTotalTodayCount();
-    assert.equal(count, 1);
-});
-
-test("getTotalTodayCount - retorna 0 si totes les entrades són d'ahir", async () => {
-    clearStorage();
-    storageMock._setHistory([
-        makeEntry("gemini-2.0-flash", YESTERDAY),
-        makeEntry("gemini-2.5-pro", YESTERDAY),
-    ]);
-    const count = await getTotalTodayCount();
-    assert.equal(count, 0);
-});
 
 // ---------------------------------------------------------------------------
 // getDailyStats
@@ -164,4 +61,26 @@ test("getDailyStats - model diferent: byModel 0, total correcte", async () => {
     const { byModel, total } = await getDailyStats("gemini-2.0-flash");
     assert.equal(byModel, 0);
     assert.equal(total, 2);
+});
+
+test("getDailyStats - accepta camp 'timestamp' com a alternativa a 'date'", async () => {
+    clearStorage();
+    // Algunes entrades antigues poden usar 'timestamp' en comptes de 'date'
+    storageMock._setHistory([
+        { model: "gemini-2.0-flash", timestamp: TODAY, inputTokens: 10 },
+        { model: "gemini-2.0-flash", timestamp: YESTERDAY, inputTokens: 10 },
+    ]);
+    const { byModel, total } = await getDailyStats("gemini-2.0-flash");
+    assert.equal(byModel, 1);
+    assert.equal(total, 1);
+});
+
+test("getDailyStats - ignora entrades sense cap data", async () => {
+    clearStorage();
+    storageMock._setHistory([
+        { model: "gemini-2.0-flash", inputTokens: 10 }, // sense data
+    ]);
+    const { byModel, total } = await getDailyStats("gemini-2.0-flash");
+    assert.equal(byModel, 0);
+    assert.equal(total, 0);
 });

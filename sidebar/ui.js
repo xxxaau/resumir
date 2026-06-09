@@ -413,11 +413,6 @@ function stopGenerationTimer() {
     }
 }
 
-function stopCountdownTimer() {
-    if (countdownInterval) clearInterval(countdownInterval);
-    countdownInterval = null;
-}
-
 /**
  * Formats a number with thousands separator (.) and millions notation (M).
  * Examples: 1000 → "1.000", 1500000 → "1,5M", 950000 → "950.000"
@@ -486,39 +481,6 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
         const prefix = outputEstimated ? "Estimacio: " : "";
         tokensOut.title = `${prefix}${formatTokenTooltipCount(outputTokens)} tokens rebuts`;
     }
-}
-
-let countdownInterval = null;
-
-async function startCountdown(seconds) {
-    if (countdownInterval) clearInterval(countdownInterval);
-    
-    const unblockTime = Date.now() + (seconds * 1000);
-    await ext.storage.local.set({ blockedUntil: unblockTime });
-    
-    runCountdownTimer(unblockTime);
-}
-
-function runCountdownTimer(unblockTime) {
-    if (countdownInterval) clearInterval(countdownInterval);
-    
-    const footer = document.getElementById("footer-status");
-    footer.classList.remove("hidden");
-    
-    const updateTimer = () => {
-        const now = Date.now();
-        const remainingMs = unblockTime - now;
-        const remainingSec = Math.ceil(remainingMs / 1000);
-
-        if (remainingSec <= 0) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-            ext.storage.local.remove("blockedUntil").catch(() => {});
-        }
-    };
-    
-    updateTimer(); 
-    countdownInterval = setInterval(updateTimer, 1000);
 }
 
 /**

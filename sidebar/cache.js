@@ -185,15 +185,15 @@ async function getAvailableTypes(url) {
         }
         const allData = await ext.storage.local.get(relevant);
         const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
-        const types = [];
+        const types = new Set();
         for (const key of relevant) {
             const value = allData[key];
             if (!value?.timestamp) continue;
             const ts = new Date(value.timestamp).getTime();
             if (ts < cutoff) continue;
-            types.push(_keyToType(key));
+            types.add(_keyToType(key));
         }
-        return types;
+        return Array.from(types);
     } catch (e) {
         console.error("Error getting available types:", e);
         return [];

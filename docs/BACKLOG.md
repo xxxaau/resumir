@@ -4,88 +4,14 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-~~Pestanya de PDF local no renderitza el PDF a Firefox~~ ✅ **Resolt a v2.3.0**
+## Coherència visual dels botons de control del mapa conceptual
 
-**Context (2026-05-25):** Quan l'usuari selecciona un PDF local mitjançant el botó "Selecciona PDF local", el flux fa:
-1. Extreu el text del PDF amb pdf.js (al sidebar).
-2. Obre una pestanya de fons amb `blob:` URL per consultar el PDF.
-3. El resum es genera directament des del text extret (sense dependre de la pestanya).
+**Context (2026-06-05):** Els botons de control del mapa conceptual (sidebar + fullscreen) s'han unificat amb estil planer (32×32, padding 4px, border-radius 4px, hover amb background) per coincidir amb els botons de la toolbar. El codi està aplicat però no s'ha pogut verificar en local (probablement cache del sidebar panel de Firefox).
 
-**Problema:** Firefox no renderitza `blob:moz-extension://...` URLs al visor PDF nadiu.
-
-**Solució implementada:**
-- Pàgina personalitzada `sidebar/pdf-viewer.html` que rep el buffer del PDF via `storage.session` i el renderitza amb pdf.js.
-- El buffer es passa com a base64 via `storage.session` amb clau `pdfViewer:<timestamp>`.
-- Funciona a Firefox i Chromium sense regressió.
-
-**Criteris d'acceptació (complerts ✅):**
-- [x] La pestanya nova mostra el PDF seleccionat de manera llegible a Firefox.
-- [x] El resum es genera correctament.
-- [x] També funciona a Chromium (no regressió).
-
-**Fitxers modificats:**
-- `sidebar/sidebar.js` — flux del "Selecciona PDF local" (envia buffer a storage.session)
-- `sidebar/pdf-viewer.html` + `sidebar/pdf-viewer.js` — pàgina nova de visualització
-- `tests/e2e-pdf-local.mjs` — test actualitzat per al nou visor
-
----
-
-~~Persistència de la clau API i historial entre recàrregues de l'extensió~~ ✅ **Resolt a v2.3.0**
-
-**Símptoma observat (2026-05-25):** Quan es recarrega l'extensió (`about:debugging` → Recarrega, o `chrome://extensions` → refresh), sovint cal tornar a introduir la clau API de Gemini. L'historial de resums també sembla afectat de manera intermitent.
-
-**Causes arrel identificades i resoltes:**
-1. **Race condition** a la inicialització del sidebar: la migració `sync→local` i la lectura de la clau eren dues IIFE independents. Si l'init llegia abans que la migració copiés, la clau es donava per perduda. **Solució:** fusionar migració dins l'init, seqüencial.
-2. **Falta `unlimitedStorage`:** `storage.local` té un límit de ~5-10MB. Amb 500 entrades de cache, omplir-lo feia que `set()` fallés silenciosament, perdent clau i cache. **Solució:** afegir `unlimitedStorage` al manifest.
-3. **Pèrdua per remove/re-add i market uninstall:** esperada (storage bucket nou amb extension ID diferent). Limitació documentada a `docs/BUILD.md`.
-
-**Criteris d'acceptació (complerts ✅):**
-- [x] Després de recarregar l'extensió a Firefox i Chromium (mode prod instal·lat), la clau API persisteix.
-- [x] L'historial de resums (`storage.local`) també persisteix.
-- [x] No hi ha pèrdua per quota de storage gràcies a `unlimitedStorage`.
-- [x] Si el problema és específic del mode DEV (extension ID canviant), documentar-ho a `docs/BUILD.md` com a limitació coneguda.
-
-**Fitxers modificats:**
-- `sidebar/sidebar.js` — migració fusionada dins l'init, mai esborra de `sync` si `local` ja té la clau
-- `manifest.json` — afegit `unlimitedStorage`
-
----
-
-~~Revisar i suprimir `set_dev_mode.ps1` en favor de `node scripts/set-mode.mjs`~~ ✅ **Resolt a v2.3.0**
-
-**Criteris d'acceptació (complerts ✅):**
-- [x] Comparació línia per línia dels dos scripts per a mode `dev` i `prod` — són equivalents.
-- [x] `node scripts/set-mode.mjs dev` produeix el mateix resultat que `.\set_dev_mode.ps1 dev`
-- [x] `node scripts/set-mode.mjs prod` produeix el mateix resultat que `.\set_dev_mode.ps1 prod`
-- [x] `set_dev_mode.ps1` eliminat i `docs/BUILD.md` actualitzat.
-
-**Fitxers modificats:**
-- `set_dev_mode.ps1` (eliminat)
-- `docs/BUILD.md` (actualitzat)
-
----
-
-~~Migrar `build.ps1` i `release.ps1` a Node.js cross-platform~~ ✅ **Resolt a v2.3.0**
-
-**Criteris d'acceptació (complerts ✅):**
-- [x] `scripts/build.mjs` cobreix tots els casos de `build.ps1` (sidebar bundle, exclusió de JS individuals, ZIP output).
-- [x] `scripts/build.mjs` és **superior**: inclou `vendor/` directori (pdf.js), elimina `icons/dev/` i `icons/prod/` del paquet, llista completa de sidecars.
-- [x] `scripts/release.mjs` creat: backup opcional → set-mode prod → build → restauració del mode original.
-- [x] `node scripts/release.mjs --target firefox --no-backup --skip-dev-restore` cobreix tots els flags.
-- [x] `build.ps1`, `release.ps1`, `scripts/pwsh-runner.mjs` eliminats.
-- [x] `docs/BUILD.md`, `docs/CHANGELOG.md`, `package.json`, `.github/workflows/release.yml` actualitzats.
-
-**Fitxers modificats:**
-- `build.ps1` (eliminat)
-- `release.ps1` (eliminat)
-- `set_dev_mode.ps1` (eliminat)
-- `scripts/pwsh-runner.mjs` (eliminat)
-- `scripts/release.mjs` (nou)
-- `scripts/build.mjs` (referència corregida a `set-mode.mjs`)
-- `package.json` (scripts `release*` ara apunten a `scripts/release.mjs`)
-- `.github/workflows/release.yml` (node en lloc de pwsh, `build/` prefix als ZIPs)
-- `docs/BUILD.md` (actualitzat)
-- `docs/CHANGELOG.md` (actualitzat)
+**Pendent:**
+- [ ] Verificar que els canvis CSS s'apliquen correctament al sidebar (`.markmap-control-btn`) i al fullscreen (`.markmap-fs-btn`).
+- [ ] Confirmar que el padding 4px i l'SVG 24×24 donen el mateix aspecte que els botons d'acció del menú de resumir.
+- [ ] Si el problema persisteix després de tancar/obrir la sidebar, investigar si Firefox cacheja el sidebar panel independentment de la recàrrega de l'extensió.
 
 ---
 

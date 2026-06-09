@@ -1,3 +1,158 @@
+# Canvis — Sessió 2026-06-09 (pre-producció)
+
+> Auditoria profunda pre-producció + millora del visor de PDF + redisseny del mapa conceptual a l'estil NotebookLM.
+
+## 1. Auditoria de seguretat i codi (pre-release)
+- **CSP**: afegits `img-src 'self' data:` i `font-src 'self'` als **patches de producció** (firefox/chromium prod) que no els tenien; **`file:` eliminat** de la CSP de Firefox (dev+prod) — el fetch de `file://` no funcionava ni amb `file:`, i `content.js` ja redirigeix els PDFs locals al botó selector. Afegit check a `pre-release-check.mjs` que verifica `img-src`/`font-src` als manifests generats (regressió permanent).
+- **Validació SSRF**: `captionBaseUrl` (YouTube) validat contra llista blanca de dominis a `content.js`.
+- **Missatges**: `sender.id === ext.runtime.id` al `runtime.onMessage` de `sidebar.js`.
+- **Injecció de prompt**: es neutralitza el delimitador `</UNTRUSTED_CONTENT>` dins del contingut a `summary.js`.
+
+## 2. Codi mort eliminat
+- `stats.js`: `getTodayRequestCount`, `getTotalTodayCount` (deprecated), `refreshRemainingOnModelChange` (no-op).
+- `ext.js`: `getViews` (0 cridadors).
+- Feature de bloqueig per quota abandonada: `startCountdown`, `runCountdownTimer`, `stopCountdownTimer`, `countdownInterval`, branca `blockedUntil` (queda neteja única de la clau heretada).
+- `summary.js`: bloc mort `requests-remaining` (id inexistent).
+- Globals òrfens a `eslint.config.mjs`.
+- `shared/icons.js` afegit a `build-sidebar-bundle.mjs` (`files` + `BUNDLED_SRCS`) — abans funcionava per atzar.
+
+## 3. Lectura biònica — defaults unificats
+- Nova font de veritat `DEFAULT_BIONIC` a `shared/defaults.js`: fixació **20%**, font sistema, gruix **600**, mida **1.2em**, interlineat **1.5**. Tots els consumidors (summary/sidebar/history/options) hi apunten → s'acaba la divergència 30/35/700.
+- Opcions: slider fixació **5–60%**, gruixos **500/600/700/800**, 5 stacks de font universals (sense detecció de SO).
+- Fix race: els estils biònics s'apliquen **abans** de l'streaming (1a obertura ja surt amb la mida correcta) i es passa `bionicFixation` al render final.
+
+## 4. Visor de PDF — text seleccionable
+- Afegida **capa de text** de pdf.js (`renderTextLayer` + `--scale-factor` amb mida CSS, no física) sobre el canvas → text seleccionable/copiable. Cancel·lació de la task en re-render. (`pdf-viewer.html`/`.js`).
+
+## 5. Mapa conceptual — estil NotebookLM
+- **Controls**: 4 botons circulars (toggle desplegar/plegar-tot, +, −, descarregar) a **baix-dreta**; pantalla completa / tancar a **dalt-dreta**. Botons sense ombra (plans, vora subtil).
+- **Colors per PROFUNDITAT** (no branca/fulla): paleta `DEPTH_SOLID`/`DEPTH_GRAD` (0 lavanda · 1 blau · 2 verd · 3+ verd clar) amb degradat vertical subtil.
+- **Toggle**: chevron SVG (no caràcter de text), ben centrat.
+- **Contacte arestes**: surten de la dreta del cercle toggle (`width+18`).
+- **Clic a la pastilla** desplega **un sol nivell** (pan-safe via `didPan`); **autofit en desplegar**.
+- **Plegat per defecte**: només nivells **0 i 1** visibles.
+- Títol de pantalla completa = text del **primer node**; **animació** d'obertura (fade + scale).
+- Tipografia: pes 400, stack de sistema.
+- **Prompt**: desenvolupa fins a **4 nivells** (`PROMPT_DEFAULTS_VERSION` → 2).
+
+## ⚠️ Pendents per a la propera sessió
+- **"Bombolla" dels botons de la sidebar**: es va treure el `box-shadow` però cal confirmar al navegador real (amb l'extensió carregada, no harness) que ja no apareix; si persisteix, inspeccionar amb Playwright sobre l'extensió real.
+- Validació visual general del mapa i del visor a **Chrome i Firefox**.
+- Release (prod/tag/push) el tanca en Sergi.
+
+---
+
+# Aprenentatges — Sessió v2.3.1+ (2026-06-05)
+
+> Unificació del sistema d'icones SVG, correcció del parseig de DOIs, i consistència visual entre vistes.
+
+---
+
+## 1. SVG compartit entre sidebar i fullscreen overlay
+
+### Problema
+
+Els botons de control del mapa conceptual tenien SVG inline duplicat a `conceptmap.js` i al fullscreen overlay (dins `fullscreenOverlayFunc`). Cada canvi d'icona requeria tocar dos llocs.
+
+### Solució
+
+- Crear `shared/icons.js` amb un objecte `MARKMAP_ICONS` que conté només el `path`/`line`/`polyline` dels SVG (sense wrapper `<svg>`).
+- La sidebar l'importa com a script global (`<script src="../shared/icons.js">`).
+- El fullscreen el rep com a 3r argument de `executeScript` (`args: [text, pageTitle, MARKMAP_ICONS]`).
+- Ambdós wrappers (`makeBtn`, `mkBtn`) fan `DOMParser` + `document.importNode` per crear el SVG sense `innerHTML`.
+
+### Lliçons
+
+- **Les icones són strings serialitzables** — encaixen perfectament a `args` de `executeScript`.
+- **`parseFromString` + `importNode`** evita `innerHTML` i passa els checks d'AMO (no `eval`/`innerHTML` dinàmic).
+- **`stroke-linecap="round"` i `stroke-linejoin="round"`** es posen al wrapper `<svg>`, no a cada icona individual.
+
+### ⚠️ DUPLICACIÓ CRÍTICA DEL RENDERER (llegir abans de tocar el mapa conceptual)
+
+El renderer SVG del mapa conceptual està **DUPLICAT a propòsit** en dos llocs:
+
+1. `sidebar/markmap-native.js` — el renderer de la **sidebar** (s'exposa a `window.markmapNative`).
+2. `sidebar/conceptmap.js` → funció `fullscreenOverlayFunc` — una **còpia inline** per a la vista de **pantalla completa**.
+
+**Per què la duplicació:** `fullscreenOverlayFunc` se serialitza a string i s'injecta al **món MAIN** de la pàgina via `executeScript`. En aquell context NO existeix `window.markmapNative` (viu a la sidebar, no a la pàgina), per tant tota la lògica de parseig, layout, fold, colors, clic i pan s'ha de duplicar dins la funció.
+
+**REGLA OBLIGATÒRIA:** qualsevol canvi al comportament o aspecte del mapa (colors branca/fulla, color d'arestes, profunditat de plegat per defecte, handler de clic a la pastilla, llindar de pan/`didPan`, layout, toggle) **s'ha d'aplicar als DOS fitxers alhora**, o les dues vistes divergiran (és el bug que portem arrossegant). Tots dos fitxers porten un comentari d'avís a la capçalera.
+
+**Decisions actuals (han de coincidir als dos llocs):** colors per branca (`#c3d4f5`) / fulla (`#c9f0d9`), arestes `#c7cbe0`; plegat per defecte a profunditat ≥ 3 (mostra 4 nivells); clic a la pastilla desplega **un sol nivell**; controls circulars estil NotebookLM (toggle desplegar/plegar-tot, +, −, descarregar) en columna a **baix-dreta**, i botó de pantalla completa / tancar a **dalt-dreta**.
+
+**Millora futura recomanada:** injectar `markmap-native.js` a la pàgina (`executeScript({files, world:'MAIN'})`) i fer que la pantalla completa reusi `window.markmapNative`, eliminant la duplicació del tot.
+
+---
+
+## 2. Parseig de DOIs amb punts al path
+
+### Problema
+
+El regex `[^\s,;.!?<>"')\]]+` truncava DOIs amb punts al mig (ex. `10.1007/978-981-10-5035-0_12`).
+
+### Solució
+
+Regex de dos passos a `sidebar/ui.js:278`:
+```
+[^\s<>"')\]]*[^\s<>"')\].,;!?]
+```
+1. Greedy match de caràcters no-separador (`[^\s<>"')\]]*`)
+2. Requereix que el darrer caràcter no sigui puntuació final (`[^\s<>"')\].,;!?]`)
+
+### Lliçó
+
+- **Els DOIs són URLs, no paraules.** Un regex que funciona per paraules no funciona per DOIs.
+- **L'ordre dels caràcters al conjunt exclòs importa:** `.,;!?` al final, no al principi.
+
+---
+
+## 3. Botons planers vs botons amb bombolla
+
+### Problema
+
+Els botons de control del mapa conceptual tenien estil "bombolla" (circulars, ombra, fons blanc) mentre els botons de la toolbar de la sidebar eren planers (quadrats, sense ombra, fons transparent). Inconsistència visual.
+
+### Solució (aplicada però pendent de verificació local)
+
+- `.markmap-control-btn`: 32×32, `padding: 4px`, `border-radius: 4px`, `background: transparent`, hover amb `background-color: var(--button-hover)`.
+- `.markmap-fs-btn` (fullscreen): mateixos valors amb `!important`, colors hardcoded (`#e0e0e0` per hover, `#100f0f` per text).
+- SVG dins botons: 24×24 per coincidir amb els de la toolbar.
+
+### Pendent
+
+- **Verificar per què no s'apliquen en local** (probablement cache del sidebar panel de Firefox — tancar i obrir la sidebar després de recarregar l'extensió).
+
+---
+
+## 4. Accessibilitat en botons del fullscreen
+
+### Problema detectat a code review
+
+El `mkBtn` del fullscreen overlay no posava `aria-label`, mentre que el `makeBtn` de la sidebar sí.
+
+### Fix
+
+`b.setAttribute('aria-label', ttl);` afegit al `mkBtn` del fullscreen, al costat de `b.title`.
+
+### Lliçó
+
+- **Quan es duplica codi entre sidebar i fullscreen, cal revisar accessibilitat als dos llocs.** La sidebar té el context de l'extensió; el fullscreen s'injecta al MAIN world, però els lectors de pantalla hi funcionen igual.
+
+---
+
+## 5. Manteniment de manifests
+
+### Problema detectat a code review
+
+`manifest.base.json`, `manifest.chromium.patch.json` i `manifest.firefox.patch.json` havien perdut el newline final arran d'edicions anteriors.
+
+### Lliçó
+
+- **POSIX newline final** és una convenció que evita difs bruts en futures edicions. Els editors moderns ho fan automàticament, però quan s'usen eines d'edició programàtica cal verificar-ho.
+- Els manifests generats (`manifest.json`, `manifest.chromium.json`) deriven dels patches — cal mantenir els patches nets.
+
+---
+
 # Aprenentatges — Sessió v2.2.10 (2026-05-22)
 
 Notes tècniques i decisions de disseny derivades de la sessió que va portar a la

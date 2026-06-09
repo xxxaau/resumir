@@ -5,6 +5,16 @@
 // Pure SVG mind-map renderer. Replaces markmap-lib + markmap-view + d3.
 // No external dependencies, no innerHTML, no eval/Function constructor.
 //
+// ⚠️⚠️ DUPLICACIÓ DELIBERADA — LLEGEIX ABANS DE TOCAR EL RENDERER ⚠️⚠️
+// La lògica de render/layout/fold/clic/colors d'aquest fitxer està DUPLICADA
+// a `sidebar/conceptmap.js` dins de `fullscreenOverlayFunc` (la vista de
+// pantalla completa). Aquella còpia s'injecta al món MAIN de la pàgina via
+// executeScript i NO pot accedir a window.markmapNative, per això es duplica.
+// REGLA: qualsevol canvi de renderer aquí (colors NODE/LEAF, arestes,
+// profunditat de plegat, handler de clic a la pastilla, layout) s'HA D'APLICAR
+// TAMBÉ a `fullscreenOverlayFunc` de conceptmap.js perquè les dues vistes no
+// divergeixin. Vegeu docs/LEARNINGS.md.
+//
 // Public API (attached to window.markmapNative):
 //   parseMarkdownTree(text)           -> root node {label, children, depth, fold}
 //   createMindMap(svgElement, root, options) -> instance { fit, rescale, setFold, setData, getRoot }
@@ -97,7 +107,7 @@
             } catch { _measureCtx = null; }
         }
         if (_measureCtx) {
-            _measureCtx.font = `500 ${fontSize}px "Google Sans", system-ui, -apple-system, sans-serif`;
+            _measureCtx.font = `400 ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
         }
         return _measureCtx;
     }
@@ -202,11 +212,26 @@
 
     // ─── Renderer ────────────────────────────────────────────────────────────
 
-    // NotebookLM-inspired pastel palette per depth.
-    // Pills get NODE_COLORS[depth] as fill; edges entering depth N use EDGE_COLORS[depth].
-    const NODE_COLORS = ["#c5c8f7", "#c5dff7", "#a8e6cf", "#c8f0d5"];
-    const EDGE_COLORS = ["#a5a8e0", "#7fc8a9", "#7fc8a9", "#7fc8a9"];
+    // Paleta NotebookLM per PROFUNDITAT: cada nivell té un color distint.
+    // Índex = min(depth, 3). 0 lavanda · 1 blau · 2 verd · 3+ verd clar.
+    const DEPTH_SOLID = ["#b1a8e6", "#a7c6ef", "#93d4b4", "#c2ebd3"];  // sòlid (cercle toggle)
+    const DEPTH_GRAD  = [["#c6c0f2", "#a59ce0"], ["#c1d6f6", "#97b8e8"], ["#b9ebcd", "#87cda8"], ["#d6f2e0", "#b0e0c4"]];
+    const EDGE_COLOR  = "#c7cbe0";
     const TEXT_COLOR  = "#1a1a1a";
+
+    // Crea un <linearGradient> vertical (top→bottom) sense innerHTML.
+    function makeGradient(id, topColor, bottomColor) {
+        const g = document.createElementNS(SVG_NS, "linearGradient");
+        g.setAttribute("id", id);
+        g.setAttribute("x1", "0"); g.setAttribute("y1", "0");
+        g.setAttribute("x2", "0"); g.setAttribute("y2", "1");
+        const s1 = document.createElementNS(SVG_NS, "stop");
+        s1.setAttribute("offset", "0%"); s1.setAttribute("stop-color", topColor);
+        const s2 = document.createElementNS(SVG_NS, "stop");
+        s2.setAttribute("offset", "100%"); s2.setAttribute("stop-color", bottomColor);
+        g.appendChild(s1); g.appendChild(s2);
+        return g;
+    }
 
     function createMindMap(svgElement, root, userOptions) {
         const options = Object.assign({
@@ -217,14 +242,21 @@
             maxLabelWidth: 280,
             spacingX: 50,
             spacingY: 14,
-            colors: NODE_COLORS,
-            edgeColors: EDGE_COLORS,
+            depthColors: DEPTH_SOLID,
+            edgeColor: EDGE_COLOR,
             backgroundColor: null, // null = transparent
             textColor: TEXT_COLOR,
         }, userOptions || {});
 
         // Ensure svg has a viewport <g> for zoom/pan transforms
         while (svgElement.firstChild) svgElement.removeChild(svgElement.firstChild);
+
+        // Degradats verticals subtils per a les pastilles (com NotebookLM).
+        // Construïts via createElementNS (sense innerHTML, AMO-friendly).
+        const defs = document.createElementNS(SVG_NS, "defs");
+        DEPTH_GRAD.forEach((gr, i) => defs.appendChild(makeGradient("mm-grad-" + i, gr[0], gr[1])));
+        svgElement.appendChild(defs);
+
         const viewport = document.createElementNS(SVG_NS, "g");
         viewport.setAttribute("class", "markmap-viewport");
         svgElement.appendChild(viewport);
@@ -237,11 +269,11 @@
             bounds: null,
         };
 
-        function nodeColorFor(depth) {
-            return options.colors[Math.min(depth, options.colors.length - 1)];
+        function nodeColorFor(node) {
+            return options.depthColors[Math.min(node.depth, options.depthColors.length - 1)];
         }
-        function edgeColorFor(depth) {
-            return options.edgeColors[Math.min(depth, options.edgeColors.length - 1)];
+        function edgeColorFor() {
+            return options.edgeColor;
         }
 
         function curve(x1, y1, x2, y2) {
@@ -268,13 +300,15 @@
                 // Links to children — connect pill-to-pill laterally
                 for (const c of visible) {
                     const path = document.createElementNS(SVG_NS, "path");
-                    const x1 = node._x + node._width;
+                    // L'aresta surt de la dreta del cercle toggle (cx=width+10, r=8),
+                    // com NotebookLM, no de la vora de la pastilla.
+                    const x1 = node._x + node._width + 18;
                     const y1 = node._y;
                     const x2 = c._x;
                     const y2 = c._y;
                     path.setAttribute("d", curve(x1, y1, x2, y2));
                     path.setAttribute("fill", "none");
-                    path.setAttribute("stroke", edgeColorFor(c.depth));
+                    path.setAttribute("stroke", edgeColorFor());
                     path.setAttribute("stroke-width", "1.5");
                     path.setAttribute("opacity", "1");
                     linksGroup.appendChild(path);
@@ -285,9 +319,10 @@
                 g.setAttribute("class", "markmap-node");
                 g.setAttribute("transform", `translate(${node._x}, ${node._y - node._height / 2})`);
 
-                const fillColor = nodeColorFor(node.depth);
+                const fillColor = nodeColorFor(node);  // color sòlid (cercle toggle, glifo)
+                const gradId = "url(#mm-grad-" + Math.min(node.depth, DEPTH_GRAD.length - 1) + ")";
 
-                // Pill background (NotebookLM-style rounded rectangle)
+                // Pill background (NotebookLM-style rounded rectangle) amb degradat subtil.
                 const rect = document.createElementNS(SVG_NS, "rect");
                 rect.setAttribute("x", "0");
                 rect.setAttribute("y", "0");
@@ -296,7 +331,7 @@
                 const radius = Math.min(12, node._height / 2);
                 rect.setAttribute("rx", String(radius));
                 rect.setAttribute("ry", String(radius));
-                rect.setAttribute("fill", fillColor);
+                rect.setAttribute("fill", gradId);
                 rect.setAttribute("stroke", "none");
                 g.appendChild(rect);
 
@@ -307,8 +342,8 @@
                 text.setAttribute("dominant-baseline", "central");
                 text.setAttribute("text-anchor", "start");
                 text.setAttribute("font-size", String(options.fontSize));
-                text.setAttribute("font-family", "'Google Sans', system-ui, -apple-system, sans-serif");
-                text.setAttribute("font-weight", "500");
+                text.setAttribute("font-family", "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
+                text.setAttribute("font-weight", "400");
                 text.setAttribute("fill", options.textColor || TEXT_COLOR);
                 text.style.userSelect = "none";
 
@@ -344,25 +379,37 @@
                     toggle.setAttribute("stroke-width", "1.5");
                     tg.appendChild(toggle);
 
-                    const glyph = document.createElementNS(SVG_NS, "text");
-                    glyph.setAttribute("x", String(cx));
-                    glyph.setAttribute("y", String(cy));
-                    glyph.setAttribute("text-anchor", "middle");
-                    glyph.setAttribute("dominant-baseline", "central");
-                    glyph.setAttribute("font-size", "10");
-                    glyph.setAttribute("font-family", "system-ui, -apple-system, sans-serif");
-                    glyph.setAttribute("font-weight", "700");
-                    glyph.setAttribute("fill", toggleStroke);
-                    glyph.style.userSelect = "none";
-                    glyph.textContent = node.fold ? ">" : "<";
+                    // Chevron SVG (no glyph de text) per a un símbol net i ben centrat,
+                    // com NotebookLM. fold → ">" (expandir), desplegat → "<" (plegar).
+                    const glyph = document.createElementNS(SVG_NS, "polyline");
+                    const pts = node.fold
+                        ? `${cx - 2},${cy - 3.5} ${cx + 2},${cy} ${cx - 2},${cy + 3.5}`
+                        : `${cx + 2},${cy - 3.5} ${cx - 2},${cy} ${cx + 2},${cy + 3.5}`;
+                    glyph.setAttribute("points", pts);
+                    glyph.setAttribute("fill", "none");
+                    glyph.setAttribute("stroke", toggleStroke);
+                    glyph.setAttribute("stroke-width", "1.5");
+                    glyph.setAttribute("stroke-linecap", "round");
+                    glyph.setAttribute("stroke-linejoin", "round");
                     tg.appendChild(glyph);
 
                     tg.addEventListener("click", (e) => {
                         e.stopPropagation();
                         node.fold = !node.fold;
                         render();
+                        if (!node.fold) requestAnimationFrame(() => fit());  // autofit en desplegar
                     });
                     g.appendChild(tg);
+
+                    // Clic sobre tota la pastilla = desplega/plega UN nivell (com NotebookLM).
+                    // S'ignora si s'estava arrossegant (pan), per no disparar-ho en fer pan.
+                    g.style.cursor = "pointer";
+                    g.addEventListener("click", () => {
+                        if (didPan) return;
+                        node.fold = !node.fold;
+                        render();
+                        if (!node.fold) requestAnimationFrame(() => fit());  // autofit en desplegar
+                    });
                 }
 
                 nodesGroup.appendChild(g);
@@ -431,12 +478,14 @@
         // ─── Pan & Zoom interactions ─────────────────────────────────────────
 
         let isPanning = false;
+        let didPan = false;  // true si el ratolí s'ha mogut prou → no és un clic de pastilla
         let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
 
         svgElement.addEventListener("mousedown", (e) => {
             // Don't start pan on toggle clicks
             if (e.target.tagName === "circle") return;
             isPanning = true;
+            didPan = false;
             panStart.x = e.clientX;
             panStart.y = e.clientY;
             panStart.tx = state.transform.x;
@@ -445,6 +494,7 @@
         });
         window.addEventListener("mousemove", (e) => {
             if (!isPanning) return;
+            if (Math.abs(e.clientX - panStart.x) > 4 || Math.abs(e.clientY - panStart.y) > 4) didPan = true;
             state.transform.x = panStart.tx + (e.clientX - panStart.x);
             state.transform.y = panStart.ty + (e.clientY - panStart.y);
             applyTransform();

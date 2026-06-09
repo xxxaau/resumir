@@ -26,14 +26,15 @@ function buildFallbackList(preferredModel, favoriteIds) {
 function applyBionicStyles(element, isEnabled, config = {}) {
     if (!element) return;
     if (isEnabled) {
-        element.style.fontFamily = config.bionicFont || "inherit";
-        element.style.fontSize = config.bionicFontSize || "inherit";
-        element.style.lineHeight = config.bionicLineHeight || "1.5";
-        element.style.setProperty("--bionic-weight", config.bionicWeight || "700");
+        element.style.fontFamily = config.bionicFont || DEFAULT_BIONIC.font;
+        element.style.fontSize = config.bionicFontSize || DEFAULT_BIONIC.fontSize;
+        element.style.lineHeight = config.bionicLineHeight || DEFAULT_BIONIC.lineHeight;
+        element.style.setProperty("--bionic-weight", config.bionicWeight || DEFAULT_BIONIC.weight);
     } else {
         element.style.fontFamily = "";
         element.style.fontSize = "";
         element.style.lineHeight = "";
+        element.style.removeProperty("--bionic-weight");
     }
 }
 
@@ -86,11 +87,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // 1. Get Configuration
         const [config, localSecrets] = await Promise.all([
             ext.storage.sync.get([
-                "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic", 
-                "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt", 
+                "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic",
+                "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt",
                 "enableConceptMap", "extensionOrder", "favoriteModels",
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
-                "conceptMapAutoExpand"
+                "conceptMapAutoExpand",
+                "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"
             ]),
             ext.storage.local.get(["apiKey"])
         ]);
@@ -196,12 +198,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     }
                 }
 
-                const remainEl = document.getElementById("requests-remaining");
-                if (remainEl) {
-                    const dateStr = new Date(cachedEntry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    remainEl.textContent = `Memòria cau (${dateStr})`;
-                    remainEl.style.color = "#28a745";
-                }
 
                 getPageContent().then(data => {
                     if (data && data.text) {
@@ -233,7 +229,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
         }
 
-        let pageText = `<UNTRUSTED_CONTENT>\n${pageData.text}\n</UNTRUSTED_CONTENT>`;
+        // Neutralitza qualsevol delimitador fals dins del contingut no fiable
+        // perquè no pugui "tancar" el bloc i fer-se passar per instruccions.
+        const safeContent = String(pageData.text || "").replace(/<\/?UNTRUSTED_CONTENT>/gi, "[FILTERED]");
+        let pageText = `<UNTRUSTED_CONTENT>\n${safeContent}\n</UNTRUSTED_CONTENT>`;
         ctx.setSourceText(pageData.text);
 
         if (signal.aborted) return abortController;
@@ -259,6 +258,14 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         let success = false;
         let lastError = null;
         const bionicEnabled = ctx.isBionicEnabled();
+        const bionicFixation = (config.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
+        // Apliquem els estils de contenidor (font/mida/interlineat) ABANS de
+        // l'streaming perquè la previsualització en text pla ja surti amb la
+        // mida correcta des del primer chunk. Sense això, en una obertura nova
+        // el contentDiv no té estils inline i el text es veu petit fins que el
+        // parse final el re-estilitza (en obertures posteriors els estils
+        // quedaven de la vegada anterior, per això el bug només es veia el 1r cop).
+        applyBionicStyles(contentDiv, bionicEnabled, config);
         let apiUsage = null;
         const liveInputTokens = estimateTokens(pageText);
         let liveOutputTokens = 0;
@@ -351,11 +358,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         if (isConceptMap) {
             contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title));
         } else {
-            contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled));
+            contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled, bionicFixation));
         }
-        
-        const cfg = ctx.getGlobalConfig() || {};
-        applyBionicStyles(contentDiv, bionicEnabled, cfg);
+
+        applyBionicStyles(contentDiv, bionicEnabled, config);
         
         setGeneratingState(false, true);
         

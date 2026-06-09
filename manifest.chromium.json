@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Resumir",
+    "name": "Resumir (DEV)",
     "short_name": "Resumir",
     "version": "2.3.1",
     "author": "Sergi Xaudiera",
@@ -32,7 +32,7 @@
         "open_in_tab": true
     },
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https:"
+        "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https:"
     },
     "optional_permissions": [
         "<all_urls>"

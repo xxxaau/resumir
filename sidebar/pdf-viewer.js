@@ -2,7 +2,9 @@
     "use strict";
 
     const container = document.getElementById("canvas-container");
+    const pageWrapper = document.getElementById("page-wrapper");
     const canvas = document.getElementById("pdf-canvas");
+    const textLayerDiv = document.getElementById("text-layer");
     const ctx = canvas.getContext("2d");
     const pageInput = document.getElementById("pageInput");
     const totalPagesEl = document.getElementById("totalPages");
@@ -20,6 +22,7 @@
     let pageNum = 1;
     let scale = 2.0;
     let sessionKey = null;
+    let currentTextTask = null;
 
     function showError(msg) {
         loadingDiv.style.display = "none";
@@ -44,6 +47,12 @@
 
     async function renderPage(num) {
         if (!pdfDoc) return;
+        // Cancel·la la capa de text en vol del render anterior (zoom/navegació/resize
+        // criden renderPage repetidament; sense cancel·lar s'acumularien spans obsolets).
+        if (currentTextTask) {
+            try { currentTextTask.cancel(); } catch { /* ignore */ }
+            currentTextTask = null;
+        }
         try {
             const page = await pdfDoc.getPage(num);
             const viewport = page.getViewport({ scale });
@@ -68,6 +77,28 @@
                 viewport: finalViewport,
             };
             await page.render(renderCtx).promise;
+
+            // Capa de text seleccionable sobre el canvas. Usa SEMPRE la mida CSS
+            // (finalViewport, sense dpr): pdf.js posiciona els spans amb --scale-factor.
+            pageWrapper.style.width = finalViewport.width + "px";
+            pageWrapper.style.height = finalViewport.height + "px";
+            textLayerDiv.replaceChildren();
+            textLayerDiv.style.setProperty("--scale-factor", finalViewport.scale);
+            try {
+                const textContentSource = await page.getTextContent();
+                currentTextTask = pdfjsLib.renderTextLayer({
+                    textContentSource,
+                    container: textLayerDiv,
+                    viewport: finalViewport,
+                });
+                await currentTextTask.promise;
+            } catch (textErr) {
+                // AbortException de cancel() és esperat en re-renders ràpids; la resta es loga.
+                if (textErr?.name !== "AbortException") {
+                    console.error("[pdf-viewer] text layer error:", textErr);
+                }
+            }
+
             pageNum = num;
             pageInput.value = num;
             prevBtn.disabled = num <= 1;
@@ -139,6 +170,10 @@
     }
 
     function cleanup() {
+        if (currentTextTask) {
+            try { currentTextTask.cancel(); } catch { /* ignore */ }
+            currentTextTask = null;
+        }
         if (sessionKey) {
             try {
                 const storage = (ext && ext.storage && ext.storage.session)

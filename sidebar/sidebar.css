@@ -891,70 +891,54 @@ body {
   stroke: none;
 }
 
-/* Floating controls on the right side (like NotebookLM) */
+/* Floating controls — columna circular a baix-dreta (com NotebookLM) */
 .markmap-controls {
   position: absolute;
   right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   z-index: 100;
 }
 
+/* Botó de pantalla completa, aïllat a dalt-dreta (com NotebookLM) */
+.markmap-fullscreen-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+}
+
+/* Mateix estil exacte que els botons de pantalla completa (.markmap-fs-btn):
+   valors fixos NotebookLM (no variables de tema) perquè les dues vistes
+   siguin idèntiques i tinguin sempre l'aspecte clar de NotebookLM. */
 .markmap-control-btn {
   width: 40px;
   height: 40px;
-  padding: 0;
-  border: none;
+  min-width: 40px;
+  padding: 8px;
+  border: 1px solid #dadce0;
   border-radius: 50%;
-  background: white;
+  background: #ffffff;
   color: #5f6368;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.markmap-control-btn:hover {
+  background-color: #f1f3f4;
+  color: #100f0f;
 }
 
 .markmap-control-btn svg {
   width: 20px;
   height: 20px;
-  stroke: #5f6368;
-}
-
-.markmap-control-btn:hover {
-  background: #f8f9fa;
-  box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
-  transform: scale(1.05);
-}
-
-.markmap-control-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-}
-
-.markmap-controls button {
-  font-size: 0.85em;
-  padding: 0.3em 0.8em;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--bg-color);
-  color: var(--text-color);
-  cursor: pointer;
-  transition: background 0.15s ease;
-  font-family: inherit;
-}
-
-.markmap-controls button:hover {
-  background: var(--button-hover);
-}
-
-.markmap-controls button:active {
-  transform: scale(0.98);
+  stroke: currentColor;
 }
 
 /* Markmap node styling overrides */
@@ -963,9 +947,9 @@ body {
 }
 
 .markmap-container .markmap-node text {
-  font-family: 'Google Sans', system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   fill: #1a1a1a;
   user-select: none;
 }

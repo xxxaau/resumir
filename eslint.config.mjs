@@ -36,6 +36,7 @@ const extensionGlobals = {
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
     PROMPT_DEFAULTS_VERSION: "readonly",
+    DEFAULT_BIONIC: "readonly",
     // sidebar/conceptmap.js
     parseConceptTree: "readonly",
     collapseAll: "readonly",
@@ -53,11 +54,8 @@ const extensionGlobals = {
     applyExtensionOrder: "readonly",
     resetUI: "readonly",
     renderApiKeyWarning: "readonly",
-    runCountdownTimer: "readonly",
     startGenerationTimer: "readonly",
     stopGenerationTimer: "readonly",
-    stopCountdownTimer: "readonly",
-    startCountdown: "readonly",
     getIcon: "readonly",
     CHECK_ICON_STR: "readonly",
     PLAY_ICON_STR: "readonly",
@@ -76,6 +74,8 @@ const extensionGlobals = {
     sortModelsByPriority: "readonly",
     // shared/content-types.js
     CONTENT_TYPES: "readonly",
+    // shared/icons.js
+    MARKMAP_ICONS: "readonly",
     // sidebar/content.js
     isPdfUrl: "readonly",
     looksLikePdfByHead: "readonly",
@@ -94,9 +94,6 @@ const extensionGlobals = {
     markmapNative: "readonly",
     // sidebar/stats.js
     getDailyStats: "readonly",
-    getTodayRequestCount: "readonly",
-    getTotalTodayCount: "readonly",
-    refreshRemainingOnModelChange: "readonly",
     // sidebar/content.js
     getPageContent: "readonly",
     executeScriptSafe: "readonly",

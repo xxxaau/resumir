@@ -59,11 +59,10 @@ async function getPageContent() {
     //    amb host_permissions, el fetch() des de l'extensió NO té
     //    restriccions CORS. El permís es demana sota gest d'usuari
     //    (clic a "Resum" o obertura del sidebar), no a l'instal·lació.
-    //  - Per a PDFs `file://`, es demana permís `<all_urls>` i es reintenta.
-    //    Cal `file:` a connect-src CSP (Firefox). Si encara falla (per
-    //    restriccions de Firefox a file://), l'usuari usa el botó local.
-    //  - Per a PDFs `http://` (no HTTPS), el fetch és insegur. L'usuari
-    //    ha d'usar el botó "Selecciona PDF local" del sidebar.
+    //  - Per a PDFs `file://` i `http://`, el fetch directe NO és possible
+    //    (la CSP només permet `https:` per principi de mínim privilegi).
+    //    L'usuari els resumeix amb el botó "Selecciona PDF local" del sidebar
+    //    (FileReader, sense xarxa). No demanem `<all_urls>` per a aquests casos.
     //  - No usem content script injection perquè a Firefox el fetch dels
     //    content scripts (ISOLATED o MAIN world) també està subjecte a CORS
     //    sense host_permissions explícites.
@@ -105,7 +104,7 @@ async function getPageContent() {
                 // el fetch() des del sidebar NO té restriccions CORS.
                 // El permís es demana ara (amb gest d'usuari) en lloc de
                 // a l'instal·lació (on falla per manca de gest).
-                if (tabUrl && (tabUrl.startsWith("https://") || tabUrl.startsWith("file://"))) {
+                if (tabUrl && tabUrl.startsWith("https://")) {
                     console.debug("[PDF] Fetch directe ha fallat, demanant permís <all_urls>...");
                     try {
                         const granted = await ext.permissions.request({
@@ -399,6 +398,14 @@ async function getPageContent() {
                 // Provem múltiples variants d'URL perquè per a vídeos amb només ASR (pista
                 // auto-generada), &fmt=json3 sovint retorna 200 amb body buit; en canvi
                 // &fmt=srv3 (XML) o la URL crua (XML per defecte) sí donen segments.
+                if (!transcriptText && meta.captionBaseUrl) {
+                    const _captionHost = (() => { try { return new URL(meta.captionBaseUrl).hostname; } catch { return ""; } })();
+                    const _allowedCaptionHosts = ["www.youtube.com", "youtube.com", "www.googleapis.com", "googleapis.com"];
+                    if (!_allowedCaptionHosts.some(h => _captionHost === h || _captionHost.endsWith("." + h))) {
+                        console.warn("[YouTube] captionBaseUrl fora de domini esperat:", _captionHost);
+                        meta.captionBaseUrl = null;
+                    }
+                }
                 if (!transcriptText && meta.captionBaseUrl) {
                     const variants = [
                         meta.captionBaseUrl + '&fmt=json3',

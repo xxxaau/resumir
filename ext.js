@@ -76,22 +76,6 @@ const ext = {
         },
 
         /**
-         * Returns sidebar views (for toggle detection).
-         * Firefox: extension.getViews({ type: "sidebar" })
-         * Chromium: always returns [] (use isOpen state or getContexts instead)
-         */
-        getViews: (filter) => {
-            if (isFirefox) {
-                if (baseApi.extension && baseApi.extension.getViews) {
-                    return baseApi.extension.getViews(filter);
-                }
-            }
-            // Chromium: getViews({ type: "sidebar" }) is not supported.
-            // The background.js toggle logic will fallback to open() on catch.
-            return [];
-        },
-
-        /**
          * Sets side panel behavior (Chromium only).
          * Configures whether clicking the action button opens the side panel.
          * No-op on Firefox (sidebarAction handles this natively).

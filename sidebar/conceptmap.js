@@ -200,40 +200,13 @@ function expandAll(container) {
 /**
  * Builds the PNG export filename for a concept map.
  * Format: YYYYMMDD_word1_word2.png from the map's root label.
- * Delegates to the shared pure util at sidebar/conceptmap-filename.js when
- * available; otherwise falls back to a minimal inline implementation so the
- * sidebar still works if the script load order changes.
+ * Delega a la util pura compartida (sidebar/conceptmap-filename.js), que es
+ * carrega sempre abans que aquest fitxer tant a sidebar.html com al bundle.
  * @param {string} rootLabel
  * @returns {string}
  */
 function buildConceptMapFilename(rootLabel = "") {
-    if (typeof window !== "undefined" && typeof window.buildConceptMapFilename === "function") {
-        return window.buildConceptMapFilename(rootLabel);
-    }
-    // Inline fallback (mirrors sidebar/conceptmap-filename.js logic).
-    const STOP = new Set([
-        "a","al","als","amb","de","del","dels","el","els","en","es","i","la","les","lo",
-        "o","per","que","un","una","uns","unes","com","si",
-        "con","las","los","por","y",
-        "an","and","at","by","for","in","of","on","or","the","to","with","is","it","as",
-    ]);
-    const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    const date = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
-    const norm = String(rootLabel || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, " ")
-        .trim();
-    const tokens = norm.length === 0
-        ? []
-        : norm.split(/\s+/)
-            .filter(t => t.length > 1 && !STOP.has(t))
-            .map(t => t.slice(0, 20));
-    const picked = tokens.slice(0, 2);
-    if (picked.length === 0) return `${date}_mapa.png`;
-    return `${date}_${picked.join("_")}.png`;
+    return window.buildConceptMapFilename(rootLabel);
 }
 
 function renderMarkmapInteractive(text, pageTitle = "") {
@@ -278,7 +251,7 @@ function renderMarkmapInteractive(text, pageTitle = "") {
         // Build the inner SVG via DOM nodes (no innerHTML)
         const parser = new DOMParser();
         const doc = parser.parseFromString(
-            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${svgInner}</svg>`,
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgInner}</svg>`,
             "image/svg+xml"
         );
         const importedSvg = document.importNode(doc.documentElement, true);
@@ -286,43 +259,23 @@ function renderMarkmapInteractive(text, pageTitle = "") {
         return b;
     };
 
-    const fitBtn = makeBtn(
-        `<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>`,
-        "Ajustar a la vista"
-    );
-    const zoomInBtn = makeBtn(
-        `<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>`,
-        "Ampliar"
-    );
-    const zoomOutBtn = makeBtn(
-        `<line x1="5" y1="12" x2="19" y2="12"></line>`,
-        "Reduir"
-    );
-    const expandAllBtn = makeBtn(
-        `<polyline points="7 13 12 18 17 13" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 6 12 11 17 6" stroke-linecap="round" stroke-linejoin="round"/>`,
-        "Expandir tot"
-    );
-    const collapseAllBtn = makeBtn(
-        `<polyline points="7 11 12 6 17 11" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 18 12 13 17 18" stroke-linecap="round" stroke-linejoin="round"/>`,
-        "Col·lapsar tot"
-    );
-    const downloadPngBtn = makeBtn(
-        `<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline>`,
-        "Descarregar com a PNG"
-    );
-    const fullPageBtn = makeBtn(
-        `<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" stroke-linecap="round"/><polyline points="15 3 21 3 21 9" stroke-linecap="round"/><polyline points="9 21 3 21 3 15" stroke-linecap="round"/><line x1="21" y1="3" x2="14" y2="10" stroke-linecap="round"/><line x1="3" y1="21" x2="10" y2="14" stroke-linecap="round"/>`,
-        "Vista de pantalla completa"
-    );
+    // Controls estil NotebookLM: columna a baix-dreta amb 4 botons.
+    let allExpanded = false;  // estat del toggle desplegar/plegar-tot
+    const toggleAllBtn = makeBtn(MARKMAP_ICONS.toggleAll, "Desplegar / plegar tot");
+    const zoomInBtn = makeBtn(MARKMAP_ICONS.zoomIn, "Ampliar");
+    const zoomOutBtn = makeBtn(MARKMAP_ICONS.zoomOut, "Reduir");
+    const downloadBtn = makeBtn(MARKMAP_ICONS.download, "Descarregar com a PNG");
 
-    controls.appendChild(fitBtn);
+    controls.appendChild(toggleAllBtn);
     controls.appendChild(zoomInBtn);
     controls.appendChild(zoomOutBtn);
-    controls.appendChild(expandAllBtn);
-    controls.appendChild(collapseAllBtn);
-    controls.appendChild(downloadPngBtn);
-    controls.appendChild(fullPageBtn);
+    controls.appendChild(downloadBtn);
     container.appendChild(controls);
+
+    // Botó de pantalla completa, separat i posicionat a dalt-dreta (com NotebookLM).
+    const fullPageBtn = makeBtn(MARKMAP_ICONS.expand, "Vista de pantalla completa");
+    fullPageBtn.classList.add("markmap-fullscreen-btn");
+    container.appendChild(fullPageBtn);
 
     fragment.appendChild(container);
 
@@ -330,31 +283,27 @@ function renderMarkmapInteractive(text, pageTitle = "") {
     setTimeout(() => {
         try {
             const root = window.markmapNative.parseMarkdownTree(text);
-            // Fold from depth 2 onwards by default
+            // Per defecte només es veuen els nivells 0 i 1: plega a partir de profunditat 1
+            // (els nodes de nivell 1 queden plegats, amagant el nivell 2+).
             const collapseFromLevel = (node, currentDepth, targetDepth) => {
                 if (currentDepth >= targetDepth && node.children && node.children.length > 0) {
                     node.fold = true;
                 }
                 if (node.children) node.children.forEach(c => collapseFromLevel(c, currentDepth + 1, targetDepth));
             };
-            collapseFromLevel(root, 0, 2);
+            collapseFromLevel(root, 0, 1);
 
             const mm = window.markmapNative.createMindMap(svg, root, {});
 
             zoomInBtn.addEventListener("click", () => mm.rescale(1.25));
             zoomOutBtn.addEventListener("click", () => mm.rescale(0.8));
-            fitBtn.addEventListener("click", () => mm.fit());
-            expandAllBtn.addEventListener("click", () => {
-                mm.setFoldAll(false);
+            toggleAllBtn.addEventListener("click", () => {
+                allExpanded = !allExpanded;
+                mm.setFoldAll(!allExpanded);  // expandit → fold=false a tots
                 mm.rerender();
                 requestAnimationFrame(() => mm.fit());
             });
-            collapseAllBtn.addEventListener("click", () => {
-                mm.setFoldAll(true);
-                mm.rerender();
-                requestAnimationFrame(() => mm.fit());
-            });
-            downloadPngBtn.addEventListener("click", async () => {
+            downloadBtn.addEventListener("click", async () => {
                 try {
                     // Use the shared filename builder seeded with the root label.
                     // Falls back to the legacy pageTitle-based name if the shared
@@ -429,7 +378,7 @@ async function openFullPageView(text, pageTitle = "") {
             target: { tabId },
             world: "MAIN",
             func: fullscreenOverlayFunc,
-            args: [text, pageTitle]
+            args: [text, pageTitle, MARKMAP_ICONS]
         });
 
         if (!result || !result.length) {
@@ -448,22 +397,34 @@ async function openFullPageView(text, pageTitle = "") {
 
 /**
  * Self-contained function injected into the host page's MAIN world.
- * Receives (text, pageTitle) and builds an interactive full-screen overlay
+ * Receives (text, pageTitle, icons) and builds an interactive full-screen overlay
  * with the mind map. No external dependencies — all logic inlined.
+ *
+ * @param {Object} icons - Icon SVG paths from MARKMAP_ICONS
  *
  * IMPORTANT: this function is serialised to a string by executeScript and
  * executed in the host page context. It cannot reference any outer scope.
  */
-function fullscreenOverlayFunc(text, _pageTitle) {
+// ⚠️⚠️ DUPLICACIÓ DELIBERADA — CÒPIA INLINE DE sidebar/markmap-native.js ⚠️⚠️
+// Aquesta funció se serialitza a string i s'injecta al món MAIN de la pàgina
+// via executeScript, on NO pot accedir a window.markmapNative. Per això tota la
+// lògica de render/layout/fold/clic/colors està DUPLICADA aquí.
+// REGLA: qualsevol canvi al renderer (colors branca/fulla, arestes, profunditat
+// de plegat per defecte, clic a la pastilla, layout) s'HA D'APLICAR TAMBÉ a
+// sidebar/markmap-native.js perquè la sidebar i la pantalla completa no
+// divergeixin. Vegeu docs/LEARNINGS.md.
+function fullscreenOverlayFunc(text, _pageTitle, icons) {
     try {
         // Remove existing overlay if any (re-open behaviour)
         const existing = document.getElementById('markmap-fullscreen-overlay');
         if (existing) existing.remove();
 
         const SVG_NS = 'http://www.w3.org/2000/svg';
-        // NotebookLM-inspired pastel palette per depth.
-        const NODE_COLORS = ['#c5c8f7', '#c5dff7', '#a8e6cf', '#c8f0d5'];
-        const EDGE_COLORS = ['#a5a8e0', '#7fc8a9', '#7fc8a9', '#7fc8a9'];
+        // Paleta NotebookLM per PROFUNDITAT: cada nivell té un color distint.
+        // Índex = min(depth, 3). 0 lavanda · 1 blau · 2 verd · 3+ verd clar.
+        const DEPTH_SOLID = ['#b1a8e6', '#a7c6ef', '#93d4b4', '#c2ebd3'];
+        const DEPTH_GRAD  = [['#c6c0f2', '#a59ce0'], ['#c1d6f6', '#97b8e8'], ['#b9ebcd', '#87cda8'], ['#d6f2e0', '#b0e0c4']];
+        const EDGE_COLOR  = '#c7cbe0';  // arestes uniformes clares
         const TEXT_COLOR  = '#1a1a1a';
 
         // ─── Parser ─────────────────────────────────────────────────────────
@@ -517,7 +478,7 @@ function fullscreenOverlayFunc(text, _pageTitle) {
                 } catch { _ctx = null; }
             }
             if (_ctx) {
-                _ctx.font = `500 ${FONT_SIZE}px "Google Sans", system-ui, -apple-system, sans-serif`;
+                _ctx.font = `400 ${FONT_SIZE}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
             }
             return _ctx;
         }
@@ -591,10 +552,10 @@ function fullscreenOverlayFunc(text, _pageTitle) {
         // ─── DOM scaffolding ───────────────────────────────────────────────
         const overlay = document.createElement('div');
         overlay.id = 'markmap-fullscreen-overlay';
-        overlay.style.cssText = 'all:initial;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:rgba(0,0,0,0.55)!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;font-family:system-ui,-apple-system,sans-serif!important';
+        overlay.style.cssText = 'all:initial;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:rgba(0,0,0,0.55)!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;font-family:system-ui,-apple-system,sans-serif!important;animation:mm-fs-backdrop-in 0.18s ease-out!important';
 
         const modal = document.createElement('div');
-        modal.style.cssText = 'width:95vw!important;height:95vh!important;background:#ffffff!important;border-radius:12px!important;box-shadow:0 20px 60px rgba(0,0,0,0.35)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important';
+        modal.style.cssText = 'width:95vw!important;height:95vh!important;background:#ffffff!important;border-radius:12px!important;box-shadow:0 20px 60px rgba(0,0,0,0.35)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;animation:mm-fs-modal-in 0.22s cubic-bezier(0.2,0,0,1)!important';
 
         const header = document.createElement('div');
         header.style.cssText = 'display:flex!important;justify-content:space-between!important;align-items:center!important;padding:0.6em 1em!important;border-bottom:1px solid #e0e0e0!important;background:#f9f9fb!important;flex-shrink:0!important';
@@ -603,31 +564,51 @@ function fullscreenOverlayFunc(text, _pageTitle) {
         title.textContent = 'Mapa Conceptual';
         title.style.cssText = 'font-weight:600!important;font-size:1em!important;color:#100f0f!important';
 
-        const toolbar = document.createElement('div');
-        toolbar.style.cssText = 'display:flex!important;gap:0.4em!important;align-items:center!important';
+        // CSS dels botons, estil NotebookLM (circulars). !important per resistir
+        // overrides de la pàgina amfitriona.
+        const btnStyle = document.createElement('style');
+        btnStyle.textContent = `
+            .markmap-fs-btn{width:40px!important;height:40px!important;min-width:40px!important;padding:8px!important;border:1px solid #dadce0!important;border-radius:50%!important;background:#ffffff!important;color:#5f6368!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+            .markmap-fs-btn:hover{background:#f1f3f4!important;color:#100f0f!important}
+            .markmap-fs-btn svg{width:20px!important;height:20px!important;stroke:currentColor!important}
+            .markmap-fs-controls{position:absolute!important;right:16px!important;bottom:16px!important;display:flex!important;flex-direction:column!important;gap:8px!important;z-index:5!important}
+            .markmap-fs-close{border:none!important;background:transparent!important;box-shadow:none!important;width:32px!important;height:32px!important;min-width:32px!important;color:#5f6368!important}
+            .markmap-fs-close:hover{background:#f1f3f4!important;color:#d32f2f!important}
+            .markmap-fs-close svg{width:22px!important;height:22px!important}
+            @keyframes mm-fs-backdrop-in{from{opacity:0}to{opacity:1}}
+            @keyframes mm-fs-modal-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+        `;
+        overlay.appendChild(btnStyle);
 
-        function mkBtn(label, ttl) {
+        function mkBtn(svgInner, ttl, extraClass) {
             const b = document.createElement('button');
-            b.textContent = label;
+            b.className = 'markmap-fs-btn' + (extraClass ? ' ' + extraClass : '');
             b.title = ttl;
+            b.setAttribute('aria-label', ttl);
             b.type = 'button';
-            b.style.cssText = 'padding:0.35em 0.7em!important;border:1px solid #ccc!important;border-radius:5px!important;background:#fff!important;color:#100f0f!important;cursor:pointer!important;font-size:0.85em!important;font-family:inherit!important;line-height:1!important';
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + svgInner + '</svg>',
+                'image/svg+xml'
+            );
+            b.appendChild(document.importNode(doc.documentElement, true));
             return b;
         }
 
-        const btnFit       = mkBtn('⛶', 'Ajustar a la vista');
-        const btnZoomIn    = mkBtn('+', 'Ampliar');
-        const btnZoomOut   = mkBtn('−', 'Reduir');
-        const btnExpand    = mkBtn('▾▾', 'Expandir tot');
-        const btnCollapse  = mkBtn('▴▴', 'Col·lapsar tot');
-        const btnPng       = mkBtn('⬇ PNG', 'Descarregar com a PNG');
-        const btnClose     = mkBtn('✕', 'Tancar (Esc)');
-        btnClose.style.borderColor = '#d32f2f';
-        btnClose.style.color = '#d32f2f';
+        // Columna de controls flotant a baix-dreta (com NotebookLM): 4 botons.
+        let allExpanded = false;  // estat del toggle desplegar/plegar-tot
+        const controls = document.createElement('div');
+        controls.className = 'markmap-fs-controls';
+        const btnToggleAll = mkBtn(icons.toggleAll, 'Desplegar / plegar tot');
+        const btnZoomIn    = mkBtn(icons.zoomIn, 'Ampliar');
+        const btnZoomOut   = mkBtn(icons.zoomOut, 'Reduir');
+        const btnPng       = mkBtn(icons.download, 'Descarregar com a PNG');
+        [btnToggleAll, btnZoomIn, btnZoomOut, btnPng].forEach(b => controls.appendChild(b));
 
-        [btnFit, btnZoomIn, btnZoomOut, btnExpand, btnCollapse, btnPng, btnClose].forEach(b => toolbar.appendChild(b));
+        // Botó de tancar a dalt-dreta (al header).
+        const btnClose = mkBtn(icons.close, 'Tancar (Esc)', 'markmap-fs-close');
         header.appendChild(title);
-        header.appendChild(toolbar);
+        header.appendChild(btnClose);
 
         const content = document.createElement('div');
         content.style.cssText = 'flex:1!important;position:relative!important;overflow:hidden!important;background:#ffffff!important';
@@ -642,8 +623,8 @@ function fullscreenOverlayFunc(text, _pageTitle) {
         const styleEl = document.createElementNS(SVG_NS, 'style');
         styleEl.textContent = `
             text { fill: #1a1a1a !important;
-                   font-family: 'Google Sans', system-ui, -apple-system, sans-serif !important;
-                   font-weight: 500 !important; }
+                   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
+                   font-weight: 400 !important; }
             .markmap-node { cursor: default; }
             .markmap-toggle { cursor: pointer; }
             rect { fill-opacity: 1 !important; stroke: none !important; }
@@ -651,6 +632,7 @@ function fullscreenOverlayFunc(text, _pageTitle) {
         `;
         svg.appendChild(styleEl);
         content.appendChild(svg);
+        content.appendChild(controls);
 
         modal.appendChild(header);
         modal.appendChild(content);
@@ -659,9 +641,11 @@ function fullscreenOverlayFunc(text, _pageTitle) {
 
         // ─── Render ────────────────────────────────────────────────────────
         const root = parseMarkdownTree(text);
-        // Auto-fold from depth 2
+        // Títol = text del primer node jeràrquic (arrel del mapa), com NotebookLM.
+        if (root && root.label) title.textContent = root.label;
+        // Per defecte només es veuen els nivells 0 i 1: plega a partir de profunditat 1.
         (function autoFold(node, d) {
-            if (d >= 2 && node.children && node.children.length > 0) node.fold = true;
+            if (d >= 1 && node.children && node.children.length > 0) node.fold = true;
             if (node.children) node.children.forEach(c => autoFold(c, d + 1));
         })(root, 0);
 
@@ -670,8 +654,25 @@ function fullscreenOverlayFunc(text, _pageTitle) {
         viewport.setAttribute('class', 'markmap-viewport');
         svg.appendChild(viewport);
 
-        function nodeColorFor(depth) { return NODE_COLORS[Math.min(depth, NODE_COLORS.length - 1)]; }
-        function edgeColorFor(depth) { return EDGE_COLORS[Math.min(depth, EDGE_COLORS.length - 1)]; }
+        // Degradats subtils per a les pastilles (com NotebookLM), sense innerHTML.
+        const mkGrad = (id, top, bottom) => {
+            const g = document.createElementNS(SVG_NS, 'linearGradient');
+            g.setAttribute('id', id);
+            g.setAttribute('x1', '0'); g.setAttribute('y1', '0');
+            g.setAttribute('x2', '0'); g.setAttribute('y2', '1');
+            const s1 = document.createElementNS(SVG_NS, 'stop');
+            s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', top);
+            const s2 = document.createElementNS(SVG_NS, 'stop');
+            s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', bottom);
+            g.appendChild(s1); g.appendChild(s2);
+            return g;
+        };
+        const defs = document.createElementNS(SVG_NS, 'defs');
+        DEPTH_GRAD.forEach((gr, i) => defs.appendChild(mkGrad('mm-grad-' + i, gr[0], gr[1])));
+        svg.appendChild(defs);
+
+        function nodeColorFor(node) { return DEPTH_SOLID[Math.min(node.depth, DEPTH_SOLID.length - 1)]; }
+        function edgeColorFor() { return EDGE_COLOR; }
         function curve(x1, y1, x2, y2) {
             const dx = Math.max(20, (x2 - x1) * 0.4);
             return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
@@ -693,9 +694,11 @@ function fullscreenOverlayFunc(text, _pageTitle) {
                 // Edges connect pill-to-pill laterally
                 for (const c of visible) {
                     const path = document.createElementNS(SVG_NS, 'path');
-                    path.setAttribute('d', curve(node._x + node._width, node._y, c._x, c._y));
+                    // L'aresta surt de la dreta del cercle toggle (cx=width+10, r=8),
+                    // com NotebookLM, no de la vora de la pastilla.
+                    path.setAttribute('d', curve(node._x + node._width + 18, node._y, c._x, c._y));
                     path.setAttribute('fill', 'none');
-                    path.setAttribute('stroke', edgeColorFor(c.depth));
+                    path.setAttribute('stroke', edgeColorFor());
                     path.setAttribute('stroke-width', '1.5');
                     path.setAttribute('opacity', '1');
                     linksG.appendChild(path);
@@ -703,9 +706,10 @@ function fullscreenOverlayFunc(text, _pageTitle) {
                 const g = document.createElementNS(SVG_NS, 'g');
                 g.setAttribute('class', 'markmap-node');
                 g.setAttribute('transform', `translate(${node._x}, ${node._y - node._height / 2})`);
-                const fillColor = nodeColorFor(node.depth);
+                const fillColor = nodeColorFor(node);  // color sòlid (cercle toggle, glifo)
+                const gradId = 'url(#mm-grad-' + Math.min(node.depth, DEPTH_GRAD.length - 1) + ')';
 
-                // Pill background
+                // Pill background amb degradat subtil
                 const rect = document.createElementNS(SVG_NS, 'rect');
                 rect.setAttribute('x', '0');
                 rect.setAttribute('y', '0');
@@ -714,7 +718,7 @@ function fullscreenOverlayFunc(text, _pageTitle) {
                 const radius = Math.min(12, node._height / 2);
                 rect.setAttribute('rx', String(radius));
                 rect.setAttribute('ry', String(radius));
-                rect.setAttribute('fill', fillColor);
+                rect.setAttribute('fill', gradId);
                 rect.setAttribute('stroke', 'none');
                 g.appendChild(rect);
 
@@ -725,8 +729,8 @@ function fullscreenOverlayFunc(text, _pageTitle) {
                 textEl.setAttribute('dominant-baseline', 'central');
                 textEl.setAttribute('text-anchor', 'start');
                 textEl.setAttribute('font-size', String(FONT_SIZE));
-                textEl.setAttribute('font-family', "'Google Sans', system-ui, -apple-system, sans-serif");
-                textEl.setAttribute('font-weight', '500');
+                textEl.setAttribute('font-family', "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
+                textEl.setAttribute('font-weight', '400');
                 textEl.setAttribute('fill', TEXT_COLOR);
                 textEl.style.userSelect = 'none';
                 const lineH = FONT_SIZE * LINE_H;
@@ -758,25 +762,36 @@ function fullscreenOverlayFunc(text, _pageTitle) {
                     toggle.setAttribute('stroke-width', '1.5');
                     tg.appendChild(toggle);
 
-                    const glyph = document.createElementNS(SVG_NS, 'text');
-                    glyph.setAttribute('x', String(cx));
-                    glyph.setAttribute('y', String(cy));
-                    glyph.setAttribute('text-anchor', 'middle');
-                    glyph.setAttribute('dominant-baseline', 'central');
-                    glyph.setAttribute('font-size', '10');
-                    glyph.setAttribute('font-family', 'system-ui, -apple-system, sans-serif');
-                    glyph.setAttribute('font-weight', '700');
-                    glyph.setAttribute('fill', fillColor);
-                    glyph.style.userSelect = 'none';
-                    glyph.textContent = node.fold ? '>' : '<';
+                    // Chevron SVG (no glyph de text) per a un símbol net i ben centrat.
+                    const glyph = document.createElementNS(SVG_NS, 'polyline');
+                    const pts = node.fold
+                        ? `${cx - 2},${cy - 3.5} ${cx + 2},${cy} ${cx - 2},${cy + 3.5}`
+                        : `${cx + 2},${cy - 3.5} ${cx - 2},${cy} ${cx + 2},${cy + 3.5}`;
+                    glyph.setAttribute('points', pts);
+                    glyph.setAttribute('fill', 'none');
+                    glyph.setAttribute('stroke', fillColor);
+                    glyph.setAttribute('stroke-width', '1.5');
+                    glyph.setAttribute('stroke-linecap', 'round');
+                    glyph.setAttribute('stroke-linejoin', 'round');
                     tg.appendChild(glyph);
 
                     tg.addEventListener('click', (e) => {
                         e.stopPropagation();
                         node.fold = !node.fold;
                         render();
+                        if (!node.fold) requestAnimationFrame(fit);  // autofit en desplegar
                     });
                     g.appendChild(tg);
+
+                    // Clic sobre tota la pastilla = desplega/plega UN nivell (com NotebookLM).
+                    // S'ignora si s'estava arrossegant (pan).
+                    g.style.cursor = 'pointer';
+                    g.addEventListener('click', () => {
+                        if (didPan) return;
+                        node.fold = !node.fold;
+                        render();
+                        if (!node.fold) requestAnimationFrame(fit);  // autofit en desplegar
+                    });
                 }
                 nodesG.appendChild(g);
                 for (const c of visible) walk(c);
@@ -825,16 +840,19 @@ function fullscreenOverlayFunc(text, _pageTitle) {
 
         // ─── Interactions ──────────────────────────────────────────────────
         let isPanning = false;
+        let didPan = false;  // true si el ratolí s'ha mogut prou → no és un clic de pastilla
         const pan = { x: 0, y: 0, tx: 0, ty: 0 };
         svg.addEventListener('mousedown', (e) => {
             if (e.target.tagName === 'circle') return;
             isPanning = true;
+            didPan = false;
             pan.x = e.clientX; pan.y = e.clientY;
             pan.tx = state.transform.x; pan.ty = state.transform.y;
             svg.style.cursor = 'grabbing';
         });
         const moveHandler = (e) => {
             if (!isPanning) return;
+            if (Math.abs(e.clientX - pan.x) > 4 || Math.abs(e.clientY - pan.y) > 4) didPan = true;
             state.transform.x = pan.tx + (e.clientX - pan.x);
             state.transform.y = pan.ty + (e.clientY - pan.y);
             applyTransform();
@@ -859,11 +877,14 @@ function fullscreenOverlayFunc(text, _pageTitle) {
             applyTransform();
         }, { passive: false });
 
-        btnFit.addEventListener('click', fit);
         btnZoomIn.addEventListener('click', () => rescale(1.25));
         btnZoomOut.addEventListener('click', () => rescale(0.8));
-        btnExpand.addEventListener('click', () => { setFoldAll(false); render(); requestAnimationFrame(fit); });
-        btnCollapse.addEventListener('click', () => { setFoldAll(true); render(); requestAnimationFrame(fit); });
+        btnToggleAll.addEventListener('click', () => {
+            allExpanded = !allExpanded;
+            setFoldAll(!allExpanded);  // expandit → fold=false a tots
+            render();
+            requestAnimationFrame(fit);
+        });
 
         // ─── PNG Export ────────────────────────────────────────────────────
         // Filename rule (mirrors sidebar/conceptmap-filename.js): YYYYMMDD_w1_w2.png
@@ -950,12 +971,14 @@ function fullscreenOverlayFunc(text, _pageTitle) {
             window.removeEventListener('mousemove', moveHandler);
             window.removeEventListener('mouseup', upHandler);
             document.removeEventListener('keydown', escHandler);
+            window.removeEventListener('pagehide', close);
             overlay.remove();
         }
         function escHandler(e) { if (e.key === 'Escape') close(); }
         btnClose.addEventListener('click', close);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
         document.addEventListener('keydown', escHandler);
+        window.addEventListener('pagehide', close, { once: true });
 
         // ─── Initial render + fit ──────────────────────────────────────────
         render();

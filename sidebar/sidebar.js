@@ -299,11 +299,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyBionicToContent(config) {
         const cfg = config || globalConfigCache;
-        contentDiv.style.fontFamily = cfg.bionicFont || "inherit";
-        contentDiv.style.fontSize = cfg.bionicFontSize || "inherit";
-        contentDiv.style.lineHeight = cfg.bionicLineHeight || "1.5";
-        contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || "500");
-        const fixation = (cfg.bionicFixation || 35) / 100;
+        contentDiv.style.fontFamily = cfg.bionicFont || DEFAULT_BIONIC.font;
+        contentDiv.style.fontSize = cfg.bionicFontSize || DEFAULT_BIONIC.fontSize;
+        contentDiv.style.lineHeight = cfg.bionicLineHeight || DEFAULT_BIONIC.lineHeight;
+        contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || DEFAULT_BIONIC.weight);
+        const fixation = (cfg.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
         if (currentMetadata.summary) {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
         }
@@ -503,7 +503,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         await ext.storage.sync.set({ modelName: e.target.value });
-        refreshRemainingOnModelChange(e.target.value);
     });
 
     // --- Context Menu / Message Handling ---
@@ -519,7 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
         handleTrigger((text, dd, sc, ui) => doSummary(text, dd, sc, ui), data);
     };
 
-    ext.runtime.onMessage.addListener((message) => {
+    ext.runtime.onMessage.addListener((message, sender) => {
+        if (sender.id !== ext.runtime.id) return;
         if (message.action === "trigger_summary") {
             boundTrigger(message.data);
         }
@@ -528,8 +528,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Check for pending summary on load (context menu while sidebar was closed)
     ext.storage.local.get("pendingSummary").then(data => {
         if (data.pendingSummary) {
-            boundTrigger(data.pendingSummary);
             ext.storage.local.remove("pendingSummary");
+            boundTrigger(data.pendingSummary);
         }
     });
 
@@ -558,8 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Watch for pendingSummary and pendingCacheLoad (reliable fallback for Chrome sidePanel timing)
     ext.storage.onChanged.addListener((changes, area) => {
         if (area === "local" && changes.pendingSummary && changes.pendingSummary.newValue) {
-            boundTrigger(changes.pendingSummary.newValue);
             ext.storage.local.remove("pendingSummary");
+            boundTrigger(changes.pendingSummary.newValue);
         }
         if (area === "local" && changes.pendingCacheLoad?.newValue) {
             _handlePendingCacheLoad(changes.pendingCacheLoad.newValue);
@@ -569,7 +569,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('beforeunload', () => {
         if (abortController) abortController.abort();
         stopGenerationTimer();
-        stopCountdownTimer();
     });
 
     // --- On Load Init ---
@@ -687,15 +686,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Preload timeout")), 2000))
             ]).catch(() => null);
 
-            if (localData.blockedUntil && Date.now() < localData.blockedUntil) {
-                runCountdownTimer(localData.blockedUntil);
-            } else {
-                if (localData.blockedUntil) await ext.storage.local.remove("blockedUntil");
-            }
+            // Neteja de la clau heretada `blockedUntil` (feature de bloqueig
+            // temporal per quota, abandonada a favor del fallback de models).
+            if (localData.blockedUntil) await ext.storage.local.remove("blockedUntil");
 
             if (apiKey) {
                 await loadModels(apiKey, modelName);
-                refreshRemainingOnModelChange(modelSelect.value || modelName);
                 await ext.storage.local.remove("currentSession");
             } else {
                 renderApiKeyWarning(contentDiv);

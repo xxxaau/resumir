@@ -83,17 +83,17 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#obsidianTemplate").value = (syncData && syncData.obsidianTemplate) || DEFAULT_OBSIDIAN_TEMPLATE;
 
     document.querySelector("#enableBionic").checked = syncData && syncData.enableBionic === true;
-    document.querySelector("#bionicFixation").value = (syncData && syncData.bionicFixation) || 35;
-    document.querySelector("#bionicFixationValue").textContent = ((syncData && syncData.bionicFixation) || 35) + "%";
-    let savedFont = (syncData && syncData.bionicFont) || "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    document.querySelector("#bionicFixation").value = (syncData && syncData.bionicFixation) || DEFAULT_BIONIC.fixation;
+    document.querySelector("#bionicFixationValue").textContent = ((syncData && syncData.bionicFixation) || DEFAULT_BIONIC.fixation) + "%";
+    let savedFont = (syncData && syncData.bionicFont) || DEFAULT_BIONIC.font;
     const fontSelect = document.querySelector("#bionicFont");
     if (!Array.from(fontSelect.options).some(opt => opt.value === savedFont)) {
-        savedFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        savedFont = DEFAULT_BIONIC.font;
     }
     fontSelect.value = savedFont;
-    document.querySelector("#bionicWeight").value = (syncData && syncData.bionicWeight) || "600";
-    document.querySelector("#bionicFontSize").value = (syncData && syncData.bionicFontSize) || "1em";
-    document.querySelector("#bionicLineHeight").value = (syncData && syncData.bionicLineHeight) || "1.5";
+    document.querySelector("#bionicWeight").value = (syncData && syncData.bionicWeight) || DEFAULT_BIONIC.weight;
+    document.querySelector("#bionicFontSize").value = (syncData && syncData.bionicFontSize) || DEFAULT_BIONIC.fontSize;
+    document.querySelector("#bionicLineHeight").value = (syncData && syncData.bionicLineHeight) || DEFAULT_BIONIC.lineHeight;
 
     document.querySelector("#enableDeepdive").checked = syncData && syncData.enableDeepdive === true;
     document.querySelector("#deepDivePrompt").value = (syncData && syncData.deepDivePrompt !== undefined) ? syncData.deepDivePrompt : DEFAULT_DEEP_DIVE_PROMPT;
@@ -130,14 +130,6 @@ function showPromptUpdateBanner(type, isAvailable) {
 function initializeSettingsPageUI() {
   const manifest = ext.runtime.getManifest();
   document.getElementById("appVersion").textContent = manifest.version;
-
-  // Filtrar tipografies de Lectura Biònica segons SO
-  const isMac = navigator.userAgent.toLowerCase().includes('mac');
-  const osClassToHide = isMac ? '.os-windows' : '.os-mac';
-  document.querySelectorAll(`#bionicFont ${osClassToHide}`).forEach(el => {
-      el.style.display = 'none';
-      el.disabled = true; // Prevé que es seleccioni accidentalment l'opció
-  });
 }
 
 function resetTemplate() {
@@ -177,12 +169,12 @@ function resetConceptMapPrompt() {
 }
 
 function resetBionic() {
-    document.querySelector("#bionicFixation").value = "35";
-    document.querySelector("#bionicFixationValue").textContent = "35%";
-    document.querySelector("#bionicFont").value = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    document.querySelector("#bionicWeight").value = "600";
-    document.querySelector("#bionicFontSize").value = "1em";
-    document.querySelector("#bionicLineHeight").value = "1.5";
+    document.querySelector("#bionicFixation").value = String(DEFAULT_BIONIC.fixation);
+    document.querySelector("#bionicFixationValue").textContent = DEFAULT_BIONIC.fixation + "%";
+    document.querySelector("#bionicFont").value = DEFAULT_BIONIC.font;
+    document.querySelector("#bionicWeight").value = DEFAULT_BIONIC.weight;
+    document.querySelector("#bionicFontSize").value = DEFAULT_BIONIC.fontSize;
+    document.querySelector("#bionicLineHeight").value = DEFAULT_BIONIC.lineHeight;
     showStatus("Valors de lectura biònica restaurats als valors per defecte.");
 }
 
