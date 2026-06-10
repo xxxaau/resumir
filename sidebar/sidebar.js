@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
                     SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
                     TOO_LARGE: "[PDF-013] PDF massa gran.",
-                    TIMEOUT: "[PDF-014] Timeout extraient el PDF.",
+                    TIMEOUT: "[PDF-014] S'ha esgotat el temps en extreure el PDF.",
                 };
                 const msg = codeMap[err?.code] || `[PDF-019] Error obrint PDF: ${err?.message || err}`;
                 if (errorDiv) {

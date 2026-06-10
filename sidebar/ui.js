@@ -158,7 +158,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
                 activeBtn.classList.remove("primary");
             }
             activeBtn.dataset.originalTitle = activeBtn.title || "";
-            activeBtn.title = "Aturar Generació";
+            activeBtn.title = "Aturar la generació";
         }
         
         const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn", "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn"];

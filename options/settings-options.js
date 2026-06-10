@@ -66,7 +66,7 @@ function saveOptions(e) {
       ext.storage.sync.set(settings),
       ext.storage.local.set({ apiKey: apiKeyValue })
   ]).then(() => {
-     showStatus("Configuració guardada correctament!");
+     showStatus("Configuració desada correctament!");
      updateSidebar(); 
   }).catch(err => {
      console.error("Error saving options:", err);
