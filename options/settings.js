@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight",
         "enableDeepdive", "deepDivePrompt", "deepDivePromptCustomized", "deepDivePromptUpdateAvailable",
         "enableScience", "sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable",
-        "enableResum", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
+        "enableResum", "enablePdf", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
         "enableSimple", "simplePrompt", "simplePromptCustomized", "simplePromptUpdateAvailable",
         "extensionOrder", "promptDefaultsVersion"
     ];
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Handle "Live" Toggles in extension list
-    const extensionToggles = ["enableResum", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple"];
+    const extensionToggles = ["enableResum", "enablePdf", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple"];
     extensionToggles.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;

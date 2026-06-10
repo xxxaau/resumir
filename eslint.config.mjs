@@ -36,6 +36,7 @@ const extensionGlobals = {
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
     DEFAULT_SIMPLE_PROMPT: "readonly",
+    DEFAULT_EXTENSION_ORDER: "readonly",
     PROMPT_DEFAULTS_VERSION: "readonly",
     DEFAULT_BIONIC: "readonly",
     // sidebar/conceptmap.js
@@ -112,6 +113,7 @@ const settingsGlobals = {
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
     DEFAULT_SIMPLE_PROMPT: "readonly",
+    DEFAULT_EXTENSION_ORDER: "readonly",
     // settings-order.js
     getCurrentExtensionOrder: "readonly",
     applyExtensionOrder: "readonly",

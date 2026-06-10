@@ -40,6 +40,7 @@ function saveOptions(e) {
     sciencePromptCustomized: document.querySelector("#sciencePrompt").value !== DEFAULT_SCIENCE_PROMPT,
 
     enableResum: document.querySelector("#enableResum").checked,
+    enablePdf: document.querySelector("#enablePdf").checked,
 
     enableConceptMap: document.querySelector("#enableConceptMap").checked,
     conceptMapPrompt: document.querySelector("#conceptMapPrompt").value,
@@ -107,6 +108,7 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#sciencePrompt").value = (syncData && syncData.sciencePrompt !== undefined) ? syncData.sciencePrompt : DEFAULT_SCIENCE_PROMPT;
 
     document.querySelector("#enableResum").checked = syncData ? syncData.enableResum !== false : true;
+    document.querySelector("#enablePdf").checked = syncData ? syncData.enablePdf !== false : true;
     document.querySelector("#enableConceptMap").checked = syncData && syncData.enableConceptMap === true;
     document.querySelector("#conceptMapPrompt").value = (syncData && syncData.conceptMapPrompt !== undefined) ? syncData.conceptMapPrompt : DEFAULT_CONCEPTMAP_PROMPT;
 
@@ -123,6 +125,10 @@ function restoreOptions(syncData, localData) {
 
     if (syncData && syncData.extensionOrder && Array.isArray(syncData.extensionOrder)) {
         applyExtensionOrder(syncData.extensionOrder);
+    } else {
+        // Sense ordre desat: apliquem l'ordre per defecte perquè la llista (i el
+        // que captura getCurrentExtensionOrder en desar) reflecteixi el default.
+        applyExtensionOrder([...DEFAULT_EXTENSION_ORDER]);
     }
 }
 

@@ -54,6 +54,12 @@ function applyExtensionVisibility(config) {
         summarizeBtnEl.style.display = config.enableResum !== false ? "flex" : "none";
     }
 
+    const selectPdfBtnEl = document.getElementById("selectPdfBtn");
+    if (selectPdfBtnEl) {
+        // PDF és core: per defecte actiu (només s'amaga si l'usuari el desactiva).
+        selectPdfBtnEl.style.display = config.enablePdf !== false ? "flex" : "none";
+    }
+
     const conceptMapBtnEl = document.getElementById("conceptMapBtn");
     if (conceptMapBtnEl) {
         conceptMapBtnEl.style.display = config.enableConceptMap ? "flex" : "none";
@@ -71,7 +77,7 @@ function applyExtensionOrder(order) {
     // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
     // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
     if (!order.includes("resum")) {
-        order = ["resum", "selectpdf", "science", "deepdive", "conceptmap", "simple", "bionic", "obsidian", "markdown"];
+        order = [...DEFAULT_EXTENSION_ORDER];
         ext.storage.sync.set({ extensionOrder: order });
     } else if (!order.includes("selectpdf")) {
         // Migrate older saved orders to include selectpdf in 2a posicio
@@ -224,17 +230,13 @@ function resetUI(hasContent, config = null) {
     
     if (config) {
         applyExtensionVisibility(config);
-        if (config.extensionOrder) {
-            applyExtensionOrder(config.extensionOrder);
-        }
+        applyExtensionOrder(config.extensionOrder || DEFAULT_EXTENSION_ORDER);
     } else {
         ext.storage.sync
-            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableSimple", "extensionOrder"])
+            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableSimple", "enablePdf", "extensionOrder"])
             .then(fetchedConfig => {
                 applyExtensionVisibility(fetchedConfig);
-                if (fetchedConfig.extensionOrder) {
-                    applyExtensionOrder(fetchedConfig.extensionOrder);
-                }
+                applyExtensionOrder(fetchedConfig.extensionOrder || DEFAULT_EXTENSION_ORDER);
             })
             .catch(e => console.error("Error refreshing visibility config:", e));
     }

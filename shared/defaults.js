@@ -12,6 +12,13 @@
 // la notificació d'actualització als personalitzats.
 const PROMPT_DEFAULTS_VERSION = 3;
 
+// ── ORDRE PER DEFECTE DELS PLUGINS A LA TOOLBAR ─────────────────────────────
+// Font de veritat única per a l'ordre dels botons quan l'usuari encara no n'ha
+// desat cap de personalitzat. Tant la sidebar (ui.js) com la pàgina d'opcions
+// (settings-order.js) l'apliquen com a fallback. Els ids han de coincidir amb
+// les claus de `extensionIdToButtonId` (ui.js) i els `data-extension-id` (HTML).
+const DEFAULT_EXTENSION_ORDER = ["resum", "selectpdf", "simple", "deepdive", "science", "conceptmap", "obsidian", "markdown", "bionic"];
+
 // ── DEFAULTS DE LECTURA BIÒNICA ─────────────────────────────────────────────
 // Font de veritat única per als valors per defecte del mode bionic. Tots els
 // consumidors (options, summary.js, sidebar.js, history.js) han de referenciar

@@ -83,16 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Configuration Initialization & Migration ---
 
-    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
+    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "enableSimple", "enablePdf", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
 
     ext.storage.sync
       .get(CONFIG_KEYS)
       .then(config => {
           globalConfigCache = config;
           applyExtensionVisibility(config);
-          if (config.extensionOrder) {
-              applyExtensionOrder(config.extensionOrder);
-          }
+          applyExtensionOrder(config.extensionOrder || DEFAULT_EXTENSION_ORDER);
           resetUI(false, config);
       })
       .catch(e => console.error("Error loading initial visibility config:", e));

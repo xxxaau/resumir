@@ -28,7 +28,7 @@ function applyExtensionOrder(order) {
     const currentOrderStr = JSON.stringify(order);
     
     if (currentOrderStr === oldDefault1 || currentOrderStr === oldDefault2 || currentOrderStr === oldDefault3) {
-        order = ["resum", "science", "deepdive", "bionic", "obsidian", "markdown"];
+        order = [...DEFAULT_EXTENSION_ORDER];
         ext.storage.sync.set({ extensionOrder: order });
     }
 
