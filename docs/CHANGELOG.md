@@ -7,6 +7,12 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+*(buit)*
+
+---
+
+## [2.4.1] - 2026-06-10
+
 ### Canviat
 - **CI/Node:** `node-version` 20 → 22 als workflows (Node 20 és EOL),
   `softprops/action-gh-release` v2 → v3 (node24-native) i eliminada l'env var
