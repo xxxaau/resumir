@@ -1,3 +1,40 @@
+# Canvis — Sessió 2026-06-10 (plugins: Explica-ho fàcil + PDF ordenable)
+
+> Nou plugin de llenguatge planer, conversió del PDF en plugin ordenable, ordre
+> per defecte centralitzat, i correcció del bug de visibilitat del botó.
+
+## 1. Nou plugin "Explica-ho fàcil" (`simple`)
+- Reescriu el contingut en llenguatge senzill per a algú sense coneixements previs.
+- Botó bombeta ambre (`#explainSimpleBtn`, `#f59e0b`), tipus `simple` (💡) a l'historial.
+- Render Markdown normal (com Resum), flag `isSimple` a `startSummary`/`doSummary`.
+- Prompt editable + banner d'actualització + reset a Settings (`PROMPT_DEFAULTS_VERSION` 2→3).
+
+## 2. PDF com a plugin ordenable
+- El botó de PDF (id `selectpdf`, etiqueta "PDF") passa a plugin complet: toggle
+  `enablePdf` (core, **actiu per defecte** com `resum`: `!== false`), `extension-item`
+  amb moure amunt/avall, entrada al nav lateral i pestanya informativa (sense prompt).
+
+## 3. Ordre per defecte centralitzat — `DEFAULT_EXTENSION_ORDER`
+- Nova font de veritat única a `shared/defaults.js`: resum, selectpdf, simple,
+  deepdive, science, conceptmap, obsidian, markdown, bionic.
+- S'aplica com a fallback (`applyExtensionOrder(order || DEFAULT_EXTENSION_ORDER)`)
+  a la sidebar i a opcions → ja no depèn de l'ordre fràgil del DOM HTML.
+
+## 4. Bug: el botó "simple" no sortia a la sidebar (però sí a Settings)
+
+### Causa arrel
+`enableSimple` faltava a `CONFIG_KEYS` de `sidebar/sidebar.js` (la llista de claus
+que la sidebar llegeix de `storage.sync`). `config.enableSimple` era `undefined` →
+`applyExtensionVisibility` amagava el botó. Settings usa `ALL_CONFIG_KEYS` (una llista
+diferent i completa), per això allà sí apareixia.
+
+### Lliçó
+- **Símptoma → diagnòstic:** "surt a Settings però no a la sidebar" = clau que falta a
+  `CONFIG_KEYS`. Hi ha múltiples llistes de claus de config i totes han de contenir la
+  nova `enable<Plugin>`. Documentat ara a `docs/CREAR-PLUGIN.md` (pas 4 + Trampes).
+
+---
+
 # Canvis — Sessió 2026-06-09 (pre-producció)
 
 > Auditoria profunda pre-producció + millora del visor de PDF + redisseny del mapa conceptual a l'estil NotebookLM.

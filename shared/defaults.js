@@ -32,6 +32,11 @@ const DEFAULT_BIONIC = {
 };
 
 // ── GUIA: COM AFEGIR UN NOU PLUGIN AMB PROMPT ──────────────────────────────
+// Aquesta guia cobreix la part del PROMPT. El cablejat del BOTÓ, la VISIBILITAT
+// i l'ORDRE (clau enable<Plugin>, CONFIG_KEYS, DEFAULT_EXTENSION_ORDER...) està
+// documentat a docs/CREAR-PLUGIN.md. ⚠️ No oblidis afegir enable<Plugin> a
+// CONFIG_KEYS de sidebar.js o el botó no sortirà a la sidebar (bug del 2026-06-10).
+//
 // Quan modificuis un DEFAULT_*_PROMPT existent, incrementa PROMPT_DEFAULTS_VERSION
 // perquè la migració es torni a executar. Quan afegeixis un plugin NOU:
 //

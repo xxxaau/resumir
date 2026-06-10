@@ -7,7 +7,33 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
-*(buit)*
+### Afegit
+- **Nou plugin "Explica-ho fàcil":** reescriu el contingut en llenguatge senzill i
+  planer, assumint que l'usuari no té coneixements previs del tema. Botó bombeta
+  (ambre) a la toolbar, tipus de contingut `simple` (💡) a l'historial, prompt
+  editable amb banner d'actualització i reset a Settings. (minor)
+- **Lectura de PDF com a plugin ordenable:** el botó de PDF local passa a ser un
+  plugin complet (id `selectpdf`, etiqueta "PDF"): toggle `enablePdf` (actiu per
+  defecte), entrada a la llista de Plugins amb moure amunt/avall, nav lateral i
+  pestanya informativa. Ara es pot activar/desactivar i reordenar. (minor)
+
+### Canviat
+- **Ordre per defecte dels plugins** centralitzat a `DEFAULT_EXTENSION_ORDER`
+  (`shared/defaults.js`): resum, PDF, Explica-ho fàcil, aprofundiment, validació
+  científica, mapa conceptual, Obsidian, Markdown, lectura biònica. S'aplica com a
+  fallback quan no hi ha ordre desat (substitueix la dependència de l'ordre del
+  DOM). Els usuaris amb ordre personalitzat el conserven. (minor)
+
+### Corregit
+- **El botó "Explica-ho fàcil" no apareixia a la sidebar:** la clau `enableSimple`
+  faltava a `CONFIG_KEYS` de `sidebar.js`, així que `config.enableSimple` era
+  `undefined` i s'amagava el botó (a Settings sí sortia, perquè usa una llista de
+  claus diferent). Afegida `enableSimple` (i `enablePdf`) a `CONFIG_KEYS`.
+  Documentat com a trampa a `docs/CREAR-PLUGIN.md`. (patch)
+- **"Bombolla" a les icones dels botons del mapa conceptual:** el selector
+  descendent `.markmap-container svg` pintava fons/vora als SVG de les icones dels
+  botons de control (visible amb temes no blancs com solarized). Escopat amb `> svg`
+  + resets a la còpia del fullscreen. (patch)
 
 ---
 

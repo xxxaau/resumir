@@ -17,14 +17,41 @@ Cada plugin consta de:
 
 ## Checklist ràpid
 
-1. Afegir botó a `sidebar/sidebar.html`
+> ⚠️ **El pas que sempre s'oblida (pas 4).** La clau `enable<Plugin>` s'ha de
+> registrar a **TOTES** les llistes que llegeixen config de `storage.sync`, no
+> només a `applyExtensionVisibility`. Si falta a `CONFIG_KEYS` de `sidebar.js`,
+> el botó **no apareix a la sidebar** encara que sí surti a Settings. Vegeu el
+> pas 4 i la secció "Trampes conegudes".
+
+**Sidebar (toolbar + comportament):**
+1. Afegir botó a `sidebar/sidebar.html` (+ `<script>` si té fitxer JS propi)
 2. Registrar ID a `sidebar/ui.js` → `extensionIdToButtonId`
-3. Afegir visibilitat a `applyExtensionVisibility()`
-4. Afegir a l'array `extensionOrder` per defecte
-5. Crear fitxer JS dedicat + `<script>` tag
+3. Afegir visibilitat a `applyExtensionVisibility()` (`sidebar/ui.js`)
+4. **Registrar la clau `enable<Plugin>` a TOTES les llistes de config** (vegeu sota)
+5. Afegir l'ID a `DEFAULT_EXTENSION_ORDER` (`shared/defaults.js`) a la posició desitjada
 6. Afegir event listener a `sidebar/sidebar.js`
-7. Afegir toggle a `options/settings.html`
-8. Afegir claus a `options/settings-options.js`
+
+**Opcions (toggle + ordre + persistència):**
+7. Afegir l'`extension-item` (toggle + moure amunt/avall) a `options/settings.html`
+8. Afegir l'entrada a l'array `extensions` de `options/settings-sidebar.js` (nav lateral)
+9. Registrar `enable<Plugin>` a `ALL_CONFIG_KEYS` i `extensionToggles` (`options/settings.js`)
+10. Save/restore de la clau a `options/settings-options.js`
+
+**Si té prompt configurable** (com simple/science/deepdive): seguir també la
+guia de 9 passos de prompts a `shared/defaults.js` (constant `DEFAULT_*_PROMPT`,
+versió, migració, banner, pestanya de config, reset).
+
+### Pas 4 en detall — les llistes de claus de config
+
+Quan afegeixes `enable<Plugin>`, ha d'aparèixer a **totes** aquestes (si no, el
+comportament divergeix entre sidebar i settings):
+
+| Fitxer | Llista | Si falta… |
+|---|---|---|
+| `sidebar/sidebar.js` | `CONFIG_KEYS` | **el botó no surt a la sidebar** (símptoma del bug "simple") |
+| `sidebar/ui.js` | el `storage.sync.get([...])` inline del fallback dins `resetUI` | el botó no surt en el camí de refresc sense config |
+| `options/settings.js` | `ALL_CONFIG_KEYS` | el toggle no carrega bé a Settings |
+| `options/settings.js` | `extensionToggles` | el canvi del toggle no refresca la sidebar en viu |
 
 ## Pas a pas detallat
 
@@ -60,12 +87,14 @@ Afegir l'entrada al mapa `extensionIdToButtonId` (`sidebar/ui.js:78`):
 ```javascript
 const extensionIdToButtonId = {
     "resum": "summarizeBtn",
+    "selectpdf": "selectPdfBtn",
     "obsidian": "obsidianBtn",
     "markdown": "copyBtn",
     "deepdive": "deepDiveBtn",
     "bionic": "bionicBtn",
     "science": "scienceBtn",
     "conceptmap": "conceptMapBtn",
+    "simple": "explainSimpleBtn",
     "elmeuplugin": "elMeuPluginBtn",  // ← afegir aquí
 };
 ```
@@ -86,15 +115,25 @@ if (elMeuPluginBtnEl) {
 
 **Patró:** `config.enable<NomPlugin>` → `display: "flex"` o `"none"`.
 
-### 4. Ordre per defecte
+### 4. Claus de config (vegeu el checklist) + 5. Ordre per defecte
 
-Afegir l'ID d'extensió a l'array `extensionOrder` per defecte. Buscar on es defineix
-l'ordre inicial (normalment a `options/settings-order.js` o `shared/defaults.js`)
-i afegir `"elmeuplugin"` a la posició desitjada:
+**5. Ordre per defecte.** Hi ha **una sola font de veritat**: la constant
+`DEFAULT_EXTENSION_ORDER` a `shared/defaults.js`. Afegeix l'ID d'extensió a la
+posició desitjada:
 
 ```javascript
-["resum", "science", "deepdive", "conceptmap", "bionic", "obsidian", "markdown", "elmeuplugin"]
+const DEFAULT_EXTENSION_ORDER = ["resum", "selectpdf", "simple", "deepdive", "science", "conceptmap", "obsidian", "markdown", "bionic"];
 ```
+
+Aquesta constant s'aplica com a fallback quan l'usuari no té cap ordre desat,
+tant a la sidebar (`sidebar/ui.js` i `sidebar/sidebar.js` criden
+`applyExtensionOrder(config.extensionOrder || DEFAULT_EXTENSION_ORDER)`) com a la
+pàgina d'opcions (`options/settings-options.js` → `restoreOptions`). No cal
+reordenar blocs HTML: `applyExtensionOrder` reordena el DOM segons aquest array.
+
+> Els usuaris que ja tenen un `extensionOrder` desat **conserven el seu ordre**;
+> els plugins nous que no hi siguin s'afegeixen al final. Per veure el nou ordre
+> per defecte, cal restablir l'ordre (moure qualsevol plugin) o esborrar la clau.
 
 ### 5. Fitxer JS dedicat
 
@@ -210,7 +249,11 @@ enableElMeuPlugin: document.querySelector("#enableElMeuPlugin").checked,
 document.querySelector("#enableElMeuPlugin").checked = data.enableElMeuPlugin === true;
 ```
 
-**Nota:** Per defecte, els plugins nous estan **desactivats** (`=== true` en lloc de `!== false`).
+**Nota — estat per defecte:**
+- Plugins **opcionals** → desactivats per defecte: `data.enableX === true` (cal opt-in).
+- Plugins **core** (resum, PDF) → actius per defecte: `data.enableX !== false` i el
+  `<input>` HTML porta l'atribut `checked`. La visibilitat a `applyExtensionVisibility`
+  ha d'usar la mateixa lògica (`config.enableX !== false`).
 
 Si el plugin té un prompt personalitzat, afegir també:
 
@@ -309,18 +352,42 @@ Les icones compartides entre múltiples components van a **`shared/icons.js`** (
 - Executar `npm test` -- tots 207+ tests han de passar
 - Afegir tests propis a `tests/` si el plugin té lògica parsejable
 
+## Trampes conegudes (casos reals)
+
+### El botó surt a Settings però NO a la sidebar
+
+**Causa:** la clau `enable<Plugin>` no és a `CONFIG_KEYS` de `sidebar/sidebar.js`.
+La sidebar llegeix la config amb aquesta llista; si la clau hi falta,
+`config.enable<Plugin>` és `undefined` i `applyExtensionVisibility` amaga el botó.
+Settings usa una llista diferent (`ALL_CONFIG_KEYS`), per això allà sí surt.
+
+**Fix:** afegir la clau a `CONFIG_KEYS` (i a totes les llistes del pas 4).
+Va passar amb el plugin "Explica-ho fàcil" (2026-06-10). Vegeu `docs/LEARNINGS.md`.
+
+### Una regla CSS de SVG pinta "bombolla" a les icones dels botons
+
+Un selector descendent sobre `svg` dins d'un contenidor amb botons (p.ex.
+`.markmap-container svg { background: ... }`) també atrapa els SVG de les icones
+dels botons de control. Escopa sempre el llenç amb el combinador de fill (`> svg`).
+Va passar amb els controls del mapa conceptual. Validar amb **tots els temes**
+(light/dark/solarized): un fons espuri pot ser invisible en un tema i evident en
+un altre. Vegeu `docs/LEARNINGS.md`.
+
 ## Fitxers de referència
 
 | Fitxer | Rol |
 |---|---|
 | `sidebar/sidebar.html` | Botons toolbar + scripts |
-| `sidebar/ui.js` | Mapa IDs, visibilitat, ordre |
-| `sidebar/sidebar.js` | Event listeners, `doSummary` |
+| `sidebar/ui.js` | Mapa IDs, visibilitat, aplicació de l'ordre |
+| `sidebar/sidebar.js` | Event listeners, `doSummary`, **`CONFIG_KEYS`** |
 | `sidebar/conceptmap.js` | Exemple complet de plugin |
-| `sidebar/sidebar.css` | Estils compartits |
+| `sidebar/sidebar.css` | Estils compartits + color de cada botó |
 | `sidebar/content.js` | `executeScriptSafe()` |
-| `options/settings.html` | Toggles i configuració |
+| `shared/defaults.js` | **`DEFAULT_EXTENSION_ORDER`**, prompts per defecte, guia de prompts |
+| `options/settings.html` | `extension-item` (toggle) + pestanyes de config |
+| `options/settings.js` | `ALL_CONFIG_KEYS`, `extensionToggles`, binds |
 | `options/settings-options.js` | Save/load/reset settings |
+| `options/settings-sidebar.js` | Array `extensions` del nav lateral + `checkboxId` |
 | `options/settings-order.js` | Drag & drop ordre |
 | `manifest.json` | Permisos, `web_accessible_resources` |
-| `eslint.config.mjs` | Globals per funcions exposades |
+| `eslint.config.mjs` | Globals per funcions/constants exposades |
