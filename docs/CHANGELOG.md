@@ -7,7 +7,29 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
-*(buit)*
+### Canviat
+- **CI/Node:** `node-version` 20 → 22 als workflows (Node 20 és EOL),
+  `softprops/action-gh-release` v2 → v3 (node24-native) i eliminada l'env var
+  pont `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`; `engines.node` >=18 → >=20.
+- **Migració de prompts versionada per-prompt** (`PROMPT_VERSIONS`): evita banners
+  falsos de "nova versió del prompt" quan només canvia un prompt. Lògica extreta a
+  una funció pura testejada (`computePromptMigration`, 8 casos nous).
+- **Llengua:** verbs dels botons unificats a **infinitiu** (guia de Comunicació
+  Clara de Gencat) i castellanismes corregits ("Desar" per "Guardar", "memòria cau"
+  per "caché", "claudàtors" per "corxers", "ressaltarà", "a la barra lateral").
+
+### Accessibilitat
+- **Mapa conceptual operable amb teclat**: toggles amb `tabindex`/`role=button`/
+  `aria-label` i Enter/Espai; vista a pantalla completa com a diàleg modal real
+  (`role=dialog`, focus al botó de tancar, focus trap i restauració del focus).
+- **Contrast** del tema solarized a WCAG AA (text i text secundari).
+- `aria-pressed` als botons commutables (biònic, desplega/plega tot), `aria-current`
+  al nav de configuració, i historial operable amb teclat.
+
+### Seguretat
+- **Mapa a pantalla completa**: es demana confirmació abans d'injectar l'overlay si
+  la pestanya activa no coincideix amb l'origen del mapa (evita filtrar el contingut
+  a una pàgina diferent).
 
 ---
 

@@ -49,14 +49,21 @@ fitxer exposa una util a `window`, els consumidors la criden via `window.X`.
 
 ## Diferit conscientment (backlog per a properes versions)
 
-- Navegació per teclat dins del mapa conceptual (toggles SVG sense tabindex) i focus
-  trap del fullscreen (`role="dialog"`, focus al tancar).
-- Paleta solarized una mica per sota d'AA (text 4,45:1; muted 3,2:1).
-- Passada lingüística completa (imperatiu vs infinitiu, "guardar→desar", "caché→cau").
-- pdf.js 3.11→4.x (CVE-2024-4367, doblement mitigat avui: `isEvalSupported:false` + CSP).
-- Versionat per-prompt de les migracions (evita banners falsos quan només canvia un prompt).
-- Check d'URL (`tabs[0].url === currentMetadata.url`) abans d'injectar l'overlay al MAIN world.
-- Historial navegable amb teclat; `aria-pressed` als toggles; `alert()` → errorDiv.
+**Fet a la sessió 2026-06-10 (post-v2.4.0)** — vegeu CHANGELOG [Sense publicar]:
+- ~~Navegació per teclat al mapa + focus trap del fullscreen~~ ✓
+- ~~Paleta solarized a AA~~ ✓
+- ~~Passada lingüística (infinitiu + castellanismes)~~ ✓ (convenció: **infinitiu**, guia Gencat)
+- ~~Versionat per-prompt de les migracions~~ ✓ (`PROMPT_VERSIONS` + funció pura testejada)
+- ~~Check d'URL abans d'injectar l'overlay al MAIN world~~ ✓
+- ~~Historial navegable amb teclat; `aria-pressed`; `alert()`→errorDiv~~ ✓
+- ~~Node 20 deprecat als workflows~~ ✓ (node 22 + action-gh-release v3)
+
+**Pendent:**
+- **pdf.js 3.11→4.x** (CVE-2024-4367, doblement mitigat avui: `isEvalSupported:false` + CSP).
+  Reservat per a una sessió dedicada: és un canvi de binaris vendoritzats amb canvis
+  d'API i cal verificar visor + extracció al navegador real.
+- Petits residus d'accessibilitat fora del backlog original: `#cache-badge` operable amb
+  teclat, `alert()` d'Obsidian (sidebar.js) → errorDiv, tractament "vós" als errors.
 
 ---
 
