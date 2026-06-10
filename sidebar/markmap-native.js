@@ -426,23 +426,72 @@
             viewport.setAttribute("transform", `translate(${x}, ${y}) scale(${k})`);
         }
 
-        function fit() {
-            if (!state.bounds) return;
+        // ─── Transicions suaus del viewport (tween via rAF) ──────────────────
+        // El transform és un ATRIBUT SVG, que les CSS transitions no animen de
+        // forma fiable; per això animem amb requestAnimationFrame. El pan i el
+        // zoom amb roda es mantenen instantanis (cancel·len qualsevol tween).
+        let animFrame = null;
+        function cancelAnim() {
+            if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        }
+        function setTransform(t) {
+            state.transform.x = t.x; state.transform.y = t.y; state.transform.k = t.k;
+            applyTransform();
+        }
+        function animateTransform(target, duration) {
+            cancelAnim();
+            const dur = duration == null ? 350 : duration;
+            const s = { x: state.transform.x, y: state.transform.y, k: state.transform.k };
+            const dx = target.x - s.x, dy = target.y - s.y, dk = target.k - s.k;
+            if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(dk) < 0.002) {
+                setTransform(target);
+                return;
+            }
+            const t0 = performance.now();
+            const ease = (t) => 1 - Math.pow(1 - t, 3);  // easeOutCubic
+            function stepFrame(now) {
+                const t = Math.min(1, (now - t0) / dur);
+                const e = ease(t);
+                state.transform.x = s.x + dx * e;
+                state.transform.y = s.y + dy * e;
+                state.transform.k = s.k + dk * e;
+                applyTransform();
+                animFrame = t < 1 ? requestAnimationFrame(stepFrame) : null;
+            }
+            animFrame = requestAnimationFrame(stepFrame);
+        }
+
+        // Calcula el transform que enquadra el mapa (amb un multiplicador d'escala
+        // opcional per a l'efecte d'entrada). Retorna null si encara no hi ha bounds.
+        function computeFitTarget(scaleMul) {
+            if (!state.bounds) return null;
             const svgRect = svgElement.getBoundingClientRect();
             const sw = svgRect.width || 800;
             const sh = svgRect.height || 600;
             const bw = state.bounds.width;
             const bh = state.bounds.height;
-            if (bw <= 0 || bh <= 0) return;
+            if (bw <= 0 || bh <= 0) return null;
             const margin = 40;
-            const k = Math.min((sw - margin * 2) / bw, (sh - margin * 2) / bh, 2);
-            state.transform.k = k;
-            // Center bounds in viewport
+            const k = Math.min((sw - margin * 2) / bw, (sh - margin * 2) / bh, 2) * (scaleMul || 1);
             const cx = (state.bounds.minX + state.bounds.maxX) / 2;
             const cy = (state.bounds.minY + state.bounds.maxY) / 2;
-            state.transform.x = sw / 2 - cx * k;
-            state.transform.y = sh / 2 - cy * k;
-            applyTransform();
+            return { k, x: sw / 2 - cx * k, y: sh / 2 - cy * k };
+        }
+
+        function fit(animate) {
+            const target = computeFitTarget(1);
+            if (!target) return;
+            if (animate === false) setTransform(target);
+            else animateTransform(target);
+        }
+
+        // Entrada suau: comença lleugerament allunyat i centrat, i s'assenta.
+        function introFit() {
+            const start = computeFitTarget(0.9);
+            const target = computeFitTarget(1);
+            if (!target) return;
+            if (start) setTransform(start);
+            animateTransform(target, 480);
         }
 
         function rescale(factor) {
@@ -452,10 +501,11 @@
             // Zoom centered on viewport center
             const newK = Math.max(0.1, Math.min(10, state.transform.k * factor));
             const ratio = newK / state.transform.k;
-            state.transform.x = cx - (cx - state.transform.x) * ratio;
-            state.transform.y = cy - (cy - state.transform.y) * ratio;
-            state.transform.k = newK;
-            applyTransform();
+            animateTransform({
+                x: cx - (cx - state.transform.x) * ratio,
+                y: cy - (cy - state.transform.y) * ratio,
+                k: newK,
+            }, 220);
         }
 
         function setFoldAll(fold) {
@@ -484,6 +534,7 @@
         svgElement.addEventListener("mousedown", (e) => {
             // Don't start pan on toggle clicks
             if (e.target.tagName === "circle") return;
+            cancelAnim();  // el pan és instantani: atura qualsevol tween en curs
             isPanning = true;
             didPan = false;
             panStart.x = e.clientX;
@@ -510,6 +561,7 @@
 
         svgElement.addEventListener("wheel", (e) => {
             e.preventDefault();
+            cancelAnim();  // zoom amb roda instantani: atura qualsevol tween
             const rect = svgElement.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
@@ -524,8 +576,8 @@
 
         // Initial render
         render();
-        // Fit after DOM has dimensions
-        requestAnimationFrame(() => fit());
+        // Fit after DOM has dimensions — amb entrada suau (zoom-in centrat).
+        requestAnimationFrame(() => introFit());
 
         return {
             fit,
@@ -593,8 +645,11 @@
         return new Promise((resolve, reject) => {
             try {
                 const svgString = serializeToSVG(svgElement, opts);
-                const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-                const url = URL.createObjectURL(svgBlob);
+                // data: URL en lloc de blob: — la CSP de la pàgina d'extensió
+                // (img-src 'self' data:) bloqueja blob:, i això feia fallar
+                // l'export a la sidebar (a pantalla completa funcionava perquè
+                // corre al context de la pàgina amfitriona). data: és permès.
+                const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString);
 
                 // Parse out width/height from svg string
                 const wMatch = svgString.match(/width="([\d.]+)"/);

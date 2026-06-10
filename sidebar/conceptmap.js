@@ -552,10 +552,10 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         // ─── DOM scaffolding ───────────────────────────────────────────────
         const overlay = document.createElement('div');
         overlay.id = 'markmap-fullscreen-overlay';
-        overlay.style.cssText = 'all:initial;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:rgba(0,0,0,0.55)!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;font-family:system-ui,-apple-system,sans-serif!important;animation:mm-fs-backdrop-in 0.18s ease-out!important';
+        overlay.style.cssText = 'all:initial;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:rgba(0,0,0,0.55)!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;font-family:system-ui,-apple-system,sans-serif!important;animation:mm-fs-backdrop-in 0.25s ease-out!important';
 
         const modal = document.createElement('div');
-        modal.style.cssText = 'width:95vw!important;height:95vh!important;background:#ffffff!important;border-radius:12px!important;box-shadow:0 20px 60px rgba(0,0,0,0.35)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;animation:mm-fs-modal-in 0.22s cubic-bezier(0.2,0,0,1)!important';
+        modal.style.cssText = 'width:95vw!important;height:95vh!important;background:#ffffff!important;border-radius:12px!important;box-shadow:0 20px 60px rgba(0,0,0,0.35)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;animation:mm-fs-modal-in 0.32s cubic-bezier(0.2,0,0,1)!important';
 
         const header = document.createElement('div');
         header.style.cssText = 'display:flex!important;justify-content:space-between!important;align-items:center!important;padding:0.6em 1em!important;border-bottom:1px solid #e0e0e0!important;background:#f9f9fb!important;flex-shrink:0!important';
@@ -576,7 +576,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             .markmap-fs-close:hover{background:#f1f3f4!important;color:#d32f2f!important}
             .markmap-fs-close svg{width:22px!important;height:22px!important}
             @keyframes mm-fs-backdrop-in{from{opacity:0}to{opacity:1}}
-            @keyframes mm-fs-modal-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+            @keyframes mm-fs-modal-in{from{opacity:0;transform:scale(0.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
         `;
         overlay.appendChild(btnStyle);
 
@@ -800,22 +800,65 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             applyTransform();
         }
 
-        function fit() {
-            if (!state.bounds) return;
+        // ─── Transicions suaus del viewport (tween via rAF) ──────────────────
+        // (Duplicat de sidebar/markmap-native.js — vegeu l'avís de dalt.) El
+        // transform és un atribut SVG, que les CSS transitions no animen fiablement.
+        let animFrame = null;
+        function cancelAnim() {
+            if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        }
+        function setTransform(t) {
+            state.transform.x = t.x; state.transform.y = t.y; state.transform.k = t.k;
+            applyTransform();
+        }
+        function animateTransform(target, duration) {
+            cancelAnim();
+            const dur = duration == null ? 350 : duration;
+            const s = { x: state.transform.x, y: state.transform.y, k: state.transform.k };
+            const dx = target.x - s.x, dy = target.y - s.y, dk = target.k - s.k;
+            if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(dk) < 0.002) {
+                setTransform(target);
+                return;
+            }
+            const t0 = performance.now();
+            const ease = (t) => 1 - Math.pow(1 - t, 3);
+            function stepFrame(now) {
+                const t = Math.min(1, (now - t0) / dur);
+                const e = ease(t);
+                state.transform.x = s.x + dx * e;
+                state.transform.y = s.y + dy * e;
+                state.transform.k = s.k + dk * e;
+                applyTransform();
+                animFrame = t < 1 ? requestAnimationFrame(stepFrame) : null;
+            }
+            animFrame = requestAnimationFrame(stepFrame);
+        }
+        function computeFitTarget(scaleMul) {
+            if (!state.bounds) return null;
             const rect = svg.getBoundingClientRect();
             const sw = rect.width || 1200;
             const sh = rect.height || 800;
             const bw = state.bounds.width;
             const bh = state.bounds.height;
-            if (bw <= 0 || bh <= 0) return;
+            if (bw <= 0 || bh <= 0) return null;
             const margin = 40;
-            const k = Math.min((sw - margin * 2) / bw, (sh - margin * 2) / bh, 2);
-            state.transform.k = k;
+            const k = Math.min((sw - margin * 2) / bw, (sh - margin * 2) / bh, 2) * (scaleMul || 1);
             const cx = (state.bounds.minX + state.bounds.maxX) / 2;
             const cy = (state.bounds.minY + state.bounds.maxY) / 2;
-            state.transform.x = sw / 2 - cx * k;
-            state.transform.y = sh / 2 - cy * k;
-            applyTransform();
+            return { k, x: sw / 2 - cx * k, y: sh / 2 - cy * k };
+        }
+        function fit(animate) {
+            const target = computeFitTarget(1);
+            if (!target) return;
+            if (animate === false) setTransform(target);
+            else animateTransform(target);
+        }
+        function introFit() {
+            const start = computeFitTarget(0.9);
+            const target = computeFitTarget(1);
+            if (!target) return;
+            if (start) setTransform(start);
+            animateTransform(target, 480);
         }
         function rescale(factor) {
             const rect = svg.getBoundingClientRect();
@@ -823,10 +866,11 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             const cy = rect.height / 2;
             const newK = Math.max(0.1, Math.min(10, state.transform.k * factor));
             const ratio = newK / state.transform.k;
-            state.transform.x = cx - (cx - state.transform.x) * ratio;
-            state.transform.y = cy - (cy - state.transform.y) * ratio;
-            state.transform.k = newK;
-            applyTransform();
+            animateTransform({
+                x: cx - (cx - state.transform.x) * ratio,
+                y: cy - (cy - state.transform.y) * ratio,
+                k: newK,
+            }, 220);
         }
         function setFoldAll(fold) {
             (function walk(n) {
@@ -844,6 +888,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         const pan = { x: 0, y: 0, tx: 0, ty: 0 };
         svg.addEventListener('mousedown', (e) => {
             if (e.target.tagName === 'circle') return;
+            cancelAnim();  // el pan és instantani: atura qualsevol tween en curs
             isPanning = true;
             didPan = false;
             pan.x = e.clientX; pan.y = e.clientY;
@@ -865,6 +910,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
 
         svg.addEventListener('wheel', (e) => {
             e.preventDefault();
+            cancelAnim();  // zoom amb roda instantani: atura qualsevol tween
             const rect = svg.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
@@ -934,8 +980,9 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                 clone.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${w} ${h}`);
                 clone.setAttribute('xmlns', SVG_NS);
                 const xml = new XMLSerializer().serializeToString(clone);
-                const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
+                // data: URL en lloc de blob: per coherència amb la sidebar i per
+                // resistir CSP estrictes (img-src sense blob:) de la pàgina amfitriona.
+                const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
@@ -981,8 +1028,9 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         window.addEventListener('pagehide', close, { once: true });
 
         // ─── Initial render + fit ──────────────────────────────────────────
+        // Entrada suau (zoom-in centrat) que acompanya l'animació del modal.
         render();
-        requestAnimationFrame(() => requestAnimationFrame(fit));
+        requestAnimationFrame(() => requestAnimationFrame(introFit));
 
         return 'ok';
     } catch (err) {
