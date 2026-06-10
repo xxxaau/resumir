@@ -570,7 +570,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         btnStyle.textContent = `
             .markmap-fs-btn{width:40px!important;height:40px!important;min-width:40px!important;padding:8px!important;border:1px solid #dadce0!important;border-radius:50%!important;background:#ffffff!important;color:#5f6368!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
             .markmap-fs-btn:hover{background:#f1f3f4!important;color:#100f0f!important}
-            .markmap-fs-btn svg{width:20px!important;height:20px!important;stroke:currentColor!important}
+            .markmap-fs-btn svg{width:20px!important;height:20px!important;stroke:currentColor!important;background:transparent!important;border:none!important;border-radius:0!important}
             .markmap-fs-controls{position:absolute!important;right:16px!important;bottom:16px!important;display:flex!important;flex-direction:column!important;gap:8px!important;z-index:5!important}
             .markmap-fs-close{border:none!important;background:transparent!important;box-shadow:none!important;width:32px!important;height:32px!important;min-width:32px!important;color:#5f6368!important}
             .markmap-fs-close:hover{background:#f1f3f4!important;color:#d32f2f!important}

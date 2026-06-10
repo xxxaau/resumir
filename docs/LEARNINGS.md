@@ -36,9 +36,33 @@
 - **Prompt**: desenvolupa fins a **4 nivells** (`PROMPT_DEFAULTS_VERSION` → 2).
 
 ## ⚠️ Pendents per a la propera sessió
-- **"Bombolla" dels botons de la sidebar**: es va treure el `box-shadow` però cal confirmar al navegador real (amb l'extensió carregada, no harness) que ja no apareix; si persisteix, inspeccionar amb Playwright sobre l'extensió real.
+- ~~**"Bombolla" dels botons de la sidebar**~~ **RESOLT (2026-06-10)**: vegeu la secció següent.
 - Validació visual general del mapa i del visor a **Chrome i Firefox**.
 - Release (prod/tag/push) el tanca en Sergi.
+
+---
+
+# Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
+
+## Problema
+
+Els botons de control del mapa conceptual mostraven un requadre arrodonit de color de fons **dins** del botó, al voltant de la icona (la "bombolla"). Diversos intents previs (aplanar el botó, treure el `box-shadow`) no la van eliminar perquè apuntaven al **botó**, no a la icona.
+
+## Causa arrel
+
+El selector descendent `.markmap-container svg` (pensat per al llenç del mapa) també atrapava els **SVG de les icones** dels botons de control, i els aplicava `background: var(--bg-color)`, `border: 1px solid var(--border-color)` i `border-radius: 8px`. El mateix passava amb `.markmap-container svg line` (`stroke-opacity: 0.6`), que esblanqueïa les icones +/−/descarregar.
+
+**Per què va costar dies de detectar:** amb el tema clar, `--bg-color` (#f9f9fb) sobre el botó blanc és pràcticament invisible — semblava arreglat. Amb el tema **solarized** de l'usuari, `--bg-color` és beix (#f2f0e5) i la bombolla es veia clarament.
+
+## Fix
+
+- `sidebar.css`: escopar amb combinador de fill (`.markmap-container > svg`, també les regles de `line`/`.markmap-node`/`.markmap-toggle`) perquè només afectin el llenç del mapa.
+- `conceptmap.js` (fullscreen overlay, còpia duplicada): afegit `background:transparent!important;border:none!important;border-radius:0!important` a `.markmap-fs-btn svg` com a defensa contra regles `svg { ... }` de la pàgina amfitriona.
+
+## Lliçons
+
+- **Un selector descendent sobre `svg` dins d'un contenidor amb botons és una trampa:** les icones també són SVG. Escopar sempre el llenç amb `>`.
+- **Validar visualment amb TOTS els temes** (light/dark/solarized/soft-gray): un bug de fons pot ser invisible amb un tema i evident amb un altre. Reproduir amb el tema de l'usuari abans de donar res per arreglat.
 
 ---
 

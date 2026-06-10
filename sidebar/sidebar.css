@@ -857,7 +857,10 @@ body {
   position: relative;
 }
 
-.markmap-container svg {
+/* Només el llenç del mapa (fill directe): un selector descendent (".markmap-container svg")
+   també atraparia els SVG de les icones dels botons de control i els pintaria
+   fons/vora ("bombolla", visible sobretot amb temes no blancs com solarized). */
+.markmap-container > svg {
   display: block;
   width: 100%;
   height: clamp(300px, 60vh, 600px);
@@ -867,20 +870,20 @@ body {
 }
 
 /* Markmap link/edge styling (applies to both sidebar and fullpage overlay) */
-.markmap-container svg line,
-.markmap-fullpage-content svg line {
+.markmap-container > svg line,
+.markmap-fullpage-content > svg line {
   stroke-width: 2px !important;
   stroke-opacity: 0.6 !important;
 }
 
-.markmap-container svg .markmap-node,
-.markmap-fullpage-content svg .markmap-node {
+.markmap-container > svg .markmap-node,
+.markmap-fullpage-content > svg .markmap-node {
   cursor: default;
   transition: all 0.2s ease;
 }
 
-.markmap-container svg .markmap-toggle,
-.markmap-fullpage-content svg .markmap-toggle {
+.markmap-container > svg .markmap-toggle,
+.markmap-fullpage-content > svg .markmap-toggle {
   cursor: pointer;
 }
 
