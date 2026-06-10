@@ -58,12 +58,18 @@ fitxer exposa una util a `window`, els consumidors la criden via `window.X`.
 - ~~Historial navegable amb teclat; `aria-pressed`; `alert()`→errorDiv~~ ✓
 - ~~Node 20 deprecat als workflows~~ ✓ (node 22 + action-gh-release v3)
 
+**Residus menors — fets 2026-06-10:**
+- ~~`#cache-badge` operable amb teclat~~ ✓ (icones de tipus amb role/tabindex/Enter).
+- ~~Feedback d'Obsidian no enganyós~~ ✓ (el ✓ només si la pestanya s'obre bé; abans
+  es mostrava sempre, fins i tot amb error). El `confirm` "Obsidian no configurat" és
+  codi mort (`vault` sempre té default "Obsidian") — es deixa com a deute conegut.
+- Tractament "vós" als errors: **DESCARTAT a consciència** — l'extensió és personal i
+  informal; es manté "tu" (la guia Gencat avala "tu" en contextos informals).
+
 **Pendent:**
 - **pdf.js 3.11→4.x** (CVE-2024-4367, doblement mitigat avui: `isEvalSupported:false` + CSP).
   Reservat per a una sessió dedicada: és un canvi de binaris vendoritzats amb canvis
   d'API i cal verificar visor + extracció al navegador real.
-- Petits residus d'accessibilitat fora del backlog original: `#cache-badge` operable amb
-  teclat, `alert()` d'Obsidian (sidebar.js) → errorDiv, tractament "vós" als errors.
 
 ---
 
