@@ -280,15 +280,16 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const tab = await ext.tabs.create({ url: uri, active: false });
                 setTimeout(() => ext.tabs.remove(tab.id).catch(() => {}), 5000);
+                // Feedback d'èxit (✓) NOMÉS si la pestanya s'ha obert bé. Abans es
+                // mostrava sempre, també quan el protocol fallava (✓ enganyós).
+                const originalChild = obsidianBtn.firstElementChild.cloneNode(true);
+                obsidianBtn.replaceChildren(getIcon(CHECK_ICON_STR));
+                setTimeout(() => obsidianBtn.replaceChildren(originalChild), 1500);
             } catch (err) {
                 console.error("Obsidian protocol failed:", err);
                 errorDiv.textContent = "Error obrint Obsidian: " + err.message;
                 errorDiv.classList.remove("hidden");
             }
-            
-            const originalChild = obsidianBtn.firstElementChild.cloneNode(true);
-            obsidianBtn.replaceChildren(getIcon(CHECK_ICON_STR));
-            setTimeout(() => obsidianBtn.replaceChildren(originalChild), 1500);
 
         } catch (e) {
             console.error("Error Obsidian:", e);
@@ -454,6 +455,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         icon.textContent = ct.icon;
                         icon.title = ct.label;
                         icon.dataset.type = ct.id;
+                        // Operable amb teclat: el clic el gestiona el handler delegat
+                        // del badge, així que Enter/Espai només ha de re-disparar el clic.
+                        icon.setAttribute("role", "button");
+                        icon.setAttribute("tabindex", "0");
+                        icon.setAttribute("aria-label", ct.label + " (memòria cau)");
+                        icon.addEventListener("keydown", (e) => {
+                            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                                e.preventDefault();
+                                icon.click();
+                            }
+                        });
                         badge.appendChild(icon);
                     }
                 }
