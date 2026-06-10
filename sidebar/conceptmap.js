@@ -203,7 +203,7 @@ function expandAll(container) {
 // sobreescriu window.buildConceptMapFilename i es crida a si mateixa
 // (recursió infinita en mode dev amb scripts separats).
 
-function renderMarkmapInteractive(text, pageTitle = "") {
+function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
     const fragment = document.createDocumentFragment();
 
     if (!text || typeof text !== "string") {
@@ -312,7 +312,7 @@ function renderMarkmapInteractive(text, pageTitle = "") {
                 }
             });
             fullPageBtn.addEventListener("click", () => {
-                openFullPageView(text, pageTitle);
+                openFullPageView(text, pageTitle, originUrl);
             });
         } catch (error) {
             console.error("Map rendering error:", error);
@@ -355,7 +355,7 @@ function isInjectableUrl(url) {
  * @param {string} text - Original markdown text
  * @param {string} pageTitle - Page title (used for the PNG filename)
  */
-async function openFullPageView(text, pageTitle = "") {
+async function openFullPageView(text, pageTitle = "", originUrl = "") {
     try {
         const tabs = await ext.tabs.query({ active: true, currentWindow: true });
         if (!tabs.length) { alert('No hi ha cap pestanya activa.'); return; }
@@ -365,6 +365,19 @@ async function openFullPageView(text, pageTitle = "") {
         if (!isInjectableUrl(tabUrl)) {
             alert(`Aquesta pàgina és interna del navegador i no admet overlays d'extensions (${tabUrl}).\n\nCanvia a una pestanya web normal (http/https) i torna-ho a provar.`);
             return;
+        }
+
+        // L'overlay s'injecta a la pestanya ACTIVA, que pot no ser la d'origen
+        // del mapa (l'usuari ha pogut canviar de pestanya). Com que el contingut
+        // del mapa s'insereix al DOM de la pàgina activa i aquesta el pot llegir,
+        // demanem confirmació si l'origen i la pestanya activa no coincideixen.
+        if (originUrl && tabUrl && originUrl !== tabUrl) {
+            const ok = confirm(
+                "Aquest mapa prové de:\n" + originUrl +
+                "\n\nperò la pestanya activa és:\n" + tabUrl +
+                "\n\nObrir-lo a pantalla completa inserirà el contingut del mapa en aquesta pestanya. Vols continuar?"
+            );
+            if (!ok) return;
         }
 
         const result = await executeScriptSafe({

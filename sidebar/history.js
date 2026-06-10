@@ -74,7 +74,7 @@ async function loadHistoryEntry(entry) {
     if (isConceptMap) {
         const mapText = entry.summary.substring(CONCEPT_MAP_MARKER.length);
         if (typeof renderMarkmapInteractive === "function" && typeof window.markmapNative !== "undefined") {
-            contentDiv.replaceChildren(renderMarkmapInteractive(mapText));
+            contentDiv.replaceChildren(renderMarkmapInteractive(mapText, entry.title, entry.url));
         } else if (typeof parseConceptTree === "function") {
             contentDiv.replaceChildren(parseConceptTree(mapText, {}));
         } else {

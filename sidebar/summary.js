@@ -176,7 +176,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 const displayText = isCachedConceptMap ? cachedSummary.substring("<!--conceptmap-->\n".length) : cachedSummary;
                 
                 if (isCachedConceptMap) {
-                    contentDiv.replaceChildren(renderMarkmapInteractive(displayText));
+                    contentDiv.replaceChildren(renderMarkmapInteractive(displayText, currentMetadata.title, currentMetadata.url));
                 } else {
                     contentDiv.replaceChildren(formatTextToFragment(displayText));
                 }
@@ -363,7 +363,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
         
         if (isConceptMap) {
-            contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title));
+            contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title, currentMetadata.url));
         } else {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled, bionicFixation));
         }
