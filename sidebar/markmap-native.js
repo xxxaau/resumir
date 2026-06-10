@@ -365,6 +365,11 @@
                     const tg = document.createElementNS(SVG_NS, "g");
                     tg.setAttribute("class", "markmap-toggle");
                     tg.style.cursor = "pointer";
+                    // Operable amb teclat: focusable + role + label segons l'estat.
+                    tg.setAttribute("tabindex", "0");
+                    tg.setAttribute("role", "button");
+                    const lbl = (node.label || node.text || "").slice(0, 60);
+                    tg.setAttribute("aria-label", (node.fold ? "Desplega" : "Plega") + (lbl ? ": " + lbl : ""));
 
                     const cx = node._width + 10;
                     const cy = node._height / 2;
@@ -393,11 +398,18 @@
                     glyph.setAttribute("stroke-linejoin", "round");
                     tg.appendChild(glyph);
 
-                    tg.addEventListener("click", (e) => {
-                        e.stopPropagation();
+                    const toggleNode = (e) => {
+                        if (e) e.stopPropagation();
                         node.fold = !node.fold;
                         render();
                         if (!node.fold) requestAnimationFrame(() => fit());  // autofit en desplegar
+                    };
+                    tg.addEventListener("click", toggleNode);
+                    tg.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                            e.preventDefault();
+                            toggleNode(e);
+                        }
                     });
                     g.appendChild(tg);
 

@@ -291,8 +291,10 @@ function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
 
             zoomInBtn.addEventListener("click", () => mm.rescale(1.25));
             zoomOutBtn.addEventListener("click", () => mm.rescale(0.8));
+            toggleAllBtn.setAttribute("aria-pressed", "false");
             toggleAllBtn.addEventListener("click", () => {
                 allExpanded = !allExpanded;
+                toggleAllBtn.setAttribute("aria-pressed", String(allExpanded));
                 mm.setFoldAll(!allExpanded);  // expandit → fold=false a tots
                 mm.rerender();
                 requestAnimationFrame(() => mm.fit());
@@ -355,15 +357,26 @@ function isInjectableUrl(url) {
  * @param {string} text - Original markdown text
  * @param {string} pageTitle - Page title (used for the PNG filename)
  */
+// Mostra un error de la sidebar a l'#error div (no bloquejant), en lloc d'alert().
+function _showMapError(msg) {
+    const errorDiv = document.getElementById("error");
+    if (errorDiv) {
+        errorDiv.textContent = msg;
+        errorDiv.classList.remove("hidden");
+    } else {
+        console.error(msg);
+    }
+}
+
 async function openFullPageView(text, pageTitle = "", originUrl = "") {
     try {
         const tabs = await ext.tabs.query({ active: true, currentWindow: true });
-        if (!tabs.length) { alert('No hi ha cap pestanya activa.'); return; }
+        if (!tabs.length) { _showMapError("No hi ha cap pestanya activa."); return; }
         const tabId = tabs[0].id;
         const tabUrl = tabs[0].url;
 
         if (!isInjectableUrl(tabUrl)) {
-            alert(`Aquesta pàgina és interna del navegador i no admet overlays d'extensions (${tabUrl}).\n\nCanvia a una pestanya web normal (http/https) i torna-ho a provar.`);
+            _showMapError(`Aquesta pàgina és interna del navegador i no admet la vista a pantalla completa (${tabUrl}). Canvia a una pestanya web (http/https) i torna-ho a provar.`);
             return;
         }
 
@@ -388,16 +401,16 @@ async function openFullPageView(text, pageTitle = "", originUrl = "") {
         });
 
         if (!result || !result.length) {
-            alert("No s'ha pogut crear l'overlay a la pàgina.");
+            _showMapError("No s'ha pogut obrir la vista a pantalla completa en aquesta pàgina.");
             return;
         }
         const overlayRes = result[0]?.result;
         if (typeof overlayRes === 'string' && overlayRes.startsWith('error')) {
-            alert('Error al mapa: ' + overlayRes);
+            _showMapError('Error al mapa: ' + overlayRes);
         }
     } catch (error) {
         console.error('Error opening fullscreen view:', error);
-        alert('Error obrint vista completa: ' + error.message);
+        _showMapError('Error obrint la vista completa: ' + error.message);
     }
 }
 
@@ -652,6 +665,24 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
 
+        // ─── Accessibilitat: diàleg modal amb gestió de focus ───────────────
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Mapa conceptual a pantalla completa');
+        const prevFocus = document.activeElement;  // per restaurar-lo en tancar
+        requestAnimationFrame(() => { try { btnClose.focus(); } catch (e) { /* noop */ } });
+        // Focus trap: manté el tabulador dins de l'overlay mentre està obert.
+        function trapTab(e) {
+            if (e.key !== 'Tab') return;
+            const f = overlay.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+            if (!f.length) return;
+            const first = f[0];
+            const last = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+        overlay.addEventListener('keydown', trapTab);
+
         // ─── Render ────────────────────────────────────────────────────────
         const root = parseMarkdownTree(text);
         // Títol = text del primer node jeràrquic (arrel del mapa), com NotebookLM.
@@ -763,6 +794,10 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                     const tg = document.createElementNS(SVG_NS, 'g');
                     tg.setAttribute('class', 'markmap-toggle');
                     tg.style.cursor = 'pointer';
+                    tg.setAttribute('tabindex', '0');
+                    tg.setAttribute('role', 'button');
+                    const tgLbl = (node.label || node.text || '').slice(0, 60);
+                    tg.setAttribute('aria-label', (node.fold ? 'Desplega' : 'Plega') + (tgLbl ? ': ' + tgLbl : ''));
                     const cx = node._width + 10;
                     const cy = node._height / 2;
 
@@ -788,11 +823,18 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                     glyph.setAttribute('stroke-linejoin', 'round');
                     tg.appendChild(glyph);
 
-                    tg.addEventListener('click', (e) => {
-                        e.stopPropagation();
+                    const toggleNode = (e) => {
+                        if (e) e.stopPropagation();
                         node.fold = !node.fold;
                         render();
                         if (!node.fold) requestAnimationFrame(fit);  // autofit en desplegar
+                    };
+                    tg.addEventListener('click', toggleNode);
+                    tg.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                            e.preventDefault();
+                            toggleNode(e);
+                        }
                     });
                     g.appendChild(tg);
 
@@ -943,8 +985,10 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
 
         btnZoomIn.addEventListener('click', () => rescale(1.25));
         btnZoomOut.addEventListener('click', () => rescale(0.8));
+        btnToggleAll.setAttribute('aria-pressed', 'false');
         btnToggleAll.addEventListener('click', () => {
             allExpanded = !allExpanded;
+            btnToggleAll.setAttribute('aria-pressed', String(allExpanded));
             setFoldAll(!allExpanded);  // expandit → fold=false a tots
             render();
             requestAnimationFrame(fit);
@@ -1038,7 +1082,10 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             window.removeEventListener('mouseup', upHandler);
             document.removeEventListener('keydown', escHandler);
             window.removeEventListener('pagehide', close);
+            overlay.removeEventListener('keydown', trapTab);
             overlay.remove();
+            // Restaura el focus a l'element que el tenia abans d'obrir l'overlay.
+            try { if (prevFocus && typeof prevFocus.focus === 'function') prevFocus.focus(); } catch (e) { /* noop */ }
         }
         overlay.__mmClose = close;  // perquè una re-obertura pugui netejar aquesta instància
         function escHandler(e) { if (e.key === 'Escape') close(); }

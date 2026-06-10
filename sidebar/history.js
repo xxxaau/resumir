@@ -146,6 +146,9 @@ function _renderHistoryPanel(panel, entries) {
     for (const group of groups) {
         const li = document.createElement("li");
         li.className = "history-item";
+        // Operable amb teclat: és un element clicable, no un botó natiu.
+        li.setAttribute("role", "button");
+        li.setAttribute("tabindex", "0");
 
         const topRow = document.createElement("div");
         topRow.className = "history-item-top";
@@ -166,11 +169,21 @@ function _renderHistoryPanel(panel, entries) {
                 typeIcon.className = "type-icon";
                 typeIcon.textContent = ct.icon;
                 typeIcon.title = ct.label;
+                typeIcon.setAttribute("role", "button");
+                typeIcon.setAttribute("tabindex", "0");
+                typeIcon.setAttribute("aria-label", ct.label);
                 typeIcon.dataset.type = ct.id;
                 typeIcon.dataset.url = group.url;
-                typeIcon.addEventListener("click", (e) => {
-                    e.stopPropagation();
+                const openType = (e) => {
+                    if (e) e.stopPropagation();
                     _loadTypeFromCache(group.url, ct.id);
+                };
+                typeIcon.addEventListener("click", openType);
+                typeIcon.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                        e.preventDefault();
+                        openType(e);
+                    }
                 });
                 typesRow.appendChild(typeIcon);
             }
@@ -184,9 +197,16 @@ function _renderHistoryPanel(panel, entries) {
         metaEl.textContent = _relativeTime(group.latestTimestamp);
         li.appendChild(metaEl);
 
-        li.addEventListener("click", () => {
+        const openEntry = () => {
             const preferredType = group.types.includes("summary") ? "summary" : group.types[0];
             _loadTypeFromCache(group.url, preferredType);
+        };
+        li.addEventListener("click", openEntry);
+        li.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+                e.preventDefault();
+                openEntry();
+            }
         });
 
         list.appendChild(li);

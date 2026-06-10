@@ -42,10 +42,11 @@
 }
 
 [data-actual-theme="solarized"] {
-  /* Solarized/Sepia adapted with Flexoki Warmth */
+  /* Solarized/Sepia adapted with Flexoki Warmth.
+     text/muted enfosquits per complir WCAG AA (abans 4,45:1 i 3,2:1 sobre #f2f0e5). */
   --bg-color: #f2f0e5;
-  --text-color: #6f6e69;
-  --text-muted: #878580;
+  --text-color: #403e3c; /* Flexoki warm ~9:1 sobre el fons */
+  --text-muted: #6f6e69; /* ~4,6:1 — AA per a text secundari */
   --border-color: #e6e4d9;
   --toolbar-bg: #f2f0e5;
   --button-hover: #e6e4d9;
@@ -59,7 +60,7 @@
   --error-text: #af3029;
   --footer-bg: #f2f0e5;
   --footer-border: #e6e4d9;
-  --footer-text: #878580;
+  --footer-text: #6f6e69;
 }
 
 [data-actual-theme="soft-gray"] {
@@ -910,6 +911,12 @@ body {
 .markmap-container > svg .markmap-toggle,
 .markmap-fullpage-content > svg .markmap-toggle {
   cursor: pointer;
+}
+
+/* Focus visible per als toggles operables amb teclat (tabindex + role=button). */
+.markmap-container > svg .markmap-toggle:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
 }
 
 /* Pill background for NotebookLM-style nodes */

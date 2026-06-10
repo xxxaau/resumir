@@ -131,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             isBionicEnabled = true;
                             if (bionicBtn) {
                                 bionicBtn.classList.add("active");
+                                bionicBtn.setAttribute("aria-pressed", "true");
                             }
                         }
                         applyBionicToContent(config);
@@ -313,9 +314,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ext.storage.local.set({ isBionicActive: isBionicEnabled });
         if (isBionicEnabled) {
             bionicBtn.classList.add("active");
+            bionicBtn.setAttribute("aria-pressed", "true");
             applyBionicToContent();
         } else {
             bionicBtn.classList.remove("active");
+            bionicBtn.setAttribute("aria-pressed", "false");
             contentDiv.style.fontFamily = "";
             contentDiv.style.fontSize = "";
             contentDiv.style.lineHeight = "";
@@ -648,6 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 isBionicEnabled = true;
                 if (bionicBtn) {
                     bionicBtn.classList.add("active");
+                    bionicBtn.setAttribute("aria-pressed", "true");
                 }
             }
             

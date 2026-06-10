@@ -31,11 +31,12 @@ function initializeSidebarNavigation() {
         if (!target || !target.classList.contains('nav-item')) return;
 
         // Remove active class from all
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
         document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
 
         // Add to current
         target.classList.add('active');
+        target.setAttribute('aria-current', 'page');
         const tabId = target.getAttribute('data-tab');
         const tab = document.getElementById(`tab-${tabId}`);
         if (tab) {
@@ -53,7 +54,10 @@ function navigateToTab(tabId) {
     if (navItem) {
         navItem.click();
     } else {
-        // Fallback for sub-tabs not in sidebar (shouldn't happen with new design, but safety)
+        // Fallback per a sub-pestanyes sense nav-item (p.ex. plugin desactivat):
+        // mostra la pestanya i NETEJA el highlight de la barra lateral perquè no
+        // quedi un nav-item ressaltat que ja no correspon.
+        document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
         document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
         const tab = document.getElementById(`tab-${tabId}`);
         if (tab) tab.classList.add('active');
