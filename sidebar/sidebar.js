@@ -598,63 +598,28 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn("API key migration failed:", e);
         }
 
-        // 2. Migració de prompts: detectar prompts personalitzats vs per defecte
+        // 2. Migració de prompts (versionat PER-PROMPT). La lògica és una funció
+        //    pura a shared/defaults.js (computePromptMigration), testejada a
+        //    tests/prompt-migration.test.mjs: només avisa els prompts que han
+        //    canviat de versió I que l'usuari ha personalitzat.
         try {
+            const promptDefs = [
+                { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized", updateKey: "sciencePromptUpdateAvailable" },
+                { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized", updateKey: "deepDivePromptUpdateAvailable" },
+                { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized", updateKey: "conceptMapPromptUpdateAvailable" },
+                { key: "simplePrompt", defaultVal: DEFAULT_SIMPLE_PROMPT, customizedKey: "simplePromptCustomized", updateKey: "simplePromptUpdateAvailable" },
+            ];
             const promptKeys = [
-                "sciencePrompt", "deepDivePrompt", "conceptMapPrompt", "simplePrompt",
-                "sciencePromptCustomized", "deepDivePromptCustomized", "conceptMapPromptCustomized", "simplePromptCustomized",
-                "sciencePromptUpdateAvailable", "deepDivePromptUpdateAvailable", "conceptMapPromptUpdateAvailable", "simplePromptUpdateAvailable",
-                "promptDefaultsVersion"
+                ...promptDefs.map(d => d.key),
+                ...promptDefs.map(d => d.customizedKey),
+                ...promptDefs.map(d => d.updateKey),
+                "promptVersions", "promptDefaultsVersion",
             ];
             const promptConfig = await ext.storage.sync.get(promptKeys);
+            const { toSet, toRemove } = computePromptMigration(promptConfig, promptDefs, PROMPT_VERSIONS);
 
-            // Si la versió coincideix, la migració ja s'ha executat per aquests defaults
-            if (promptConfig.promptDefaultsVersion === PROMPT_DEFAULTS_VERSION) {
-                // Netejar flags d'actualització òrfans si el prompt desat ja no és personalitzat
-                const cleanupNeeded = [];
-                const promptDefs = [
-                    { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized" },
-                    { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized" },
-                    { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized" },
-                    { key: "simplePrompt", defaultVal: DEFAULT_SIMPLE_PROMPT, customizedKey: "simplePromptCustomized" },
-                ];
-                for (const { key, defaultVal, customizedKey } of promptDefs) {
-                    const saved = promptConfig[key];
-                    const flag = promptConfig[customizedKey];
-                    if (flag && saved !== undefined && saved === defaultVal) {
-                        cleanupNeeded.push(customizedKey);
-                    }
-                }
-                if (cleanupNeeded.length) {
-                    await ext.storage.sync.remove(cleanupNeeded);
-                }
-            } else {
-                const toRemove = [];
-                const toSet = { promptDefaultsVersion: PROMPT_DEFAULTS_VERSION };
-
-                const promptDefs = [
-                    { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized", updateKey: "sciencePromptUpdateAvailable" },
-                    { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized", updateKey: "deepDivePromptUpdateAvailable" },
-                    { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized", updateKey: "conceptMapPromptUpdateAvailable" },
-                    { key: "simplePrompt", defaultVal: DEFAULT_SIMPLE_PROMPT, customizedKey: "simplePromptCustomized", updateKey: "simplePromptUpdateAvailable" },
-                ];
-
-                for (const { key, defaultVal, customizedKey, updateKey } of promptDefs) {
-                    const saved = promptConfig[key];
-
-                    if (saved === undefined || saved === defaultVal) {
-                        if (saved === defaultVal) toRemove.push(key);
-                        toSet[customizedKey] = false;
-                        toSet[updateKey] = false;
-                    } else {
-                        toSet[customizedKey] = true;
-                        toSet[updateKey] = true;
-                    }
-                }
-
-                if (toRemove.length) await ext.storage.sync.remove(toRemove);
-                if (Object.keys(toSet).length) await ext.storage.sync.set(toSet);
-            }
+            if (toRemove.length) await ext.storage.sync.remove(toRemove);
+            if (Object.keys(toSet).length) await ext.storage.sync.set(toSet);
         } catch (e) {
             console.warn("Prompt migration failed:", e);
         }

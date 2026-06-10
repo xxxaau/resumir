@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "enableScience", "sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable",
         "enableResum", "enablePdf", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
         "enableSimple", "simplePrompt", "simplePromptCustomized", "simplePromptUpdateAvailable",
-        "extensionOrder", "promptDefaultsVersion"
+        "extensionOrder", "promptVersions"
     ];
     const [localData, syncData] = await Promise.all([
         ext.storage.local.get(["apiKey"]),

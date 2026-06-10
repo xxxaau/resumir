@@ -5,12 +5,75 @@
 // Font de veritat única per als prompts per defecte.
 // Carregat tant per la sidebar com per la pàgina d'opcions.
 //
-// ── VERSIÓ DE PROMPTS ───────────────────────────────────────────────────────
-// Incrementa PROMPT_DEFAULTS_VERSION quan modifiquis qualsevol DEFAULT_*_PROMPT.
-// Això fa que la migració a sidebar.js es torni a executar per als usuaris
-// existents, actualitzant automàticament els no personalitzats i mostrant
-// la notificació d'actualització als personalitzats.
-const PROMPT_DEFAULTS_VERSION = 4;
+// ── VERSIONS DELS PROMPTS (per-prompt) ──────────────────────────────────────
+// Versió independent de cada prompt per defecte. Quan en modifiquis UN, incrementa
+// NOMÉS la seva entrada: així només aquell prompt re-avalua la migració i només els
+// usuaris que l'hagin personalitzat veuen el banner d'actualització (abans, un sol
+// PROMPT_DEFAULTS_VERSION global feia aparèixer banners falsos a tots els prompts
+// personalitzats encara que no haguessin canviat).
+const PROMPT_VERSIONS = {
+    sciencePrompt: 2,       // v2.4.0: bloc SEGURETAT afegit
+    deepDivePrompt: 2,      // v2.4.0: bloc SEGURETAT afegit
+    conceptMapPrompt: 2,    // v2.3.x: 4 nivells de profunditat
+    simplePrompt: 1,        // v2.4.0: nou
+};
+
+/**
+ * Decideix les operacions d'storage de la migració de prompts, per-prompt.
+ * Funció PURA i SEGURA: mai esborra un prompt personalitzat — només treu claus que
+ * igualen el default (per caure al default) i commuta flags booleans. Retorna
+ * { toSet, toRemove } per aplicar a storage.sync. Testejada a tests/prompt-migration.test.mjs.
+ *
+ * @param {object} stored - valors actuals de sync (prompts, *Customized, *UpdateAvailable, promptVersions, i la clau heretada promptDefaultsVersion)
+ * @param {Array<{key,defaultVal,customizedKey,updateKey}>} defs
+ * @param {object} versions - mapa key→versió actual (PROMPT_VERSIONS)
+ * @returns {{toSet: object, toRemove: string[]}}
+ */
+function computePromptMigration(stored, defs, versions) {
+    const s = stored || {};
+    const toSet = {};
+    const toRemove = [];
+    const savedVersions = s.promptVersions || {};
+    const newVersions = Object.assign({}, savedVersions);
+
+    for (const { key, defaultVal, customizedKey, updateKey } of defs) {
+        const cur = versions[key];
+        const saved = s[key];
+        const isDefault = (saved === undefined || saved === defaultVal);
+
+        if (savedVersions[key] === cur) {
+            // Aquest prompt ja és al dia: només neteja flags obsolets si ja no és personalitzat.
+            if (s[customizedKey] && isDefault) {
+                toSet[customizedKey] = false;
+                toSet[updateKey] = false;
+            }
+            continue;
+        }
+
+        // La versió d'aquest prompt ha canviat (o encara no existeix per a l'usuari).
+        newVersions[key] = cur;
+        if (isDefault) {
+            if (saved === defaultVal) toRemove.push(key);  // cau al default
+            toSet[customizedKey] = false;
+            toSet[updateKey] = false;
+        } else {
+            // Personalitzat i el default ha canviat → avisa NOMÉS aquest prompt.
+            toSet[customizedKey] = true;
+            toSet[updateKey] = true;
+        }
+    }
+
+    let versionsChanged = false;
+    for (const k in newVersions) {
+        if (newVersions[k] !== savedVersions[k]) { versionsChanged = true; break; }
+    }
+    if (versionsChanged) toSet.promptVersions = newVersions;
+
+    // Neteja única de la clau global heretada (esquema antic).
+    if (s.promptDefaultsVersion !== undefined) toRemove.push("promptDefaultsVersion");
+
+    return { toSet, toRemove };
+}
 
 // ── ORDRE PER DEFECTE DELS PLUGINS A LA TOOLBAR ─────────────────────────────
 // Font de veritat única per a l'ordre dels botons quan l'usuari encara no n'ha
@@ -37,8 +100,11 @@ const DEFAULT_BIONIC = {
 // documentat a docs/CREAR-PLUGIN.md. ⚠️ No oblidis afegir enable<Plugin> a
 // CONFIG_KEYS de sidebar.js o el botó no sortirà a la sidebar (bug del 2026-06-10).
 //
-// Quan modificuis un DEFAULT_*_PROMPT existent, incrementa PROMPT_DEFAULTS_VERSION
-// perquè la migració es torni a executar. Quan afegeixis un plugin NOU:
+// Quan modifiquis un DEFAULT_*_PROMPT existent, incrementa NOMÉS la seva entrada a
+// PROMPT_VERSIONS (no cap versió global). Quan afegeixis un plugin NOU, afegeix-hi
+// també la seva entrada (versió 1). La migració (computePromptMigration) ja s'encarrega
+// d'actualitzar els no personalitzats i avisar només els personalitzats d'aquell prompt.
+// Quan afegeixis un plugin NOU amb prompt:
 //
 //
 // 1. DEFINEIX LA CONSTANT AQUÍ (ex: const DEFAULT_MYPLUGIN_PROMPT = `...`)
@@ -81,11 +147,13 @@ const DEFAULT_BIONIC = {
 //    I a options/settings.js → bannerResets:
 //    myplugin: { reset: resetMyPluginPrompt, saveId: "saveMyPlugin" },
 //
-// 7. REGISTRA LA MIGRACIÓ a sidebar/sidebar.js (bloc On Load Init)
-//    Afegeix l'objecte al array promptDefs:
-//    { key: "myPluginPrompt", defaultVal: DEFAULT_MYPLUGIN_PROMPT,
-//      customizedKey: "myPluginPromptCustomized",
-//      updateKey: "myPluginPromptUpdateAvailable" }
+// 7. REGISTRA LA MIGRACIÓ:
+//    a) Afegeix la versió a PROMPT_VERSIONS (dalt d'aquest fitxer): myPluginPrompt: 1
+//    b) A sidebar/sidebar.js, afegeix l'objecte al array promptDefs:
+//       { key: "myPluginPrompt", defaultVal: DEFAULT_MYPLUGIN_PROMPT,
+//         customizedKey: "myPluginPromptCustomized",
+//         updateKey: "myPluginPromptUpdateAvailable" }
+//       (i afegeix les 3 claus + "myPluginPrompt" a promptKeys del get).
 //
 // 8. REGISTRA EL BOTÓ + NOTIFICACIÓ a sidebar/sidebar.js
 //    Al click handler del botó, usa checkPromptUpdate():
@@ -214,3 +282,9 @@ ESTRUCTURA DE LA RESPOSTA:
 - [2-3 punts sobre per què això és rellevant o útil a la pràctica]
 
 CONTINGUT A EXPLICAR:`;
+
+// Node (tests): exposa la funció pura de migració i el mapa de versions.
+// Al navegador, defaults.js es carrega com a <script> clàssic (globals).
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = { PROMPT_VERSIONS, computePromptMigration };
+}

@@ -37,7 +37,8 @@ const extensionGlobals = {
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
     DEFAULT_SIMPLE_PROMPT: "readonly",
     DEFAULT_EXTENSION_ORDER: "readonly",
-    PROMPT_DEFAULTS_VERSION: "readonly",
+    PROMPT_VERSIONS: "readonly",
+    computePromptMigration: "readonly",
     DEFAULT_BIONIC: "readonly",
     // sidebar/conceptmap.js
     parseConceptTree: "readonly",
