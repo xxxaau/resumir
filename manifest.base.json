@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Resumir (DEV)",
+    "name": "Resumir",
     "short_name": "Resumir",
     "version": "2.4.0",
     "author": "Sergi Xaudiera",
