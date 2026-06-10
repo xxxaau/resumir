@@ -231,6 +231,7 @@
             cleanup();
             window.close();
         }
+        if (!pdfDoc) return;  // PDF encara no carregat (o ha fallat): no hi ha pàgines on navegar
         if (e.key === "ArrowLeft" && pageNum > 1) renderPage(pageNum - 1);
         if (e.key === "ArrowRight" && pageNum < pdfDoc.numPages) renderPage(pageNum + 1);
     });

@@ -25,6 +25,31 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   DOM). Els usuaris amb ordre personalitzat el conserven. (minor)
 
 ### Corregit
+- **Auditoria pre-producció (2026-06-10):**
+  - **Botons dels banners d'actualització de prompts morts per CSP:** els 8 botons
+    usaven `onclick` inline, que la CSP de MV3 (`script-src 'self'`) bloqueja a les
+    pàgines d'extensió. Ara van amb `data-attributes` + binding delegat a
+    `settings.js`. La guia de `shared/defaults.js` (pas 6) actualitzada. (patch)
+  - **Recursió infinita a l'export PNG del mapa (mode dev):** un wrapper top-level
+    `buildConceptMapFilename` a `conceptmap.js` sobreescrivia la util global i es
+    cridava a si mateix amb scripts separats. Eliminat. (patch)
+  - **Prompts d'Aprofundiment i Validació científica sense bloc SEGURETAT:** ara
+    expliquen al model que `<UNTRUSTED_CONTENT>` són dades, no instruccions
+    (`PROMPT_DEFAULTS_VERSION` → 4); regex de neutralització del delimitador més
+    tolerant (espais/guions). (patch)
+  - **Botons nous actius durant la generació:** `conceptMapBtn`, `explainSimpleBtn` i
+    `selectPdfBtn` ara es desactiven mentre es genera (abans, clicar-los aturava la
+    generació en curs). (patch)
+  - **Fuita de listeners en reobrir el mapa a pantalla completa:** la reobertura ara
+    tanca la instància anterior via `close()` (desregistra mousemove/mouseup/keydown/
+    pagehide); `close()` també cancel·la el tween en curs. (patch)
+  - **TypeError al visor PDF:** fletxes de teclat amb el PDF encara no carregat. (patch)
+- **Accessibilitat (auditoria):** `aria-label` als 9 toggles de plugins i focus
+  visible al switch (abans invisibles per a lectors de pantalla i teclat);
+  `prefers-reduced-motion` respectat a la sidebar, al tween del mapa i a l'overlay;
+  contrast de les icones ambre/verd apujat a ≥3:1 en temes clars (WCAG 1.4.11);
+  `role=status/alert` i `aria-label` al visor PDF; missatge PDF-016 coherent amb el
+  tooltip del botó. (patch)
 - **El botó "Explica-ho fàcil" no apareixia a la sidebar:** la clau `enableSimple`
   faltava a `CONFIG_KEYS` de `sidebar.js`, així que `config.enableSimple` era
   `undefined` i s'amagava el botó (a Settings sí sortia, perquè usa una llista de

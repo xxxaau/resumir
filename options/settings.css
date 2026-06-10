@@ -488,8 +488,11 @@ input:checked + .slider {
   background-color: #0060df;
 }
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #0060df;
+/* Focus visible real: l'input és opacity:0, així que el ring va al slider.
+   El box-shadow d'1px anterior era pràcticament invisible. */
+input:focus-visible + .slider {
+  outline: 2px solid #0060df;
+  outline-offset: 2px;
 }
 
 input:checked + .slider:before {
@@ -662,11 +665,11 @@ input:checked + .slider:before {
 
 /* Icon Color Classes */
 .icon-blue { color: #0060df; }
-.icon-green { color: #10b981; }
+.icon-green { color: #047857; } /* fosc per contrast ≥3:1 sobre fons clar */
 .icon-purple { color: #a855f7; }
 .icon-gray { color: #666; }
 .icon-orange { color: #bc5215; }
-.icon-amber { color: #f59e0b; }
+.icon-amber { color: #b45309; } /* fosc per contrast ≥3:1 sobre fons clar */
 
 /* Version History Section */
 .version-entry {

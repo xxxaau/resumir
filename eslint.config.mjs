@@ -136,6 +136,7 @@ const settingsGlobals = {
     resetSciencePrompt: "readonly",
     resetConceptMapPrompt: "readonly",
     resetSimplePrompt: "readonly",
+    dismissPromptUpdate: "readonly",
     resetBionic: "readonly",
     showStatus: "readonly",
     // settings-sidebar.js

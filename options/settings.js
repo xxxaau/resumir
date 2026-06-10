@@ -53,6 +53,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
+    // Banners d'actualització de prompts: els handlers van per data-attributes
+    // perquè la CSP de MV3 (script-src 'self') bloqueja els onclick inline.
+    const bannerResets = {
+        deepdive: { reset: resetDeepDivePrompt, saveId: "saveDeepDive" },
+        science: { reset: resetSciencePrompt, saveId: "saveScience" },
+        conceptmap: { reset: resetConceptMapPrompt, saveId: "saveConceptMap" },
+        simple: { reset: resetSimplePrompt, saveId: "saveSimple" },
+    };
+    document.querySelectorAll('[data-banner-action]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const action = e.currentTarget.getAttribute('data-banner-action');
+            const type = e.currentTarget.getAttribute('data-banner-type');
+            if (action === "reset" && bannerResets[type]) {
+                bannerResets[type].reset();
+                document.getElementById(bannerResets[type].saveId)?.click();
+            } else if (action === "dismiss") {
+                dismissPromptUpdate(type);
+            }
+        });
+    });
+
     // Handle "Live" Toggles in extension list
     const extensionToggles = ["enableResum", "enablePdf", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple"];
     extensionToggles.forEach(id => {

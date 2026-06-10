@@ -185,7 +185,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableResum" checked />
+                <input type="checkbox" id="enableResum" aria-label="Activa el plugin Resum" checked />
                 <span class="slider round"></span>
               </label>
               <span class="sr-only">Resum</span>
@@ -228,7 +228,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enablePdf" checked />
+                <input type="checkbox" id="enablePdf" aria-label="Activa el plugin PDF" checked />
                 <span class="slider round"></span>
               </label>
               <span class="sr-only">PDF</span>
@@ -301,7 +301,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableScience" />
+                <input type="checkbox" id="enableScience" aria-label="Activa el plugin Validació científica" />
                 <span class="slider round"></span>
               </label>
               <span class="sr-only">Validació científica</span>
@@ -385,7 +385,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableDeepdive" />
+                <input type="checkbox" id="enableDeepdive" aria-label="Activa el plugin Aprofundiment" />
                 <span class="slider round"></span>
               </label>
               <span class="sr-only">Deep Dive</span>
@@ -455,7 +455,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableConceptMap" />
+                <input type="checkbox" id="enableConceptMap" aria-label="Activa el plugin Mapa conceptual" />
                 <span class="slider round"></span>
               </label>
               <span class="sr-only">Mapa conceptual</span>
@@ -509,7 +509,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableSimple" />
+                <input type="checkbox" id="enableSimple" aria-label="Activa el plugin Explica-ho fàcil" />
                 <span class="slider round"></span>
               </label>
               <span class="sr-only">Explica-ho fàcil</span>
@@ -579,7 +579,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableObsidian" />
+                <input type="checkbox" id="enableObsidian" aria-label="Activa el plugin Obsidian" />
                 <span class="slider round"></span>
               </label>
               <button
@@ -663,7 +663,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableMarkdown" />
+                <input type="checkbox" id="enableMarkdown" aria-label="Activa el plugin Markdown" />
                 <span class="slider round"></span>
               </label>
               <button
@@ -749,7 +749,7 @@
                 </svg>
               </button>
               <label class="switch">
-                <input type="checkbox" id="enableBionic" />
+                <input type="checkbox" id="enableBionic" aria-label="Activa el plugin Lectura biònica" />
                 <span class="slider round"></span>
               </label>
               <!-- No config for Bionic yet, maybe disable button or remove it -->
@@ -881,8 +881,8 @@
         <div id="deepdiveUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt d'aprofundiment per defecte.</p>
           <div class="update-banner-actions">
-            <button class="btn btn-secondary btn-sm" onclick="resetDeepDivePrompt(); document.querySelector('#saveDeepDive').click()">Restaurar prompt per defecte</button>
-            <button class="btn btn-ghost" onclick="dismissPromptUpdate('deepdive')">Mantenir el meu prompt</button>
+            <button class="btn btn-secondary btn-sm" data-banner-action="reset" data-banner-type="deepdive">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" data-banner-action="dismiss" data-banner-type="deepdive">Mantenir el meu prompt</button>
           </div>
         </div>
         <div class="section">
@@ -912,8 +912,8 @@
         <div id="scienceUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt de validació científica per defecte.</p>
           <div class="update-banner-actions">
-            <button class="btn btn-secondary btn-sm" onclick="resetSciencePrompt(); document.querySelector('#saveScience').click()">Restaurar prompt per defecte</button>
-            <button class="btn btn-ghost" onclick="dismissPromptUpdate('science')">Mantenir el meu prompt</button>
+            <button class="btn btn-secondary btn-sm" data-banner-action="reset" data-banner-type="science">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" data-banner-action="dismiss" data-banner-type="science">Mantenir el meu prompt</button>
           </div>
         </div>
         <div class="section">
@@ -1025,8 +1025,8 @@
         <div id="conceptmapUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt de mapa conceptual per defecte.</p>
           <div class="update-banner-actions">
-            <button class="btn btn-secondary btn-sm" onclick="resetConceptMapPrompt(); document.querySelector('#saveConceptMap').click()">Restaurar prompt per defecte</button>
-            <button class="btn btn-ghost" onclick="dismissPromptUpdate('conceptmap')">Mantenir el meu prompt</button>
+            <button class="btn btn-secondary btn-sm" data-banner-action="reset" data-banner-type="conceptmap">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" data-banner-action="dismiss" data-banner-type="conceptmap">Mantenir el meu prompt</button>
           </div>
         </div>
         <div class="section">
@@ -1056,8 +1056,8 @@
         <div id="simpleUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt d'Explica-ho fàcil per defecte.</p>
           <div class="update-banner-actions">
-            <button class="btn btn-secondary btn-sm" onclick="resetSimplePrompt(); document.querySelector('#saveSimple').click()">Restaurar prompt per defecte</button>
-            <button class="btn btn-ghost" onclick="dismissPromptUpdate('simple')">Mantenir el meu prompt</button>
+            <button class="btn btn-secondary btn-sm" data-banner-action="reset" data-banner-type="simple">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" data-banner-action="dismiss" data-banner-type="simple">Mantenir el meu prompt</button>
           </div>
         </div>
         <div class="section">

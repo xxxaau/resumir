@@ -172,6 +172,18 @@ body {
   display: none !important;
 }
 
+/* Respecta la preferència de moviment reduït (WCAG 2.3.3): atura animacions
+   i transicions decoratives. Els tweens JS del mapa fan el mateix check. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 #loading {
   color: var(--text-muted);
   font-style: italic;
@@ -739,12 +751,20 @@ body {
 
 #scienceBtn {
   display: none;
+  color: #047857; /* verd fosc — contrast ≥3:1 sobre fons clars (WCAG 1.4.11) */
+}
+
+[data-actual-theme="dark"] #scienceBtn {
   color: #10b981;
 }
 
 #explainSimpleBtn {
   display: none;
-  color: #f59e0b; /* ambre — idea/claredat */
+  color: #b45309; /* ambre fosc — contrast ≥3:1 sobre fons clars (WCAG 1.4.11) */
+}
+
+[data-actual-theme="dark"] #explainSimpleBtn {
+  color: #f59e0b; /* ambre viu — sobre fons fosc sí que contrasta */
 }
 
 #conceptMapBtn {

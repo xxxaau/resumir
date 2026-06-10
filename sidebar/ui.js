@@ -161,7 +161,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
             activeBtn.title = "Aturar Generació";
         }
         
-        const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn"];
+        const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn", "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn"];
         for (const btnId of allActionBtns) {
             if (btnId !== currentActiveBtnId) {
                 const btn = document.getElementById(btnId);
@@ -200,7 +200,13 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         if (deepDiveBtn) deepDiveBtn.disabled = false;
         const scienceBtn = document.getElementById("scienceBtn");
         if (scienceBtn) scienceBtn.disabled = false;
-        
+        const conceptMapBtn = document.getElementById("conceptMapBtn");
+        if (conceptMapBtn) conceptMapBtn.disabled = false;
+        const explainSimpleBtn = document.getElementById("explainSimpleBtn");
+        if (explainSimpleBtn) explainSimpleBtn.disabled = false;
+        const selectPdfBtn = document.getElementById("selectPdfBtn");
+        if (selectPdfBtn) selectPdfBtn.disabled = false;
+
         if (summarizeBtn) summarizeBtn.disabled = false;
     }
 }
@@ -227,7 +233,13 @@ function resetUI(hasContent, config = null) {
     if (deepDiveBtn) deepDiveBtn.disabled = false;
     const scienceBtn = document.getElementById("scienceBtn");
     if (scienceBtn) scienceBtn.disabled = false;
-    
+    const conceptMapBtn = document.getElementById("conceptMapBtn");
+    if (conceptMapBtn) conceptMapBtn.disabled = false;
+    const explainSimpleBtn = document.getElementById("explainSimpleBtn");
+    if (explainSimpleBtn) explainSimpleBtn.disabled = false;
+    const selectPdfBtn = document.getElementById("selectPdfBtn");
+    if (selectPdfBtn) selectPdfBtn.disabled = false;
+
     if (config) {
         applyExtensionVisibility(config);
         applyExtensionOrder(config.extensionOrder || DEFAULT_EXTENSION_ORDER);

@@ -440,6 +440,11 @@
         }
         function animateTransform(target, duration) {
             cancelAnim();
+            // Respecta prefers-reduced-motion: salta directament al destí.
+            if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                setTransform(target);
+                return;
+            }
             const dur = duration == null ? 350 : duration;
             const s = { x: state.transform.x, y: state.transform.y, k: state.transform.k };
             const dx = target.x - s.x, dy = target.y - s.y, dk = target.k - s.k;

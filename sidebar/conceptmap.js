@@ -197,17 +197,11 @@ function expandAll(container) {
  * @returns {DocumentFragment}
  */
 
-/**
- * Builds the PNG export filename for a concept map.
- * Format: YYYYMMDD_word1_word2.png from the map's root label.
- * Delega a la util pura compartida (sidebar/conceptmap-filename.js), que es
- * carrega sempre abans que aquest fitxer tant a sidebar.html com al bundle.
- * @param {string} rootLabel
- * @returns {string}
- */
-function buildConceptMapFilename(rootLabel = "") {
-    return window.buildConceptMapFilename(rootLabel);
-}
+// NOTA: el nom de fitxer PNG el construeix window.buildConceptMapFilename
+// (sidebar/conceptmap-filename.js, carregat abans). NO declarar aquí cap
+// wrapper top-level amb el mateix nom: en script clàssic la declaració
+// sobreescriu window.buildConceptMapFilename i es crida a si mateixa
+// (recursió infinita en mode dev amb scripts separats).
 
 function renderMarkmapInteractive(text, pageTitle = "") {
     const fragment = document.createDocumentFragment();
@@ -305,12 +299,11 @@ function renderMarkmapInteractive(text, pageTitle = "") {
             });
             downloadBtn.addEventListener("click", async () => {
                 try {
-                    // Use the shared filename builder seeded with the root label.
-                    // Falls back to the legacy pageTitle-based name if the shared
-                    // util isn't loaded for some reason.
+                    // Shared filename builder (conceptmap-filename.js) seeded
+                    // with the root label; date-only fallback if it's missing.
                     const builder = typeof window.buildConceptMapFilename === "function"
                         ? window.buildConceptMapFilename
-                        : (lbl) => buildConceptMapFilename(lbl || pageTitle);
+                        : () => "mapa-conceptual.png";
                     const filename = builder(root.label || pageTitle);
                     await window.markmapNative.exportToPNG(svg, filename, { backgroundColor: "#ffffff" });
                 } catch (error) {
@@ -415,9 +408,15 @@ async function openFullPageView(text, pageTitle = "") {
 // divergeixin. Vegeu docs/LEARNINGS.md.
 function fullscreenOverlayFunc(text, _pageTitle, icons) {
     try {
-        // Remove existing overlay if any (re-open behaviour)
+        // Remove existing overlay if any (re-open behaviour). Si la instància
+        // anterior va exposar el seu close(), usem-lo: també desregistra els
+        // listeners de window/document (mousemove, mouseup, keydown, pagehide),
+        // que un simple .remove() deixaria penjats per sempre a la pàgina.
         const existing = document.getElementById('markmap-fullscreen-overlay');
-        if (existing) existing.remove();
+        if (existing) {
+            if (typeof existing.__mmClose === 'function') existing.__mmClose();
+            else existing.remove();
+        }
 
         const SVG_NS = 'http://www.w3.org/2000/svg';
         // Paleta NotebookLM per PROFUNDITAT: cada nivell té un color distint.
@@ -577,6 +576,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             .markmap-fs-close svg{width:22px!important;height:22px!important}
             @keyframes mm-fs-backdrop-in{from{opacity:0}to{opacity:1}}
             @keyframes mm-fs-modal-in{from{opacity:0;transform:scale(0.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+            @media (prefers-reduced-motion: reduce){#markmap-fullscreen-overlay,#markmap-fullscreen-overlay *{animation-duration:0.01ms!important}}
         `;
         overlay.appendChild(btnStyle);
 
@@ -813,6 +813,11 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         }
         function animateTransform(target, duration) {
             cancelAnim();
+            // Respecta prefers-reduced-motion: salta directament al destí.
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                setTransform(target);
+                return;
+            }
             const dur = duration == null ? 350 : duration;
             const s = { x: state.transform.x, y: state.transform.y, k: state.transform.k };
             const dx = target.x - s.x, dy = target.y - s.y, dk = target.k - s.k;
@@ -1015,12 +1020,14 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
 
         // ─── Close handlers ────────────────────────────────────────────────
         function close() {
+            cancelAnim();
             window.removeEventListener('mousemove', moveHandler);
             window.removeEventListener('mouseup', upHandler);
             document.removeEventListener('keydown', escHandler);
             window.removeEventListener('pagehide', close);
             overlay.remove();
         }
+        overlay.__mmClose = close;  // perquè una re-obertura pugui netejar aquesta instància
         function escHandler(e) { if (e.key === 'Escape') close(); }
         btnClose.addEventListener('click', close);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });

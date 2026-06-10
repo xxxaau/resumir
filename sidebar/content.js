@@ -156,7 +156,7 @@ async function getPageContent() {
                 TOO_LARGE: "[PDF-013] PDF massa gran. Massa pàgines per processar.",
                 TIMEOUT: "[PDF-014] Timeout extraient el PDF. Prova amb un fitxer més petit.",
                 FETCH_FAILED: "[PDF-015] No s'ha pogut descarregar el PDF.",
-                NON_HTTPS: "[PDF-016] PDFs locals i HTTP no es poden descarregar directament. Usa el bot\u00f3 'Selecciona PDF local' al sidebar.",
+                NON_HTTPS: "[PDF-016] PDFs locals i HTTP no es poden descarregar directament. Usa el bot\u00f3 'Tria un PDF de l'ordinador' de la barra lateral.",
             };
             const friendly = codeMap[e?.code] || `[PDF-019] Error inesperat extraient PDF: ${e?.message || e}`;
             throw new Error(friendly);

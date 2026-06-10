@@ -39,8 +39,8 @@
       <span class="title" id="doc-title">PDF</span>
       <button class="close-btn" id="closeBtn">Tancar</button>
     </div>
-    <div id="loading"><div class="spinner"></div>Carregant PDF...</div>
-    <div id="error"></div>
+    <div id="loading" role="status" aria-live="polite"><div class="spinner"></div>Carregant PDF...</div>
+    <div id="error" role="alert" aria-live="assertive"></div>
     <div id="canvas-container" style="display:none">
       <div id="page-wrapper">
         <canvas id="pdf-canvas"></canvas>
@@ -48,15 +48,15 @@
       </div>
     </div>
     <div id="footer" style="display:none">
-      <button id="prevBtn" title="Pàgina anterior">⏮</button>
-      <input type="number" id="pageInput" class="page-input" min="1" value="1" />
+      <button id="prevBtn" title="Pàgina anterior" aria-label="Pàgina anterior">⏮</button>
+      <input type="number" id="pageInput" class="page-input" min="1" value="1" aria-label="Número de pàgina" />
       <span class="total-pages">/ <span id="totalPages">0</span></span>
-      <button id="nextBtn" title="Pàgina següent">⏭</button>
-      <span style="color:#555;margin:0 8px;">|</span>
+      <button id="nextBtn" title="Pàgina següent" aria-label="Pàgina següent">⏭</button>
+      <span style="color:#555;margin:0 8px;" aria-hidden="true">|</span>
       <div class="zoom-control">
-        <button id="zoomOutBtn" title="Allunyar">−</button>
+        <button id="zoomOutBtn" title="Allunyar" aria-label="Allunyar">−</button>
         <span class="zoom-label" id="zoomLabel">100%</span>
-        <button id="zoomInBtn" title="Apropar">+</button>
+        <button id="zoomInBtn" title="Apropar" aria-label="Apropar">+</button>
       </div>
     </div>
 

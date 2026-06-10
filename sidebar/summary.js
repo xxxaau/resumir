@@ -236,7 +236,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         // Neutralitza qualsevol delimitador fals dins del contingut no fiable
         // perquè no pugui "tancar" el bloc i fer-se passar per instruccions.
-        const safeContent = String(pageData.text || "").replace(/<\/?UNTRUSTED_CONTENT>/gi, "[FILTERED]");
+        // Regex tolerant: també variants amb espais o guions (</ UNTRUSTED-CONTENT >)
+        // que un LLM podria interpretar igualment com a tancament del bloc.
+        const safeContent = String(pageData.text || "").replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
         let pageText = `<UNTRUSTED_CONTENT>\n${safeContent}\n</UNTRUSTED_CONTENT>`;
         ctx.setSourceText(pageData.text);
 
