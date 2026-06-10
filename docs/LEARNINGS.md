@@ -1,3 +1,65 @@
+# Auditoria pre-producció — Sessió 2026-06-10 (v2.4.0)
+
+> Auditoria exhaustiva amb 4 revisors paral·lels (seguretat, codi, accessibilitat/UI,
+> integritat funcional) abans del release. 2 bloquejants trobats i arreglats (87f7bab).
+
+## Bloquejants trobats
+
+### 1. `onclick` inline = botó mort a pàgines d'extensió MV3
+
+Els 8 botons dels banners d'actualització de prompts usaven `onclick="..."`. La CSP
+de MV3 (`script-src 'self'`) **bloqueja tots els handlers inline** a les pàgines
+d'extensió — els botons no feien literalment res. El patró venia de la guia inline
+de `shared/defaults.js`, que el documentava com a exemple (!): un patró trencat
+documentat es replica (el plugin "simple" el va copiar tal qual).
+
+**Lliçó:** a pàgines d'extensió MV3, MAI `onclick`/`onchange` inline; sempre
+`addEventListener` (idealment delegat amb `data-attributes`). Les guies també
+s'auditen: un mal exemple a la documentació és una fàbrica de bugs.
+
+### 2. Wrapper top-level que ombreja una global = recursió infinita (només en dev!)
+
+`conceptmap.js` declarava `function buildConceptMapFilename() { return
+window.buildConceptMapFilename(...) }`. En script clàssic, la declaració top-level
+**sobreescriu** `window.buildConceptMapFilename` (assignada abans per
+`conceptmap-filename.js`) → es crida a si mateixa → stack overflow. El pervers: al
+bundle de producció l'ordre de hoisting feia que **funcionés**; només petava en dev
+amb scripts separats.
+
+**Lliçó:** la classe de bugs "divergeix entre dev (scripts separats) i prod
+(bundle concatenat)" existeix i és traïdora en les DUES direccions. No declarar
+mai funcions top-level amb el mateix nom que una global d'un altre fitxer; si un
+fitxer exposa una util a `window`, els consumidors la criden via `window.X`.
+
+## Altres lliçons de l'auditoria
+
+- **El bloc SEGURETAT d'`<UNTRUSTED_CONTENT>` ha d'anar a TOTS els prompts** que
+  reben contingut de pàgina. Aprofundiment i Científica embolcallaven el contingut
+  amb les etiquetes però el prompt no explicava al model què signifiquen → mitigació
+  inoperant. Checklist de prompt nou: bloc SEGURETAT inclòs sempre.
+- **Cada botó d'acció nou s'ha d'afegir a `allActionBtns`** (`ui.js`,
+  setGeneratingState) i a les reactivacions: si no, queda actiu durant una generació
+  i clicar-lo l'atura (fa de "stop" d'un altre botó).
+- **L'overlay del MAIN world ha d'exposar el seu `close()`** (`__mmClose`) perquè una
+  reobertura pugui desregistrar els listeners de window/document de la instància
+  anterior; un simple `.remove()` els deixa penjats per sempre a la pàgina amfitriona.
+- **Auditar amb subagents paral·lels per dimensió** (seguretat/codi/a11y/funcional)
+  troba coses que una passada única no veu: els 2 bloquejants els van trobar 2
+  revisors diferents amb tècniques diferents (lectura CSP vs test empíric amb Node/vm).
+
+## Diferit conscientment (backlog per a properes versions)
+
+- Navegació per teclat dins del mapa conceptual (toggles SVG sense tabindex) i focus
+  trap del fullscreen (`role="dialog"`, focus al tancar).
+- Paleta solarized una mica per sota d'AA (text 4,45:1; muted 3,2:1).
+- Passada lingüística completa (imperatiu vs infinitiu, "guardar→desar", "caché→cau").
+- pdf.js 3.11→4.x (CVE-2024-4367, doblement mitigat avui: `isEvalSupported:false` + CSP).
+- Versionat per-prompt de les migracions (evita banners falsos quan només canvia un prompt).
+- Check d'URL (`tabs[0].url === currentMetadata.url`) abans d'injectar l'overlay al MAIN world.
+- Historial navegable amb teclat; `aria-pressed` als toggles; `alert()` → errorDiv.
+
+---
+
 # Canvis — Sessió 2026-06-10 (plugins: Explica-ho fàcil + PDF ordenable)
 
 > Nou plugin de llenguatge planer, conversió del PDF en plugin ordenable, ordre

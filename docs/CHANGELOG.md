@@ -7,6 +7,12 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+*(buit)*
+
+---
+
+## [2.4.0] - 2026-06-10
+
 ### Afegit
 - **Nou plugin "Explica-ho fàcil":** reescriu el contingut en llenguatge senzill i
   planer, assumint que l'usuari no té coneixements previs del tema. Botó bombeta

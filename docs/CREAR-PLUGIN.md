@@ -373,6 +373,33 @@ Va passar amb els controls del mapa conceptual. Validar amb **tots els temes**
 (light/dark/solarized): un fons espuri pot ser invisible en un tema i evident en
 un altre. Vegeu `docs/LEARNINGS.md`.
 
+### `onclick` inline a les pàgines d'extensió = botó mort (CSP MV3)
+
+La CSP de MV3 (`script-src 'self'`) bloqueja **tots** els handlers inline
+(`onclick`, `onchange`...) a les pàgines d'extensió, sense error visible (només
+una violació CSP a la consola). Sempre `addEventListener` des d'un fitxer JS;
+per a grups de botons, binding delegat amb `data-attributes` (vegeu
+`bannerResets` a `options/settings.js`). Va passar amb els 8 botons dels banners
+de prompts (auditoria 2026-06-10).
+
+### No declaris funcions top-level amb el nom d'una global d'un altre fitxer
+
+En script clàssic, `function foo() { return window.foo(...) }` top-level
+**sobreescriu** `window.foo` i es crida a si mateixa (recursió infinita). I el
+comportament pot divergir entre dev (scripts separats) i producció (bundle
+concatenat, ordre de hoisting diferent): pot funcionar a prod i petar a dev o a
+l'inrevés. Si un fitxer exposa una util a `window`, crida-la sempre com a
+`window.nomUtil(...)` sense redeclarar-la.
+
+### Checklist extra per a botons d'acció i prompts
+
+- Botó d'acció nou → afegir-lo a `allActionBtns` de `setGeneratingState`
+  (`sidebar/ui.js`) i a les reactivacions (else-branch + `resetUI`); si no, queda
+  actiu durant una generació i clicar-lo l'atura.
+- Prompt nou que rep contingut de pàgina → ha d'incloure SEMPRE el bloc
+  «SEGURETAT: ... <UNTRUSTED_CONTENT> ...» (copia'l de `DEFAULT_SYSTEM_PROMPT`).
+  Les etiquetes sense l'explicació al prompt no protegeixen de res.
+
 ## Fitxers de referència
 
 | Fitxer | Rol |
