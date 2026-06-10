@@ -35,6 +35,7 @@ const extensionGlobals = {
     DEFAULT_DEEP_DIVE_PROMPT: "readonly",
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
+    DEFAULT_SIMPLE_PROMPT: "readonly",
     PROMPT_DEFAULTS_VERSION: "readonly",
     DEFAULT_BIONIC: "readonly",
     // sidebar/conceptmap.js
@@ -110,6 +111,7 @@ const settingsGlobals = {
     DEFAULT_DEEP_DIVE_PROMPT: "readonly",
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
+    DEFAULT_SIMPLE_PROMPT: "readonly",
     // settings-order.js
     getCurrentExtensionOrder: "readonly",
     applyExtensionOrder: "readonly",
@@ -131,6 +133,7 @@ const settingsGlobals = {
     resetDeepDivePrompt: "readonly",
     resetSciencePrompt: "readonly",
     resetConceptMapPrompt: "readonly",
+    resetSimplePrompt: "readonly",
     resetBionic: "readonly",
     showStatus: "readonly",
     // settings-sidebar.js

@@ -44,6 +44,11 @@ function applyExtensionVisibility(config) {
         scienceBtnEl.style.display = config.enableScience ? "flex" : "none";
     }
 
+    const explainSimpleBtnEl = document.getElementById("explainSimpleBtn");
+    if (explainSimpleBtnEl) {
+        explainSimpleBtnEl.style.display = config.enableSimple ? "flex" : "none";
+    }
+
     const summarizeBtnEl = document.getElementById("summarizeBtn");
     if (summarizeBtnEl) {
         summarizeBtnEl.style.display = config.enableResum !== false ? "flex" : "none";
@@ -66,7 +71,7 @@ function applyExtensionOrder(order) {
     // Cobreix tant els ordres antics hardcodejats com qualsevol ordre pre-v2.1.
     // Aquest bloc pot eliminar-se quan tots els usuaris actius hagin actualitzat a v2.2+.
     if (!order.includes("resum")) {
-        order = ["resum", "selectpdf", "science", "deepdive", "conceptmap", "bionic", "obsidian", "markdown"];
+        order = ["resum", "selectpdf", "science", "deepdive", "conceptmap", "simple", "bionic", "obsidian", "markdown"];
         ext.storage.sync.set({ extensionOrder: order });
     } else if (!order.includes("selectpdf")) {
         // Migrate older saved orders to include selectpdf in 2a posicio
@@ -93,6 +98,7 @@ function applyExtensionOrder(order) {
         "bionic": "bionicBtn",
         "science": "scienceBtn",
         "conceptmap": "conceptMapBtn",
+        "simple": "explainSimpleBtn",
     };
     
     const orderedButtons = [];
@@ -223,7 +229,7 @@ function resetUI(hasContent, config = null) {
         }
     } else {
         ext.storage.sync
-            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "extensionOrder"])
+            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableSimple", "extensionOrder"])
             .then(fetchedConfig => {
                 applyExtensionVisibility(fetchedConfig);
                 if (fetchedConfig.extensionOrder) {

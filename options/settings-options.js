@@ -45,6 +45,10 @@ function saveOptions(e) {
     conceptMapPrompt: document.querySelector("#conceptMapPrompt").value,
     conceptMapPromptCustomized: document.querySelector("#conceptMapPrompt").value !== DEFAULT_CONCEPTMAP_PROMPT,
 
+    enableSimple: document.querySelector("#enableSimple").checked,
+    simplePrompt: document.querySelector("#simplePrompt").value,
+    simplePromptCustomized: document.querySelector("#simplePrompt").value !== DEFAULT_SIMPLE_PROMPT,
+
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder(),
 
@@ -55,6 +59,7 @@ function saveOptions(e) {
   settings.deepDivePromptUpdateAvailable = false;
   settings.sciencePromptUpdateAvailable = false;
   settings.conceptMapPromptUpdateAvailable = false;
+  settings.simplePromptUpdateAvailable = false;
 
   Promise.all([
       ext.storage.sync.set(settings),
@@ -105,11 +110,15 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#enableConceptMap").checked = syncData && syncData.enableConceptMap === true;
     document.querySelector("#conceptMapPrompt").value = (syncData && syncData.conceptMapPrompt !== undefined) ? syncData.conceptMapPrompt : DEFAULT_CONCEPTMAP_PROMPT;
 
+    document.querySelector("#enableSimple").checked = syncData && syncData.enableSimple === true;
+    document.querySelector("#simplePrompt").value = (syncData && syncData.simplePrompt !== undefined) ? syncData.simplePrompt : DEFAULT_SIMPLE_PROMPT;
+
     // Mostrar banners d'actualització de prompts si n'hi ha
     if (syncData) {
         showPromptUpdateBanner("deepdive", syncData.deepDivePromptUpdateAvailable);
         showPromptUpdateBanner("science", syncData.sciencePromptUpdateAvailable);
         showPromptUpdateBanner("conceptmap", syncData.conceptMapPromptUpdateAvailable);
+        showPromptUpdateBanner("simple", syncData.simplePromptUpdateAvailable);
     }
 
     if (syncData && syncData.extensionOrder && Array.isArray(syncData.extensionOrder)) {
@@ -159,6 +168,7 @@ function dismissPromptUpdate(type) {
     if (banner) banner.style.display = "none";
     const updateKey = type === "deepdive" ? "deepDivePromptUpdateAvailable"
         : type === "science" ? "sciencePromptUpdateAvailable"
+        : type === "simple" ? "simplePromptUpdateAvailable"
         : "conceptMapPromptUpdateAvailable";
     ext.storage.sync.set({ [updateKey]: false }).catch(() => {});
 }
@@ -166,6 +176,11 @@ function dismissPromptUpdate(type) {
 function resetConceptMapPrompt() {
     document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
     dismissPromptUpdate("conceptmap");
+}
+
+function resetSimplePrompt() {
+    document.querySelector("#simplePrompt").value = DEFAULT_SIMPLE_PROMPT;
+    dismissPromptUpdate("simple");
 }
 
 function resetBionic() {

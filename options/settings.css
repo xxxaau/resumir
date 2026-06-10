@@ -666,6 +666,7 @@ input:checked + .slider:before {
 .icon-purple { color: #a855f7; }
 .icon-gray { color: #666; }
 .icon-orange { color: #bc5215; }
+.icon-amber { color: #f59e0b; }
 
 /* Version History Section */
 .version-entry {

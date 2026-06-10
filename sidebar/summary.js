@@ -56,10 +56,11 @@ function applyBionicStyles(element, isEnabled, config = {}) {
  * @param {boolean} isScience - Whether this is a scientific validation
  * @param {boolean} isUserInitiated - Whether user triggered this action
  * @param {boolean} isConceptMap - Whether this is a concept map generation
+ * @param {boolean} isSimple - Whether this is a plain-language explanation ("Explica-ho fàcil")
  * @returns {AbortController} The abort controller for cancellation
  */
-async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false) {
-    if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isUserInitiated) {
+async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false) {
+    if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isUserInitiated) {
         return null;
     }
 
@@ -74,6 +75,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     if (isDeepDive) activeBtnId = "deepDiveBtn";
     else if (isScience) activeBtnId = "scienceBtn";
     else if (isConceptMap) activeBtnId = "conceptMapBtn";
+    else if (isSimple) activeBtnId = "explainSimpleBtn";
     
     setGeneratingState(true, false, activeBtnId);
     
@@ -89,6 +91,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             ext.storage.sync.get([
                 "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic",
                 "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt",
+                "enableSimple", "simplePrompt",
                 "enableConceptMap", "extensionOrder", "favoriteModels",
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
                 "conceptMapAutoExpand",
@@ -101,9 +104,11 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         
         let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
         if (isDeepDive) {
-            systemPrompt = config.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT; 
+            systemPrompt = config.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT;
         } else if (isScience) {
-            systemPrompt = config.sciencePrompt || DEFAULT_SCIENCE_PROMPT; 
+            systemPrompt = config.sciencePrompt || DEFAULT_SCIENCE_PROMPT;
+        } else if (isSimple) {
+            systemPrompt = config.simplePrompt || DEFAULT_SIMPLE_PROMPT;
         } else if (isConceptMap) {
             // Build dynamic prompt based on config
             const basePrompt = config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT;
@@ -154,7 +159,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache);
         
-        if (!isRefresh && !pageData && !overrideText && !isDeepDive && !isScience && !isConceptMap) {
+        if (!isRefresh && !pageData && !overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple) {
             const cachedEntry = await getSummaryCache(currentUrl);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
@@ -372,7 +377,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
         const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
         
-        const contentType = isConceptMap ? "conceptmap" : isScience ? "science" : isDeepDive ? "deepdive" : "summary";
+        const contentType = isConceptMap ? "conceptmap" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
         const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary : currentMetadata.summary;
         await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens, contentType);
         await saveUsageStats(inputTokens, outputTokens, contentType, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);

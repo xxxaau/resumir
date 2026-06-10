@@ -742,6 +742,11 @@ body {
   color: #10b981;
 }
 
+#explainSimpleBtn {
+  display: none;
+  color: #f59e0b; /* ambre — idea/claredat */
+}
+
 #conceptMapBtn {
   color: #bc5215; /* Flexoki Orange */
 }

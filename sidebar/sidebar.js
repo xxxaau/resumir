@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bionicBtn = document.getElementById("bionicBtn");
     const deepDiveBtn = document.getElementById("deepDiveBtn");
     const scienceBtn = document.getElementById("scienceBtn");
+    const explainSimpleBtn = document.getElementById("explainSimpleBtn");
     const historyBtn = document.getElementById("historyBtn");
     const sourceTextBtn = document.getElementById("sourceTextBtn");
     const selectPdfBtn = document.getElementById("selectPdfBtn");
@@ -62,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Bound summary starter (partially applied with ctx)
-    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap) => {
+    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple) => {
         if (isGenerating && abortController) {
             abortController.abort();
             abortController = null;
@@ -71,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         isGenerating = true;
-        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap).then(ctrl => {
+        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple).then(ctrl => {
             abortController = ctrl;
         }).finally(() => {
             isGenerating = false;
@@ -397,6 +398,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    if (explainSimpleBtn) {
+        explainSimpleBtn.addEventListener("click", () => {
+            checkPromptUpdate("explicació planera", "simplePromptUpdateAvailable", () => {
+                doSummary(null, false, false, true, false, true);
+            });
+        });
+    }
+
     if (historyBtn) historyBtn.addEventListener("click", () => {
         const historyPanel = document.getElementById("history-panel");
         if (historyPanel && !historyPanel.classList.contains("hidden")) {
@@ -594,9 +603,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // 2. Migració de prompts: detectar prompts personalitzats vs per defecte
         try {
             const promptKeys = [
-                "sciencePrompt", "deepDivePrompt", "conceptMapPrompt",
-                "sciencePromptCustomized", "deepDivePromptCustomized", "conceptMapPromptCustomized",
-                "sciencePromptUpdateAvailable", "deepDivePromptUpdateAvailable", "conceptMapPromptUpdateAvailable",
+                "sciencePrompt", "deepDivePrompt", "conceptMapPrompt", "simplePrompt",
+                "sciencePromptCustomized", "deepDivePromptCustomized", "conceptMapPromptCustomized", "simplePromptCustomized",
+                "sciencePromptUpdateAvailable", "deepDivePromptUpdateAvailable", "conceptMapPromptUpdateAvailable", "simplePromptUpdateAvailable",
                 "promptDefaultsVersion"
             ];
             const promptConfig = await ext.storage.sync.get(promptKeys);
@@ -609,6 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized" },
                     { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized" },
                     { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized" },
+                    { key: "simplePrompt", defaultVal: DEFAULT_SIMPLE_PROMPT, customizedKey: "simplePromptCustomized" },
                 ];
                 for (const { key, defaultVal, customizedKey } of promptDefs) {
                     const saved = promptConfig[key];
@@ -628,6 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized", updateKey: "sciencePromptUpdateAvailable" },
                     { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized", updateKey: "deepDivePromptUpdateAvailable" },
                     { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized", updateKey: "conceptMapPromptUpdateAvailable" },
+                    { key: "simplePrompt", defaultVal: DEFAULT_SIMPLE_PROMPT, customizedKey: "simplePromptCustomized", updateKey: "simplePromptUpdateAvailable" },
                 ];
 
                 for (const { key, defaultVal, customizedKey, updateKey } of promptDefs) {

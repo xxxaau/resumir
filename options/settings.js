@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "enableDeepdive", "deepDivePrompt", "deepDivePromptCustomized", "deepDivePromptUpdateAvailable",
         "enableScience", "sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable",
         "enableResum", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
+        "enableSimple", "simplePrompt", "simplePromptCustomized", "simplePromptUpdateAvailable",
         "extensionOrder", "promptDefaultsVersion"
     ];
     const [localData, syncData] = await Promise.all([
@@ -53,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Handle "Live" Toggles in extension list
-    const extensionToggles = ["enableResum", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap"];
+    const extensionToggles = ["enableResum", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple"];
     extensionToggles.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -63,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Bind all save buttons to saveOptions
-    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap"].forEach(id => {
+    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple"].forEach(id => {
         bindClick(id, saveOptions);
     });
 
@@ -74,6 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindClick("resetDeepDive", resetDeepDivePrompt);
     bindClick("resetScience", resetSciencePrompt);
     bindClick("resetConceptMap", resetConceptMapPrompt);
+    bindClick("resetSimple", resetSimplePrompt);
     bindClick("resetBionic", resetBionic);
 
     // Model selection buttons
