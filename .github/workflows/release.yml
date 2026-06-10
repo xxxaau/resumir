@@ -5,9 +5,6 @@ on:
     tags:
       - "v*"
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build-and-release:
     name: Build i publicar release
@@ -20,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Instal·lar dependències
@@ -29,7 +26,7 @@ jobs:
       - name: Build Firefox i Chromium ZIPs
         run: node scripts/build.mjs all
 
-      - name: Prerelease audit (17 checks)
+      - name: Prerelease audit
         run: npm run prerelease
 
       - name: Verificar vendors (SHA-256)
@@ -39,7 +36,7 @@ jobs:
         run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.zip'
 
       - name: Crear GitHub Release amb els ZIPs
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: build/resumir-contingut-*.zip
           body: |-
