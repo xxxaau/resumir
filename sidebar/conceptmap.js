@@ -893,6 +893,10 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             }
             animFrame = requestAnimationFrame(stepFrame);
         }
+        // Escala de l'autofit per defecte. <1 deixa més aire al voltant del
+        // mapa perquè es vegi sencer sense haver de reduir manualment amb la
+        // roda. 0.78 ≈ dues passes de roda enrere respecte a l'ajust exacte.
+        const FIT_SCALE = 0.78;
         function computeFitTarget(scaleMul) {
             if (!state.bounds) return null;
             const rect = svg.getBoundingClientRect();
@@ -908,14 +912,14 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             return { k, x: sw / 2 - cx * k, y: sh / 2 - cy * k };
         }
         function fit(animate) {
-            const target = computeFitTarget(1);
+            const target = computeFitTarget(FIT_SCALE);
             if (!target) return;
             if (animate === false) setTransform(target);
             else animateTransform(target);
         }
         function introFit() {
-            const start = computeFitTarget(0.9);
-            const target = computeFitTarget(1);
+            const start = computeFitTarget(FIT_SCALE * 0.9);
+            const target = computeFitTarget(FIT_SCALE);
             if (!target) return;
             if (start) setTransform(start);
             animateTransform(target, 480);
