@@ -895,6 +895,13 @@ async function getPageContent() {
           }
         });
         
+        // executeScriptSafe retorna null NOMÉS quan el permís falta i no s'ha
+        // pogut concedir (pàgina restringida del navegador, permís denegat,
+        // sense gest d'usuari). Distingim-ho del cas "pàgina buida": el consell
+        // de recarregar (F5) no arregla un problema de permisos.
+        if (scriptResults === null) {
+            throw new Error("[011] No es pot llegir aquesta pàgina: és una pàgina restringida del navegador o l'extensió no hi té permís. Prova-ho en una pàgina web normal.");
+        }
         if (scriptResults?.[0]?.result) text = scriptResults[0].result;
     }
 
