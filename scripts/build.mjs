@@ -42,6 +42,7 @@ console.log(`\nðŸ”¨ Building v${version} for target: ${target}`);
 // Common files and directories
 const commonFiles = [
   "Readability.js",
+  "defuddle.js", // injectat en runtime per a Twitter/X (sidebar/content.js)
   "theme.js",
   "LICENSE",
   "docs/PRIVACY_POLICY.md"
