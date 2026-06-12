@@ -1,3 +1,72 @@
+# Cross-browser: side panel i detecció de navegador — Sessió 2026-06-12
+
+> Proves a Edge: la icona de l'extensió no obria el side panel. Després de
+> diverses hipòtesis, la causa arrel era la detecció de navegador a `ext.js`.
+
+## 1. (CRÍTIC) El global `browser` existeix també a Chromium/Edge modern
+
+`ext.js` detectava Firefox amb `const isFirefox = typeof browser !== 'undefined'`.
+Però **Chrome ≥ ~140 / Edge també exposen un global `browser`** (verificat: Chrome
+148 → `typeof browser === "object"`). Per tant `isFirefox` era `true` a Chromium i
+**tot `ext.sidebar` agafava la branca de Firefox**:
+- `setPanelBehavior` → no-op → `openPanelOnActionClick` mai es posava a `true`.
+- `open()`/`toggle()` → cridaven `sidebarAction` (inexistent a Chromium) → no-op
+  silenciós: `open()` "es resol OK" però el panell no apareix; o el clic no fa res
+  i no hi ha cap error.
+
+Afectava **tota** l'obertura del sidebar a Chromium (icona, menú contextual
+"Resumir", càrrega des de caché), no només el toggle.
+
+**Fix:** detectar Firefox per l'API que de fet cal distingir, no pel namespace:
+```js
+const isFirefox = typeof browser !== "undefined" &&
+                  typeof browser.sidebarAction !== "undefined";
+```
+`sidebarAction` només existeix a Firefox; Chromium usa `sidePanel`.
+
+**Lliçó:** MAI detectis Firefox amb `typeof browser`. Detecta per una API
+exclusiva (`browser.sidebarAction`, `runtime.getBrowserInfo`). Test de regressió a
+`tests/ext.test.mjs` ("REGRESSIÓ Chromium amb global `browser` present"): simula el
+Chromium REAL amb `global.browser` present però sense `sidebarAction`. Els tests
+antics feien `delete global.browser`, que NO reproduïa la condició real i per això
+no haurien detectat el bug.
+
+## 2. `openPanelOnActionClick` i `action.onClicked` són mútuament excloents (Chromium)
+
+A Chromium no es poden combinar: amb `openPanelOnActionClick:true`, l'`onClicked`
+no es dispara. Estratègia: a **Chromium** el navegador obre/tanca el panell natiu
+(`setPanelBehavior({openPanelOnActionClick:true})`, SENSE listener); a **Firefox**
+es registra `action.onClicked` → `sidebarAction.toggle()` (gate amb
+`typeof ext.runtime.getBrowserInfo === "function"`). Driblar `sidePanel.open()`
+manualment des d'`onClicked` és poc fiable a Edge (es resol però no obre).
+
+## 3. El missatge d'error de host permission difereix per navegador
+
+`scripting.executeScript` sense permís: Firefox diu "Missing host permission",
+Chromium/Edge diu "Cannot access contents of the page…". `executeScriptSafe`
+(`sidebar/content.js`) ara comprova les dues variants per demanar el permís i
+reintentar.
+
+## 4. Càrrega en dev i reproducció
+
+- A **Edge/Chrome** cal carregar `build_chromium_dev` (`npm run dev:chromium`), NO
+  l'arrel: el `manifest.json` de l'arrel és el de Firefox (sense side_panel ni
+  service worker). A **Firefox** sí que es carrega l'arrel.
+- `<all_urls>` a Chromium NOMÉS pot anar a `optional_host_permissions`, mai a
+  `optional_permissions` (error "Permission '<all_urls>' is unknown").
+- Reproducció fiable: Playwright `chromium.launchPersistentContext` +
+  `--load-extension=build_chromium_dev` (headful) i llegir
+  `chrome.sidePanel.getPanelBehavior()`/`getOptions()` des del service worker.
+
+## 5. Recordatori de testing cross-browser
+
+Les regressions cross-browser només es capturen si els tests simulen les dues
+plataformes amb la condició REAL de cada una (incloent el global `browser` present
+a Chromium). En tocar `ext.js`/`background.js`, regenerar `background.bundle.js` i
+`npm test` (cobreix Firefox i Chromium via mocks).
+
+---
+
 # Auditoria pre-producció — Sessió 2026-06-10 (v2.4.0)
 
 > Auditoria exhaustiva amb 4 revisors paral·lels (seguretat, codi, accessibilitat/UI,
