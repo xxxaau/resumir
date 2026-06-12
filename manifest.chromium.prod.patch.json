@@ -3,12 +3,6 @@
         "contextMenus",
         "sidePanel"
     ],
-    "optional_permissions": [
-        "<all_urls>"
-    ],
-    "optional_host_permissions": [
-        "<all_urls>"
-    ],
     "side_panel": {
         "default_path": "sidebar/sidebar.html"
     },

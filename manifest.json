@@ -14,6 +14,9 @@
         "tabs",
         "menus"
     ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
     "action": {
         "default_title": "Obre Resumir",
         "default_icon": "icons/icon-96.png"
@@ -33,9 +36,6 @@
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com https:"
     },
-    "optional_permissions": [
-        "<all_urls>"
-    ],
     "browser_specific_settings": {
         "gecko": {
             "id": "sergi@xaudiera.xyz",
