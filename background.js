@@ -1,23 +1,36 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-// On toolbar action click:
-//  - Firefox: fires ext.sidebar.toggle() → browser.sidebarAction.toggle()
-//  - Chromium: with setPanelBehavior({openPanelOnActionClick:true}) the panel
-//    opens/closes natively. This listener is a fallback for environments where
-//    setPanelBehavior cannot be applied or fails silently.
-ext.action.onClicked.addListener(async (tab) => {
-  try {
-    await ext.sidebar.toggle(tab.windowId);
-  } catch (err) {
-    console.error("Error toggling sidebar:", err);
-  }
-});
+// Toolbar action click → open/close the sidebar.
+//  - Firefox: browser.sidebarAction.toggle() is the native open/close, and
+//    Firefox has no "open panel on action click" bound to the panel, so we
+//    register this listener. (getBrowserInfo is a Firefox-only API.)
+//  - Chromium/Edge: the browser opens AND closes the panel natively via
+//    setPanelBehavior({openPanelOnActionClick:true}) below. We deliberately do
+//    NOT register an onClicked listener there: it is mutually exclusive with
+//    the native behavior, and driving chrome.sidePanel.open() ourselves proved
+//    unreliable on Edge (the call resolves but the panel never appears). Letting
+//    the browser open the panel avoids the user-gesture/async pitfalls entirely.
+if (typeof ext.runtime.getBrowserInfo === "function") {
+  ext.action.onClicked.addListener(async (tab) => {
+    try {
+      await ext.sidebar.toggle(tab.windowId);
+    } catch (err) {
+      console.error("[sidebar] toggle error:", err);
+    }
+  });
+}
+
+// Chromium/Edge: open/close the side panel when the toolbar icon is clicked.
+// Re-applied on every service worker startup (a revived worker won't re-run
+// onInstalled). No-op on Firefox.
+ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
 
 // --- Context Menus ---
 
 ext.runtime.onInstalled.addListener(async (details) => {
-  // Chromium: register side panel to open on action click (needed on install AND update)
+  // Chromium: open the side panel when the toolbar icon is clicked (native
+  // open/close). Persisted across restarts; also re-applied at top-level above.
   ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
 
   if (details.reason === "install") {

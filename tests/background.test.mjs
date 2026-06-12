@@ -56,8 +56,22 @@ global.ext = {
     },
 };
 
-// Carreguem background.js — registra tots els listeners
-require("../background.js");
+// (Re)carrega background.js simulant un navegador concret. getBrowserInfo és
+// una API només de Firefox: present → Firefox, absent (null) → Chromium.
+function loadBackground({ firefox } = { firefox: false }) {
+    listeners.actionClicked  = null;
+    listeners.onInstalled    = null;
+    listeners.menusClicked   = null;
+    listeners.storageChanged = null;
+    global.ext.runtime.getBrowserInfo = firefox
+        ? (async () => ({ name: "Firefox" }))
+        : null;
+    delete require.cache[require.resolve("../background.js")];
+    require("../background.js");
+}
+
+// Càrrega per defecte: Chromium
+loadBackground({ firefox: false });
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -74,15 +88,32 @@ function resetCalls() {
 }
 
 // ---------------------------------------------------------------------------
-// action.onClicked → sidebar.toggle
+// action.onClicked: Chromium obre natiu (sense listener); Firefox amb listener
 // ---------------------------------------------------------------------------
 
-test("background: action.onClicked crida ext.sidebar.toggle", async () => {
+test("background: a Chromium NO registra action.onClicked (l'obre el navegador)", () => {
+    loadBackground({ firefox: false });
+    assert.equal(listeners.actionClicked, null,
+        "A Chromium el listener és mútuament excloent amb el toggle natiu — no s'ha de registrar");
+});
+
+test("background: a Chromium activa openPanelOnActionClick en carregar", () => {
     resetCalls();
-    assert.ok(listeners.actionClicked, "El listener actionClicked ha d'estar registrat");
+    loadBackground({ firefox: false });
+    assert.ok(sidebarCalls.setPanelBehavior.length >= 1,
+        "setPanelBehavior s'ha de cridar en carregar");
+    assert.deepEqual(sidebarCalls.setPanelBehavior.at(-1), { openPanelOnActionClick: true },
+        "openPanelOnActionClick ha de ser true perquè el navegador obri el panell amb el clic");
+});
+
+test("background: a Firefox action.onClicked crida ext.sidebar.toggle", async () => {
+    loadBackground({ firefox: true });
+    resetCalls();
+    assert.ok(listeners.actionClicked, "A Firefox el listener s'ha de registrar");
     await listeners.actionClicked({ windowId: 42 });
     assert.equal(sidebarCalls.toggle.length, 1, "sidebar.toggle ha de ser cridat una vegada");
     assert.equal(sidebarCalls.toggle[0], 42, "Ha de passar el windowId correcte");
+    loadBackground({ firefox: false }); // restaura l'estat per defecte
 });
 
 // ---------------------------------------------------------------------------
