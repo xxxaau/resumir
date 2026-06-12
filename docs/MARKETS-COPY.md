@@ -1,6 +1,9 @@
 # Market Copy — Textos per a Firefox Add-ons (AMO)
 
 Textos en català per a la pàgina del producte a addons.mozilla.org.
+Alineats amb la proposta de valor de `docs/COMUNICACIO.md` (pipeline de
+coneixement: captura → 5 lents → consolidació; confiança radical com a capa
+de valors).
 
 ---
 
@@ -20,12 +23,11 @@ Textos en català per a la pàgina del producte a addons.mozilla.org.
 **Límit:** ~160 caràcters
 
 ```
-Resumeix qualsevol pàgina web amb Google Gemini AI.
-Suporta YouTube, Hacker News, PDF, mapa conceptual i lectura biònica.
-Sense rastreig, sense telemetria, privacitat total.
+Converteix articles, vídeos de YouTube, fils i PDFs en coneixement: resums,
+mapes conceptuals i validació científica. Privat, local i en català.
 ```
 
-**Caràcters:** 156 ✅
+**Caràcters:** 144 ✅
 
 ---
 
@@ -34,83 +36,65 @@ Sense rastreig, sense telemetria, privacitat total.
 **Límit:** ~3.000 caràcters
 
 ```
-📝 Resumir — Resums intel·ligents amb privacitat total
+📝 Resumir — Del contingut al coneixement, en un clic
 
-Una extensió de navegador que resumeix qualsevol pàgina web en segons
-utilitzant la API de Google Gemini AI. Tot s'executa al teu navegador:
-cap dada surt del teu ordinador excepte el text que TÚ decideixes resumir.
-
-═══════════════════════════════════════════════════════════════
-
-✨ FUNCIONALITATS
-
-🎯 Resum amb IA
-• Un sol clic per obtenir un resum estructurat de qualsevol pàgina
-• Respostes en temps real (streaming SSE): el text apareix mentre es genera
-• Trieu entre múltiples models Gemini: Flash (ràpid) o Pro (profund)
-• Xat de seguiment: després del resum, podeu fer preguntes addicionals
-
-📹 YouTube i Hacker News
-• Extracció intel·ligent de transcripcions de vídeos YouTube
-• Suport per subtítols automàtics (ASR) i manuals, amb detecció d'idioma
-• Fils de comentaris de Hacker News resumits automàticament
-• Múltiples vies de fallback per maximitzar la compatibilitat
-
-📄 PDF amb text
-• Resum de PDFs remots (HTTPS) i locals (des del vostre ordinador)
-• Detecció automàtica per extensió o Content-Type
-• Límit: 500 pàgines, 2 milions de caràcters, 60 segons de temps d'espera
-
-🧠 Mapa conceptual interactiu
-• Visualització jeràrquica del resum en format SVG (estil NotebookLM)
-• Renderitzador natiu propi — zero dependències externes (~22 KB)
-• Pan, zoom, plegar/desplegar branques, ajustar a la vista
-• Exportació a PNG amb nom de fitxer intel·ligent
-
-🔬 Validació científica
-• Verifica afirmacions del text amb rigor acadèmic
-• Avaluació de fiabilitat de fonts i detecció de biaixos
-
-📖 Lectura biònica
-• Mode de lectura ràpida amb nivell de fixació configurable (20–80%)
-• Tipografia, gruix de negreta, mida de lletra i interlineat personalitzables
-
-📤 Exporta a Markdown i Obsidian
-• Copia el resum al porta-retalls amb plantilla personalitzable
-• Envia resums directament al vault d'Obsidian amb un clic
-• Format net i reutilitzable
-
-🎨 Múltiples temes
-• Sistema (segueix el tema del sistema operatiu)
-• Clar, fosc, Solarized i gris clar
-
-🧩 Sistema de plugins
-• Activeu, desactiveu i reordeneu les funcionalitats des de la configuració
-• Plugins inclosos: Resum, Aprofundiment, Mapa conceptual, Validació
-  científica, Obsidian, Exportació Markdown, Lectura biònica
-
-📊 Estadístiques d'ús
-• Comptatge real de tokens des de l'API de Gemini
-• Velocitat de generació (ms) i tokens d'entrada/sortida
-• Selector de període (7 dies / 30 dies / 6 mesos / 1 any)
-• Seguiment de cost per model
+Cada dia obres més pestanyes de les que pots llegir. Resumir converteix
+qualsevol cosa que llegeixes o mires — articles, vídeos, fils, PDFs — en
+coneixement estructurat, comprensible i teu. Al teu navegador, amb la teva
+clau de Gemini, sense intermediaris.
 
 ═══════════════════════════════════════════════════════════════
 
-🔒 PRIVACITAT I SEGURETAT
+📥 CAPTURA QUALSEVOL CONTINGUT
+
+Si ho pots obrir al navegador, ho pots aprofitar:
+• Articles i pàgines web (extracció neta del text)
+• Vídeos de YouTube (transcripcions, també amb subtítols automàtics)
+• Fils de Twitter/X i discussions de Hacker News (article + comentaris)
+• PDFs remots i locals (amb capa de text)
+
+🔍 CINC LENTS PER ENTENDRE
+
+No un resum: la comprensió que necessites en cada moment.
+• Resum — l'essencial, estructurat i en temps real (streaming)
+• Aprofundiment — el context i els matisos que un resum no dona
+• Explica-ho fàcil — qualsevol tema en llenguatge planer
+• Validació científica — afirmacions verificades, fonts avaluades,
+  biaixos detectats
+• Mapa conceptual — visualització interactiva amb zoom, plegat de
+  branques i exportació a PNG
+
+I si en vols més: tots els prompts són 100 % personalitzables.
+
+📚 CONEIXEMENT QUE PERDURA
+
+El que entens avui, ho trobes demà:
+• Envia resums a Obsidian amb plantilla configurable
+• Copia en Markdown net i reutilitzable
+• Historial i memòria cau local: els resums anteriors carreguen a l'instant
+• Estadístiques de tokens i cost per model
+
+📖 LLEGIBILITAT A LA TEVA MIDA
+
+• Lectura biònica configurable (fixació, tipografia, mida, interlineat)
+• 5 temes: sistema, clar, fosc, solarized i gris
+• Navegable per teclat i amb contrast acurat (WCAG)
+
+═══════════════════════════════════════════════════════════════
+
+🔒 CONFIANÇA RADICAL
 
 Aquesta extensió NO fa:
-❌ No recull dades personals
-❌ No fa seguiment ni telemetria
-❌ No envia dades a servidors propis
-❌ No sincronitza dades entre dispositius
+❌ No recull dades personals ni fa telemetria
+❌ No envia dades a servidors propis (no en té)
+❌ No demana cap compte ni subscripció
 ❌ No té anuncis
 
 Aquesta extensió SÍ:
-✅ La clau API s'emmagatzema localment al navegador (storage.local)
-✅ Envia el text seleccionat a l'API de Google Gemini via HTTPS
-✅ Guarda un historial local de resums (opcional, podeu esborrar-lo)
-✅ Té el codi font públic a GitHub (MPL-2.0)
+✅ Guarda la clau API i totes les dades només al teu navegador
+✅ Envia el contingut directament a l'API de Google Gemini (HTTPS),
+   i només quan tu ho demanes
+✅ Codi obert (MPL-2.0), auditable per qualsevol
 
 Política de privacitat completa:
 https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md
@@ -119,105 +103,97 @@ https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLI
 
 🚀 COM COMENÇAR
 
-1. Instal·leu l'extensió des de Firefox Add-ons
-2. Obteniu una clau API gratuïta de Google Gemini:
+1. Instal·la l'extensió
+2. Obtén una clau API gratuïta de Google Gemini (sense targeta de crèdit):
    https://aistudio.google.com/app/apikey
-3. Obriu Configuració > Clau API Gemini
-4. Enganxeu la vostra clau
-5. Visiteu qualsevol pàgina i feu clic a "Resumir"
-
-🎁 GRATUÏT: Els usuaris nous de Google AI Studio obtenen:
-• 60 peticions per minut (suficient per a ús personal)
-• 300 $ de crèdit gratuït durant 90 dies
-• Sense necessitat de targeta de crèdit
+3. Enganxa-la a Configuració › Clau API Gemini
+4. Obre qualsevol pàgina i clica «Resumir»
 
 ═══════════════════════════════════════════════════════════════
 
-🐛 BUGS I SUGGERIMENTS
-
-Reporteu errors:
+🐛 Errors i suggeriments:
 https://github.com/xxxaau/extensio-resumir-contingut/issues
 
-Contacte:
-sergi@xaudiera.xyz
+📄 Llicència MPL-2.0 — codi font:
+https://github.com/xxxaau/extensio-resumir-contingut
 
-═══════════════════════════════════════════════════════════════
-
-📄 LLICÈNCIA
-
-Mozilla Public License 2.0 (MPL-2.0)
-Codi font: https://github.com/xxxaau/extensio-resumir-contingut
-
-═══════════════════════════════════════════════════════════════
-
-v2.3.0 — Maig de 2026
+Fet a Banyoles ❤️
 ```
 
-**Caràcters:** ~2.800 ✅ (dins del límit de 3.000)
+**Caràcters:** ~2.600 ✅ (dins del límit de 3.000)
 
 ---
 
 ### 4. Justificació de permisos
 
+> ⚠️ Actualitzat (juny 2026): `<all_urls>` ara és un permís de host REQUERIT
+> al manifest (es concedeix a la instal·lació), ja NO és opcional en temps
+> d'execució. La justificació ha de reflectir-ho.
+
 ```
 Resumir necessita aquests permisos per funcionar:
 
+🔹 Accés a totes les pàgines (<all_urls>)
+   Per llegir el contingut de la pàgina que demanes resumir — i pot ser
+   qualsevol pàgina. Es concedeix a la instal·lació perquè el resum
+   funcioni sense un avís de permís a cada lloc. El contingut es llegeix
+   NOMÉS quan cliques «Resumir» i s'envia NOMÉS a l'API de Google Gemini.
+
 🔹 activeTab
-   Per accedir al contingut de la pestanya actual quan feu clic a "Resumir"
+   Per identificar la pestanya que vols resumir (URL i títol)
 
 🔹 storage
-   Per guardar preferències, la clau API, l'historial i la memòria cau de resums
+   Per guardar preferències, la clau API, l'historial i la memòria cau
 
 🔹 scripting
-   Per extreure text net de les pàgines (Readability.js, YouTube, PDF)
+   Per extreure el text net de les pàgines (Readability, YouTube, PDF)
 
 🔹 tabs
-   Per obtenir la URL i el títol de la pàgina (per a les claus de la memòria cau)
+   Per obtenir la URL i el títol de la pàgina (claus de la memòria cau)
 
 🔹 menus
-   Per afegir les opcions "Resumir aquesta pàgina" i "Resumir text seleccionat"
-   al menú contextual del botó dret
+   Per afegir «Resumir» i «Resumir text seleccionat» al menú contextual
 
 🔹 sidebar_action
-   Per obrir el panell lateral on es mostren els resums
+   Per mostrar els resums al panell lateral
 
-🔹 OPINABLE: <all_urls>
-   Només per extreure contingut de pàgines Hacker News quan ho sol·liciteu.
-   Es demana permís explícit en aquell moment, no a la instal·lació.
-
-Cap d'aquests permisos es comparteix amb tercers.
+Cap dada es comparteix amb tercers: l'únic destí del contingut és l'API
+de Google Gemini, i només quan tu ho demanes.
 ```
 
 ---
 
 ### 5. Nota de versió (What's New)
 
-Llista de canvis per a la versió **2.3.0** que es mostra als usuaris existents durant l'actualització.
+Esborrany per a la **propera versió** (número pendent de bump; els canvis ja
+són a `main`).
 
 ```
-🔖 Resumir v2.3.0
+🔖 Resumir — propera versió
 
-🆕 Noves funcionalitats
-• 📄 Suport per a PDF (remots i locals) amb extracció de text
-• 🧠 Mapa conceptual interactiu natiu (SVG, zero dependències)
-• 🔬 Validació científica: verificació de fonts i detecció de biaixos
-• 🧩 Sistema de plugins (activeu/desactiveu funcionalitats)
-• ⭐ Models favorits: selecció ràpida des del menú desplegable
-• 🌐 Suport per a Chromium (Chrome, Edge, Brave): instal·lació manual
+🛠 Edge i Chrome, ara de debò
+• Arreglat el bug que feia que la icona no obrís el panell lateral
+  (Chromium/Edge moderns exposen un global `browser` que confonia la
+  detecció de navegador)
+• Selector de models llegible a la barra inferior, amb focus de teclat
+  visible
+• L'extracció de fils de Twitter/X funciona també als paquets publicats
 
-🔧 Millores
-• Models reordenats: els millors models al capdavant
-• Transcripcions YouTube: detecció d'idioma i selecció de pista
-• Mapa conceptual: pestanya de conversa sota el mapa
-• ZIPs de build nets i verificats
+🔑 Permisos més simples
+• L'accés a les pàgines es concedeix una sola vegada a la instal·lació:
+  adéu a l'avís de permís a cada lloc nou
+• ⚠️ En actualitzar, el navegador et demanarà re-aprovar els permisos:
+  és normal i només passa aquesta vegada
 
-🐛 Correccions
-• Error [008] a YouTube amb paràmetres de cerca a l'URL
+📖 Llegibilitat
+• La lectura biònica manté la mida coherent a tot arreu (en generar,
+  a l'historial i en canviar la configuració)
+• El mapa conceptual s'obre amb l'enquadrament ideal, sense haver
+  d'allunyar el zoom a mà
 
-🛠 Intern
-• Build migrat a Node.js (ja no cal Python)
-• 233 tests automatitzats
-• 0 warnings AMO (seguretat)
+💬 Errors més clars
+• Les pàgines restringides del navegador ara expliquen el motiu real
+  en lloc de suggerir recarregar
 ```
 
 ---
@@ -226,19 +202,19 @@ Llista de canvis per a la versió **2.3.0** que es mostra als usuaris existents 
 
 ```
 Captura 1 — Panell principal:
-"Panell de resum — Resum estructurat generat en temps real amb estadístiques de tokens i velocitat"
+"Del contingut al coneixement — resum estructurat generat en temps real"
 
 Captura 2 — Mapa conceptual:
-"Mapa conceptual interactiu — Visualització jeràrquica del resum amb zoom, pan i exportació a PNG"
+"Mapa conceptual interactiu — zoom, plegat de branques i exportació a PNG"
 
 Captura 3 — Historial:
-"Historial amb memòria cau — Accés ràpid a resums anteriors sense consumir tokens"
+"El que entens avui, ho trobes demà — historial amb memòria cau local"
 
 Captura 4 — Configuració:
-"Configuració — Clau API, selecció de model, tema i sistema de plugins"
+"Cinc lents personalitzables — cada prompt és teu"
 
 Captura 5 — YouTube:
-"YouTube — Extracció automàtica de transcripcions amb generació de resums"
+"YouTube — de la transcripció del vídeo al resum en segons"
 ```
 
 ---
@@ -248,7 +224,7 @@ Captura 5 — YouTube:
 | Camp | Valor |
 |------|-------|
 | **Categoria** | Productivitat |
-| **Idioma de la interfície** | Català, Anglès |
+| **Idioma de la interfície** | Català |
 | **Pàgina d'inici** | https://github.com/xxxaau/extensio-resumir-contingut |
 | **URL de suport** | https://github.com/xxxaau/extensio-resumir-contingut/issues |
 | **Política de privacitat** | https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md |
@@ -261,14 +237,16 @@ Captura 5 — YouTube:
 
 L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrome, Edge o Brave, cal instal·lar-la manualment:
 
-1. Baixeu el fitxer `resumir-contingut-vX.X.X-chromium.zip` de la secció **Releases** del GitHub:
+1. Baixa el fitxer `resumir-contingut-vX.X.X-chromium.zip` de la secció **Releases** del GitHub:
    https://github.com/xxxaau/extensio-resumir-contingut/releases
-2. Descomprimiu el fitxer en una carpeta
-3. Obriu `chrome://extensions`
-4. Activeu el **Mode de desenvolupador** (interruptor a dalt a la dreta)
-5. Feu clic a **Carrega extensió desempaquetada** i seleccioneu la carpeta descomprimida
+2. Descomprimeix el fitxer en una carpeta
+3. Obre `chrome://extensions`
+4. Activa el **Mode de desenvolupador** (interruptor a dalt a la dreta)
+5. Fes clic a **Carrega extensió desempaquetada** i selecciona la carpeta descomprimida
 
-> **Nota:** En obrir el navegador, de vegades Chrome us demanarà si voleu desactivar l'extensió. Feu clic a "Mantén-la activada". Per evitar aquest avís, podeu instal·lar-la des de la Chrome Web Store si està disponible. Alternativament, feu clic dret a la icona de l'extensió a la barra d'eines, seleccioneu "Gestiona l'extensió" i activeu l'opció "Permís en mode d'incògnit" si cal.
+> **Nota:** En obrir el navegador, de vegades Chrome demana si vols desactivar l'extensió. Fes clic a «Mantén-la activada».
+
+> ⚠️ **Actualització amb permisos nous:** en passar a una versió amb `<all_urls>` requerit, Chrome/Edge desactiven l'extensió fins que re-aprovis els permisos («L'extensió necessita permisos nous»). És el comportament estàndard del navegador; cal explicar-ho a les notes de versió.
 
 ---
 
@@ -277,10 +255,10 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 ```
 [ ] Títol correcte
 [ ] Descripció breu dins del límit de caràcters
-[ ] Descripció llarga dins del límit (~2.800 / 3.000)
+[ ] Descripció llarga dins del límit (~2.600 / 3.000)
 [ ] Enllaços funcionen (GitHub, issues, privacitat)
-[ ] Permisos justificats
-[ ] Release notes actualitzades
+[ ] Permisos justificats (⚠️ <all_urls> ara és REQUERIT — text actualitzat)
+[ ] Release notes actualitzades (inclou avís de re-aprovació de permisos)
 [ ] 5 captures de pantalla 1280×800 PNG
 [ ] Textos de les captures preparats
 [ ] Català correcte (sense errors)
@@ -291,6 +269,6 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 
 ---
 
-**Última actualització:** 27 de maig de 2026
-**Versió:** 2.0
-**Status:** ✅ Ready for submission
+**Última actualització:** 12 de juny de 2026
+**Versió:** 3.0 (alineat amb docs/COMUNICACIO.md)
+**Status:** ✅ Llest per a la propera submissió (pendent de número de versió)

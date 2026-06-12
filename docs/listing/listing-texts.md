@@ -1,53 +1,86 @@
 # Store Listing Texts
 
+Aligned with the value proposition in `docs/COMUNICACIO.md` (knowledge
+pipeline: capture → five lenses → consolidation; radical trust as the
+values layer).
+
 ## Short Description (≤132 characters — CWS limit)
 
 ```
-Summarize any web page with Google Gemini AI. Supports YouTube, Hacker News, Twitter/X, and bionic reading.
+Turn articles, YouTube videos, threads and PDFs into structured knowledge: summaries, concept maps, science checks. Private.
 ```
-(104 chars ✓)
+(124 chars ✓)
 
 ---
 
 ## Long Description (English)
 
-**Resumir** summarizes any web page using Google Gemini AI, directly inside a sidebar — no copy-pasting required.
+**Resumir** turns anything you read or watch — articles, YouTube videos, Twitter/X threads, Hacker News discussions, PDFs — into structured, lasting knowledge. Right in your browser sidebar, with your own Gemini API key, with no servers in between.
 
-### Features
+### 📥 Capture any content
 
-- **One-click summarization** — click the toolbar button or right-click any page to get an AI summary in the sidebar
-- **Streaming responses** — text appears in real time as the AI generates it
-- **Smart content extraction** — specialized extractors for YouTube (transcript), Hacker News (article + comments), Twitter/X (Defuddle), **PDF files** (text layer via pdf.js), and standard pages (Readability.js)
-- **Bionic Reading** — configurable fixation mode to improve reading speed
-- **Multiple themes** — system default, light, dark, solarized, sepia, soft gray
-- **Summary cache** — previously summarized pages load instantly from local cache (30-day TTL)
-- **Usage statistics** — daily token and cost tracking per Gemini model, with period selector (7d / 30d / 6m / 1y)
-- **Obsidian export** — send summaries directly to your Obsidian vault
-- **Plugin system** — enable, disable, and reorder functionality from settings
-- **Firefox + Chromium** — works on Firefox, Chrome, Edge, and Brave
+If you can open it in your browser, you can use it:
 
-### Privacy
+- **Articles and web pages** — clean text extraction (Readability)
+- **YouTube** — transcripts, including auto-generated captions
+- **Twitter/X threads** and **Hacker News** (article + comments)
+- **PDF files** — remote and local, with a text layer (pdf.js)
 
-- Your API key is stored locally on your device (`storage.local`) and never leaves your browser
-- Page content is sent directly to Google Gemini API — no third-party servers involved
-- No telemetry, no analytics, no account required
+### 🔍 Five lenses to understand
+
+Not just a summary — the understanding you need right now:
+
+- **Summary** — the essentials, structured, streamed in real time
+- **Deep dive** — the context and nuance a summary leaves out
+- **Explain it simply** — any topic in plain language
+- **Science check** — claims verified, sources assessed, biases flagged
+- **Concept map** — interactive visualization with zoom, collapsible branches, and PNG export
+
+Every prompt is 100% customizable.
+
+### 📚 Knowledge that lasts
+
+- **Obsidian export** with a configurable template
+- **Markdown copy** — clean and reusable
+- **History + local cache** — previously summarized pages load instantly
+- **Usage statistics** — token and cost tracking per Gemini model
+
+### 📖 Readability, your way
+
+- **Bionic Reading** — configurable fixation, font, size, and line height
+- **Multiple themes** — system, light, dark, solarized, gray
+- Keyboard-navigable, WCAG-minded contrast
+
+### 🔒 Radical trust
+
+- Your API key and all your data stay in your browser (`storage.local`)
+- Page content goes directly to the Google Gemini API — no third-party servers, ever
+- No telemetry, no analytics, no account, no ads
+- Open source (MPL-2.0)
 
 ### Requirements
 
-- A free Google Gemini API key (from [Google AI Studio](https://aistudio.google.com/))
-- Firefox 139+ or Chrome/Edge/Brave (Manifest V3)
+- A free Google Gemini API key (from [Google AI Studio](https://aistudio.google.com/)) — no credit card needed
+- Firefox 142+ or Chrome/Edge/Brave (Manifest V3)
 
 ---
 
 ## Single Purpose Statement (CWS)
 
 ```
-Summarize the active web page using Google Gemini AI, displayed in the browser sidebar.
+Summarize and explain the content of the active web page using Google Gemini AI, displayed in the browser sidebar.
 ```
 
 ---
 
 ## Permission Justifications (CWS)
+
+> ⚠️ Updated (June 2026): `<all_urls>` is now a REQUIRED host permission
+> granted at install time — it is no longer optional/runtime. Justifications
+> below reflect this.
+
+### `<all_urls>` (host permission, granted at install)
+Required to read the content of whichever page the user asks to summarize — which by design can be any page. Content is read only when the user explicitly triggers a summary, is sent only to the Google Gemini API over HTTPS, and is never stored remotely or shared with any other party. Granted at install so summarizing works without a per-site permission prompt.
 
 ### `activeTab`
 Required to read the URL and title of the current tab when the user triggers a summary. Without this, the extension cannot identify which page to summarize.
@@ -67,8 +100,19 @@ Required to display the summary in the browser sidebar without opening a new tab
 ### `contextMenus` / `menus`
 Required to add the "Summarize this page" option to the right-click context menu.
 
-### `<all_urls>` (optional, requested at runtime)
-Requested only when the user first triggers a summary on a page. Required to inject the content extraction script into any URL. The user can grant or deny this permission — the extension requests it only when needed, not at install time.
+---
+
+## Update note for existing users (permission escalation)
+
+Moving `<all_urls>` from optional to required means browsers will ask
+existing users to re-approve permissions on update (Chrome/Edge disable the
+extension until re-approved). Release notes MUST mention this:
+
+```
+⚠️ This update simplifies permissions: page access is now granted once at
+install instead of per-site prompts. Your browser will ask you to re-approve
+the extension — this is expected and only happens once.
+```
 
 ---
 
@@ -85,8 +129,6 @@ Requested only when the user first triggers a summary on a page. Required to inj
 
 | Field | Value |
 |-------|-------|
-| Homepage URL | https://github.com/[USERNAME]/extensio-resumir-contingut |
-| Support URL | https://github.com/[USERNAME]/extensio-resumir-contingut/issues |
-| Privacy Policy URL | https://[USERNAME].github.io/extensio-resumir-contingut/PRIVACY_POLICY |
-
-> Replace `[USERNAME]` with the real GitHub handle once decided.
+| Homepage URL | https://github.com/xxxaau/extensio-resumir-contingut |
+| Support URL | https://github.com/xxxaau/extensio-resumir-contingut/issues |
+| Privacy Policy URL | https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md |
