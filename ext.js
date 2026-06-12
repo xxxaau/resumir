@@ -13,7 +13,14 @@
  *   ext.*            → all other APIs pass through unchanged
  */
 
-const isFirefox = typeof browser !== 'undefined';
+// IMPORTANT: el Chromium/Edge modern (≥ Chrome ~140) TAMBÉ exposa un global
+// `browser`, així que `typeof browser !== 'undefined'` NO és una detecció vàlida
+// de Firefox (és cert també a Edge/Chrome). Si s'usa, tot ext.sidebar agafa la
+// branca de Firefox a Chromium i el side panel no s'obre mai.
+// Detectem Firefox per l'API que de fet ens cal distingir: `sidebarAction`
+// existeix només a Firefox; Chromium (i el seu global `browser`) usa `sidePanel`.
+const isFirefox = typeof browser !== "undefined" &&
+                  typeof browser.sidebarAction !== "undefined";
 const baseApi = isFirefox ? browser : chrome;
 
 const ext = {

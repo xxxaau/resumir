@@ -137,3 +137,63 @@ test("ext.menus (Firefox) - apunta a browser.menus", () => {
     const ext = loadExt();
     assert.strictEqual(ext.menus, menus);
 });
+
+// ---------------------------------------------------------------------------
+// REGRESSIÓ: el Chromium/Edge modern (Chrome ≥ ~140) TAMBÉ exposa un global
+// `browser` (SENSE sidebarAction). Amb la detecció antiga
+// `typeof browser !== 'undefined'`, isFirefox era true a Chromium → tot
+// ext.sidebar agafava la branca de Firefox: open()/toggle() cridaven
+// sidebarAction (inexistent) i setPanelBehavior quedava en no-op → el side
+// panel no s'obria mai. Aquest test bloqueja qualsevol reintroducció del bug.
+// ---------------------------------------------------------------------------
+test("REGRESSIÓ Chromium amb global `browser` present → usa sidePanel, no sidebarAction", async () => {
+    const openCalls = [];
+    const behaviorCalls = [];
+    global.chrome = {
+        windows:    { getCurrent: async () => ({ id: 9 }) },
+        sidePanel:  {
+            open:             async opts => openCalls.push(opts),
+            setPanelBehavior: async o => behaviorCalls.push(o),
+        },
+        storage:      { sync: {}, local: {}, onChanged: { addListener: () => {} } },
+        runtime:      {},
+        tabs:         {},
+        contextMenus: {},
+    };
+    // Chromium/Edge real: `browser` existeix però NO té sidebarAction.
+    global.browser = { runtime: {}, storage: {}, tabs: {} };
+
+    const ext = loadExt();
+    await ext.sidebar.open(9);
+    await ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
+
+    assert.equal(openCalls.length, 1, "ext.sidebar.open ha d'usar chrome.sidePanel.open (branca Chromium)");
+    assert.deepEqual(openCalls[0], { windowId: 9 });
+    assert.equal(behaviorCalls.length, 1, "setPanelBehavior NO ha de ser no-op a Chromium");
+    assert.deepEqual(behaviorCalls[0], { openPanelOnActionClick: true });
+
+    delete global.browser;
+});
+
+// Contrapartida: Firefox real (browser AMB sidebarAction) → branca Firefox.
+test("REGRESSIÓ Firefox (browser amb sidebarAction) → usa sidebarAction", async () => {
+    let sidebarOpened = false;
+    const behaviorCalls = [];
+    global.browser = {
+        sidebarAction: { open: async () => { sidebarOpened = true; } },
+        sidePanel:     { setPanelBehavior: async o => behaviorCalls.push(o) },
+        storage:       { sync: {}, local: {}, onChanged: { addListener: () => {} } },
+        runtime:       {},
+        tabs:          {},
+    };
+    delete global.chrome;
+
+    const ext = loadExt();
+    await ext.sidebar.open();
+    await ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
+
+    assert.ok(sidebarOpened, "ext.sidebar.open ha d'usar sidebarAction.open a Firefox");
+    assert.equal(behaviorCalls.length, 0, "setPanelBehavior ha de ser no-op a Firefox (no hi ha openPanelOnActionClick)");
+
+    delete global.browser;
+});
