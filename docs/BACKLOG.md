@@ -15,6 +15,39 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
+## Renombrar el repositori a `resumir` (pendent per al proper bump)
+
+**Context (2026-06-12):** Decisió del propietari: el repo `extensio-resumir-contingut`
+passa a dir-se **`resumir`**, alineat amb la marca (vegeu `docs/COMUNICACIO.md`).
+Cal fer-ho coordinat amb un bump perquè els manifests publicats duen la
+`homepage_url` i els usuaris de Chromium instal·len des de GitHub Releases.
+
+**Inventari d'URLs a actualitzar (51 ocurrències, 18 fitxers — verificat amb
+`grep -r "extensio-resumir-contingut"`):**
+
+*Dins de l'extensió (s'envia als usuaris):*
+- [ ] `manifest.base.json` → `homepage_url` (+ regenerar `manifest.json` i `manifest.chromium.json` amb `npm run manifests:gen`)
+- [ ] `options/settings.js` → enllaços a issues/repo
+
+*Meta del repo:*
+- [ ] `package.json` → `repository.url`
+- [ ] `README.md` → badges (CI, releases, sponsors), enllaços d'instal·lació Chromium i issues/discussions
+- [ ] `docs/`: `BUILD.md`, `CONTRIBUTING.md`, `MARKETS-COPY.md`, `listing/listing-texts.md`, `marketplace/` (CHROME-STORE, MARKETS-COPY, RELEASE-PROCESS, SUBMISSION-CHECKLIST), `user-guide/GETTING-STARTED.md`
+- [ ] `scripts/prepare-release.mjs`
+
+*Fora del repo (manual):*
+- [ ] GitHub → Settings → Rename a `resumir` (GitHub manté redireccions de l'URL antiga per a web i git, però es trenquen si mai es crea un repo nou amb el nom vell — no reutilitzar-lo)
+- [ ] AMO → panell de l'extensió: Pàgina d'inici, URL de suport i Política de privacitat
+- [ ] Remot local: `git remote set-url origin https://github.com/xxxaau/resumir.git`
+
+**Criteris d'acceptació:**
+- [ ] `grep -r "extensio-resumir-contingut"` només retorna documents històrics (`.dev/`, `.opencode/plans/`, CHANGELOG) — mai codi, manifests ni docs vius.
+- [ ] El badge de CI del README funciona amb el nom nou.
+- [ ] La release del bump següent publica els ZIPs sota el repo renombrat i els enllaços del README hi apunten.
+- [ ] AMO actualitzat amb les URLs noves.
+
+---
+
 ## Resum de documents Office online (Word/PowerPoint de SharePoint/OneDrive)
 
 **Context (2026-06-11):** Actualment l'extracció de contingut (`sidebar/content.js`) injecta Readability/Defuddle al DOM de la pàgina i, per a PDFs, els detecta per Content-Type i els processa amb `sidebar/pdf-extract.js`. Els documents Word (`.docx`) i PowerPoint (`.pptx`) oberts online a SharePoint/OneDrive **no funcionen** perquè:
