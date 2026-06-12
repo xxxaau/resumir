@@ -37,7 +37,10 @@ function collectFiles(dir, predicate, files = []) {
         const full = resolve(dir, entry);
         const rel  = relative(root, full);
         if (statSync(full).isDirectory()) {
-            if (entry === "node_modules" || entry === ".git") continue;
+            // Exclou dependències i TOTS els artefactes de build (build/,
+            // build_firefox/, build_chromium/, build_chromium_dev/): contenen
+            // còpies de vendors que dispararien falsos positius als checks.
+            if (entry === "node_modules" || entry === ".git" || entry.startsWith("build")) continue;
             collectFiles(full, predicate, files);
         } else if (predicate(full, rel)) {
             files.push(full);
