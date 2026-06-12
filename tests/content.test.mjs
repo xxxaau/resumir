@@ -104,6 +104,27 @@ test("executeScriptSafe - atorga permís i reintenta quan l'usuari accepta", asy
     assert.deepEqual(res, [{ result: "retry-ok" }]);
 });
 
+test("executeScriptSafe - reconeix l'error de permís de Chromium/Edge i reintenta", async () => {
+    // Chromium/Edge no diu "Missing host permission" sinó "Cannot access
+    // contents of the page...". Ha de tractar-se igualment com a error de
+    // permís: demanar-lo i reintentar (regressió del bug a pàgines HTTPS).
+    let calls = 0;
+    global.ext = {
+        tabs: { query: async () => [DEFAULT_TAB], get: async () => DEFAULT_TAB },
+        scripting: {
+            executeScript: async () => {
+                if (calls++ === 0) {
+                    throw new Error("Cannot access contents of the page. Extension manifest must request permission to access the respective host.");
+                }
+                return [{ result: "retry-ok" }];
+            },
+        },
+        permissions: { request: async () => true },
+    };
+    const res = await executeScriptSafe({ target: { tabId: 1 }, func: () => {} });
+    assert.deepEqual(res, [{ result: "retry-ok" }]);
+});
+
 test("executeScriptSafe - propaga errors que no són de permisos", async () => {
     global.ext = makeExt({
         tabs: [DEFAULT_TAB],

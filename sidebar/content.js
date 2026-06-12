@@ -13,8 +13,18 @@ async function executeScriptSafe(injection) {
     try {
         return await ext.scripting.executeScript(injection);
     } catch (err) {
-        const isPermissionError = err.message.includes("Missing host permission") ||
-                                  err.message.includes("Missing permissions");
+        // El text de l'error de permís difereix per navegador:
+        //  - Firefox: "Missing host permission for the tab" / "Missing permissions"
+        //  - Chromium/Edge: "Cannot access contents of the page. Extension
+        //    manifest must request permission to access the respective host."
+        // Si només es comprova la variant de Firefox, a Chromium l'error es
+        // propaga sense demanar el permís → l'usuari veu l'error de permisos
+        // en pàgines HTTPS normals on sí es podria concedir.
+        const m = (err.message || "").toLowerCase();
+        const isPermissionError = m.includes("missing host permission") ||
+                                  m.includes("missing permissions") ||
+                                  m.includes("cannot access contents") ||
+                                  m.includes("must request permission");
         if (!isPermissionError) throw err;
 
         // Permission missing — try to request it (requires user gesture)
