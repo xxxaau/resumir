@@ -50,6 +50,7 @@ const extensionGlobals = {
     // sidebar/summary.js
     startSummary: "readonly",
     classifyError: "readonly",
+    applyBionicStyles: "readonly",
     handleTrigger: "readonly",
     // sidebar/ui.js
     setGeneratingState: "readonly",

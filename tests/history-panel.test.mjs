@@ -115,6 +115,7 @@ function setupGlobals(dom) {
     global.listCachedSummaries = async () => [];
     global.getSummaryCache = async () => null;
     global.DEFAULT_BIONIC = { fixation: 20, font: "system-ui, sans-serif", weight: "600", fontSize: "1.2em", lineHeight: "1.5" };
+    global.applyBionicStyles = () => {}; // definit a summary.js; mock com la resta de globals
     global.formatTextToFragment = (text) => {
         const el = makeEl();
         el.textContent = text;

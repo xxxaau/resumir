@@ -300,17 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyBionicToContent(config) {
         const cfg = config || globalConfigCache;
-        contentDiv.style.fontFamily = cfg.bionicFont || DEFAULT_BIONIC.font;
-        // La mida biònica venia en 'em', però com a font-size l''em' és relatiu
-        // al PARE (#container = 12px), no als 14px de #content. Així "Normal
-        // (1em)" donava 12px — més petit que la lectura normal. L'ancorem a la
-        // mida base de #content (14px) perquè "Normal" hi coincideixi i l'escala
-        // sigui coherent a tots els navegadors.
-        const CONTENT_BASE_PX = 14; // ha de coincidir amb #content { font-size } a sidebar.css
-        const sizeFactor = parseFloat(cfg.bionicFontSize || DEFAULT_BIONIC.fontSize) || 1;
-        contentDiv.style.fontSize = (CONTENT_BASE_PX * sizeFactor) + "px";
-        contentDiv.style.lineHeight = cfg.bionicLineHeight || DEFAULT_BIONIC.lineHeight;
-        contentDiv.style.setProperty("--bionic-weight", cfg.bionicWeight || DEFAULT_BIONIC.weight);
+        // applyBionicStyles (summary.js) és l'únic punt que estila #content en
+        // mode biònic — hi ancora la mida en px sobre --content-base-size.
+        applyBionicStyles(contentDiv, true, cfg);
         const fixation = (cfg.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
         if (currentMetadata.summary) {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
@@ -327,9 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             bionicBtn.classList.remove("active");
             bionicBtn.setAttribute("aria-pressed", "false");
-            contentDiv.style.fontFamily = "";
-            contentDiv.style.fontSize = "";
-            contentDiv.style.lineHeight = "";
+            applyBionicStyles(contentDiv, false);
             if (currentMetadata.summary) {
                contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
             }

@@ -83,17 +83,9 @@ async function loadHistoryEntry(entry) {
     } else {
         contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
     }
-    if (bionicEnabled) {
-        contentDiv.style.fontFamily = bionicConfig.bionicFont || DEFAULT_BIONIC.font;
-        contentDiv.style.fontSize = bionicConfig.bionicFontSize || DEFAULT_BIONIC.fontSize;
-        contentDiv.style.lineHeight = bionicConfig.bionicLineHeight || DEFAULT_BIONIC.lineHeight;
-        contentDiv.style.setProperty("--bionic-weight", bionicConfig.bionicWeight || DEFAULT_BIONIC.weight);
-    } else {
-        contentDiv.style.fontFamily = "";
-        contentDiv.style.fontSize = "";
-        contentDiv.style.lineHeight = "";
-        contentDiv.style.removeProperty("--bionic-weight");
-    }
+    // applyBionicStyles (summary.js) és l'únic punt que estila #content en mode
+    // biònic — manté la mida coherent amb la resta de camins (streaming, toggle).
+    applyBionicStyles(contentDiv, bionicEnabled, bionicConfig);
     contentDiv.classList.remove("hidden");
 
     const historyPanel = document.getElementById("history-panel");

@@ -153,9 +153,12 @@ body {
 
 /* Content Area */
 #content {
+  /* Base de la mida de lectura. El mode biònic la llegeix per JS
+     (applyBionicStyles) per ancorar-hi els factors em del select d'opcions. */
+  --content-base-size: 14px;
   white-space: pre-wrap;
   line-height: 1.5;
-  font-size: 14px;
+  font-size: var(--content-base-size);
 }
 
 #content a {
@@ -350,6 +353,14 @@ body {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* Focus de teclat visible (WCAG 2.4.7): amb appearance:none i outline:none
+   el focus quedava totalment invisible per a usuaris de teclat. */
+#model-select:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 #model-select option {
