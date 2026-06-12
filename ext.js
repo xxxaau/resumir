@@ -26,6 +26,11 @@ const baseApi = isFirefox ? browser : chrome;
 const ext = {
     ...baseApi,
 
+    // Única font de veritat de la detecció de navegador. Els consumidors
+    // (background.js, etc.) han d'usar ext.isFirefox, MAI una detecció pròpia:
+    // les heurístiques ad-hoc divergeixen (vegeu el bug del global `browser`).
+    isFirefox,
+
     // Alias for Context Menus (Firefox: menus, Chromium: contextMenus)
     menus: baseApi.menus || baseApi.contextMenus,
 

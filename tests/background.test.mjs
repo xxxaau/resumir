@@ -56,16 +56,14 @@ global.ext = {
     },
 };
 
-// (Re)carrega background.js simulant un navegador concret. getBrowserInfo és
-// una API només de Firefox: present → Firefox, absent (null) → Chromium.
+// (Re)carrega background.js simulant un navegador concret via ext.isFirefox
+// (la detecció unificada que exposa ext.js).
 function loadBackground({ firefox } = { firefox: false }) {
     listeners.actionClicked  = null;
     listeners.onInstalled    = null;
     listeners.menusClicked   = null;
     listeners.storageChanged = null;
-    global.ext.runtime.getBrowserInfo = firefox
-        ? (async () => ({ name: "Firefox" }))
-        : null;
+    global.ext.isFirefox = firefox;
     delete require.cache[require.resolve("../background.js")];
     require("../background.js");
 }

@@ -4,14 +4,14 @@
 // Toolbar action click → open/close the sidebar.
 //  - Firefox: browser.sidebarAction.toggle() is the native open/close, and
 //    Firefox has no "open panel on action click" bound to the panel, so we
-//    register this listener. (getBrowserInfo is a Firefox-only API.)
+//    register this listener.
 //  - Chromium/Edge: the browser opens AND closes the panel natively via
 //    setPanelBehavior({openPanelOnActionClick:true}) below. We deliberately do
-//    NOT register an onClicked listener there: it is mutually exclusive with
-//    the native behavior, and driving chrome.sidePanel.open() ourselves proved
-//    unreliable on Edge (the call resolves but the panel never appears). Letting
-//    the browser open the panel avoids the user-gesture/async pitfalls entirely.
-if (typeof ext.runtime.getBrowserInfo === "function") {
+//    NOT register an onClicked listener there: registering one SUPPRESSES the
+//    native open-on-click behavior (they are mutually exclusive), leaving the
+//    toolbar icon dead. The native path also gives us close-on-click for free,
+//    which chrome.sidePanel has no API for.
+if (ext.isFirefox) {
   ext.action.onClicked.addListener(async (tab) => {
     try {
       await ext.sidebar.toggle(tab.windowId);
@@ -23,32 +23,24 @@ if (typeof ext.runtime.getBrowserInfo === "function") {
 
 // Chromium/Edge: open/close the side panel when the toolbar icon is clicked.
 // Re-applied on every service worker startup (a revived worker won't re-run
-// onInstalled). No-op on Firefox.
-ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
+// onInstalled). No-op on Firefox. If this fails, the icon does nothing on
+// Chromium — log it loudly instead of dying as an unhandled rejection.
+ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true })
+  .catch(err => console.error("[sidebar] setPanelBehavior failed (toolbar icon will be inert):", err));
 
 // --- Context Menus ---
 
-ext.runtime.onInstalled.addListener(async (details) => {
+ext.runtime.onInstalled.addListener(async (_details) => {
   // Chromium: open the side panel when the toolbar icon is clicked (native
   // open/close). Persisted across restarts; also re-applied at top-level above.
   ext.sidebar.setPanelBehavior({ openPanelOnActionClick: true });
 
-  if (details.reason === "install") {
-    // Firefox: request all_urls permission on first install only
-    if (ext.runtime.getBrowserInfo) {
-      try {
-        const browserInfo = await ext.runtime.getBrowserInfo();
-        if (browserInfo.name === "Firefox") {
-          ext.permissions.request({
-            permissions: [],
-            origins: ["<all_urls>"]
-          }).catch(() => {});
-        }
-      } catch (_e) {
-        // getBrowserInfo not available (Chromium), skip silently
-      }
-    }
-  }
+  // NOTA permisos: <all_urls> és host_permissions REQUERIT al manifest.
+  // A Chromium es concedeix a la instal·lació. A Firefox MV3 els host
+  // permissions són opcionals per naturalesa: demanar-los aquí NO funciona
+  // (permissions.request exigeix un gest d'usuari i onInstalled no en té),
+  // així que el camí real de concessió és executeScriptSafe (content.js),
+  // que els demana sota el gest del primer "Resumir".
 
   // Recreate context menus on install and update (browser clears them on update).
   // Both Firefox (browser.menus) and modern Chromium (chrome.contextMenus) return
