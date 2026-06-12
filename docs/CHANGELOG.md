@@ -11,6 +11,58 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ---
 
+## [2.5.0] - 2026-06-12
+
+### Arreglat
+- **Chromium/Edge: el panell lateral s'obre des de la icona.** El Chromium modern
+  (≥ ~140) també exposa un global `browser`, cosa que feia que la detecció de
+  navegador (`typeof browser`) classifiqués Edge/Chrome com a Firefox i tot
+  `ext.sidebar` fos un no-op silenciós (el panell no s'obria mai). La detecció ara
+  usa `browser.sidebarAction` i s'exposa com a `ext.isFirefox` (única font de
+  veritat). Tests de regressió que simulen el Chromium real (global `browser`
+  present sense `sidebarAction`).
+- **Selector de models llegible** a la barra inferior: la fletxa nativa del
+  desplegable se superposava al nom del model a Chromium/Edge; ara hi ha un caret
+  SVG propi amb espai reservat i el·lipsi.
+- **Lectura biònica amb mida coherent a tot arreu**: la mida s'aplicava en `em`
+  relatiu al pare (12px) i «Normal» es veia més petit que la lectura normal; a
+  més, cada camí (toggle, streaming, historial) aplicava els estils pel seu
+  compte. Ara un únic helper (`applyBionicStyles`) ancora la mida en px sobre
+  `--content-base-size` (sidebar.css).
+- **Twitter/X als paquets publicats**: `defuddle.js` no s'incloïa als ZIPs de
+  producció i l'extracció de fils queia silenciosament al fallback.
+- **Errors de permís reconeguts a Chromium/Edge**: el missatge «Cannot access
+  contents of the page» no es detectava (només la variant de Firefox) i l'usuari
+  veia l'error de permisos en pàgines HTTPS normals en lloc de la petició de
+  permís.
+- **Mapa conceptual: enquadrament inicial més allunyat** (escala d'autofit 0.78):
+  el mapa es veu sencer per defecte, sense haver d'allunyar el zoom amb la roda.
+- **Errors més clars en pàgines restringides** (nou codi `[011]`): s'explica el
+  motiu real (pàgina restringida o permís denegat) en lloc de suggerir recarregar.
+
+### Canviat
+- **Permisos: `<all_urls>` ara és requerit a la instal·lació** (abans era opcional
+  en temps d'execució): resumir ja no demana permís lloc a lloc. ⚠️ En
+  actualitzar, el navegador demana re-aprovar els permisos — és normal i només
+  passa una vegada.
+- A Chromium el clic a la icona usa el comportament natiu del panell
+  (`openPanelOnActionClick`); el listener d'acció només es registra a Firefox
+  (són mútuament excloents a Chromium).
+
+### Accessibilitat
+- Focus de teclat visible al selector de models (WCAG 2.4.7), que amb el caret
+  personalitzat hauria quedat invisible.
+
+### Desenvolupament
+- `npm run dev:chromium`: genera la carpeta desempaquetada per provar a
+  Edge/Chrome (el `manifest.json` de l'arrel és el de Firefox i no funciona a
+  Chromium).
+- Proposta de valor i pla de comunicació (`docs/COMUNICACIO.md`); literals d'AMO
+  i CWS alineats; README reescrit amb crèdits a les llibreries open source
+  (Readability, Defuddle, pdf.js, markmap+D3).
+
+---
+
 ## [2.4.1] - 2026-06-10
 
 ### Canviat
