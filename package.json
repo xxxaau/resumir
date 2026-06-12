@@ -33,6 +33,7 @@
     "release:firefox": "node scripts/release.mjs --target firefox",
     "release:chromium": "node scripts/release.mjs --target chromium",
     "dev": "node scripts/set-mode.mjs dev",
+    "dev:chromium": "node scripts/dev-chromium.mjs",
     "prod": "node scripts/set-mode.mjs prod",
     "manifests:gen": "node scripts/merge-manifest.mjs firefox manifest.json && node scripts/merge-manifest.mjs chromium manifest.chromium.json",
     "version:sync": "node scripts/bump-version.mjs",

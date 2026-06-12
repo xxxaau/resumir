@@ -17,6 +17,7 @@ desktop.ini
 background.bundle.js
 sidebar.bundle.js
 build/
+build_chromium_dev/
 .backups/
 
 # Temporary output files
