@@ -1,3 +1,29 @@
+# Release v2.5.0 — Sessió 2026-06-12 (tarda)
+
+## El hook `postversion` deixa els manifests fora del commit taggejat
+
+`npm version` executa: `preversion` → bump → **`version`** → commit+tag →
+`postversion`. El sync de manifests era a `postversion` → quedava *staged però
+fora del commit taggejat* → el workflow de release (tags `v*`) compilava amb la
+versió antiga i fallava. **Fix:** el sync va al hook `version` (package.json),
+que s'executa abans del commit i els fitxers staged hi queden inclosos.
+Recuperació: moure el tag (`git tag -fa vX.Y.Z HEAD` + push `--force`) mentre
+la release no s'hagi publicat.
+
+**Lliçó general:** un hook que fa `git add` només té efecte si corre ABANS del
+commit. I verifica sempre el contingut del commit taggejat
+(`git show vX.Y.Z:manifest.json`), no només el working tree.
+
+## Els checks que escanegen el repo han d'excloure artefactes
+
+`pre-release-check.mjs` escanejava `build_chromium_dev/` (carpeta dev nova) i
+disparava un fals positiu de `console.log` als vendors copiats. Les exclusions
+per prefix (`rel.startsWith("vendor")`) no cobreixen còpies dins d'altres
+directoris — exclou els directoris d'artefactes (`build*`) a l'arrel del
+recorregut, no per camí relatiu.
+
+---
+
 # Cross-browser: side panel i detecció de navegador — Sessió 2026-06-12
 
 > Proves a Edge: la icona de l'extensió no obria el side panel. Després de
