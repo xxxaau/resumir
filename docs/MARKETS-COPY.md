@@ -43,13 +43,13 @@ qualsevol cosa que llegeixes o mires — articles, vídeos, fils, PDFs — en
 coneixement estructurat, comprensible i teu. Al teu navegador, amb la teva
 clau de Gemini, sense intermediaris.
 
-═══════════════════════════════════════════════════════════════
+═══════════════════════════════
 
 📥 CAPTURA QUALSEVOL CONTINGUT
 
 Si ho pots obrir al navegador, ho pots aprofitar:
 • Articles i pàgines web (extracció neta del text)
-• Vídeos de YouTube (transcripcions, també amb subtítols automàtics)
+• Vídeos de YouTube (transcripcions, també automàtiques)
 • Fils de Twitter/X i discussions de Hacker News (article + comentaris)
 • PDFs remots i locals (amb capa de text)
 
@@ -64,14 +64,14 @@ No un resum: la comprensió que necessites en cada moment.
 • Mapa conceptual — visualització interactiva amb zoom, plegat de
   branques i exportació a PNG
 
-I si en vols més: tots els prompts són 100 % personalitzables.
+Tots els prompts són 100 % personalitzables.
 
 📚 CONEIXEMENT QUE PERDURA
 
 El que entens avui, ho trobes demà:
 • Envia resums a Obsidian amb plantilla configurable
 • Copia en Markdown net i reutilitzable
-• Historial i memòria cau local: els resums anteriors carreguen a l'instant
+• Historial i memòria cau local: resums anteriors a l'instant
 • Estadístiques de tokens i cost per model
 
 📖 LLEGIBILITAT A LA TEVA MIDA
@@ -80,7 +80,7 @@ El que entens avui, ho trobes demà:
 • 5 temes: sistema, clar, fosc, solarized i gris
 • Navegable per teclat i amb contrast acurat (WCAG)
 
-═══════════════════════════════════════════════════════════════
+═══════════════════════════════
 
 🔒 CONFIANÇA RADICAL
 
@@ -92,14 +92,13 @@ Aquesta extensió NO fa:
 
 Aquesta extensió SÍ:
 ✅ Guarda la clau API i totes les dades només al teu navegador
-✅ Envia el contingut directament a l'API de Google Gemini (HTTPS),
-   i només quan tu ho demanes
+✅ Envia el contingut només a l'API de Google Gemini (HTTPS), quan tu ho demanes
 ✅ Codi obert (MPL-2.0), auditable per qualsevol
 
 Política de privacitat completa:
 https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md
 
-═══════════════════════════════════════════════════════════════
+═══════════════════════════════
 
 🚀 COM COMENÇAR
 
@@ -109,7 +108,14 @@ https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLI
 3. Enganxa-la a Configuració › Clau API Gemini
 4. Obre qualsevol pàgina i clica «Resumir»
 
-═══════════════════════════════════════════════════════════════
+═══════════════════════════════
+
+🙏 CONSTRUÏT SOBRE ESPATLLES DE GEGANTS
+
+Resumir existeix gràcies a aquests projectes open source:
+• Readability.js (Mozilla, Apache-2.0) — extracció d'articles
+• Defuddle (Steph Ango, MIT) — extracció neta de contingut
+• pdf.js (Mozilla, Apache-2.0) — lectura de PDFs
 
 🐛 Errors i suggeriments:
 https://github.com/xxxaau/extensio-resumir-contingut/issues
@@ -120,7 +126,7 @@ https://github.com/xxxaau/extensio-resumir-contingut
 Fet a Banyoles ❤️
 ```
 
-**Caràcters:** ~2.600 ✅ (dins del límit de 3.000)
+**Caràcters:** 2957 ✅ (dins del límit de 3.000)
 
 ---
 

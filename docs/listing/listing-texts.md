@@ -58,6 +58,10 @@ Every prompt is 100% customizable.
 - No telemetry, no analytics, no account, no ads
 - Open source (MPL-2.0)
 
+### 🙏 Built on the shoulders of giants
+
+Resumir exists thanks to these open source projects: **Readability.js** (Mozilla, Apache-2.0) for article extraction, **Defuddle** (Steph Ango, MIT) for clean content extraction, and **pdf.js** (Mozilla, Apache-2.0) for PDF reading.
+
 ### Requirements
 
 - A free Google Gemini API key (from [Google AI Studio](https://aistudio.google.com/)) — no credit card needed
