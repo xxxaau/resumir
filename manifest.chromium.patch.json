@@ -3,9 +3,6 @@
         "contextMenus",
         "sidePanel"
     ],
-    "optional_permissions": [
-        "<all_urls>"
-    ],
     "optional_host_permissions": [
         "<all_urls>"
     ],
