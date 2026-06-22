@@ -53,6 +53,20 @@ test("LinkedIn: extractLinkedInPost extreu el post de la vista pública", () => 
     assert.ok(text && text.trim().length > 30, "ha d'extreure el post (nivell públic o OG)");
 });
 
+test("YouTube: readYoutubeCaptionMeta llegeix tracks o prerenderedText de ytInitialData", () => {
+    const fix = JSON.parse(readFix("youtube-ytdata.json"));
+    // Simulem l'estat de la pàgina de YouTube al MAIN world.
+    global.window = {
+        ytInitialPlayerResponse: fix.ytInitialPlayerResponse,
+        ytInitialData: fix.ytInitialData,
+    };
+    global.document = { querySelector: () => null }; // #movie_player absent al test
+    const meta = extractors.readYoutubeCaptionMeta();
+    assert.ok(!meta.error, "no ha de retornar error amb fixture vàlida");
+    assert.ok(meta.hasTracks === true || (meta.prerenderedText && meta.prerenderedText.length > 0),
+        "ha de detectar pistes o text pre-renderitzat");
+});
+
 test("Readability: extractWithReadability extreu >100 caràcters d'un article", () => {
     const dom = loadDom("article-generic.html");
     // Readability és un global a la pàgina; al test l'injectem des de vendor.

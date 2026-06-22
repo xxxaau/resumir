@@ -205,6 +205,67 @@ function extractLinkedInPost() {
     return null;
 }
 
+// Llegeix les metadades de subtítols de YouTube des dels globals del MAIN world.
+// Retorna { hasTracks, tracks, activeVssId, prerenderedText, captionBaseUrl }
+// o { error } si falla. Autocontinguda: només usa globals window i document.
+function readYoutubeCaptionMeta() {
+    try {
+        // Pistes de subtítols del player
+        const rawCaptionTracks = window.ytInitialPlayerResponse?.captions
+            ?.playerCaptionsTracklistRenderer?.captionTracks || [];
+
+        // Pista activa via API privada del player (pot no estar disponible)
+        let activeVssId = null;
+        try {
+            const player = document.querySelector('#movie_player');
+            player?.loadModule?.('captions');
+            const active = player?.getOption?.('captions', 'track');
+            activeVssId = active?.vss_id || active?.vssId || null;
+        } catch { /* API privada — ignorem */ }
+
+        // Text pre-renderitzat del panell de transcripció (ytInitialData)
+        let prerenderedText = '';
+        try {
+            const panels = window.ytInitialData?.engagementPanels || [];
+            const transcriptPanel = panels.find(p =>
+                p?.engagementPanelSectionListRenderer?.targetId === 'engagement-panel-searchable-transcript'
+            );
+            const segments = transcriptPanel
+                ?.engagementPanelSectionListRenderer
+                ?.content?.transcriptRenderer
+                ?.content?.transcriptSearchPanelRenderer
+                ?.body?.transcriptSegmentListRenderer
+                ?.initialSegments || [];
+            const lines = segments
+                .map(s => s?.transcriptSegmentRenderer?.snippet?.runs?.map(r => r.text)?.join('') || '')
+                .filter(Boolean);
+            if (lines.length > 0) prerenderedText = lines.join(' ');
+        } catch { /* ytInitialData absent o estructura canviada */ }
+
+        // URL base de la millor pista si no hi ha text pre-renderitzat
+        let captionBaseUrl = null;
+        if (!prerenderedText && rawCaptionTracks.length > 0) {
+            const best = rawCaptionTracks.find(t => t.vssId === activeVssId)
+                || rawCaptionTracks.find(t => t.kind !== 'asr')
+                || rawCaptionTracks[0];
+            captionBaseUrl = best?.baseUrl || null;
+        }
+
+        return {
+            hasTracks: rawCaptionTracks.length > 0,
+            tracks: rawCaptionTracks.map(t => ({
+                lang: t.languageCode || '',
+                langName: t.name?.simpleText || '',
+                vssId: t.vssId || '',
+                isAsr: t.kind === 'asr' || (t.vssId || '').startsWith('a.'),
+            })),
+            activeVssId,
+            prerenderedText,
+            captionBaseUrl,
+        };
+    } catch (e) { return { error: String(e) }; }
+}
+
 // Export per a Node (tests/canari). Ignorat al navegador (module undefined).
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
@@ -213,5 +274,6 @@ if (typeof module !== "undefined" && module.exports) {
         extractTwitterOG,
         extractWithReadability,
         extractLinkedInPost,
+        readYoutubeCaptionMeta,
     };
 }
