@@ -70,3 +70,10 @@ test("estat: appendAnkiCards afegeix sense duplicar preguntes", () => {
     assert.equal(all.length, 2); // "A?" no es duplica
     assert.ok(all.some(c => c.q === "C?"));
 });
+
+test("buildAnkiRegenPrompt inclou exclusió i enfocament", () => {
+    const p = anki.buildAnkiRegenPrompt("BASE {{LANG}}", "ca", ["Què és X?", "Quan?"], "dates i xifres");
+    assert.ok(p.includes("català"));
+    assert.ok(p.includes("Què és X?") && p.includes("Quan?"), "ha de llistar les preguntes a excloure");
+    assert.ok(/dates i xifres/.test(p), "ha d'incloure l'enfocament");
+});

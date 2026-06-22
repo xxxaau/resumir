@@ -185,19 +185,80 @@ async function exportAnkiToObsidian(ctx) {
 }
 
 /**
- * Stub temporal — implementat a la Task 6.
- * Genera targetes addicionals a partir del text original de la pàgina.
- * @param {Object} _ctx - Context de summary (contentDiv, errorDiv, etc.)
- * @param {string} _focusText - Text d'afinament optatiu
+ * Construeix el prompt de regeneració substituint {{LANG}}, afegint les
+ * preguntes a excloure i l'enfocament optatiu.
+ * Funció pura i testejable (sense efectes secundaris).
+ * @param {string} basePrompt - Prompt base (pot contenir {{LANG}})
+ * @param {string} lang - Codi d'idioma ("en" → "English", qualsevol altre → "català")
+ * @param {string[]} existingQuestions - Preguntes ja generades a excloure
+ * @param {string} focusText - Text d'afinament optatiu
+ * @returns {string}
  */
-function generateMoreAnkiCards(_ctx, _focusText) {
-    // implementat a la Task 6
+function buildAnkiRegenPrompt(basePrompt, lang, existingQuestions, focusText) {
+    const langName = lang === "en" ? "English" : "català";
+    let p = basePrompt.replace(/\{\{LANG\}\}/g, langName);
+    if (existingQuestions && existingQuestions.length) {
+        p += `\n\nNo repeteixis aquestes preguntes ja generades:\n- ${existingQuestions.join("\n- ")}`;
+    }
+    if (focusText) {
+        p += `\n\nCentra les noves targetes en: ${focusText}`;
+    }
+    return p;
+}
+
+/**
+ * Genera targetes addicionals a partir del text original de la pàgina.
+ * Substitueix l'stub de la Task 5.
+ * @param {Object} ctx - Context del panell (contentDiv, errorDiv, getGlobalConfig)
+ * @param {string} focusText - Text d'afinament optatiu
+ */
+async function generateMoreAnkiCards(ctx, focusText) {
+    // Obtenim el text original de la pàgina (injectat per la pipeline, Task 5)
+    const pageText = (typeof window !== "undefined" && window.__ankiPageText) || "";
+    if (!pageText) return;
+
+    // Clau d'API (storage.local) i configuració del model (storage.sync)
+    const { apiKey } = await ext.storage.local.get(["apiKey"]);
+    const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang"]);
+    const modelName = cfg.modelName || DEFAULT_MODEL_ID;
+    const base = cfg.ankiPrompt || DEFAULT_ANKI_PROMPT;
+    const lang = cfg.ankiLang || DEFAULT_ANKI_LANG;
+
+    // Construïm el prompt excloent les preguntes ja existents
+    const existing = getAnkiCards().map(c => c.q);
+    const prompt = buildAnkiRegenPrompt(base, lang, existing, focusText);
+
+    // Acumulem la resposta en streaming
+    let raw = "";
+    try {
+        await callGeminiStream(apiKey, modelName, prompt, pageText, undefined,
+            (chunk) => { raw += chunk; }, () => {});
+    } catch (e) {
+        if (ctx.errorDiv) {
+            ctx.errorDiv.textContent = "Error generant més targetes: " + e.message;
+            ctx.errorDiv.classList.remove("hidden");
+        }
+        return;
+    }
+
+    // Parsejem i afegim les targetes noves
+    const newCards = parseAnkiCards(raw);
+    if (newCards.length === 0) {
+        if (ctx.errorDiv) {
+            ctx.errorDiv.textContent = "No s'han pogut generar més targetes.";
+            ctx.errorDiv.classList.remove("hidden");
+        }
+        return;
+    }
+    appendAnkiCards(newCards);
+    renderAnkiPanel(ctx);
 }
 
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         parseAnkiCards, formatCardForAnki, buildAnkiExport, ANKI_INLINE_MAX_LEN,
         setAnkiCards, getAnkiCards, getSelectedAnkiCards, appendAnkiCards,
-        renderAnkiPanel, exportAnkiToObsidian, generateMoreAnkiCards,
+        renderAnkiPanel, exportAnkiToObsidian,
+        buildAnkiRegenPrompt, generateMoreAnkiCards,
     };
 }
