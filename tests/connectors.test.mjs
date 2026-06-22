@@ -47,6 +47,12 @@ test("Twitter: scrapeTwitterTweets extreu els tweets del DOM", () => {
     assert.ok(scraped.includes("milestone") || scraped.length > 20, "ha de contenir el text del tweet");
 });
 
+test("LinkedIn: extractLinkedInPost extreu el post de la vista pública", () => {
+    loadDom("linkedin-public.html");
+    const text = extractors.extractLinkedInPost();
+    assert.ok(text && text.trim().length > 30, "ha d'extreure el post (nivell públic o OG)");
+});
+
 test("Readability: extractWithReadability extreu >100 caràcters d'un article", () => {
     const dom = loadDom("article-generic.html");
     // Readability és un global a la pàgina; al test l'injectem des de vendor.

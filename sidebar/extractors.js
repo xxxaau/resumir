@@ -131,6 +131,80 @@ function extractWithReadability() {
     return (fallback || "").replace(/\s{3,}/g, "\n\n").trim();
 }
 
+// Extreu el contingut d'una publicació de LinkedIn amb fallback de 3 nivells.
+// Nivell 1: selectors de la vista logged-in. Nivell 2: selectors de la vista pública.
+// Nivell 3: Open Graph (og:title + og:description).
+function extractLinkedInPost() {
+    // Helper local: innerText quan disponible (navegador), textContent com a fallback (jsdom).
+    const getText = (el) => (el && el.innerText !== undefined ? el.innerText : (el ? el.textContent : "")) || "";
+
+    // Nivell 1 — vista logged-in (feed): autor + post + comentaris.
+    const loggedInAuthor = getText(
+        document.querySelector(".update-components-actor__title, .feed-shared-actor__title")
+    ).trim().split("\n")[0];
+
+    const expandBtn = document.querySelector(
+        ".feed-shared-inline-show-more-text button, " +
+        ".update-components-text button.see-more"
+    );
+    if (expandBtn) expandBtn.click();
+
+    const loggedInPost = getText(
+        document.querySelector(".update-components-text, .feed-shared-text")
+    ).trim();
+
+    if (loggedInPost) {
+        const parts = [];
+        if (loggedInAuthor) parts.push(`Autor: ${loggedInAuthor}`);
+        parts.push(`\nPublicació:\n${loggedInPost}`);
+
+        const UI_NOISE = /^(Like|Reply|Show translation|Load more|Comment|Repost|Send|See more|\d+\s*(like|comment|reaction))/i;
+        const extractComment = (item, indent) => {
+            const nameEl = item.querySelector(
+                ".comments-post-meta__name-text, .comments-post-meta__name, " +
+                ".feed-shared-actor__name, .hoverable-link-text"
+            );
+            const textEl = item.querySelector(
+                ".comments-comment-item__main-content, .comments-comment-texteditor, .update-components-text"
+            );
+            const name = getText(nameEl).trim().split("\n")[0];
+            const txt = getText(textEl).trim();
+            if (txt.length <= 5 || UI_NOISE.test(txt)) return null;
+            return `${indent}${name ? name + ":\n" + indent : ""}${txt}`;
+        };
+        const items = Array.from(document.querySelectorAll(".comments-comment-item"));
+        const comments = [];
+        items.forEach(item => {
+            const isReply = !!item.closest(".comments-comment-item__nested-items");
+            const c = extractComment(item, isReply ? "  > " : "");
+            if (c) comments.push(c);
+        });
+        if (comments.length > 0) parts.push(`\nComentaris:\n${comments.join("\n\n")}`);
+        return parts.join("\n");
+    }
+
+    // Nivell 2 — vista pública (logged-out): card amb autor + text complet.
+    const card = document.querySelector(".main-feed-activity-card");
+    const publicSegs = Array.from(document.querySelectorAll(".attributed-text-segment-list__content"))
+        .map(s => getText(s).replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+    if (publicSegs.length > 0) {
+        const authorEl = card && card.querySelector("a[href*='/company/'], a[href*='/in/']");
+        const author = getText(authorEl).trim();
+        const body = publicSegs.join("\n\n");
+        return author ? `Autor: ${author}\n\nPublicació:\n${body}` : `Publicació:\n${body}`;
+    }
+
+    // Nivell 3 — Open Graph (servit pel servidor, immune al DOM).
+    const ogDesc = document.querySelector('meta[property="og:description"]')?.content;
+    if (ogDesc) {
+        const ogTitle = document.querySelector('meta[property="og:title"]')?.content || "";
+        return ogTitle ? `${ogTitle}\n\n${ogDesc}` : ogDesc;
+    }
+
+    return null;
+}
+
 // Export per a Node (tests/canari). Ignorat al navegador (module undefined).
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
@@ -138,5 +212,6 @@ if (typeof module !== "undefined" && module.exports) {
         scrapeTwitterTweets,
         extractTwitterOG,
         extractWithReadability,
+        extractLinkedInPost,
     };
 }
