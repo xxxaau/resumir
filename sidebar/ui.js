@@ -65,6 +65,11 @@ function applyExtensionVisibility(config) {
         conceptMapBtnEl.style.display = config.enableConceptMap ? "flex" : "none";
     }
 
+    const ankiBtnEl = document.getElementById("ankiBtn");
+    if (ankiBtnEl) {
+        ankiBtnEl.style.display = config.enableAnki ? "flex" : "none";
+    }
+
 }
 
 /**
@@ -105,6 +110,7 @@ function applyExtensionOrder(order) {
         "science": "scienceBtn",
         "conceptmap": "conceptMapBtn",
         "simple": "explainSimpleBtn",
+        "anki": "ankiBtn",
     };
     
     const orderedButtons = [];
@@ -161,7 +167,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
             activeBtn.title = "Aturar la generació";
         }
         
-        const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn", "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn"];
+        const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn", "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn", "ankiBtn"];
         for (const btnId of allActionBtns) {
             if (btnId !== currentActiveBtnId) {
                 const btn = document.getElementById(btnId);
@@ -245,7 +251,7 @@ function resetUI(hasContent, config = null) {
         applyExtensionOrder(config.extensionOrder || DEFAULT_EXTENSION_ORDER);
     } else {
         ext.storage.sync
-            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableSimple", "enablePdf", "extensionOrder"])
+            .get(["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableSimple", "enablePdf", "enableAnki", "extensionOrder"])
             .then(fetchedConfig => {
                 applyExtensionVisibility(fetchedConfig);
                 applyExtensionOrder(fetchedConfig.extensionOrder || DEFAULT_EXTENSION_ORDER);

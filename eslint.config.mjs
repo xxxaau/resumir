@@ -101,6 +101,18 @@ const extensionGlobals = {
     executeScriptSafe: "readonly",
     // sidebar/youtube-track-select.js
     selectYoutubeTrack: "readonly",
+    // sidebar/anki.js
+    parseAnkiCards: "readonly",
+    formatCardForAnki: "readonly",
+    buildAnkiExport: "readonly",
+    renderAnkiPanel: "readonly",
+    exportAnkiToObsidian: "readonly",
+    generateMoreAnkiCards: "readonly",
+    // shared/defaults.js — constants Anki
+    DEFAULT_ANKI_PROMPT: "readonly",
+    DEFAULT_ANKI_PATH: "readonly",
+    DEFAULT_ANKI_PACKET: "readonly",
+    DEFAULT_ANKI_LANG: "readonly",
 };
 
 /** Globals cross-file específics de la pàgina d'opcions (settings-*.js) */
@@ -113,6 +125,10 @@ const settingsGlobals = {
     DEFAULT_SCIENCE_PROMPT: "readonly",
     DEFAULT_CONCEPTMAP_PROMPT: "readonly",
     DEFAULT_SIMPLE_PROMPT: "readonly",
+    DEFAULT_ANKI_PROMPT: "readonly",
+    DEFAULT_ANKI_PATH: "readonly",
+    DEFAULT_ANKI_PACKET: "readonly",
+    DEFAULT_ANKI_LANG: "readonly",
     DEFAULT_EXTENSION_ORDER: "readonly",
     // settings-order.js
     getCurrentExtensionOrder: "readonly",

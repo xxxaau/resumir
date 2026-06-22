@@ -793,6 +793,8 @@ body {
   color: #bc5215; /* Flexoki Orange */
 }
 
+#ankiBtn { color: #205EA6; /* Flexoki Blue */ }
+
 #timelineCleanerBtn {
   display: none;
   color: #ef4444;
