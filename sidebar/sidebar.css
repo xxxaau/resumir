@@ -1148,3 +1148,9 @@ body {
 .prompt-update-dismiss:hover {
   opacity: 1;
 }
+
+
+/* ── Plugin Anki: targetes i controls ────────────────────────────────────── */
+.anki-card { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--text-color); border-radius: 6px; margin-bottom: 8px; }
+.anki-card textarea { width: 100%; background: var(--bg-color); color: var(--text-color); }
+.anki-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }

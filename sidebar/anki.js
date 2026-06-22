@@ -56,6 +56,138 @@ function buildAnkiExport(cards) {
         .join("\n\n");
 }
 
+// ── Estat de mòdul ──────────────────────────────────────────────────────────
+let ankiState = []; // [{ q, a, selected }]
+
+function setAnkiCards(cards) {
+    ankiState = (cards || []).map(c => ({
+        q: c.q, a: c.a,
+        selected: c.selected !== undefined ? c.selected : true,
+    }));
+    return ankiState;
+}
+function getAnkiCards() { return ankiState; }
+function getSelectedAnkiCards() {
+    return ankiState.filter(c => c.selected && c.q.trim() && c.a.trim())
+        .map(c => ({ q: c.q, a: c.a }));
+}
+function appendAnkiCards(cards) {
+    const existing = new Set(ankiState.map(c => c.q.trim().toLowerCase()));
+    for (const c of cards || []) {
+        const key = (c.q || "").trim().toLowerCase();
+        if (!key || existing.has(key)) continue;
+        existing.add(key);
+        ankiState.push({ q: c.q, a: c.a, selected: true });
+    }
+    return ankiState;
+}
+
+// ── Panell interactiu ───────────────────────────────────────────────────────
+// ctx: { contentDiv, errorDiv, getGlobalConfig, onGenerateMore(focusText) }
+function renderAnkiPanel(ctx) {
+    const { contentDiv } = ctx;
+    contentDiv.replaceChildren();
+    contentDiv.classList.remove("hidden");
+
+    const panel = document.createElement("div");
+    panel.className = "anki-panel";
+
+    ankiState.forEach((card, i) => {
+        const item = document.createElement("div");
+        item.className = "anki-card";
+
+        const keep = document.createElement("input");
+        keep.type = "checkbox";
+        keep.checked = card.selected;
+        keep.addEventListener("change", () => {
+            card.selected = keep.checked;
+            updateExportCount();
+        });
+
+        const qField = document.createElement("textarea");
+        qField.className = "anki-q";
+        qField.value = card.q;
+        qField.addEventListener("input", () => { card.q = qField.value; });
+
+        const aField = document.createElement("textarea");
+        aField.className = "anki-a";
+        aField.value = card.a;
+        aField.addEventListener("input", () => { card.a = aField.value; });
+
+        const discard = document.createElement("button");
+        discard.className = "anki-discard";
+        discard.textContent = "Descarta";
+        discard.addEventListener("click", () => {
+            ankiState.splice(i, 1);
+            renderAnkiPanel(ctx);
+        });
+
+        item.append(keep, qField, aField, discard);
+        panel.appendChild(item);
+    });
+
+    // Controls
+    const controls = document.createElement("div");
+    controls.className = "anki-controls";
+
+    const moreBtn = document.createElement("button");
+    moreBtn.textContent = "Generar 5 més";
+    moreBtn.addEventListener("click", () => ctx.onGenerateMore(""));
+
+    const focusInput = document.createElement("input");
+    focusInput.type = "text";
+    focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
+
+    const focusBtn = document.createElement("button");
+    focusBtn.textContent = "Afinar";
+    focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
+
+    const exportBtn = document.createElement("button");
+    exportBtn.id = "ankiExportBtn";
+    exportBtn.addEventListener("click", () => exportAnkiToObsidian(ctx));
+
+    function updateExportCount() {
+        exportBtn.textContent = `Afegir nota/es a Obsidian (${getSelectedAnkiCards().length})`;
+    }
+    updateExportCount();
+
+    controls.append(moreBtn, focusInput, focusBtn, exportBtn);
+    panel.appendChild(controls);
+    contentDiv.appendChild(panel);
+}
+
+// ── Exportació a Obsidian ───────────────────────────────────────────────────
+async function exportAnkiToObsidian(ctx) {
+    const config = ctx.getGlobalConfig() || {};
+    const selected = getSelectedAnkiCards();
+    if (selected.length === 0) return;
+
+    const vault = config.obsidianVault || "Obsidian";
+    const pathTemplate = config.ankiPath || DEFAULT_ANKI_PATH;
+    if (!config.obsidianVault) {
+        if (confirm("Obsidian no està configurat. Vols obrir la configuració?")) {
+            ext.runtime.openOptionsPage();
+        }
+        return;
+    }
+    const filePath = parseObsidianPath(pathTemplate);
+    const content = buildAnkiExport(selected);
+    const uri = `obsidian://new?vault=${encodeURIComponent(vault)}&file=${encodeURIComponent(filePath)}&content=${encodeURIComponent(content)}&append=true`;
+    try {
+        const tab = await ext.tabs.create({ url: uri, active: false });
+        setTimeout(() => ext.tabs.remove(tab.id).catch(() => {}), 5000);
+    } catch (err) {
+        if (ctx.errorDiv) {
+            ctx.errorDiv.textContent = "Error obrint Obsidian: " + err.message;
+            ctx.errorDiv.classList.remove("hidden");
+        }
+    }
+}
+
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { parseAnkiCards, formatCardForAnki, buildAnkiExport, ANKI_INLINE_MAX_LEN };
+    module.exports = {
+        parseAnkiCards, formatCardForAnki, buildAnkiExport, ANKI_INLINE_MAX_LEN,
+        setAnkiCards, getAnkiCards, getSelectedAnkiCards, appendAnkiCards,
+        renderAnkiPanel, exportAnkiToObsidian,
+    };
 }

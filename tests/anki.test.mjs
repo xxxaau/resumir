@@ -50,3 +50,23 @@ test("buildAnkiExport: separa targetes per línia en blanc", () => {
     ]);
     assert.equal(out, "STARTI [Basic] A? Back: 1 ENDI\n\nSTARTI [Basic] B? Back: 2 ENDI");
 });
+
+test("estat: setAnkiCards marca selected per defecte i getSelected filtra", () => {
+    anki.setAnkiCards([{ q: "A?", a: "1" }, { q: "B?", a: "2" }]);
+    let all = anki.getAnkiCards();
+    assert.equal(all.length, 2);
+    assert.equal(all[0].selected, true);
+    all[1].selected = false;
+    anki.setAnkiCards(all); // re-set respectant selected existent
+    const sel = anki.getSelectedAnkiCards();
+    assert.equal(sel.length, 1);
+    assert.equal(sel[0].q, "A?");
+});
+
+test("estat: appendAnkiCards afegeix sense duplicar preguntes", () => {
+    anki.setAnkiCards([{ q: "A?", a: "1" }]);
+    anki.appendAnkiCards([{ q: "A?", a: "dup" }, { q: "C?", a: "3" }]);
+    const all = anki.getAnkiCards();
+    assert.equal(all.length, 2); // "A?" no es duplica
+    assert.ok(all.some(c => c.q === "C?"));
+});
