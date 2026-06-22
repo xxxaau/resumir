@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const OUT_DIR = path.join(ROOT, "docs", "listing", "screenshots");
+const OUT_DIR = path.join(ROOT, "docs", "screenshots");
 
 const SUMMARY_HTML = `
 <h2>Intel·ligència artificial: el nou motor de la recerca científica</h2>
@@ -234,7 +234,7 @@ async function main() {
 
     await page.close();
     await context.close();
-    console.log(`\nCaptures desades a: docs/listing/screenshots/`);
+    console.log(`\nCaptures desades a: docs/screenshots/`);
 }
 
 main().catch(err => {

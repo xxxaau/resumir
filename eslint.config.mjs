@@ -92,8 +92,6 @@ const extensionGlobals = {
     loadHistoryEntry: "readonly",
     openSourcePanel: "readonly",
     closeSourcePanel: "readonly",
-    // defuddle.js (injectat com a script en runtime)
-    Defuddle: "readonly",
     // sidebar/markmap-native.js (renderitzador SVG propi)
     markmapNative: "readonly",
     // sidebar/stats.js
@@ -155,7 +153,6 @@ export default [
         // Fitxers a ignorar
         ignores: [
             "Readability.js",         // Llibreria de tercers (Mozilla)
-            "defuddle.js",            // Llibreria de tercers (Defuddle)
             "background.bundle.js",   // Generat automàticament pel build
             "build*/**",
             "node_modules/**",

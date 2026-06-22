@@ -30,7 +30,7 @@ const outName = "build_chromium_dev";
 const outDir = resolve(root, outName);
 
 // Fitxers d'arrel que l'extensió necessita (alguns injectats via executeScript).
-const FILES = ["ext.js", "background.bundle.js", "Readability.js", "defuddle.js", "theme.js"];
+const FILES = ["ext.js", "background.bundle.js", "Readability.js", "theme.js"];
 const DIRS = ["icons", "options", "shared", "sidebar", "vendor"];
 
 function copyDir(from, to) {

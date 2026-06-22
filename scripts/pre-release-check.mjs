@@ -53,7 +53,6 @@ function collectFiles(dir, predicate, files = []) {
 const JS_FILES = collectFiles(root, (full, rel) =>
     extname(full) === ".js" &&
     !rel.includes("Readability") &&
-    !rel.includes("defuddle") &&
     !full.endsWith(".bundle.js") &&
     !rel.startsWith("node_modules") &&
     !rel.startsWith("coverage") &&
