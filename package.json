@@ -40,16 +40,15 @@
     "version": "node scripts/bump-version.mjs && node scripts/update-changelog-html.mjs && git add manifest.base.json manifest.json manifest.chromium.json options/settings.html docs/CHANGELOG.md",
     "prerelease": "node scripts/pre-release-check.mjs",
     "prepare-release": "node scripts/prepare-release.mjs",
-    "vendor:update": "node scripts/copy-vendor.mjs",
     "vendor:verify": "node scripts/verify-vendor.mjs",
     "models:check": "node scripts/update-models-check.mjs",
-    "models:sync": "node scripts/update-models-sync.mjs"
+    "models:sync": "node scripts/update-models-sync.mjs",
+    "smoke:connectors": "node scripts/connector-smoke.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
     "@playwright/test": "^1.60.0",
     "c8": "^11.0.0",
-    "defuddle": "^0.14.0",
     "esbuild": "^0.27.3",
     "eslint": "^9.18.0",
     "globals": "^15.14.0",
