@@ -70,8 +70,8 @@ function applyBionicStyles(element, isEnabled, config = {}) {
  * @param {boolean} isSimple - Whether this is a plain-language explanation ("Explica-ho fàcil")
  * @returns {AbortController} The abort controller for cancellation
  */
-async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false) {
-    if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isUserInitiated) {
+async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false) {
+    if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isAnki && !isUserInitiated) {
         return null;
     }
 
@@ -87,6 +87,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     else if (isScience) activeBtnId = "scienceBtn";
     else if (isConceptMap) activeBtnId = "conceptMapBtn";
     else if (isSimple) activeBtnId = "explainSimpleBtn";
+    else if (isAnki) activeBtnId = "ankiBtn";
     
     setGeneratingState(true, false, activeBtnId);
     
@@ -120,6 +121,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             systemPrompt = config.sciencePrompt || DEFAULT_SCIENCE_PROMPT;
         } else if (isSimple) {
             systemPrompt = config.simplePrompt || DEFAULT_SIMPLE_PROMPT;
+        } else if (isAnki) {
+            // Selecció de prompt Anki amb substitució d'idioma
+            const langName = (config.ankiLang || DEFAULT_ANKI_LANG) === "en" ? "English" : "català";
+            systemPrompt = (config.ankiPrompt || DEFAULT_ANKI_PROMPT).replace(/\{\{LANG\}\}/g, langName);
         } else if (isConceptMap) {
             // Build dynamic prompt based on config
             const basePrompt = config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT;
@@ -170,7 +175,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache);
         
-        if (!isRefresh && !pageData && !overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple) {
+        if (!isRefresh && !pageData && !overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isAnki) {
             const cachedEntry = await getSummaryCache(currentUrl);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
@@ -184,10 +189,19 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
                 const cachedSummary = cachedEntry.summary;
                 const isCachedConceptMap = cachedSummary.startsWith("<!--conceptmap-->\n");
-                const displayText = isCachedConceptMap ? cachedSummary.substring("<!--conceptmap-->\n".length) : cachedSummary;
-                
+                const isCachedAnki = cachedSummary.startsWith("<!--anki-->\n");
+                const displayText = isCachedConceptMap
+                    ? cachedSummary.substring("<!--conceptmap-->\n".length)
+                    : isCachedAnki
+                        ? cachedSummary.substring("<!--anki-->\n".length)
+                        : cachedSummary;
+
                 if (isCachedConceptMap) {
                     contentDiv.replaceChildren(renderMarkmapInteractive(displayText, currentMetadata.title, currentMetadata.url));
+                } else if (isCachedAnki) {
+                    // Restaura l'estat Anki des de caché
+                    setAnkiCards(parseAnkiCards(displayText));
+                    renderAnkiPanel(buildAnkiCtx(ctx));
                 } else {
                     contentDiv.replaceChildren(formatTextToFragment(displayText));
                 }
@@ -252,6 +266,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const safeContent = String(pageData.text || "").replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
         let pageText = `<UNTRUSTED_CONTENT>\n${safeContent}\n</UNTRUSTED_CONTENT>`;
         ctx.setSourceText(pageData.text);
+        // Desa el text brut per a la regeneració Anki (Task 6). Guard per a tests Node.
+        if (typeof window !== "undefined") window.__ankiPageText = pageData.text;
 
         if (signal.aborted) return abortController;
 
@@ -375,6 +391,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         
         if (isConceptMap) {
             contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title, currentMetadata.url));
+        } else if (isAnki) {
+            // Desvia el render al panell Anki interactiu
+            setAnkiCards(parseAnkiCards(currentMetadata.summary));
+            renderAnkiPanel(buildAnkiCtx(ctx));
         } else {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, bionicEnabled, bionicFixation));
         }
@@ -390,8 +410,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
         const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
         
-        const contentType = isConceptMap ? "conceptmap" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
-        const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary : currentMetadata.summary;
+        const contentType = isConceptMap ? "conceptmap" : isAnki ? "anki" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
+        const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary
+            : isAnki ? "<!--anki-->\n" + currentMetadata.summary
+            : currentMetadata.summary;
         await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens, contentType);
         await saveUsageStats(inputTokens, outputTokens, contentType, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
         
@@ -510,7 +532,20 @@ function handleTrigger(startSummaryFn, data) {
     }
 }
 
+/**
+ * Construeix el ctx del panell Anki a partir del ctx de summary.
+ * onGenerateMore delega a generateMoreAnkiCards (implementat a la Task 6).
+ */
+function buildAnkiCtx(ctx) {
+    return {
+        contentDiv: ctx.contentDiv,
+        errorDiv: ctx.errorDiv,
+        getGlobalConfig: ctx.getGlobalConfig,
+        onGenerateMore: (focusText) => generateMoreAnkiCards(ctx, focusText),
+    };
+}
+
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { classifyError, buildFallbackList, startSummary };
+    module.exports = { classifyError, buildFallbackList, startSummary, buildAnkiCtx };
 }

@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Bound summary starter (partially applied with ctx)
-    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple) => {
+    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki) => {
         if (isGenerating && abortController) {
             abortController.abort();
             abortController = null;
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         isGenerating = true;
-        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple).then(ctrl => {
+        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki).then(ctrl => {
             abortController = ctrl;
         }).finally(() => {
             isGenerating = false;
@@ -402,6 +402,14 @@ document.addEventListener("DOMContentLoaded", () => {
             checkPromptUpdate("explicació planera", "simplePromptUpdateAvailable", () => {
                 doSummary(null, false, false, true, false, true);
             });
+        });
+    }
+
+    // Listener del botó Anki — inicia la generació de targetes
+    const ankiBtn = document.getElementById("ankiBtn");
+    if (ankiBtn) {
+        ankiBtn.addEventListener("click", () => {
+            doSummary(null, false, false, true, false, false, true);
         });
     }
 

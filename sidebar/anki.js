@@ -184,10 +184,20 @@ async function exportAnkiToObsidian(ctx) {
     }
 }
 
+/**
+ * Stub temporal — implementat a la Task 6.
+ * Genera targetes addicionals a partir del text original de la pàgina.
+ * @param {Object} _ctx - Context de summary (contentDiv, errorDiv, etc.)
+ * @param {string} _focusText - Text d'afinament optatiu
+ */
+function generateMoreAnkiCards(_ctx, _focusText) {
+    // implementat a la Task 6
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         parseAnkiCards, formatCardForAnki, buildAnkiExport, ANKI_INLINE_MAX_LEN,
         setAnkiCards, getAnkiCards, getSelectedAnkiCards, appendAnkiCards,
-        renderAnkiPanel, exportAnkiToObsidian,
+        renderAnkiPanel, exportAnkiToObsidian, generateMoreAnkiCards,
     };
 }
