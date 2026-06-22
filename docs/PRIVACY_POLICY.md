@@ -43,7 +43,7 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 | `tabs` | Consultar la pestanya activa, obrir links en noves pestanyes i gestionar integracions |
 | `menus` / `contextMenus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir") |
 | `sidePanel` | Obrir el panell lateral natiu a navegadors basats en Chromium |
-| `<all_urls>` (opcional) | Permís host demanat dinàmicament per executar scripts de lectura en qualsevol pàgina |
+| `<all_urls>` (requerit) | Permís host requerit, concedit a la instal·lació, per executar scripts de lectura en qualsevol pàgina |
 
 ## 5. Contacte i codi font
 

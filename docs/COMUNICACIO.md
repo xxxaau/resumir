@@ -111,7 +111,7 @@ Per evitar que el copy prometi coses que no hi són (o n'ometi):
 - 5 tipus de contingut: Resum, Aprofundiment, Mapa conceptual, Validació
   (científica), Explica-ho fàcil — tots amb prompt editable.
 - Extractors especialitzats: YouTube (transcripcions, 3 fallbacks), Hacker
-  News (article + comentaris), Twitter/X (Defuddle), PDFs (pdf.js; HTTPS
+  News (article + comentaris), Twitter/X (scrape + og:description), PDFs (pdf.js; HTTPS
   remots i locals; escanejats NO suportats — no prometre OCR).
 - Mapa conceptual interactiu: pan/zoom, plegat de branques, pantalla
   completa, export PNG. Renderitzador SVG propi.

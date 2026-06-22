@@ -60,7 +60,7 @@ Every prompt is 100% customizable.
 
 ### 🙏 Built on the shoulders of giants
 
-Resumir exists thanks to these open source projects: **Readability.js** (Mozilla, Apache-2.0) for article extraction, **Defuddle** (Steph Ango, MIT) for clean content extraction, and **pdf.js** (Mozilla, Apache-2.0) for PDF reading.
+Resumir exists thanks to these open source projects: **Readability.js** (Mozilla, Apache-2.0) for article extraction, and **pdf.js** (Mozilla, Apache-2.0) for PDF reading.
 
 ### Requirements
 

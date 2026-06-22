@@ -18,7 +18,7 @@ Si ho pots obrir al navegador, ho pots aprofitar:
 
 - **Articles i pàgines web** — extracció neta del text (Readability)
 - **YouTube** — transcripcions, també amb subtítols automàtics (3 vies de fallback per maximitzar compatibilitat)
-- **Twitter/X** — fils complets (Defuddle)
+- **Twitter/X** — fils complets (scrape del DOM amb fallback a meta `og:description`)
 - **Hacker News** — article enllaçat + fil de comentaris
 - **PDFs** — remots (HTTPS, descàrrega automàtica) i locals (botó «Selecciona PDF local»). Cal capa de text; PDFs escanejats no suportats (sense OCR)
 
@@ -101,7 +101,6 @@ Resumir existeix gràcies a aquests projectes open source, que mereixen tot el c
 | Projecte | Autor | Llicència | Què hi aporta |
 |---|---|---|---|
 | [Readability.js](https://github.com/mozilla/readability) | Mozilla (orig. Arc90) | Apache-2.0 | L'extracció d'articles — el mateix motor que el mode lectura del Firefox |
-| [Defuddle](https://github.com/kepano/defuddle) | [Steph Ango](https://stephango.com/) (kepano) | MIT | Extracció neta de contingut en pàgines complexes (fils de Twitter/X) |
 | [pdf.js](https://github.com/mozilla/pdf.js) | Mozilla | Apache-2.0 | La lectura de PDFs al navegador |
 | [markmap](https://markmap.js.org/) + [D3](https://d3js.org/) | markmap team / Mike Bostock | MIT / ISC | La inspiració del mapa conceptual (avui substituïts per un renderitzador SVG propi, però en van ser la llavor) |
 
@@ -129,7 +128,7 @@ sidebar/
   conceptmap-filename.js    # Generador del nom de fitxer PNG (funció pura)
 options/                    # Pàgina de configuració
 shared/                     # Models i valors per defecte compartits
-tests/                      # 241 tests unitaris i d'integració
+tests/                      # 243 tests unitaris i d'integració
 ```
 
 Consulta [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md) per a mapa de projectes, [docs/MODELS-WORKFLOW.md](docs/MODELS-WORKFLOW.md) per a detalls tècnics d'API i models, o [docs/CONCEPTMAP-FEATURES.md](docs/CONCEPTMAP-FEATURES.md) per al disseny del mapa conceptual.

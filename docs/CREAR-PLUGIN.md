@@ -273,11 +273,51 @@ function resetElMeuPluginPrompt() {
 }
 ```
 
+## Tipus de contingut, prompt i cache (`content-types.js` + `summary.js`)
+
+Si el plugin és un **mode de resum** (processa el text de la pàgina via l'API, com
+science/deepdive/conceptmap), a més del cablejat de la toolbar cal connectar-lo al
+pipeline de generació i a la cache:
+
+**1. Registra el tipus a `shared/content-types.js`.** Afegeix una entrada a
+`CONTENT_TYPES`. La cache és multientry amb clau `summary_cache:{url}:{type}`, i
+`sidebar/cache.js` itera `CONTENT_TYPES`, així que normalment no s'ha de tocar.
+
+**2. Prompt branching i tag de `contentType` a `sidebar/summary.js`.** Afegeix el
+flag `is<Plugin>` al final de la signatura de `startSummary()` (i de `doSummary()`),
+tria el prompt i etiqueta el `contentType` (s'usa per a la cache i les estadístiques):
+
+```javascript
+// signatura (afegir el flag nou AL FINAL)
+async function startSummary(ctx, overrideText = null,
+    isDeepDive = false, isScience = false,
+    isUserInitiated = false, isConceptMap = false, isSimple = false, is<Plugin> = false)
+
+// selecció del prompt
+let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+if (isDeepDive) systemPrompt = config.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT;
+else if (is<Plugin>) systemPrompt = config.<id>Prompt || DEFAULT_<PLUGIN>_PROMPT;
+
+// tag de contentType (cache + stats)
+const contentType = isConceptMap ? "conceptmap"
+    : is<Plugin> ? "<id>"
+    : isScience ? "science"
+    : isDeepDive ? "deepdive"
+    : "summary";
+```
+
+> Els flags de `doSummary`/`startSummary` són **posicionals**: afegeix el nou
+> SEMPRE al final per no desplaçar els existents.
+
+**3. Renderització.** Per defecte el resultat es pinta amb `formatTextToFragment`.
+Si el plugin necessita un renderitzador propi (com el mapa conceptual amb
+`renderMarkmapInteractive`), crea `sidebar/<id>.js` i afegeix-lo al bundle.
+
 ## Consideracions addicionals
 
 ### Dependències externes
 
-Si el plugin necessita llibreries externes (com d3.js per conceptmap):
+Si el plugin necessita llibreries externes:
 
 1. Col·locar els fitxers `.js` al **directori arrel** de l'extensió
 2. Afegir-los a `sidebar/sidebar.html` com a `<script>` tags
@@ -349,7 +389,7 @@ Les icones compartides entre múltiples components van a **`shared/icons.js`** (
 
 - Executar `npx eslint sidebar/elmeuplugin.js` abans de cometre
 - Afegir globals a `eslint.config.mjs` si cal
-- Executar `npm test` -- tots 207+ tests han de passar
+- Executar `npm test` -- tots els tests (243) han de passar
 - Afegir tests propis a `tests/` si el plugin té lògica parsejable
 
 ## Trampes conegudes (casos reals)

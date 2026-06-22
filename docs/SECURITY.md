@@ -57,10 +57,10 @@ A partir de la v2.3.0, l'extensió pot resumir PDFs amb capa de text mitjançant
 ### Permisos del navegador
 
 - `activeTab` — accés al contingut actiu quan l'usuari fa clic
-- `scripting` — injecció de Readability.js / Defuddle per extreure text net
+- `scripting` — injecció de Readability.js per extreure text net
 - `storage` — emmagatzematge local de preferències i caché
 - `tabs` — metadades de la pestanya (URL, títol) per a cache keys
-- `<all_urls>` — opcional, només per fetcher articles de tercers quan es sol·licita (Hacker News)
+- `<all_urls>` — permís host requerit (concedit a la instal·lació), per fetcher articles de tercers quan es sol·licita (Hacker News)
 
 ## Prova de seguretat
 

@@ -36,7 +36,7 @@ Cada versió té un storage **completament aïllat**.
 node scripts/backup-extension-data.mjs firefox dev   # Si estàs en DEV
 
 # Después canviar de mode
-.\set_dev_mode.ps1 prod
+npm run prod
 
 # L'extensió tindrà storage nou i aïllat
 ```
@@ -89,7 +89,7 @@ node scripts/backup-extension-data.mjs restore firefox-dev-2026-04-01T15-30-45 f
 - **manifest.firefox.prod.patch.json** (PROD) - Extension ID prod: `sergi@xaudiera.xyz`
 - **manifest.chromium.patch.json** (DEV) - Clau privada de dev
 - **manifest.chromium.prod.patch.json** (PROD) - Clau privada de producció
-- **set_dev_mode.ps1** - Copia els parches correctes según el mode
+- **npm run dev / npm run prod** (`scripts/set-mode.mjs`) - Copia els parches correctes según el mode
 - **scripts/backup-extension-data.mjs** - Tool de backup/restore
 
 ---

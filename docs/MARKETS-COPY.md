@@ -114,7 +114,6 @@ https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLI
 
 Resumir existeix gràcies a aquests projectes open source:
 • Readability.js (Mozilla, Apache-2.0) — extracció d'articles
-• Defuddle (Steph Ango, MIT) — extracció neta de contingut
 • pdf.js (Mozilla, Apache-2.0) — lectura de PDFs
 
 🐛 Errors i suggeriments:

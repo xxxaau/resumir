@@ -7,7 +7,14 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
-*(buit)*
+### Eliminat
+- **Llibreria Defuddle (`defuddle.js`, ~571 KB)**: només s'usava per a Twitter/X
+  i el scrape directe del DOM (`[data-testid="tweetText"]`) ja captura els fils
+  igual de bé (tots dos llegeixen el mateix DOM renderitzat). L'extracció de
+  Twitter/X passa a: scrape de tweets com a via primària + meta `og:description`
+  com a fallback robust (HTML servit pel servidor, immune a canvis del DOM).
+  Elimina 3 warnings recurrents d'AMO («Unsafe assignment to innerHTML» interns
+  de la llibreria de tercers) i ~571 KB del paquet.
 
 ---
 

@@ -32,7 +32,7 @@ Cal fer-ho coordinat amb un bump perquè els manifests publicats duen la
 *Meta del repo:*
 - [ ] `package.json` → `repository.url`
 - [ ] `README.md` → badges (CI, releases, sponsors), enllaços d'instal·lació Chromium i issues/discussions
-- [ ] `docs/`: `BUILD.md`, `CONTRIBUTING.md`, `MARKETS-COPY.md`, `listing/listing-texts.md`, `marketplace/` (CHROME-STORE, MARKETS-COPY, RELEASE-PROCESS, SUBMISSION-CHECKLIST), `user-guide/GETTING-STARTED.md`
+- [ ] `docs/`: `BUILD.md`, `CONTRIBUTING.md`, `MARKETS-COPY.md`, `listing/listing-texts.md`, `marketplace/` (CHROME-STORE, MARKETS-COPY, RELEASE-PROCESS, SUBMISSION-CHECKLIST), `user-guide/GUIA-INICI.md`
 - [ ] `scripts/prepare-release.mjs`
 
 *Fora del repo (manual):*
@@ -121,3 +121,91 @@ La decisió d'idioma ja es va identificar com a pendent al TO-DO.md (veure «Dec
 - `shared/content-types.js`
 - `manifest.base.json` (+ patches)
 - `scripts/pre-release-check.mjs` (validació de claus i18n)
+
+---
+
+## Múltiples proveïdors de models (més enllà de Google Gemini)
+
+**Context (2026-06-19):** Sorgit del testing amb usuaris. Avui l'extensió només
+funciona amb Google Gemini i el codi hi està **fortament acoblat, sense cap capa
+d'abstracció de proveïdor**:
+
+- `sidebar/api.js:47-71` (`callGeminiStream`) té l'endpoint
+  (`generativelanguage.googleapis.com/.../streamGenerateContent?alt=sse`) i el
+  format del body hardcoded, amb una branca especial per a Gemma vs Gemini.
+- El parsing de la resposta assumeix l'SSE de Gemini i `usageMetadata`
+  (`promptTokenCount`, etc.) per al comptatge real de tokens.
+- `shared/models.js` (`CURATED_MODELS`) assumeix l'estructura i el pricing de Gemini.
+- El fallback automàtic de models (`sidebar/summary.js`) assumeix que tots els
+  models són de Gemini.
+
+L'objectiu és donar opció de proveïdors **gratuïts i de pagament** (redueix la
+fricció de l'API key de Google, que motiva també la guia d'API key de l'usuari).
+
+**Comportament esperat:**
+- L'usuari pot triar el proveïdor a Settings i introduir-hi la seva API key.
+- Suport per a proveïdors **compatibles amb l'API d'OpenAI** (cobreix molts d'un
+  sol cop: OpenRouter, Groq, Together, locals via Ollama/LM Studio, OpenAI…) a
+  més de Gemini.
+- El comptatge de tokens i el fallback funcionen per proveïdor.
+
+**Abast tècnic estimat:**
+- **Crear una abstracció de proveïdor** (interfície comuna: construir petició,
+  fer streaming, parsejar resposta i usage) — `sidebar/api.js`.
+- Implementacions: Gemini (existent, refactoritzada) + un adaptador
+  "OpenAI-compatible".
+- `shared/models.js` — model de dades de models per proveïdor (pricing, context,
+  límits) i selecció de proveïdor + model.
+- `options/settings-models.js` + `settings.html` — selector de proveïdor i gestió
+  de múltiples API keys (`storage.sync`).
+- `sidebar/summary.js` — fallback conscient del proveïdor.
+- Tests — mockejar les respostes streaming de cada format.
+
+**Cost:** ALT. El **primer** proveïdor nou és el car (dissenyar l'abstracció);
+afegir-ne més després és incremental.
+
+**Criteris d'acceptació mínims:**
+- [ ] Es pot resumir amb un proveïdor compatible amb OpenAI (a triar) i amb Gemini.
+- [ ] El comptatge de tokens i el cost es mostren correctament per al proveïdor actiu.
+- [ ] El fallback de models no creua proveïdors de forma incorrecta.
+- [ ] No hi ha regressió amb Gemini com a proveïdor per defecte.
+
+---
+
+## Crear plugins propis des de la configuració (prompt + icona)
+
+**Context (2026-06-19):** Sorgit del testing amb usuaris. Avui els plugins són
+**estàtics i compilats** (`docs/CREAR-PLUGIN.md`: *"feature toggles estàtic — tots
+els plugins estan compilats dins l'extensió. No hi ha descobriment dinàmic"*).
+Afegir-ne un requereix 10+ passos repartits en molts fitxers (`sidebar/sidebar.html`,
+`sidebar/ui.js`, `shared/defaults.js`, `sidebar/sidebar.js`, `options/*`).
+
+La idea: que l'usuari es pugui crear un plugin **bàsic** des de Settings amb només
+un **prompt editable** i una **icona** (seleccionar d'un conjunt o pujar-ne una).
+
+**Comportament esperat:**
+- Botó "Crear plugin" a Settings → formulari amb nom, prompt i icona.
+- El plugin apareix com un botó més a la toolbar de la sidebar i és
+  activable/reordenable com els existents.
+- La configuració del plugin és només l'edició del prompt (i nom/icona).
+
+**Abast tècnic estimat:**
+- **Migrar de hardcoded a data-driven**: un array de plugins d'usuari
+  `{ id, nom, prompt, icona }` a `storage` (sync per a metadades; `local` per a
+  les icones, que poden ser pesades).
+- **Render dinàmic** dels botons de la toolbar a `sidebar/ui.js` /
+  `sidebar/sidebar.html` (avui són estàtics) i de la UI de settings.
+- **Icones (net-new, no existeix res avui)**: selector d'un conjunt d'icones
+  incloses + pujada d'imatge desada com a **data URI** a `storage.local`
+  (validar mida/format; no hi ha cap mecanisme d'imatges custom actualment).
+- Reaprofitar la **infra d'edició de prompts** existent (`storage.sync` + textarea).
+
+**Cost:** ALT / MITJÀ-ALT. Refactor estàtic→dinàmic dels plugins + sistema d'icones
+de zero. **Bonus:** elimina el procés manual de 10 passos de `CREAR-PLUGIN.md`.
+
+**Criteris d'acceptació mínims:**
+- [ ] L'usuari crea un plugin amb nom + prompt + icona des de Settings i apareix a la sidebar.
+- [ ] El plugin d'usuari resumeix usant el seu prompt.
+- [ ] Es pot editar, reordenar, desactivar i esborrar com els plugins integrats.
+- [ ] La icona pujada es desa i es mostra correctament (i no peta el límit de `storage`).
+- [ ] No hi ha regressió amb els plugins integrats.
