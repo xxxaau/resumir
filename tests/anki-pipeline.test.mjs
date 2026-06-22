@@ -118,7 +118,7 @@ function setupGlobals(overrides = {}) {
     global.applyExtensionOrder     = () => {};
 
     global.document = {
-        getElementById: (_id) => makeEl(),
+        getElementById: () => makeEl(),
         createElement: () => makeEl(),
     };
 

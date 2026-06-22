@@ -47,6 +47,7 @@ const files = [
     resolve(root, "sidebar/conceptmap.js"),
     resolve(root, "sidebar/summary.js"),
     resolve(root, "sidebar/history.js"),
+    resolve(root, "sidebar/anki.js"),
     resolve(root, "sidebar/sidebar.js"),
 ];
 
@@ -73,6 +74,7 @@ const BUNDLED_SRCS = new Set([
     "conceptmap.js",
     "summary.js",
     "history.js",
+    "anki.js",
     "sidebar.js",
 ]);
 

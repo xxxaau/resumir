@@ -123,9 +123,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         } else if (isSimple) {
             systemPrompt = config.simplePrompt || DEFAULT_SIMPLE_PROMPT;
         } else if (isAnki) {
-            // Selecció de prompt Anki amb substitució d'idioma
+            // Selecció de prompt Anki amb substitució d'idioma i quantitat de targetes
             const langName = (config.ankiLang || DEFAULT_ANKI_LANG) === "en" ? "English" : "català";
-            systemPrompt = (config.ankiPrompt || DEFAULT_ANKI_PROMPT).replace(/\{\{LANG\}\}/g, langName);
+            const ankiCount = String(config.ankiPacket || DEFAULT_ANKI_PACKET);
+            systemPrompt = (config.ankiPrompt || DEFAULT_ANKI_PROMPT)
+                .replace(/\{\{LANG\}\}/g, langName)
+                .replace(/\{\{COUNT\}\}/g, ankiCount);
         } else if (isConceptMap) {
             // Build dynamic prompt based on config
             const basePrompt = config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT;

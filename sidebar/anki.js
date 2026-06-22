@@ -176,6 +176,13 @@ async function exportAnkiToObsidian(ctx) {
     try {
         const tab = await ext.tabs.create({ url: uri, active: false });
         setTimeout(() => ext.tabs.remove(tab.id).catch(() => {}), 5000);
+        // Feedback d'èxit: mostra ✓ al botó d'exportació i restaura el text original
+        const exportBtn = document.getElementById("ankiExportBtn");
+        if (exportBtn) {
+            const original = exportBtn.textContent;
+            exportBtn.textContent = "✓ Afegit a Obsidian";
+            setTimeout(() => { exportBtn.textContent = original; }, 2000);
+        }
     } catch (err) {
         if (ctx.errorDiv) {
             ctx.errorDiv.textContent = "Error obrint Obsidian: " + err.message;
@@ -185,18 +192,21 @@ async function exportAnkiToObsidian(ctx) {
 }
 
 /**
- * Construeix el prompt de regeneració substituint {{LANG}}, afegint les
- * preguntes a excloure i l'enfocament optatiu.
+ * Construeix el prompt de regeneració substituint {{LANG}} i {{COUNT}}, afegint
+ * les preguntes a excloure i l'enfocament optatiu.
  * Funció pura i testejable (sense efectes secundaris).
- * @param {string} basePrompt - Prompt base (pot contenir {{LANG}})
+ * @param {string} basePrompt - Prompt base (pot contenir {{LANG}} i {{COUNT}})
  * @param {string} lang - Codi d'idioma ("en" → "English", qualsevol altre → "català")
+ * @param {number} count - Nombre de targetes a generar
  * @param {string[]} existingQuestions - Preguntes ja generades a excloure
  * @param {string} focusText - Text d'afinament optatiu
  * @returns {string}
  */
-function buildAnkiRegenPrompt(basePrompt, lang, existingQuestions, focusText) {
+function buildAnkiRegenPrompt(basePrompt, lang, count, existingQuestions, focusText) {
     const langName = lang === "en" ? "English" : "català";
-    let p = basePrompt.replace(/\{\{LANG\}\}/g, langName);
+    let p = basePrompt
+        .replace(/\{\{LANG\}\}/g, langName)
+        .replace(/\{\{COUNT\}\}/g, String(count));
     if (existingQuestions && existingQuestions.length) {
         p += `\n\nNo repeteixis aquestes preguntes ja generades:\n- ${existingQuestions.join("\n- ")}`;
     }
@@ -208,25 +218,31 @@ function buildAnkiRegenPrompt(basePrompt, lang, existingQuestions, focusText) {
 
 /**
  * Genera targetes addicionals a partir del text original de la pàgina.
- * Substitueix l'stub de la Task 5.
+ * Llegeix la configuració directament de storage (no usa getGlobalConfig).
  * @param {Object} ctx - Context del panell (contentDiv, errorDiv, getGlobalConfig)
  * @param {string} focusText - Text d'afinament optatiu
  */
 async function generateMoreAnkiCards(ctx, focusText) {
     // Obtenim el text original de la pàgina (injectat per la pipeline, Task 5)
-    const pageText = (typeof window !== "undefined" && window.__ankiPageText) || "";
-    if (!pageText) return;
+    const rawPageText = (typeof window !== "undefined" && window.__ankiPageText) || "";
+    if (!rawPageText) return;
 
     // Clau d'API (storage.local) i configuració del model (storage.sync)
     const { apiKey } = await ext.storage.local.get(["apiKey"]);
-    const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang"]);
+    const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang", "ankiPacket"]);
     const modelName = cfg.modelName || DEFAULT_MODEL_ID;
     const base = cfg.ankiPrompt || DEFAULT_ANKI_PROMPT;
     const lang = cfg.ankiLang || DEFAULT_ANKI_LANG;
+    const count = cfg.ankiPacket || DEFAULT_ANKI_PACKET;
 
     // Construïm el prompt excloent les preguntes ja existents
     const existing = getAnkiCards().map(c => c.q);
-    const prompt = buildAnkiRegenPrompt(base, lang, existing, focusText);
+    const prompt = buildAnkiRegenPrompt(base, lang, count, existing, focusText);
+
+    // Apliquem la mateixa neutralització + embolcall UNTRUSTED que la pipeline principal
+    // (mirrors sidebar/summary.js:267-268) per mantenir la frontera anti-injecció de prompts.
+    const safePageText = rawPageText.replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
+    const pageText = `<UNTRUSTED_CONTENT>\n${safePageText}\n</UNTRUSTED_CONTENT>`;
 
     // Acumulem la resposta en streaming
     let raw = "";

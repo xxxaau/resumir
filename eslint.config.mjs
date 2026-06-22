@@ -108,6 +108,7 @@ const extensionGlobals = {
     renderAnkiPanel: "readonly",
     exportAnkiToObsidian: "readonly",
     generateMoreAnkiCards: "readonly",
+    setAnkiCards: "readonly",
     // shared/defaults.js — constants Anki
     DEFAULT_ANKI_PROMPT: "readonly",
     DEFAULT_ANKI_PATH: "readonly",
