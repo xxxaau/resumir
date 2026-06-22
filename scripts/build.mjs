@@ -42,7 +42,6 @@ console.log(`\nðŸ”¨ Building v${version} for target: ${target}`);
 // Common files and directories
 const commonFiles = [
   "Readability.js",
-  "defuddle.js", // injectat en runtime per a Twitter/X (sidebar/content.js)
   "theme.js",
   "LICENSE",
   "docs/PRIVACY_POLICY.md"
@@ -214,7 +213,7 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
     );
     
     // Remove individual sidebar JS files (now in bundle)
-    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "pdf-extract.js", "content.js", "cache.js", "stats.js", "ui.js", "markmap-native.js", "conceptmap-filename.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
+    const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "pdf-extract.js", "extractors.js", "content.js", "cache.js", "stats.js", "ui.js", "markmap-native.js", "conceptmap-filename.js", "conceptmap.js", "summary.js", "history.js", "sidebar.js"];
     for (const f of sidebarFiles) {
       const filePath = resolve(buildPath, "sidebar", f);
       if (existsSync(filePath)) {

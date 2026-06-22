@@ -24,6 +24,10 @@ Object.defineProperty(global, "navigator", {
 
 const require = createRequire(import.meta.url);
 
+// Registrar els extractors com a globals, igual que fa el bundle al navegador
+// (extractors.js es carrega abans que content.js i declara funcions globals).
+Object.assign(global, require("../sidebar/extractors.js"));
+
 // ---------------------------------------------------------------------------
 // Mock d'ext — redefinit per test via helpers
 // ---------------------------------------------------------------------------
@@ -461,4 +465,54 @@ test("getPageContent - YouTube activeVssId té prioritat sobre preferences", asy
     );
     const result = await getPageContent();
     assert.ok(result.text.startsWith('[TRANSCRIPT: de]'), "Ha d'etiquetar 'de' (pista activa), no 'ca' (preferit)");
+});
+
+// ---------------------------------------------------------------------------
+// Twitter / X
+// ---------------------------------------------------------------------------
+
+// Mock que respon segons la funció injectada (simula l'entorn de la pàgina):
+// la funció amb 'tweetText' rep el scrape; la funció amb 'og:description' rep
+// les meta-tags. Així el test és robust a l'ordre de les crides.
+function makeTwitterExt(tab, { scrape = null, og = null } = {}) {
+    return {
+        tabs: { query: async () => [tab], get: async () => tab },
+        scripting: {
+            executeScript: async (injection) => {
+                const src = injection.func
+                    ? injection.func.toString()
+                    : (injection.files || []).join(",");
+                if (src.includes("tweetText")) return [{ result: scrape }];
+                if (src.includes("og:description")) return [{ result: og }];
+                return [{ result: null }];
+            },
+        },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: { sync: { get: async () => ({}) }, local: { get: async () => ({}) } },
+    };
+}
+
+test("getPageContent - Twitter/X usa og:description com a fallback quan el scrape no troba tweets", async () => {
+    const tab = { id: 20, url: "https://x.com/sama/status/123", title: "Sam Altman a X" };
+    global.ext = makeTwitterExt(tab, {
+        scrape: null,
+        og: "Sam Altman (@sama) a X\n\nwe trained a new model that is good at creative writing",
+    });
+    const result = await getPageContent();
+    assert.ok(
+        result.text.includes("creative writing"),
+        "Ha de retornar el text d'og:description quan el scrape de tweets falla"
+    );
+});
+
+test("getPageContent - Twitter/X usa el scrape de tweets com a via primària", async () => {
+    const tab = { id: 21, url: "https://twitter.com/u/status/456", title: "Fil a X" };
+    global.ext = makeTwitterExt(tab, {
+        scrape: "primer tweet del fil\n\n---\n\nsegon tweet del fil",
+        og: "NO-S-HA-D-USAR",
+    });
+    const result = await getPageContent();
+    assert.ok(result.text.includes("primer tweet del fil"), "Ha de contenir el primer tweet");
+    assert.ok(result.text.includes("segon tweet del fil"), "Ha de contenir el segon tweet (fil)");
+    assert.ok(!result.text.includes("NO-S-HA-D-USAR"), "No ha d'usar og:description si el scrape té contingut");
 });

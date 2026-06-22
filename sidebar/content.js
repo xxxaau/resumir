@@ -188,78 +188,10 @@ async function getPageContent() {
 
             const hnResult = await executeScriptSafe({
                 target: { tabId: tabId },
-                // The fetch runs INSIDE the page's content-script context (not the
-                // extension's extension_pages context), so the CSP `connect-src`
-                // of manifest.json does not apply. Cross-origin reach needs the
-                // optional <all_urls> host permission, which the user grants once.
-                func: async () => {
-                    const titleEl = document.querySelector(".titleline a");
-                    const comments = Array.from(document.querySelectorAll(".commtext"))
-                        .map(c => "- " + c.innerText.replace(/\s+/g, " ").trim())
-                        .join("\n");
-                    const title = titleEl?.innerText || document.title;
-                    const articleUrl = titleEl?.href || null;
-
-                    // Inline SSRF guard (function arg can't capture from outer scope).
-                    const isPrivateOrReservedIPInline = (hostname) => {
-                        const m = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-                        if (m) {
-                            const [, a, b, c, d] = m.map(Number);
-                            const ip = (a << 24) | (b << 16) | (c << 8) | d;
-                            if ((ip >>> 24) === 0) return true;
-                            if ((ip >>> 24) === 10) return true;
-                            if ((ip >>> 24) === 127) return true;
-                            if ((ip & 0xfff0000) === 0xc0a80000) return true;
-                            if ((ip >>> 20) === 0xac1) return true;
-                            if ((ip >>> 16) === 0xa9fe) return true;
-                            if ((ip >>> 22) === 0x1840) return true;
-                            if ((ip >>> 4) === 0x0fffffff) return true;
-                            return false;
-                        }
-                        if (hostname.includes(":")) {
-                            const lower = hostname.toLowerCase();
-                            if (lower === "::1" || lower.startsWith("::ffff:127.") ||
-                                lower.startsWith("fe80:") || lower.startsWith("ff")) return true;
-                        }
-                        return /^(localhost|metadata|internal)$/i.test(hostname);
-                    };
-
-                    let articleText = "";
-                    if (articleUrl && !articleUrl.includes("ycombinator.com")) {
-                        try {
-                            const u = new URL(articleUrl);
-                            if (u.protocol !== "https:" || u.port !== "" || isPrivateOrReservedIPInline(u.hostname)) {
-                                throw new Error("Blocked: private/reserved IP or invalid protocol/port");
-                            }
-                            // redirect:"manual" prevents DNS-rebinding via cross-origin
-                            // 30x to internal IPs after the initial host check.
-                            const resp = await fetch(articleUrl, {
-                                credentials: "omit",
-                                redirect: "manual",
-                                signal: AbortSignal.timeout(8000)
-                            });
-                            if (resp.type === "opaqueredirect") throw new Error("Blocked: redirect");
-                            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                            const contentType = resp.headers.get("content-type") || "";
-                            if (!contentType.includes("text/html")) throw new Error("Invalid content-type");
-                            const raw = await resp.text();
-                            if (raw.length > 2 * 1024 * 1024) throw new Error("Response too large");
-                            if (typeof Readability !== "undefined") {
-                                const doc = new DOMParser().parseFromString(raw, "text/html");
-                                const base = doc.createElement("base");
-                                base.href = articleUrl;
-                                doc.head.insertBefore(base, doc.head.firstChild);
-                                const article = new Readability(doc).parse();
-                                if (article?.textContent?.trim().length > 200) {
-                                    articleText = article.textContent.trim();
-                                }
-                            }
-                        } catch (e) {
-                            console.warn("HN article fetch failed:", e?.message);
-                        }
-                    }
-                    return { title, comments, articleText };
-                }
+                // El fetch s'executa DINS el context del content-script (no extension_pages),
+                // per tant la CSP `connect-src` del manifest no s'aplica.
+                // La lògica viu a extractors.js (font única de selectors).
+                func: extractHackerNewsFromDOM
             });
             const hn = hnResult?.[0]?.result;
             if (hn) {
@@ -288,61 +220,9 @@ async function getPageContent() {
                 const metaResult = await executeScriptSafe({
                     target: { tabId: tabId },
                     world: "MAIN",
-                    func: () => {
-                        try {
-                            const rawCaptionTracks = window.ytInitialPlayerResponse?.captions
-                                ?.playerCaptionsTracklistRenderer?.captionTracks || [];
-                            let activeVssId = null;
-                            try {
-                                const player = document.querySelector('#movie_player');
-                                player?.loadModule?.('captions');
-                                const active = player?.getOption?.('captions', 'track');
-                                activeVssId = active?.vss_id || active?.vssId || null;
-                            } catch { /* API privada — ignorem */ }
-
-                            // Via A: segments pre-renderitzats a ytInitialData.engagementPanels.
-                            let prerenderedText = '';
-                            try {
-                                const panels = window.ytInitialData?.engagementPanels || [];
-                                const transcriptPanel = panels.find(p =>
-                                    p?.engagementPanelSectionListRenderer?.targetId === 'engagement-panel-searchable-transcript'
-                                );
-                                const segments = transcriptPanel
-                                    ?.engagementPanelSectionListRenderer
-                                    ?.content?.transcriptRenderer
-                                    ?.content?.transcriptSearchPanelRenderer
-                                    ?.body?.transcriptSegmentListRenderer
-                                    ?.initialSegments || [];
-                                const lines = segments
-                                    .map(s => s?.transcriptSegmentRenderer?.snippet?.runs?.map(r => r.text)?.join('') || '')
-                                    .filter(Boolean);
-                                if (lines.length > 0) prerenderedText = lines.join(' ');
-                            } catch { /* ytInitialData absent o estructura canviada */ }
-
-                            // Via B: retornem baseUrl de la millor pista perquè el sidebar faci
-                            // el fetch directament (evita la CSP de YouTube al MAIN world).
-                            let captionBaseUrl = null;
-                            if (!prerenderedText && rawCaptionTracks.length > 0) {
-                                const best = rawCaptionTracks.find(t => t.vssId === activeVssId)
-                                    || rawCaptionTracks.find(t => t.kind !== 'asr')
-                                    || rawCaptionTracks[0];
-                                captionBaseUrl = best?.baseUrl || null;
-                            }
-
-                            return {
-                                hasTracks: rawCaptionTracks.length > 0,
-                                tracks: rawCaptionTracks.map(t => ({
-                                    lang: t.languageCode || '',
-                                    langName: t.name?.simpleText || '',
-                                    vssId: t.vssId || '',
-                                    isAsr: t.kind === 'asr' || (t.vssId || '').startsWith('a.'),
-                                })),
-                                activeVssId,
-                                prerenderedText,
-                                captionBaseUrl,
-                            };
-                        } catch (e) { return { error: String(e) }; }
-                    }
+                    // Lector MAIN-world: llegeix ytInitialPlayerResponse/ytInitialData.
+                    // La lògica viu a extractors.js (font única de selectors).
+                    func: readYoutubeCaptionMeta
                 });
                 meta = metaResult?.[0]?.result || {};
             } catch (e) {
@@ -717,74 +597,8 @@ async function getPageContent() {
         try {
             const linkedinResult = await executeScriptSafe({
                 target: { tabId: tabId },
-                func: () => {
-                    const parts = [];
-
-                    // Post author
-                    const authorEl = document.querySelector(
-                        ".update-components-actor__title, .feed-shared-actor__title"
-                    );
-                    const author = authorEl?.innerText?.trim().split("\n")[0] || "";
-
-                    // Post text — try expanded first, then visible text
-                    const expandBtn = document.querySelector(
-                        ".feed-shared-inline-show-more-text button, " +
-                        ".update-components-text button.see-more"
-                    );
-                    if (expandBtn) expandBtn.click();
-
-                    const postEl = document.querySelector(
-                        ".update-components-text, .feed-shared-text"
-                    );
-                    const postText = postEl?.innerText?.trim() || "";
-
-                    if (author) parts.push(`Autor: ${author}`);
-                    if (postText) parts.push(`\nPublicació:\n${postText}`);
-
-                    // Comments + replies (full thread)
-                    // Strategy: find all comment items, detect top-level vs reply by
-                    // checking if the item is inside a nested-items container.
-                    const UI_NOISE = /^(Like|Reply|Show translation|Load more|Comment|Repost|Send|See more|\d+\s*(like|comment|reaction))/i;
-
-                    const extractComment = (item, indent) => {
-                        // Author name — multiple known selector variants
-                        const nameEl = item.querySelector(
-                            ".comments-post-meta__name-text, " +
-                            ".comments-post-meta__name, " +
-                            ".feed-shared-actor__name, " +
-                            ".hoverable-link-text"
-                        );
-                        // Comment body text
-                        const textEl = item.querySelector(
-                            ".comments-comment-item__main-content, " +
-                            ".comments-comment-texteditor, " +
-                            ".update-components-text"
-                        );
-                        const name = nameEl?.innerText?.trim().split("\n")[0] || "";
-                        const txt = textEl?.innerText?.trim() || "";
-                        if (txt.length <= 5 || UI_NOISE.test(txt)) return null;
-                        return `${indent}${name ? name + ":\n" + indent : ""}${txt}`;
-                    };
-
-                    const allCommentItems = Array.from(
-                        document.querySelectorAll(".comments-comment-item")
-                    );
-
-                    if (allCommentItems.length > 0) {
-                        const comments = [];
-                        allCommentItems.forEach(item => {
-                            const isReply = !!item.closest(".comments-comment-item__nested-items");
-                            const indent = isReply ? "  > " : "";
-                            const c = extractComment(item, indent);
-                            if (c) comments.push(c);
-                        });
-                        if (comments.length > 0) {
-                            parts.push(`\nComentaris:\n${comments.join("\n\n")}`);
-                        }
-                    }
-
-                    return parts.length > 0 ? parts.join("\n") : null;
-                }
+                // La lògica viu a extractors.js (font única de selectors LinkedIn).
+                func: extractLinkedInPost
             });
 
             const linkedinText = linkedinResult?.[0]?.result;
@@ -799,42 +613,28 @@ async function getPageContent() {
     // TWITTER / X SPECIAL LOGIC
     else if (tabUrl.includes("twitter.com") || tabUrl.includes("x.com")) {
         try {
-            // Inject Defuddle to extract clean content from the React-rendered page
-            await executeScriptSafe({
+            // Via primària: scrape directe dels tweets renderitzats. Captura el fil
+            // sencer que el DOM tingui carregat (X virtualitza i carrega tweets a
+            // mesura que es fa scroll, igual per a qualsevol extractor).
+            const scrapeResult = await executeScriptSafe({
                 target: { tabId: tabId },
-                files: ["defuddle.js"]
+                // La lògica viu a extractors.js (font única de selectors Twitter).
+                func: scrapeTwitterTweets
             });
+            const scraped = scrapeResult?.[0]?.result;
+            if (scraped && scraped.trim().length > 0) text = scraped;
 
-            const defuddleResult = await executeScriptSafe({
-                target: { tabId: tabId },
-                func: () => {
-                    if (typeof Defuddle === "undefined") return null;
-                    try {
-                        const parsed = new Defuddle(document, { url: window.location.href }).parse();
-                        return parsed?.markdown || null;
-                    } catch (e) {
-                        return null;
-                    }
-                }
-            });
-
-            const defuddleText = defuddleResult?.[0]?.result;
-            if (defuddleText && defuddleText.trim().length > 50) {
-                text = defuddleText;
-            }
-
-            // Fallback: scrape tweet text directly from DOM
+            // Fallback robust: meta Open Graph (HTML servit pel servidor, immune a
+            // canvis del DOM i a la detecció d'automatització). Només el tweet arrel.
             if (!text) {
-                const scrapeResult = await executeScriptSafe({
+                const ogResult = await executeScriptSafe({
                     target: { tabId: tabId },
-                    func: () => {
-                        const tweetEls = document.querySelectorAll('[data-testid="tweetText"]');
-                        if (tweetEls.length === 0) return null;
-                        return Array.from(tweetEls).map(el => el.innerText).join("\n\n---\n\n");
-                    }
+                    // Fallback OG robust: meta og:description (immune a canvis DOM).
+                    // La lògica viu a extractors.js (font única de selectors Twitter).
+                    func: extractTwitterOG
                 });
-                const scraped = scrapeResult?.[0]?.result;
-                if (scraped && scraped.trim().length > 0) text = scraped;
+                const og = ogResult?.[0]?.result;
+                if (og && og.trim().length > 0) text = og;
             }
         } catch (e) {
             console.warn("Twitter/X extraction failed", e);
@@ -852,47 +652,9 @@ async function getPageContent() {
 
         const scriptResults = await executeScriptSafe({
           target: {tabId: tabId},
-          func: () => {
-              if (typeof Readability !== 'undefined') {
-                  try {
-                      const docClone = document.cloneNode(true);
-                      // Remove ALL non-content elements: scripts, styles, navigation/chrome, images, iframes, etc.
-                      [
-                          'script', 'style', 'noscript', 'iframe', 'svg',
-                          'nav', 'header', 'footer', 'aside', 
-                          '[role="navigation"]', '[role="banner"]', '[role="complementary"]',
-                          '[role="contentinfo"]', '[data-ad="true"]',
-                          '.ad', '.advertisement', '.social', '.sharing', '.comments-section'
-                      ].forEach(sel => {
-                          try { docClone.querySelectorAll(sel).forEach(el => el.remove()); } catch(e) {}
-                      });
-                      // Also remove all img tags to avoid image URLs/data inflating tokens
-                      try { docClone.querySelectorAll('img').forEach(el => el.remove()); } catch(e) {}
-                      
-                      const article = new Readability(docClone).parse();
-                      if (article && article.textContent && article.textContent.trim().length > 100) {
-                          // Further clean: remove excessive whitespace after Readability
-                          return article.textContent.replace(/\s{3,}/g, '\n\n').trim();
-                      }
-                  } catch(e) {}
-              }
-              // Last resort: body text with aggressive cleanup.
-              try {
-                  const bodyClone = document.body.cloneNode(true);
-                  [
-                      'script', 'style', 'noscript', 'iframe', 'svg',
-                      'nav', 'header', 'footer', 'aside',
-                      '[role="navigation"]', '[role="banner"]', '[role="complementary"]'
-                  ].forEach(sel => {
-                      try { bodyClone.querySelectorAll(sel).forEach(el => el.remove()); } catch(e) {}
-                  });
-                  // Remove images
-                  try { bodyClone.querySelectorAll('img').forEach(el => el.remove()); } catch(e) {}
-                  return bodyClone.innerText.replace(/\s{3,}/g, '\n\n').trim();
-              } catch(e) {}
-              // Fallback cru sense filtre de longitud: el filtre > 100 s'aplica a l'exterior
-              return document.body.innerText.replace(/\s{3,}/g, '\n\n').trim();
-          }
+          // Extracció estàndard via Readability (amb fallback body.innerText).
+          // La lògica viu a extractors.js (font única).
+          func: extractWithReadability
         });
         
         // executeScriptSafe retorna null NOMÉS quan el permís falta i no s'ha
