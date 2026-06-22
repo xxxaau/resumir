@@ -107,7 +107,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 "enableConceptMap", "extensionOrder", "favoriteModels",
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
                 "conceptMapAutoExpand",
-                "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"
+                "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation",
+                "ankiPrompt", "ankiLang"
             ]),
             ext.storage.local.get(["apiKey"])
         ]);

@@ -241,10 +241,49 @@ test("anki pipeline - setAnkiCards ha processat la resposta del model (1 targeta
 });
 
 // ---------------------------------------------------------------------------
-// Test 4: guard — retorna null si isAnki=false i cap altre flag actiu
+// Test 4: ankiLang="en" → el prompt conté "English" i NO "català"
+// Depèn que "ankiLang" estigui a la llista de claus de storage.sync.get;
+// si no hi és, config.ankiLang seria undefined i el prompt usaria el default
+// català, fent fallar les dues assertions.
 // ---------------------------------------------------------------------------
 
-test("anki pipeline - retorna null sense flags actius (comportament existent no trencat)", async () => {
+test("anki pipeline - ankiLang='en' → el prompt conté 'English' i no 'català'", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash", ankiLang: "en" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let capturedPrompt = null;
+    setupGlobals({
+        getSummaryCache: async () => null,
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        callGeminiStream: async (_k, _m, prompt, _t, _s, onChunk, onUsage) => {
+            capturedPrompt = prompt;
+            onChunk('[{"q":"P","a":"R"}]');
+            onUsage({ promptTokenCount: 50, candidatesTokenCount: 20 });
+            return { inputTokens: 50, outputTokens: 20, cacheTokens: 0 };
+        },
+    });
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true, false, false, true);
+
+    assert.ok(capturedPrompt !== null, "El prompt no pot ser null");
+    assert.ok(
+        capturedPrompt.includes("English"),
+        `El prompt ha de contenir 'English', té: "${capturedPrompt.substring(0, 300)}"`
+    );
+    assert.ok(
+        !capturedPrompt.includes("català"),
+        `El prompt NO ha de contenir 'català' quan ankiLang=en, té: "${capturedPrompt.substring(0, 300)}"`
+    );
+});
+
+// ---------------------------------------------------------------------------
+// Test 5: guard — retorna null si isAnki=false i cap altre flag actiu
+// ---------------------------------------------------------------------------
+
+test("anki pipeline - guard: retorna null sense flags actius (comportament existent no trencat)", async () => {
     resetStorage();
     const ctx = makeCtx();
     const result = await startSummary(ctx, null, false, false, false, false, false, false);
