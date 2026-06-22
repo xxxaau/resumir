@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<!--
+  Fixture ESTRUCTURAL de Twitter/X.
+  X serveix un DOM degradat a l'automatització (ni og:* ni [data-testid] als bots),
+  per tant no es pot capturar en viu amb Playwright. Aquesta fixture reprodueix
+  l'estructura real que X serveix a un navegador normal: les meta Open Graph al
+  <head> i els nodes [data-testid="tweetText"] al cos. Si X canvia aquests
+  selectors, cal refrescar aquesta fixture manualment.
+-->
+<html lang="en"><head>
+<meta property="og:title" content="Twitter on X">
+<meta property="og:description" content="“we’re hiring engineers to work on stuff like this. join us → careers link”">
+<title>Twitter on X</title>
+</head>
+<body>
+<article data-testid="tweet">
+  <div data-testid="tweetText"><span>we just hit a new milestone: 1 billion tweets loaded faster than ever. here's how the timeline team pulled it off 🧵</span></div>
+</article>
+<article data-testid="tweet">
+  <div data-testid="tweetText"><span>step 1: we rebuilt the caching layer from scratch. step 2: ship it. step 3: profit.</span></div>
+</article>
+</body></html>

@@ -1,0 +1,1143 @@
+{
+  "ytInitialPlayerResponse": {
+    "captions": {
+      "playerCaptionsTracklistRenderer": {
+        "captionTracks": [
+          {
+            "baseUrl": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&ei=uAg5aqudKZuH0u8PkLmc6Q4&caps=asr&opi=112496729&exp=xpe&xoaf=5&xowf=1&hl=ca&ip=0.0.0.0&ipbits=0&expire=1782147880&sparams=ip,ipbits,expire,v,ei,caps,opi,exp,xoaf&signature=DE83D3D1D3826A7138E0918530802DC679B60C2D.EAEAEFDC09FEE32BD9F8DA772D0393606FC0CB7C&key=yt8&lang=de-DE",
+            "name": {
+              "simpleText": "alemany (Alemanya)"
+            },
+            "vssId": ".de-DE",
+            "languageCode": "de-DE",
+            "isTranslatable": true,
+            "trackName": ""
+          },
+          {
+            "baseUrl": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&ei=uAg5aqudKZuH0u8PkLmc6Q4&caps=asr&opi=112496729&exp=xpe&xoaf=5&xowf=1&hl=ca&ip=0.0.0.0&ipbits=0&expire=1782147880&sparams=ip,ipbits,expire,v,ei,caps,opi,exp,xoaf&signature=DE83D3D1D3826A7138E0918530802DC679B60C2D.EAEAEFDC09FEE32BD9F8DA772D0393606FC0CB7C&key=yt8&lang=en",
+            "name": {
+              "simpleText": "anglès"
+            },
+            "vssId": ".en",
+            "languageCode": "en",
+            "isTranslatable": true,
+            "trackName": ""
+          },
+          {
+            "baseUrl": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&ei=uAg5aqudKZuH0u8PkLmc6Q4&caps=asr&opi=112496729&exp=xpe&xoaf=5&xowf=1&hl=ca&ip=0.0.0.0&ipbits=0&expire=1782147880&sparams=ip,ipbits,expire,v,ei,caps,opi,exp,xoaf&signature=DE83D3D1D3826A7138E0918530802DC679B60C2D.EAEAEFDC09FEE32BD9F8DA772D0393606FC0CB7C&key=yt8&kind=asr&lang=en",
+            "name": {
+              "simpleText": "anglès (generat automàticament)"
+            },
+            "vssId": "a.en",
+            "languageCode": "en",
+            "kind": "asr",
+            "isTranslatable": true,
+            "trackName": ""
+          },
+          {
+            "baseUrl": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&ei=uAg5aqudKZuH0u8PkLmc6Q4&caps=asr&opi=112496729&exp=xpe&xoaf=5&xowf=1&hl=ca&ip=0.0.0.0&ipbits=0&expire=1782147880&sparams=ip,ipbits,expire,v,ei,caps,opi,exp,xoaf&signature=DE83D3D1D3826A7138E0918530802DC679B60C2D.EAEAEFDC09FEE32BD9F8DA772D0393606FC0CB7C&key=yt8&lang=es-419",
+            "name": {
+              "simpleText": "espanyol (Amèrica Llatina)"
+            },
+            "vssId": ".es-419",
+            "languageCode": "es-419",
+            "isTranslatable": true,
+            "trackName": ""
+          },
+          {
+            "baseUrl": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&ei=uAg5aqudKZuH0u8PkLmc6Q4&caps=asr&opi=112496729&exp=xpe&xoaf=5&xowf=1&hl=ca&ip=0.0.0.0&ipbits=0&expire=1782147880&sparams=ip,ipbits,expire,v,ei,caps,opi,exp,xoaf&signature=DE83D3D1D3826A7138E0918530802DC679B60C2D.EAEAEFDC09FEE32BD9F8DA772D0393606FC0CB7C&key=yt8&lang=ja",
+            "name": {
+              "simpleText": "japonès"
+            },
+            "vssId": ".ja",
+            "languageCode": "ja",
+            "isTranslatable": true,
+            "trackName": ""
+          },
+          {
+            "baseUrl": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&ei=uAg5aqudKZuH0u8PkLmc6Q4&caps=asr&opi=112496729&exp=xpe&xoaf=5&xowf=1&hl=ca&ip=0.0.0.0&ipbits=0&expire=1782147880&sparams=ip,ipbits,expire,v,ei,caps,opi,exp,xoaf&signature=DE83D3D1D3826A7138E0918530802DC679B60C2D.EAEAEFDC09FEE32BD9F8DA772D0393606FC0CB7C&key=yt8&lang=pt-BR",
+            "name": {
+              "simpleText": "portuguès (Brasil)"
+            },
+            "vssId": ".pt-BR",
+            "languageCode": "pt-BR",
+            "isTranslatable": true,
+            "trackName": ""
+          }
+        ],
+        "audioTracks": [
+          {
+            "captionTrackIndices": [
+              0,
+              1,
+              3,
+              4,
+              5,
+              2
+            ]
+          }
+        ],
+        "translationLanguages": [
+          {
+            "languageCode": "ab",
+            "languageName": {
+              "simpleText": "Abkhaz"
+            }
+          },
+          {
+            "languageCode": "aa",
+            "languageName": {
+              "simpleText": "Àfar"
+            }
+          },
+          {
+            "languageCode": "af",
+            "languageName": {
+              "simpleText": "Afrikaans"
+            }
+          },
+          {
+            "languageCode": "ay",
+            "languageName": {
+              "simpleText": "Aimara"
+            }
+          },
+          {
+            "languageCode": "ak",
+            "languageName": {
+              "simpleText": "Àkan"
+            }
+          },
+          {
+            "languageCode": "sq",
+            "languageName": {
+              "simpleText": "Albanès"
+            }
+          },
+          {
+            "languageCode": "de",
+            "languageName": {
+              "simpleText": "Alemany"
+            }
+          },
+          {
+            "languageCode": "am",
+            "languageName": {
+              "simpleText": "Amhàric"
+            }
+          },
+          {
+            "languageCode": "en",
+            "languageName": {
+              "simpleText": "Anglès"
+            }
+          },
+          {
+            "languageCode": "ar",
+            "languageName": {
+              "simpleText": "Àrab"
+            }
+          },
+          {
+            "languageCode": "hy",
+            "languageName": {
+              "simpleText": "Armeni"
+            }
+          },
+          {
+            "languageCode": "as",
+            "languageName": {
+              "simpleText": "Assamès"
+            }
+          },
+          {
+            "languageCode": "az",
+            "languageName": {
+              "simpleText": "Azerbaidjanès"
+            }
+          },
+          {
+            "languageCode": "ba",
+            "languageName": {
+              "simpleText": "Baixkir"
+            }
+          },
+          {
+            "languageCode": "eu",
+            "languageName": {
+              "simpleText": "Basc"
+            }
+          },
+          {
+            "languageCode": "be",
+            "languageName": {
+              "simpleText": "Belarús"
+            }
+          },
+          {
+            "languageCode": "bn",
+            "languageName": {
+              "simpleText": "Bengalí"
+            }
+          },
+          {
+            "languageCode": "bho",
+            "languageName": {
+              "simpleText": "Bhojpuri"
+            }
+          },
+          {
+            "languageCode": "my",
+            "languageName": {
+              "simpleText": "Birmà"
+            }
+          },
+          {
+            "languageCode": "bs",
+            "languageName": {
+              "simpleText": "Bosnià"
+            }
+          },
+          {
+            "languageCode": "br",
+            "languageName": {
+              "simpleText": "Bretó"
+            }
+          },
+          {
+            "languageCode": "bg",
+            "languageName": {
+              "simpleText": "Búlgar"
+            }
+          },
+          {
+            "languageCode": "ca",
+            "languageName": {
+              "simpleText": "Català"
+            }
+          },
+          {
+            "languageCode": "ceb",
+            "languageName": {
+              "simpleText": "Cebuà"
+            }
+          },
+          {
+            "languageCode": "ko",
+            "languageName": {
+              "simpleText": "Coreà"
+            }
+          },
+          {
+            "languageCode": "co",
+            "languageName": {
+              "simpleText": "Cors"
+            }
+          },
+          {
+            "languageCode": "ht",
+            "languageName": {
+              "simpleText": "Crioll D’haití"
+            }
+          },
+          {
+            "languageCode": "hr",
+            "languageName": {
+              "simpleText": "Croat"
+            }
+          },
+          {
+            "languageCode": "da",
+            "languageName": {
+              "simpleText": "Danès"
+            }
+          },
+          {
+            "languageCode": "dv",
+            "languageName": {
+              "simpleText": "Divehi"
+            }
+          },
+          {
+            "languageCode": "dz",
+            "languageName": {
+              "simpleText": "Dzongka"
+            }
+          },
+          {
+            "languageCode": "sk",
+            "languageName": {
+              "simpleText": "Eslovac"
+            }
+          },
+          {
+            "languageCode": "sl",
+            "languageName": {
+              "simpleText": "Eslovè"
+            }
+          },
+          {
+            "languageCode": "es",
+            "languageName": {
+              "simpleText": "Espanyol"
+            }
+          },
+          {
+            "languageCode": "eo",
+            "languageName": {
+              "simpleText": "Esperanto"
+            }
+          },
+          {
+            "languageCode": "et",
+            "languageName": {
+              "simpleText": "Estonià"
+            }
+          },
+          {
+            "languageCode": "ee",
+            "languageName": {
+              "simpleText": "Ewe"
+            }
+          },
+          {
+            "languageCode": "fo",
+            "languageName": {
+              "simpleText": "Feroès"
+            }
+          },
+          {
+            "languageCode": "fj",
+            "languageName": {
+              "simpleText": "Fijià"
+            }
+          },
+          {
+            "languageCode": "fil",
+            "languageName": {
+              "simpleText": "Filipí"
+            }
+          },
+          {
+            "languageCode": "fi",
+            "languageName": {
+              "simpleText": "Finès"
+            }
+          },
+          {
+            "languageCode": "fr",
+            "languageName": {
+              "simpleText": "Francès"
+            }
+          },
+          {
+            "languageCode": "crs",
+            "languageName": {
+              "simpleText": "Francès Crioll De Les Seychelles"
+            }
+          },
+          {
+            "languageCode": "fy",
+            "languageName": {
+              "simpleText": "Frisó Occidental"
+            }
+          },
+          {
+            "languageCode": "gaa",
+            "languageName": {
+              "simpleText": "Ga"
+            }
+          },
+          {
+            "languageCode": "gd",
+            "languageName": {
+              "simpleText": "Gaèlic Escocès"
+            }
+          },
+          {
+            "languageCode": "gl",
+            "languageName": {
+              "simpleText": "Gallec"
+            }
+          },
+          {
+            "languageCode": "cy",
+            "languageName": {
+              "simpleText": "Gal·lès"
+            }
+          },
+          {
+            "languageCode": "lg",
+            "languageName": {
+              "simpleText": "Ganda"
+            }
+          },
+          {
+            "languageCode": "ka",
+            "languageName": {
+              "simpleText": "Georgià"
+            }
+          },
+          {
+            "languageCode": "el",
+            "languageName": {
+              "simpleText": "Grec"
+            }
+          },
+          {
+            "languageCode": "kl",
+            "languageName": {
+              "simpleText": "Groenlandès"
+            }
+          },
+          {
+            "languageCode": "gn",
+            "languageName": {
+              "simpleText": "Guaraní"
+            }
+          },
+          {
+            "languageCode": "gu",
+            "languageName": {
+              "simpleText": "Gujarati"
+            }
+          },
+          {
+            "languageCode": "ha",
+            "languageName": {
+              "simpleText": "Haussa"
+            }
+          },
+          {
+            "languageCode": "haw",
+            "languageName": {
+              "simpleText": "Hawaià"
+            }
+          },
+          {
+            "languageCode": "iw",
+            "languageName": {
+              "simpleText": "Hebreu"
+            }
+          },
+          {
+            "languageCode": "hi",
+            "languageName": {
+              "simpleText": "Hindi"
+            }
+          },
+          {
+            "languageCode": "hmn",
+            "languageName": {
+              "simpleText": "Hmong"
+            }
+          },
+          {
+            "languageCode": "hu",
+            "languageName": {
+              "simpleText": "Hongarès"
+            }
+          },
+          {
+            "languageCode": "yi",
+            "languageName": {
+              "simpleText": "Ídix"
+            }
+          },
+          {
+            "languageCode": "ig",
+            "languageName": {
+              "simpleText": "Igbo"
+            }
+          },
+          {
+            "languageCode": "id",
+            "languageName": {
+              "simpleText": "Indonesi"
+            }
+          },
+          {
+            "languageCode": "iu",
+            "languageName": {
+              "simpleText": "Inuktitut"
+            }
+          },
+          {
+            "languageCode": "yo",
+            "languageName": {
+              "simpleText": "Ioruba"
+            }
+          },
+          {
+            "languageCode": "ga",
+            "languageName": {
+              "simpleText": "Irlandès"
+            }
+          },
+          {
+            "languageCode": "is",
+            "languageName": {
+              "simpleText": "Islandès"
+            }
+          },
+          {
+            "languageCode": "it",
+            "languageName": {
+              "simpleText": "Italià"
+            }
+          },
+          {
+            "languageCode": "ja",
+            "languageName": {
+              "simpleText": "Japonès"
+            }
+          },
+          {
+            "languageCode": "jv",
+            "languageName": {
+              "simpleText": "Javanès"
+            }
+          },
+          {
+            "languageCode": "kn",
+            "languageName": {
+              "simpleText": "Kannada"
+            }
+          },
+          {
+            "languageCode": "kk",
+            "languageName": {
+              "simpleText": "Kazakh"
+            }
+          },
+          {
+            "languageCode": "kha",
+            "languageName": {
+              "simpleText": "Khasi"
+            }
+          },
+          {
+            "languageCode": "km",
+            "languageName": {
+              "simpleText": "Khmer"
+            }
+          },
+          {
+            "languageCode": "ky",
+            "languageName": {
+              "simpleText": "Kirguís"
+            }
+          },
+          {
+            "languageCode": "kri",
+            "languageName": {
+              "simpleText": "Krio"
+            }
+          },
+          {
+            "languageCode": "ku",
+            "languageName": {
+              "simpleText": "Kurd"
+            }
+          },
+          {
+            "languageCode": "lo",
+            "languageName": {
+              "simpleText": "Laosià"
+            }
+          },
+          {
+            "languageCode": "lv",
+            "languageName": {
+              "simpleText": "Letó"
+            }
+          },
+          {
+            "languageCode": "ln",
+            "languageName": {
+              "simpleText": "Lingala"
+            }
+          },
+          {
+            "languageCode": "lt",
+            "languageName": {
+              "simpleText": "Lituà"
+            }
+          },
+          {
+            "languageCode": "la",
+            "languageName": {
+              "simpleText": "Llatí"
+            }
+          },
+          {
+            "languageCode": "lua",
+            "languageName": {
+              "simpleText": "Luba-Lulua"
+            }
+          },
+          {
+            "languageCode": "luo",
+            "languageName": {
+              "simpleText": "Luo"
+            }
+          },
+          {
+            "languageCode": "lb",
+            "languageName": {
+              "simpleText": "Luxemburguès"
+            }
+          },
+          {
+            "languageCode": "mk",
+            "languageName": {
+              "simpleText": "Macedoni"
+            }
+          },
+          {
+            "languageCode": "ms",
+            "languageName": {
+              "simpleText": "Malai"
+            }
+          },
+          {
+            "languageCode": "ml",
+            "languageName": {
+              "simpleText": "Malaiàlam"
+            }
+          },
+          {
+            "languageCode": "mg",
+            "languageName": {
+              "simpleText": "Malgaix"
+            }
+          },
+          {
+            "languageCode": "mt",
+            "languageName": {
+              "simpleText": "Maltès"
+            }
+          },
+          {
+            "languageCode": "gv",
+            "languageName": {
+              "simpleText": "Manx"
+            }
+          },
+          {
+            "languageCode": "mi",
+            "languageName": {
+              "simpleText": "Maori"
+            }
+          },
+          {
+            "languageCode": "mr",
+            "languageName": {
+              "simpleText": "Marathi"
+            }
+          },
+          {
+            "languageCode": "mfe",
+            "languageName": {
+              "simpleText": "Mauricià"
+            }
+          },
+          {
+            "languageCode": "mn",
+            "languageName": {
+              "simpleText": "Mongol"
+            }
+          },
+          {
+            "languageCode": "nl",
+            "languageName": {
+              "simpleText": "Neerlandès"
+            }
+          },
+          {
+            "languageCode": "ne",
+            "languageName": {
+              "simpleText": "Nepalès"
+            }
+          },
+          {
+            "languageCode": "new",
+            "languageName": {
+              "simpleText": "Newari"
+            }
+          },
+          {
+            "languageCode": "no",
+            "languageName": {
+              "simpleText": "Noruec"
+            }
+          },
+          {
+            "languageCode": "ny",
+            "languageName": {
+              "simpleText": "Nyanja"
+            }
+          },
+          {
+            "languageCode": "oc",
+            "languageName": {
+              "simpleText": "Occità"
+            }
+          },
+          {
+            "languageCode": "or",
+            "languageName": {
+              "simpleText": "Oriya"
+            }
+          },
+          {
+            "languageCode": "om",
+            "languageName": {
+              "simpleText": "Oromo"
+            }
+          },
+          {
+            "languageCode": "os",
+            "languageName": {
+              "simpleText": "Osseta"
+            }
+          },
+          {
+            "languageCode": "ps",
+            "languageName": {
+              "simpleText": "Paixtu"
+            }
+          },
+          {
+            "languageCode": "pam",
+            "languageName": {
+              "simpleText": "Pampanga"
+            }
+          },
+          {
+            "languageCode": "pa",
+            "languageName": {
+              "simpleText": "Panjabi"
+            }
+          },
+          {
+            "languageCode": "fa",
+            "languageName": {
+              "simpleText": "Persa"
+            }
+          },
+          {
+            "languageCode": "pl",
+            "languageName": {
+              "simpleText": "Polonès"
+            }
+          },
+          {
+            "languageCode": "pt",
+            "languageName": {
+              "simpleText": "Portuguès"
+            }
+          },
+          {
+            "languageCode": "pt-PT",
+            "languageName": {
+              "simpleText": "Portuguès (Portugal)"
+            }
+          },
+          {
+            "languageCode": "qu",
+            "languageName": {
+              "simpleText": "Quítxua"
+            }
+          },
+          {
+            "languageCode": "ro",
+            "languageName": {
+              "simpleText": "Romanès"
+            }
+          },
+          {
+            "languageCode": "rw",
+            "languageName": {
+              "simpleText": "Ruandès"
+            }
+          },
+          {
+            "languageCode": "rn",
+            "languageName": {
+              "simpleText": "Rundi"
+            }
+          },
+          {
+            "languageCode": "ru",
+            "languageName": {
+              "simpleText": "Rus"
+            }
+          },
+          {
+            "languageCode": "sm",
+            "languageName": {
+              "simpleText": "Samoà"
+            }
+          },
+          {
+            "languageCode": "sg",
+            "languageName": {
+              "simpleText": "Sango"
+            }
+          },
+          {
+            "languageCode": "sa",
+            "languageName": {
+              "simpleText": "Sànscrit"
+            }
+          },
+          {
+            "languageCode": "sr",
+            "languageName": {
+              "simpleText": "Serbi"
+            }
+          },
+          {
+            "languageCode": "tn",
+            "languageName": {
+              "simpleText": "Setswana"
+            }
+          },
+          {
+            "languageCode": "sn",
+            "languageName": {
+              "simpleText": "Shona"
+            }
+          },
+          {
+            "languageCode": "sd",
+            "languageName": {
+              "simpleText": "Sindi"
+            }
+          },
+          {
+            "languageCode": "si",
+            "languageName": {
+              "simpleText": "Singalès"
+            }
+          },
+          {
+            "languageCode": "so",
+            "languageName": {
+              "simpleText": "Somali"
+            }
+          },
+          {
+            "languageCode": "su",
+            "languageName": {
+              "simpleText": "Sondanès"
+            }
+          },
+          {
+            "languageCode": "st",
+            "languageName": {
+              "simpleText": "Sotho Meridional"
+            }
+          },
+          {
+            "languageCode": "nso",
+            "languageName": {
+              "simpleText": "Sotho Septentrional"
+            }
+          },
+          {
+            "languageCode": "sw",
+            "languageName": {
+              "simpleText": "Suahili"
+            }
+          },
+          {
+            "languageCode": "sv",
+            "languageName": {
+              "simpleText": "Suec"
+            }
+          },
+          {
+            "languageCode": "ss",
+            "languageName": {
+              "simpleText": "Swazi"
+            }
+          },
+          {
+            "languageCode": "tg",
+            "languageName": {
+              "simpleText": "Tadjik"
+            }
+          },
+          {
+            "languageCode": "th",
+            "languageName": {
+              "simpleText": "Tai"
+            }
+          },
+          {
+            "languageCode": "ta",
+            "languageName": {
+              "simpleText": "Tàmil"
+            }
+          },
+          {
+            "languageCode": "tt",
+            "languageName": {
+              "simpleText": "Tàtar"
+            }
+          },
+          {
+            "languageCode": "te",
+            "languageName": {
+              "simpleText": "Telugu"
+            }
+          },
+          {
+            "languageCode": "bo",
+            "languageName": {
+              "simpleText": "Tibetà"
+            }
+          },
+          {
+            "languageCode": "ti",
+            "languageName": {
+              "simpleText": "Tigrinya"
+            }
+          },
+          {
+            "languageCode": "to",
+            "languageName": {
+              "simpleText": "Tongalès"
+            }
+          },
+          {
+            "languageCode": "ts",
+            "languageName": {
+              "simpleText": "Tsonga"
+            }
+          },
+          {
+            "languageCode": "tum",
+            "languageName": {
+              "simpleText": "Tumbuka"
+            }
+          },
+          {
+            "languageCode": "tr",
+            "languageName": {
+              "simpleText": "Turc"
+            }
+          },
+          {
+            "languageCode": "tk",
+            "languageName": {
+              "simpleText": "Turcman"
+            }
+          },
+          {
+            "languageCode": "cs",
+            "languageName": {
+              "simpleText": "Txec"
+            }
+          },
+          {
+            "languageCode": "uk",
+            "languageName": {
+              "simpleText": "Ucraïnès"
+            }
+          },
+          {
+            "languageCode": "ug",
+            "languageName": {
+              "simpleText": "Uigur"
+            }
+          },
+          {
+            "languageCode": "ur",
+            "languageName": {
+              "simpleText": "Urdú"
+            }
+          },
+          {
+            "languageCode": "uz",
+            "languageName": {
+              "simpleText": "Uzbek"
+            }
+          },
+          {
+            "languageCode": "ve",
+            "languageName": {
+              "simpleText": "Venda"
+            }
+          },
+          {
+            "languageCode": "vi",
+            "languageName": {
+              "simpleText": "Vietnamita"
+            }
+          },
+          {
+            "languageCode": "war",
+            "languageName": {
+              "simpleText": "Waray"
+            }
+          },
+          {
+            "languageCode": "wo",
+            "languageName": {
+              "simpleText": "Wòlof"
+            }
+          },
+          {
+            "languageCode": "zh-Hans",
+            "languageName": {
+              "simpleText": "Xinès (Simplificat)"
+            }
+          },
+          {
+            "languageCode": "zh-Hant",
+            "languageName": {
+              "simpleText": "Xinès (Tradicional)"
+            }
+          },
+          {
+            "languageCode": "xh",
+            "languageName": {
+              "simpleText": "Xosa"
+            }
+          },
+          {
+            "languageCode": "zu",
+            "languageName": {
+              "simpleText": "Zulu"
+            }
+          }
+        ],
+        "defaultAudioTrackIndex": 0
+      }
+    }
+  },
+  "ytInitialData": {
+    "engagementPanels": [
+      {
+        "engagementPanelSectionListRenderer": {
+          "panelIdentifier": "engagement-panel-searchable-transcript",
+          "header": {
+            "engagementPanelTitleHeaderRenderer": {
+              "title": {
+                "runs": [
+                  {
+                    "text": "Transcripció"
+                  }
+                ]
+              },
+              "menu": {
+                "menuRenderer": {
+                  "items": [
+                    {
+                      "menuServiceItemRenderer": {
+                        "text": {
+                          "runs": [
+                            {
+                              "text": "Activa/desactiva les marques de temps"
+                            }
+                          ]
+                        },
+                        "serviceEndpoint": {
+                          "clickTrackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4FqrKAQSBeDdw",
+                          "commandMetadata": {
+                            "webCommandMetadata": {
+                              "sendPost": true
+                            }
+                          },
+                          "signalServiceEndpoint": {
+                            "signal": "CLIENT_SIGNAL",
+                            "actions": [
+                              {
+                                "clickTrackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4FqrKAQSBeDdw",
+                                "signalAction": {
+                                  "signal": "TOGGLE_TRANSCRIPT_TIMESTAMPS"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "trackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4Fqo="
+                      }
+                    }
+                  ],
+                  "trackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4Fqo=",
+                  "accessibility": {
+                    "accessibilityData": {
+                      "label": "Més accions"
+                    }
+                  }
+                }
+              },
+              "visibilityButton": {
+                "buttonRenderer": {
+                  "icon": {
+                    "iconType": "CLOSE"
+                  },
+                  "accessibility": {
+                    "label": "Tanca la transcripció"
+                  },
+                  "trackingParams": "CBsQ8FsiEwjk6c-qzJqVAxVax3sAHSk4Fqo=",
+                  "accessibilityData": {
+                    "accessibilityData": {
+                      "label": "Tanca la transcripció"
+                    }
+                  },
+                  "command": {
+                    "clickTrackingParams": "CBsQ8FsiEwjk6c-qzJqVAxVax3sAHSk4FqrKAQSBeDdw",
+                    "changeEngagementPanelVisibilityAction": {
+                      "targetId": "engagement-panel-searchable-transcript",
+                      "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"
+                    }
+                  }
+                }
+              },
+              "trackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4Fqo="
+            }
+          },
+          "content": {
+            "continuationItemRenderer": {
+              "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+              "continuationEndpoint": {
+                "clickTrackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4FqrKAQSBeDdw",
+                "commandMetadata": {
+                  "webCommandMetadata": {
+                    "sendPost": true,
+                    "apiUrl": "/youtubei/v1/get_transcript"
+                  }
+                },
+                "getTranscriptEndpoint": {
+                  "params": "CgtkUXc0dzlXZ1hjURIOQ2dBU0FtVnVHZ0ElM0QYASozZW5nYWdlbWVudC1wYW5lbC1zZWFyY2hhYmxlLXRyYW5zY3JpcHQtc2VhcmNoLXBhbmVsMAE4AUAB"
+                }
+              }
+            }
+          },
+          "veType": 126250,
+          "targetId": "engagement-panel-searchable-transcript",
+          "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN",
+          "onShowCommands": [
+            {
+              "clickTrackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4FqrKAQSBeDdw",
+              "scrollToEngagementPanelCommand": {
+                "targetId": "engagement-panel-searchable-transcript"
+              }
+            }
+          ],
+          "loggingDirectives": {
+            "trackingParams": "CBoQ040EGAciEwjk6c-qzJqVAxVax3sAHSk4Fqo=",
+            "visibility": {
+              "types": "12"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
