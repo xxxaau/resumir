@@ -40,11 +40,11 @@ test("Twitter: extractTwitterOG troba og:description", () => {
     assert.ok(og && og.trim().length > 0, "ha de retornar contingut OG");
 });
 
-test("Twitter: scrapeTwitterTweets retorna tweets si el DOM els exposa, o null", () => {
+test("Twitter: scrapeTwitterTweets extreu els tweets del DOM", () => {
     loadDom("twitter-thread.html");
     const scraped = extractors.scrapeTwitterTweets();
-    // El DOM pot estar degradat (bots): acceptem string no buit O null, però no error.
-    assert.ok(scraped === null || scraped.length > 0);
+    assert.ok(scraped, "ha de retornar contingut (la fixture té [data-testid=tweetText])");
+    assert.ok(scraped.includes("milestone") || scraped.length > 20, "ha de contenir el text del tweet");
 });
 
 test("Readability: extractWithReadability extreu >100 caràcters d'un article", () => {
