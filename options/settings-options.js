@@ -50,6 +50,12 @@ function saveOptions(e) {
     simplePrompt: document.querySelector("#simplePrompt").value,
     simplePromptCustomized: document.querySelector("#simplePrompt").value !== DEFAULT_SIMPLE_PROMPT,
 
+    enableAnki: document.querySelector("#enableAnki").checked,
+    ankiPath: document.querySelector("#ankiPath").value || DEFAULT_ANKI_PATH,
+    ankiPacket: parseInt(document.querySelector("#ankiPacket").value, 10) || DEFAULT_ANKI_PACKET,
+    ankiLang: document.querySelector("#ankiLang").value || DEFAULT_ANKI_LANG,
+    ankiPrompt: document.querySelector("#ankiPrompt").value,
+
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder(),
 
@@ -114,6 +120,12 @@ function restoreOptions(syncData, localData) {
 
     document.querySelector("#enableSimple").checked = syncData && syncData.enableSimple === true;
     document.querySelector("#simplePrompt").value = (syncData && syncData.simplePrompt !== undefined) ? syncData.simplePrompt : DEFAULT_SIMPLE_PROMPT;
+
+    document.querySelector("#enableAnki").checked = syncData ? syncData.enableAnki === true : false;
+    document.querySelector("#ankiPath").value = (syncData && syncData.ankiPath) || DEFAULT_ANKI_PATH;
+    document.querySelector("#ankiPacket").value = (syncData && syncData.ankiPacket) || DEFAULT_ANKI_PACKET;
+    document.querySelector("#ankiLang").value = (syncData && syncData.ankiLang) || DEFAULT_ANKI_LANG;
+    document.querySelector("#ankiPrompt").value = (syncData && syncData.ankiPrompt !== undefined) ? syncData.ankiPrompt : DEFAULT_ANKI_PROMPT;
 
     // Mostrar banners d'actualització de prompts si n'hi ha
     if (syncData) {
@@ -187,6 +199,10 @@ function resetConceptMapPrompt() {
 function resetSimplePrompt() {
     document.querySelector("#simplePrompt").value = DEFAULT_SIMPLE_PROMPT;
     dismissPromptUpdate("simple");
+}
+
+function resetAnkiPrompt() {
+    document.querySelector("#ankiPrompt").value = DEFAULT_ANKI_PROMPT;
 }
 
 function resetBionic() {

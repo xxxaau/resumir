@@ -696,6 +696,56 @@
             </div>
           </div>
 
+          <!-- Targetes Anki -->
+          <div class="extension-item">
+            <div class="extension-icon icon-purple">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M12 8v8" />
+                <path d="M8 12h8" />
+              </svg>
+            </div>
+            <div class="extension-info">
+              <div class="extension-name">Targetes Anki</div>
+              <div class="extension-desc">
+                Genera targetes de memòria en format Anki i exporta-les a Obsidian.
+              </div>
+            </div>
+            <div class="extension-actions" data-extension-id="anki">
+              <button class="btn-icon btn-move-up" title="Moure amunt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </button>
+              <button class="btn-icon btn-move-down" title="Moure avall">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <label class="switch">
+                <input type="checkbox" id="enableAnki" aria-label="Activa el plugin Targetes Anki" />
+                <span class="slider round"></span>
+              </label>
+              <span class="sr-only">Targetes Anki</span>
+              <button class="btn-icon" data-target="anki" title="Configuració">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
           <!-- Bionic Reading -->
           <div class="extension-item">
             <div class="extension-icon icon-gray">
@@ -1099,6 +1149,63 @@
             No té cap opció configurable. Pots activar-lo, desactivar-lo o
             canviar-ne l'ordre des de la pestanya <strong>Plugins</strong>.
           </p>
+        </div>
+      </div>
+
+      <!-- Tab: Anki Config -->
+      <div id="tab-anki" class="tab-pane">
+        <h1 class="page-title">Configuració de Targetes Anki</h1>
+        <div class="section">
+          <div class="form-group">
+            <label for="ankiPath">Ruta de la nota a Obsidian</label>
+            <input
+              type="text"
+              id="ankiPath"
+              class="form-control"
+              placeholder="ex: 3 Recursos/Anki/Anki.md"
+            />
+            <div class="help-text">Ruta relativa dins el vault on s'afegiran les targetes exportades.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="ankiPacket">Mida del paquet (targetes per generació)</label>
+            <input
+              type="number"
+              id="ankiPacket"
+              class="form-control"
+              min="1"
+              max="20"
+              placeholder="5"
+            />
+            <div class="help-text">Nombre de targetes que es generen en cada petició al model.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="ankiLang">Idioma de les targetes</label>
+            <select id="ankiLang" class="form-control">
+              <option value="ca">Català</option>
+              <option value="en">Anglès</option>
+            </select>
+            <div class="help-text">Idioma en què es generaran les preguntes i respostes.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="ankiPrompt">Prompt de generació de targetes</label>
+            <textarea
+              id="ankiPrompt"
+              class="form-control"
+              rows="20"
+              placeholder="Vull aprendre i memoritzar el tema del contingut..."
+            ></textarea>
+            <div class="help-text">
+              Instruccions que s'enviaran al model per generar les targetes Anki.
+            </div>
+          </div>
+
+          <div class="section-actions">
+            <button id="saveAnki" class="btn btn-primary">Desar</button>
+            <button id="resetAnki" class="btn btn-secondary">Restaurar</button>
+          </div>
         </div>
       </div>
 

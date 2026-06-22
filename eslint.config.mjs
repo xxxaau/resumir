@@ -152,6 +152,7 @@ const settingsGlobals = {
     resetSciencePrompt: "readonly",
     resetConceptMapPrompt: "readonly",
     resetSimplePrompt: "readonly",
+    resetAnkiPrompt: "readonly",
     dismissPromptUpdate: "readonly",
     resetBionic: "readonly",
     showStatus: "readonly",

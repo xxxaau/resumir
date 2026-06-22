@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "enableScience", "sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable",
         "enableResum", "enablePdf", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
         "enableSimple", "simplePrompt", "simplePromptCustomized", "simplePromptUpdateAvailable",
+        "enableAnki", "ankiPath", "ankiPacket", "ankiLang", "ankiPrompt",
         "extensionOrder", "promptVersions"
     ];
     const [localData, syncData] = await Promise.all([
@@ -75,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Handle "Live" Toggles in extension list
-    const extensionToggles = ["enableResum", "enablePdf", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple"];
+    const extensionToggles = ["enableResum", "enablePdf", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple", "enableAnki"];
     extensionToggles.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -85,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Bind all save buttons to saveOptions
-    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple"].forEach(id => {
+    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple", "saveAnki"].forEach(id => {
         bindClick(id, saveOptions);
     });
 
@@ -98,6 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindClick("resetConceptMap", resetConceptMapPrompt);
     bindClick("resetSimple", resetSimplePrompt);
     bindClick("resetBionic", resetBionic);
+    bindClick("resetAnki", resetAnkiPrompt);
 
     // Model selection buttons
     bindClick("checkModels", listModels);
