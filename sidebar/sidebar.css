@@ -1164,6 +1164,8 @@ body {
 .anki-panel { padding-bottom: 120px; }
 .anki-controls { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .anki-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+/* "Afegir" alineat a la dreta; la resta a l'esquerra, amb separació. */
+#ankiExportBtn { margin-left: auto; }
 /* Barra d'Afinar FIXA, just sobre la barra inferior (footer-status, fixed ~32px). */
 .anki-afina-bar { position: fixed; left: 0; right: 0; bottom: 32px; z-index: 50; display: flex; flex-direction: column; gap: 6px; padding: 10px 15px; background: var(--bg-color); border-top: 1px solid var(--border-color); box-sizing: border-box; }
 .anki-afina-row { display: flex; align-items: stretch; gap: 6px; }

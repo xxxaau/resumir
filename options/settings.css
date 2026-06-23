@@ -670,6 +670,7 @@ input:checked + .slider:before {
 .icon-gray { color: #666; }
 .icon-orange { color: #bc5215; }
 .icon-amber { color: #b45309; } /* fosc per contrast ≥3:1 sobre fons clar */
+.icon-anki { color: #205EA6; } /* Flexoki Blue: igual que el botó Anki de la sidebar */
 
 /* Version History Section */
 .version-entry {
