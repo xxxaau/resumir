@@ -70,11 +70,14 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
         };
     }
 
-    // Combine user abort signal with a 60s timeout
+    // Combine user abort signal with a 60s timeout. El signal d'usuari és
+    // optatiu (p.ex. la regeneració de targetes Anki no en passa cap), així que
+    // filtrem els buits abans de combinar: AbortSignal.any() peta amb undefined.
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), 60_000);
+    const signals = [signal, timeoutController.signal].filter(Boolean);
     const fetchSignal = (typeof AbortSignal.any === 'function')
-        ? AbortSignal.any([signal, timeoutController.signal])
+        ? AbortSignal.any(signals)
         : signal;
 
     let response;

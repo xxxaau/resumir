@@ -104,7 +104,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 "modelName", "systemPrompt", "enableMarkdown", "enableObsidian", "enableBionic",
                 "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt",
                 "enableSimple", "simplePrompt",
-                "enableConceptMap", "extensionOrder", "favoriteModels",
+                "enableConceptMap", "enableAnki", "extensionOrder", "favoriteModels",
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
                 "conceptMapAutoExpand",
                 "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation",

@@ -14,7 +14,7 @@ test("DEFAULT_ANKI_PROMPT existeix i té els marcadors clau", () => {
 });
 
 test("defaults d'Anki", () => {
-    assert.equal(defaults.DEFAULT_ANKI_PATH, "3 Recursos/Anki/Anki.md");
+    assert.equal(defaults.DEFAULT_ANKI_PATH, "3 Recursos/Anki.md");
     assert.equal(defaults.DEFAULT_ANKI_PACKET, 5);
     assert.equal(defaults.DEFAULT_ANKI_LANG, "ca");
 });

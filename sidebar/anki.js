@@ -122,7 +122,12 @@ function renderAnkiPanel(ctx) {
             renderAnkiPanel(ctx);
         });
 
-        item.append(keep, qField, aField, discard);
+        // Capçalera: seleccionar (esquerra) i descartar (dreta) a la mateixa fila.
+        const header = document.createElement("div");
+        header.className = "anki-card-header";
+        header.append(keep, discard);
+
+        item.append(header, qField, aField);
         panel.appendChild(item);
     });
 
@@ -162,10 +167,11 @@ async function exportAnkiToObsidian(ctx) {
     const selected = getSelectedAnkiCards();
     if (selected.length === 0) return;
 
-    const vault = config.obsidianVault || "Obsidian";
+    // Vault independent del plugin d'Obsidian; si Anki no en té, cau al d'Obsidian.
+    const vault = config.ankiVault || config.obsidianVault || "Obsidian";
     const pathTemplate = config.ankiPath || DEFAULT_ANKI_PATH;
-    if (!config.obsidianVault) {
-        if (confirm("Obsidian no està configurat. Vols obrir la configuració?")) {
+    if (!config.ankiVault && !config.obsidianVault) {
+        if (confirm("El vault d'Obsidian no està configurat. Vols obrir la configuració?")) {
             ext.runtime.openOptionsPage();
         }
         return;

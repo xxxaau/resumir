@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "enableScience", "sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable",
         "enableResum", "enablePdf", "enableConceptMap", "conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable",
         "enableSimple", "simplePrompt", "simplePromptCustomized", "simplePromptUpdateAvailable",
-        "enableAnki", "ankiPath", "ankiPacket", "ankiLang", "ankiPrompt",
+        "enableAnki", "ankiVault", "ankiPath", "ankiPacket", "ankiLang", "ankiPrompt",
         "extensionOrder", "promptVersions"
     ];
     const [localData, syncData] = await Promise.all([

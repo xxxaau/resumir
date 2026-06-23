@@ -710,9 +710,7 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="M12 8v8" />
-                <path d="M8 12h8" />
+                <path d="M12 2 2 7l10 5 10-5-10-5Z M2 17l10 5 10-5 M2 12l10 5 10-5" />
               </svg>
             </div>
             <div class="extension-info">
@@ -1157,12 +1155,23 @@
         <h1 class="page-title">Configuració de Targetes Anki</h1>
         <div class="section">
           <div class="form-group">
+            <label for="ankiVault">Nom del Vault</label>
+            <input
+              type="text"
+              id="ankiVault"
+              class="form-control"
+              placeholder="ex: Obsidian (Per defecte)"
+            />
+            <div class="help-text">Vault d'Obsidian on s'afegiran les targetes. Independent del plugin d'Obsidian; la primera vegada s'agafa el seu valor si està configurat.</div>
+          </div>
+
+          <div class="form-group">
             <label for="ankiPath">Ruta de la nota a Obsidian</label>
             <input
               type="text"
               id="ankiPath"
               class="form-control"
-              placeholder="ex: 3 Recursos/Anki/Anki.md"
+              placeholder="ex: 3 Recursos/Anki.md"
             />
             <div class="help-text">Ruta relativa dins el vault on s'afegiran les targetes exportades.</div>
           </div>

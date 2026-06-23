@@ -285,7 +285,7 @@ CONTINGUT A EXPLICAR:`;
 
 // --- Anki ---
 // Valors per defecte del plugin d'Anki.
-const DEFAULT_ANKI_PATH = "3 Recursos/Anki/Anki.md";
+const DEFAULT_ANKI_PATH = "3 Recursos/Anki.md";
 const DEFAULT_ANKI_PACKET = 5;
 const DEFAULT_ANKI_LANG = "ca";
 

@@ -51,6 +51,7 @@ function saveOptions(e) {
     simplePromptCustomized: document.querySelector("#simplePrompt").value !== DEFAULT_SIMPLE_PROMPT,
 
     enableAnki: document.querySelector("#enableAnki").checked,
+    ankiVault: document.querySelector("#ankiVault").value,
     ankiPath: document.querySelector("#ankiPath").value || DEFAULT_ANKI_PATH,
     ankiPacket: parseInt(document.querySelector("#ankiPacket").value, 10) || DEFAULT_ANKI_PACKET,
     ankiLang: document.querySelector("#ankiLang").value || DEFAULT_ANKI_LANG,
@@ -122,6 +123,11 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#simplePrompt").value = (syncData && syncData.simplePrompt !== undefined) ? syncData.simplePrompt : DEFAULT_SIMPLE_PROMPT;
 
     document.querySelector("#enableAnki").checked = syncData ? syncData.enableAnki === true : false;
+    // Vault independent: si encara no s'ha configurat per Anki, es pre-omple amb el
+    // d'Obsidian (seed de primera càrrega). En desar es fixa i ja és independent.
+    document.querySelector("#ankiVault").value = (syncData && syncData.ankiVault !== undefined)
+        ? syncData.ankiVault
+        : ((syncData && syncData.obsidianVault) || "Obsidian");
     document.querySelector("#ankiPath").value = (syncData && syncData.ankiPath) || DEFAULT_ANKI_PATH;
     document.querySelector("#ankiPacket").value = (syncData && syncData.ankiPacket) || DEFAULT_ANKI_PACKET;
     document.querySelector("#ankiLang").value = (syncData && syncData.ankiLang) || DEFAULT_ANKI_LANG;

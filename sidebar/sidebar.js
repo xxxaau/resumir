@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Configuration Initialization & Migration ---
 
-    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "enableSimple", "enablePdf", "enableAnki", "ankiPath", "ankiPrompt", "ankiPacket", "ankiLang", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
+    const CONFIG_KEYS = ["enableMarkdown", "enableObsidian", "enableBionic", "enableDeepdive", "enableScience", "enableResum", "enableConceptMap", "enableSimple", "enablePdf", "enableAnki", "ankiVault", "ankiPath", "ankiPrompt", "ankiPacket", "ankiLang", "extensionOrder", "markdownTemplate", "obsidianVault", "obsidianPath", "obsidianTemplate", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation"];
 
     ext.storage.sync
       .get(CONFIG_KEYS)
