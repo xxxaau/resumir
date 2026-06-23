@@ -101,6 +101,13 @@ const extensionGlobals = {
     executeScriptSafe: "readonly",
     // sidebar/youtube-track-select.js
     selectYoutubeTrack: "readonly",
+    // sidebar/extractors.js (connectors — font única de selectors, usats a content.js)
+    extractHackerNewsFromDOM: "readonly",
+    readYoutubeCaptionMeta: "readonly",
+    extractLinkedInPost: "readonly",
+    scrapeTwitterTweets: "readonly",
+    extractTwitterOG: "readonly",
+    extractWithReadability: "readonly",
     // sidebar/anki.js
     parseAnkiCards: "readonly",
     formatCardForAnki: "readonly",

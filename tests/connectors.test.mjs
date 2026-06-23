@@ -68,7 +68,7 @@ test("YouTube: readYoutubeCaptionMeta llegeix tracks o prerenderedText de ytInit
 });
 
 test("Readability: extractWithReadability extreu >100 caràcters d'un article", () => {
-    const dom = loadDom("article-generic.html");
+    loadDom("article-generic.html");
     // Readability és un global a la pàgina; al test l'injectem des de vendor.
     global.Readability = require("../Readability.js");
     const text = extractors.extractWithReadability();
