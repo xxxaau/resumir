@@ -24,7 +24,7 @@ Cada plugin consta de:
 > pas 4 i la secció "Trampes conegudes".
 
 **Sidebar (toolbar + comportament):**
-1. Afegir botó a `sidebar/sidebar.html` (+ `<script>` si té fitxer JS propi)
+1. Afegir botó a `sidebar/sidebar.html` (+ `<script>` si té fitxer JS propi) — la seva icona és la **font de veritat** (vegeu «la icona viu a 3 llocs»)
 2. Registrar ID a `sidebar/ui.js` → `extensionIdToButtonId`
 3. Afegir visibilitat a `applyExtensionVisibility()` (`sidebar/ui.js`)
 4. **Registrar la clau `enable<Plugin>` a TOTES les llistes de config** (vegeu sota)
@@ -32,8 +32,8 @@ Cada plugin consta de:
 6. Afegir event listener a `sidebar/sidebar.js`
 
 **Opcions (toggle + ordre + persistència):**
-7. Afegir l'`extension-item` (toggle + moure amunt/avall) a `options/settings.html`
-8. Afegir l'entrada a l'array `extensions` de `options/settings-sidebar.js` (nav lateral)
+7. Afegir l'`extension-item` (toggle + moure amunt/avall) a `options/settings.html` — **mateixa icona** que la sidebar
+8. Afegir l'entrada a l'array `extensions` de `options/settings-sidebar.js` (nav lateral) — **mateixa icona** que la sidebar
 9. Registrar `enable<Plugin>` a `ALL_CONFIG_KEYS` i `extensionToggles` (`options/settings.js`)
 10. Save/restore de la clau a `options/settings-options.js`
 
@@ -52,6 +52,25 @@ comportament divergeix entre sidebar i settings):
 | `sidebar/ui.js` | el `storage.sync.get([...])` inline del fallback dins `resetUI` | el botó no surt en el camí de refresc sense config |
 | `options/settings.js` | `ALL_CONFIG_KEYS` | el toggle no carrega bé a Settings |
 | `options/settings.js` | `extensionToggles` | el canvi del toggle no refresca la sidebar en viu |
+
+### L'altre pas que s'oblida — la icona viu a 3 llocs
+
+> ⚠️ La icona d'un plugin està **duplicada com a SVG inline en tres fitxers**. Si
+> en canvies una i no les altres, la icona surt **diferent segons on es miri**
+> (bug recurrent: s'havia canviat al toolbar i al tab Plugins però NO a la llista
+> "Plugins actius"). El **path SVG ha de ser idèntic** a totes tres.
+
+| Fitxer | Ubicació | On es veu |
+|---|---|---|
+| `sidebar/sidebar.html` | botó `#<plugin>Btn` del toolbar | barra de la sidebar — **FONT DE VERITAT** |
+| `options/settings.html` | `div.extension-icon` de l'`extension-item` (tab Plugins) | badge de la llista de plugins |
+| `options/settings-sidebar.js` | camp `icon` de l'objecte a l'array `extensions` | nav lateral "Plugins actius" de Settings |
+
+A més, l'historial usa un **emoji** a part (`shared/content-types.js`, camp `icon`):
+NO és l'SVG, és un altre estil/context.
+
+**Regla:** en canviar una icona, fes `grep` del path antic a `sidebar/` i `options/`
+per confirmar que no en queda cap còpia abans de tancar.
 
 ## Pas a pas detallat
 
