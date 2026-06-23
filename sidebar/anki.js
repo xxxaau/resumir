@@ -100,24 +100,58 @@ function renderAnkiPanel(ctx) {
         const item = document.createElement("div");
         item.className = "anki-card";
 
-        const keep = document.createElement("input");
-        keep.type = "checkbox";
-        keep.checked = card.selected;
-        keep.addEventListener("change", () => {
-            card.selected = keep.checked;
+        // Selecció (cantonada). Desmarcada per defecte.
+        const sel = document.createElement("input");
+        sel.type = "checkbox";
+        sel.className = "anki-select";
+        sel.checked = card.selected;
+        sel.title = "Incloure a l'exportació";
+        sel.addEventListener("change", () => {
+            card.selected = sel.checked;
             updateExportCount();
+            updateSelectAllBtn();
         });
 
-        const qField = document.createElement("textarea");
-        qField.className = "anki-q";
-        qField.value = card.q;
-        qField.addEventListener("input", () => { card.q = qField.value; });
+        // Cos: lectura (Q dalt / divisòria / A sota) o edició (textarees).
+        const body = document.createElement("div");
+        body.className = "anki-card-body";
 
-        const aField = document.createElement("textarea");
-        aField.className = "anki-a";
-        aField.value = card.a;
-        aField.addEventListener("input", () => { card.a = aField.value; });
+        const editBtn = document.createElement("button");
+        editBtn.className = "anki-edit";
 
+        let editing = false;
+        function renderBody() {
+            body.replaceChildren();
+            if (editing) {
+                const qField = document.createElement("textarea");
+                qField.className = "anki-q";
+                qField.value = card.q;
+                qField.addEventListener("input", () => { card.q = qField.value; });
+                const aField = document.createElement("textarea");
+                aField.className = "anki-a";
+                aField.value = card.a;
+                aField.addEventListener("input", () => { card.a = aField.value; });
+                body.append(qField, aField);
+                editBtn.textContent = "Fet";
+            } else {
+                const qView = document.createElement("div");
+                qView.className = "anki-q-view";
+                qView.textContent = card.q;
+                const divider = document.createElement("hr");
+                divider.className = "anki-divider";
+                const aView = document.createElement("div");
+                aView.className = "anki-a-view";
+                aView.textContent = card.a;
+                body.append(qView, divider, aView);
+                editBtn.textContent = "Edita";
+            }
+        }
+        editBtn.addEventListener("click", () => { editing = !editing; renderBody(); });
+        renderBody();
+
+        // Footer estil barra d'Anki: Edita (esquerra) / Descarta (dreta).
+        const footer = document.createElement("div");
+        footer.className = "anki-card-footer";
         const discard = document.createElement("button");
         discard.className = "anki-discard";
         discard.textContent = "Descarta";
@@ -125,42 +159,55 @@ function renderAnkiPanel(ctx) {
             ankiState.splice(i, 1);
             renderAnkiPanel(ctx);
         });
+        footer.append(editBtn, discard);
 
-        // Capçalera: seleccionar (esquerra) i descartar (dreta) a la mateixa fila.
-        const header = document.createElement("div");
-        header.className = "anki-card-header";
-        header.append(keep, discard);
-
-        item.append(header, qField, aField);
+        item.append(sel, body, footer);
         panel.appendChild(item);
     });
 
-    // Controls
+    // ── Controls globals ──
     const controls = document.createElement("div");
     controls.className = "anki-controls";
 
+    const genRow = document.createElement("div");
+    genRow.className = "anki-gen-row";
     const moreBtn = document.createElement("button");
     moreBtn.textContent = "Generar 5 més";
     moreBtn.addEventListener("click", () => ctx.onGenerateMore(""));
-
     const focusInput = document.createElement("input");
     focusInput.type = "text";
     focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
-
     const focusBtn = document.createElement("button");
     focusBtn.textContent = "Afinar";
     focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
+    genRow.append(moreBtn, focusInput, focusBtn);
 
+    const actionRow = document.createElement("div");
+    actionRow.className = "anki-action-row";
+    const selectAllBtn = document.createElement("button");
+    selectAllBtn.className = "anki-select-all";
+    selectAllBtn.addEventListener("click", () => {
+        const allSelected = ankiState.length > 0 && ankiState.every(c => c.selected);
+        setAllAnkiSelected(!allSelected);
+        renderAnkiPanel(ctx);
+    });
     const exportBtn = document.createElement("button");
     exportBtn.id = "ankiExportBtn";
     exportBtn.addEventListener("click", () => exportAnkiToObsidian(ctx));
+    actionRow.append(selectAllBtn, exportBtn);
 
+    // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
-        exportBtn.textContent = `Afegir nota/es a Obsidian (${getSelectedAnkiCards().length})`;
+        exportBtn.textContent = `Afegir a Obsidian (${getSelectedAnkiCards().length})`;
+    }
+    function updateSelectAllBtn() {
+        const allSelected = ankiState.length > 0 && ankiState.every(c => c.selected);
+        selectAllBtn.textContent = allSelected ? "Treu-ho tot" : "Selecciona-ho tot";
     }
     updateExportCount();
+    updateSelectAllBtn();
 
-    controls.append(moreBtn, focusInput, focusBtn, exportBtn);
+    controls.append(genRow, actionRow);
     panel.appendChild(controls);
     contentDiv.appendChild(panel);
 }
