@@ -177,7 +177,7 @@ function renderAnkiPanel(ctx) {
     btnRow.className = "anki-btn-row";
 
     const moreBtn = document.createElement("button");
-    moreBtn.textContent = "Generar 5 més";
+    moreBtn.textContent = "Genera més";
     moreBtn.addEventListener("click", () => ctx.onGenerateMore(""));
 
     const discardAllBtn = document.createElement("button");
@@ -207,7 +207,7 @@ function renderAnkiPanel(ctx) {
 
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
-        exportBtn.textContent = `Afegir a Obsidian (${getSelectedAnkiCards().length})`;
+        exportBtn.textContent = `Afegeix (${getSelectedAnkiCards().length})`;
         exportBtn.disabled = getSelectedAnkiCards().length === 0;
     }
     function updateSelectAllBtn() {
