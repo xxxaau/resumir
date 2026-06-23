@@ -96,7 +96,7 @@ function renderAnkiPanel(ctx) {
     const panel = document.createElement("div");
     panel.className = "anki-panel";
 
-    ankiState.forEach((card, i) => {
+    ankiState.forEach((card) => {
         const item = document.createElement("div");
         item.className = "anki-card";
 
@@ -156,7 +156,8 @@ function renderAnkiPanel(ctx) {
         discard.className = "anki-discard";
         discard.textContent = "Descarta";
         discard.addEventListener("click", () => {
-            ankiState.splice(i, 1);
+            const idx = ankiState.indexOf(card);
+            if (idx !== -1) ankiState.splice(idx, 1);
             renderAnkiPanel(ctx);
         });
         footer.append(editBtn, discard);
@@ -182,12 +183,14 @@ function renderAnkiPanel(ctx) {
     focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
     genRow.append(moreBtn, focusInput, focusBtn);
 
+    function isAllSelected() { return ankiState.length > 0 && ankiState.every(c => c.selected); }
+
     const actionRow = document.createElement("div");
     actionRow.className = "anki-action-row";
     const selectAllBtn = document.createElement("button");
     selectAllBtn.className = "anki-select-all";
     selectAllBtn.addEventListener("click", () => {
-        const allSelected = ankiState.length > 0 && ankiState.every(c => c.selected);
+        const allSelected = isAllSelected();
         setAllAnkiSelected(!allSelected);
         renderAnkiPanel(ctx);
     });
@@ -199,10 +202,12 @@ function renderAnkiPanel(ctx) {
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
         exportBtn.textContent = `Afegir a Obsidian (${getSelectedAnkiCards().length})`;
+        exportBtn.disabled = getSelectedAnkiCards().length === 0;
     }
     function updateSelectAllBtn() {
-        const allSelected = ankiState.length > 0 && ankiState.every(c => c.selected);
+        const allSelected = isAllSelected();
         selectAllBtn.textContent = allSelected ? "Treu-ho tot" : "Selecciona-ho tot";
+        selectAllBtn.disabled = ankiState.length === 0;
     }
     updateExportCount();
     updateSelectAllBtn();
