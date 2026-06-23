@@ -170,34 +170,52 @@ function renderAnkiPanel(ctx) {
     const controls = document.createElement("div");
     controls.className = "anki-controls";
 
-    const genRow = document.createElement("div");
-    genRow.className = "anki-gen-row";
+    function isAllSelected() { return ankiState.length > 0 && ankiState.every(c => c.selected); }
+
+    // Fila 1: botons d'acció.
+    const btnRow = document.createElement("div");
+    btnRow.className = "anki-btn-row";
+
     const moreBtn = document.createElement("button");
     moreBtn.textContent = "Generar 5 més";
     moreBtn.addEventListener("click", () => ctx.onGenerateMore(""));
-    const focusInput = document.createElement("input");
-    focusInput.type = "text";
+
+    const discardAllBtn = document.createElement("button");
+    discardAllBtn.className = "anki-discard-all";
+    discardAllBtn.textContent = "Descarta-ho tot";
+    discardAllBtn.disabled = ankiState.length === 0;
+    discardAllBtn.addEventListener("click", () => {
+        if (ankiState.length === 0) return;
+        if (confirm("Segur que vols descartar totes les targetes?")) {
+            setAnkiCards([]);
+            renderAnkiPanel(ctx);
+        }
+    });
+
+    const selectAllBtn = document.createElement("button");
+    selectAllBtn.className = "anki-select-all";
+    selectAllBtn.addEventListener("click", () => {
+        setAllAnkiSelected(!isAllSelected());
+        renderAnkiPanel(ctx);
+    });
+
+    const exportBtn = document.createElement("button");
+    exportBtn.id = "ankiExportBtn";
+    exportBtn.addEventListener("click", () => exportAnkiToObsidian(ctx));
+
+    btnRow.append(moreBtn, discardAllBtn, selectAllBtn, exportBtn);
+
+    // Fila 2: caixa d'afinar (gran) + botó de la mateixa alçada.
+    const afinaRow = document.createElement("div");
+    afinaRow.className = "anki-afina-row";
+    const focusInput = document.createElement("textarea");
+    focusInput.className = "anki-afina-input";
+    focusInput.rows = 2;
     focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
     const focusBtn = document.createElement("button");
     focusBtn.textContent = "Afinar";
     focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
-    genRow.append(moreBtn, focusInput, focusBtn);
-
-    function isAllSelected() { return ankiState.length > 0 && ankiState.every(c => c.selected); }
-
-    const actionRow = document.createElement("div");
-    actionRow.className = "anki-action-row";
-    const selectAllBtn = document.createElement("button");
-    selectAllBtn.className = "anki-select-all";
-    selectAllBtn.addEventListener("click", () => {
-        const allSelected = isAllSelected();
-        setAllAnkiSelected(!allSelected);
-        renderAnkiPanel(ctx);
-    });
-    const exportBtn = document.createElement("button");
-    exportBtn.id = "ankiExportBtn";
-    exportBtn.addEventListener("click", () => exportAnkiToObsidian(ctx));
-    actionRow.append(selectAllBtn, exportBtn);
+    afinaRow.append(focusInput, focusBtn);
 
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
@@ -205,14 +223,13 @@ function renderAnkiPanel(ctx) {
         exportBtn.disabled = getSelectedAnkiCards().length === 0;
     }
     function updateSelectAllBtn() {
-        const allSelected = isAllSelected();
-        selectAllBtn.textContent = allSelected ? "Treu-ho tot" : "Selecciona-ho tot";
+        selectAllBtn.textContent = isAllSelected() ? "Treu-ho tot" : "Selecciona-ho tot";
         selectAllBtn.disabled = ankiState.length === 0;
     }
     updateExportCount();
     updateSelectAllBtn();
 
-    controls.append(genRow, actionRow);
+    controls.append(btnRow, afinaRow);
     panel.appendChild(controls);
     contentDiv.appendChild(panel);
 }
@@ -271,6 +288,12 @@ function buildAnkiRegenPrompt(basePrompt, lang, count, existingQuestions, focusT
         .replace(/\{\{COUNT\}\}/g, String(count));
     if (existingQuestions && existingQuestions.length) {
         p += `\n\nNo repeteixis aquestes preguntes ja generades:\n- ${existingQuestions.join("\n- ")}`;
+        if (!focusText) {
+            // "Generar més" sense focus: el prompt base demana només "punts clau" i el
+            // model s'esgota de seguida. L'empenyem a anar més enllà cap a detalls
+            // secundaris perquè pugui seguir generant targetes noves i útils.
+            p += `\n\nJa s'han generat targetes dels punts principals. Genera'n de NOVES centrant-te en detalls secundaris, exemples, dates, xifres, definicions, causes, conseqüències o matisos del contingut que encara no s'hagin cobert. No reformulis les ja generades.`;
+        }
     }
     if (focusText) {
         p += `\n\nCentra les noves targetes en: ${focusText}`;
@@ -289,59 +312,66 @@ async function generateMoreAnkiCards(ctx, focusText) {
     const rawPageText = (typeof window !== "undefined" && window.__ankiPageText) || "";
     if (!rawPageText) return;
 
-    // Clau d'API (storage.local) i configuració del model (storage.sync)
-    const { apiKey } = await ext.storage.local.get(["apiKey"]);
-    const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang", "ankiPacket"]);
-    const modelName = cfg.modelName || DEFAULT_MODEL_ID;
-    const base = cfg.ankiPrompt || DEFAULT_ANKI_PROMPT;
-    const lang = cfg.ankiLang || DEFAULT_ANKI_LANG;
-    const count = cfg.ankiPacket || DEFAULT_ANKI_PACKET;
-
-    // Amb un focus (Afinar) NO excloem les existents: volem que el model pugui
-    // aprofundir o reformular sobre el tema. Sense focus ("Generar més") sí que
-    // les excloem per evitar duplicats.
-    const existing = focusText ? [] : getAnkiCards().map(c => c.q);
-    const prompt = buildAnkiRegenPrompt(base, lang, count, existing, focusText);
-
-    // Apliquem la mateixa neutralització + embolcall UNTRUSTED que la pipeline principal
-    // (mirrors sidebar/summary.js:267-268) per mantenir la frontera anti-injecció de prompts.
-    const safePageText = rawPageText.replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
-    const pageText = `<UNTRUSTED_CONTENT>\n${safePageText}\n</UNTRUSTED_CONTENT>`;
-
-    // Acumulem la resposta en streaming
-    let raw = "";
+    // Indicador "treballant": mostra els puntets animats mentre l'usuari espera.
+    const loadingDiv = (typeof document !== "undefined") ? document.getElementById("loading") : null;
+    if (loadingDiv) loadingDiv.classList.remove("hidden");
     try {
-        await callGeminiStream(apiKey, modelName, prompt, pageText, undefined,
-            (chunk) => { raw += chunk; }, () => {});
-    } catch (e) {
-        if (ctx.errorDiv) {
-            ctx.errorDiv.textContent = "Error generant més targetes: " + e.message;
-            ctx.errorDiv.classList.remove("hidden");
-        }
-        return;
-    }
+        // Clau d'API (storage.local) i configuració del model (storage.sync)
+        const { apiKey } = await ext.storage.local.get(["apiKey"]);
+        const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang", "ankiPacket"]);
+        const modelName = cfg.modelName || DEFAULT_MODEL_ID;
+        const base = cfg.ankiPrompt || DEFAULT_ANKI_PROMPT;
+        const lang = cfg.ankiLang || DEFAULT_ANKI_LANG;
+        const count = cfg.ankiPacket || DEFAULT_ANKI_PACKET;
 
-    // Parsejem i afegim les targetes noves
-    const newCards = parseAnkiCards(raw);
-    if (newCards.length === 0) {
-        if (ctx.errorDiv) {
-            ctx.errorDiv.textContent = "No s'han pogut generar més targetes.";
-            ctx.errorDiv.classList.remove("hidden");
+        // Amb un focus (Afinar) NO excloem les existents: volem que el model pugui
+        // aprofundir o reformular sobre el tema. Sense focus ("Generar més") sí que
+        // les excloem per evitar duplicats.
+        const existing = focusText ? [] : getAnkiCards().map(c => c.q);
+        const prompt = buildAnkiRegenPrompt(base, lang, count, existing, focusText);
+
+        // Apliquem la mateixa neutralització + embolcall UNTRUSTED que la pipeline principal
+        // (mirrors sidebar/summary.js:267-268) per mantenir la frontera anti-injecció de prompts.
+        const safePageText = rawPageText.replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
+        const pageText = `<UNTRUSTED_CONTENT>\n${safePageText}\n</UNTRUSTED_CONTENT>`;
+
+        // Acumulem la resposta en streaming
+        let raw = "";
+        try {
+            await callGeminiStream(apiKey, modelName, prompt, pageText, undefined,
+                (chunk) => { raw += chunk; }, () => {});
+        } catch (e) {
+            if (ctx.errorDiv) {
+                ctx.errorDiv.textContent = "Error generant més targetes: " + e.message;
+                ctx.errorDiv.classList.remove("hidden");
+            }
+            return;
         }
-        return;
-    }
-    const before = getAnkiCards().length;
-    appendAnkiCards(newCards);
-    const added = getAnkiCards().length - before;
-    if (added === 0) {
-        if (ctx.errorDiv) {
-            ctx.errorDiv.textContent = "No s'han trobat punts nous per generar més targetes.";
-            ctx.errorDiv.classList.remove("hidden");
+
+        // Parsejem i afegim les targetes noves
+        const newCards = parseAnkiCards(raw);
+        if (newCards.length === 0) {
+            if (ctx.errorDiv) {
+                ctx.errorDiv.textContent = "No s'han pogut generar més targetes.";
+                ctx.errorDiv.classList.remove("hidden");
+            }
+            return;
         }
-        return;
+        const before = getAnkiCards().length;
+        appendAnkiCards(newCards);
+        const added = getAnkiCards().length - before;
+        if (added === 0) {
+            if (ctx.errorDiv) {
+                ctx.errorDiv.textContent = "No s'han trobat punts nous per generar més targetes.";
+                ctx.errorDiv.classList.remove("hidden");
+            }
+            return;
+        }
+        if (ctx.errorDiv) ctx.errorDiv.classList.add("hidden");
+        renderAnkiPanel(ctx);
+    } finally {
+        if (loadingDiv) loadingDiv.classList.add("hidden");
     }
-    if (ctx.errorDiv) ctx.errorDiv.classList.add("hidden");
-    renderAnkiPanel(ctx);
 }
 
 if (typeof module !== "undefined" && module.exports) {

@@ -88,3 +88,14 @@ test("buildAnkiRegenPrompt inclou exclusió i enfocament", () => {
     assert.ok(p.includes("Què és X?") && p.includes("Quan?"), "ha de llistar les preguntes a excloure");
     assert.ok(/dates i xifres/.test(p), "ha d'incloure l'enfocament");
 });
+
+test("buildAnkiRegenPrompt: 'Generar més' (sense focus) afegeix nudge de detalls secundaris", () => {
+    const p = anki.buildAnkiRegenPrompt("BASE {{LANG}} {{COUNT}}", "ca", 5, ["Què és X?"], "");
+    assert.ok(p.includes("Què és X?"), "ha d'excloure les existents");
+    assert.ok(/detalls secundaris/.test(p), "sense focus ha d'incloure el nudge per anar més enllà dels punts principals");
+});
+
+test("buildAnkiRegenPrompt: amb focus NO afegeix el nudge de detalls secundaris", () => {
+    const p = anki.buildAnkiRegenPrompt("BASE {{LANG}} {{COUNT}}", "ca", 5, [], "dates");
+    assert.ok(!/detalls secundaris/.test(p), "amb focus no s'afegeix el nudge genèric");
+});
