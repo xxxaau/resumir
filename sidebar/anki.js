@@ -245,8 +245,10 @@ async function generateMoreAnkiCards(ctx, focusText) {
     const lang = cfg.ankiLang || DEFAULT_ANKI_LANG;
     const count = cfg.ankiPacket || DEFAULT_ANKI_PACKET;
 
-    // Construïm el prompt excloent les preguntes ja existents
-    const existing = getAnkiCards().map(c => c.q);
+    // Amb un focus (Afinar) NO excloem les existents: volem que el model pugui
+    // aprofundir o reformular sobre el tema. Sense focus ("Generar més") sí que
+    // les excloem per evitar duplicats.
+    const existing = focusText ? [] : getAnkiCards().map(c => c.q);
     const prompt = buildAnkiRegenPrompt(base, lang, count, existing, focusText);
 
     // Apliquem la mateixa neutralització + embolcall UNTRUSTED que la pipeline principal
@@ -276,7 +278,17 @@ async function generateMoreAnkiCards(ctx, focusText) {
         }
         return;
     }
+    const before = getAnkiCards().length;
     appendAnkiCards(newCards);
+    const added = getAnkiCards().length - before;
+    if (added === 0) {
+        if (ctx.errorDiv) {
+            ctx.errorDiv.textContent = "No s'han trobat punts nous per generar més targetes.";
+            ctx.errorDiv.classList.remove("hidden");
+        }
+        return;
+    }
+    if (ctx.errorDiv) ctx.errorDiv.classList.add("hidden");
     renderAnkiPanel(ctx);
 }
 

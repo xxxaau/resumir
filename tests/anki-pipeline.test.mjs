@@ -29,6 +29,8 @@ function makeEl() {
         replaceChildren() { this._children = []; },
         appendChild(n) { (this._children = this._children || []).push(n); return n; },
         querySelector() { return null; },
+        addEventListener() {},
+        append(...nodes) { nodes.forEach(n => (this._children = this._children || []).push(n)); },
         value: "",
         options: [],
         _children: [],
@@ -288,4 +290,60 @@ test("anki pipeline - guard: retorna null sense flags actius (comportament exist
     const ctx = makeCtx();
     const result = await startSummary(ctx, null, false, false, false, false, false, false);
     assert.equal(result, null, "Ha de retornar null si no hi ha cap flag actiu");
+});
+
+// ---------------------------------------------------------------------------
+// Test 6: Afinar (focus) NO exclou les preguntes existents
+// ---------------------------------------------------------------------------
+
+test("anki - Afinar (focus) NO exclou les preguntes existents", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash", ankiLang: "ca", ankiPacket: 5 });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let captured = null;
+    global.window = { __ankiPageText: "Contingut de prova per generar targetes." };
+    setupGlobals({
+        callGeminiStream: async (_k, _m, prompt, _t, _s, onChunk) => {
+            captured = prompt;
+            onChunk('[{"q":"NOVA?","a":"R"}]');
+            return { inputTokens: 1, outputTokens: 1, cacheTokens: 0 };
+        },
+    });
+    global.window = { __ankiPageText: "Contingut de prova per generar targetes." };
+
+    global.setAnkiCards([{ q: "EXISTENT?", a: "1" }]);
+    const ctx = { contentDiv: makeEl(), errorDiv: makeEl(), getGlobalConfig: () => ({}) };
+
+    await global.generateMoreAnkiCards(ctx, "dates i xifres");
+
+    assert.ok(captured && captured.includes("dates i xifres"), "ha d'incloure el focus");
+    assert.ok(!captured.includes("EXISTENT?"), "amb focus NO ha d'excloure les existents");
+});
+
+// ---------------------------------------------------------------------------
+// Test 7: Generar més (sense focus) SÍ exclou les existents
+// ---------------------------------------------------------------------------
+
+test("anki - Generar més (sense focus) SÍ exclou les existents", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash", ankiLang: "ca", ankiPacket: 5 });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let captured = null;
+    setupGlobals({
+        callGeminiStream: async (_k, _m, prompt, _t, _s, onChunk) => {
+            captured = prompt;
+            onChunk('[{"q":"NOVA?","a":"R"}]');
+            return { inputTokens: 1, outputTokens: 1, cacheTokens: 0 };
+        },
+    });
+    global.window = { __ankiPageText: "Contingut de prova." };
+
+    global.setAnkiCards([{ q: "EXISTENT?", a: "1" }]);
+    const ctx = { contentDiv: makeEl(), errorDiv: makeEl(), getGlobalConfig: () => ({}) };
+
+    await global.generateMoreAnkiCards(ctx, "");
+
+    assert.ok(captured && captured.includes("EXISTENT?"), "sense focus ha d'excloure les existents");
 });
