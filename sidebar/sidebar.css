@@ -1150,8 +1150,15 @@ body {
 }
 
 
-/* ── Plugin Anki: targetes i controls ────────────────────────────────────── */
-.anki-card { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--text-color); border-radius: 6px; margin-bottom: 8px; }
-.anki-card-header { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+/* ── Plugin Anki: targetes estil flashcard i controls ───────────────────── */
+.anki-card { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--text-color); border-radius: 8px; margin-bottom: 10px; background: var(--bg-color); }
+.anki-select { position: absolute; top: 8px; right: 8px; }
+.anki-card-body { display: flex; flex-direction: column; gap: 6px; }
+.anki-q-view { text-align: center; font-weight: 600; padding: 4px 16px 0; }
+.anki-divider { width: 100%; border: none; border-top: 1px solid var(--text-color); opacity: 0.3; margin: 4px 0; }
+.anki-a-view { text-align: center; padding: 0 8px; }
 .anki-card textarea { width: 100%; background: var(--bg-color); color: var(--text-color); }
-.anki-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.anki-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.anki-controls { display: flex; flex-direction: column; gap: 8px; }
+.anki-gen-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.anki-action-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; position: sticky; bottom: 0; background: var(--bg-color); padding-top: 8px; }
