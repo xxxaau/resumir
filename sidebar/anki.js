@@ -62,7 +62,7 @@ let ankiState = []; // [{ q, a, selected }]
 function setAnkiCards(cards) {
     ankiState = (cards || []).map(c => ({
         q: c.q, a: c.a,
-        selected: c.selected !== undefined ? c.selected : true,
+        selected: c.selected !== undefined ? c.selected : false,
     }));
     return ankiState;
 }
@@ -71,13 +71,17 @@ function getSelectedAnkiCards() {
     return ankiState.filter(c => c.selected && c.q.trim() && c.a.trim())
         .map(c => ({ q: c.q, a: c.a }));
 }
+function setAllAnkiSelected(value) {
+    ankiState.forEach(c => { c.selected = value; });
+    return ankiState;
+}
 function appendAnkiCards(cards) {
     const existing = new Set(ankiState.map(c => c.q.trim().toLowerCase()));
     for (const c of cards || []) {
         const key = (c.q || "").trim().toLowerCase();
         if (!key || existing.has(key)) continue;
         existing.add(key);
-        ankiState.push({ q: c.q, a: c.a, selected: true });
+        ankiState.push({ q: c.q, a: c.a, selected: false });
     }
     return ankiState;
 }
@@ -279,7 +283,7 @@ async function generateMoreAnkiCards(ctx, focusText) {
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         parseAnkiCards, formatCardForAnki, buildAnkiExport, ANKI_INLINE_MAX_LEN,
-        setAnkiCards, getAnkiCards, getSelectedAnkiCards, appendAnkiCards,
+        setAnkiCards, getAnkiCards, getSelectedAnkiCards, setAllAnkiSelected, appendAnkiCards,
         renderAnkiPanel, exportAnkiToObsidian,
         buildAnkiRegenPrompt, generateMoreAnkiCards,
     };
