@@ -1159,18 +1159,20 @@ body {
 .anki-a-view { text-align: center; padding: 0 8px; }
 .anki-card textarea { width: 100%; background: var(--bg-color); color: var(--text-color); }
 .anki-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-/* Controls fixats just sobre la barra inferior (footer-status, fixed ~32px d'alçada). */
-.anki-controls { display: flex; flex-direction: column; gap: 8px; position: sticky; bottom: 32px; z-index: 50; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 12px 2px; margin-top: 8px; }
+/* Botons (Generar/Descarta/Selecciona/Afegir): en flux normal, deixant espai a
+   baix perquè la barra d'Afinar fixa i el footer no els tapin. */
+.anki-panel { padding-bottom: 120px; }
+.anki-controls { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .anki-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+/* Barra d'Afinar FIXA, just sobre la barra inferior (footer-status, fixed ~32px). */
+.anki-afina-bar { position: fixed; left: 0; right: 0; bottom: 32px; z-index: 50; display: flex; flex-direction: column; gap: 6px; padding: 10px 15px; background: var(--bg-color); border-top: 1px solid var(--border-color); box-sizing: border-box; }
 .anki-afina-row { display: flex; align-items: stretch; gap: 6px; }
-/* Barra fina separadora sobre la línia d'afinar. */
-.anki-controls-divider { border-top: 1px solid var(--border-color); opacity: 0.5; }
-/* Puntets de "treballant" als controls. */
+/* Puntets de "treballant". */
 .anki-loading { text-align: center; color: var(--text-muted); font-size: 1.2em; letter-spacing: 2px; padding: 2px 0; }
-/* Botons dels controls amb el mateix estil que els de la pàgina de Settings (.btn). */
-.anki-controls button { padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: var(--secondary-bg); color: var(--text-color); transition: all 0.2s; }
-.anki-controls button:hover:not(:disabled) { background: var(--secondary-hover); }
-.anki-controls button:disabled { opacity: 0.5; cursor: default; }
+/* Botons amb el mateix estil que els de la pàgina de Settings (.btn). */
+.anki-btn-row button, .anki-afina-row button { padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: var(--secondary-bg); color: var(--text-color); transition: all 0.2s; }
+.anki-btn-row button:hover:not(:disabled), .anki-afina-row button:hover:not(:disabled) { background: var(--secondary-hover); }
+.anki-btn-row button:disabled { opacity: 0.5; cursor: default; }
 /* Accions primàries (Afegir / Afinar) com .btn-primary de Settings. */
 #ankiExportBtn, .anki-afina-row button { background: var(--primary-color); color: var(--primary-text); border-color: var(--primary-color); }
 #ankiExportBtn:hover:not(:disabled), .anki-afina-row button:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }

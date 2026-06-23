@@ -205,33 +205,6 @@ function renderAnkiPanel(ctx) {
 
     btnRow.append(moreBtn, discardAllBtn, selectAllBtn, exportBtn);
 
-    // Barra fina separadora sobre la línia d'afinar.
-    const afinaDivider = document.createElement("div");
-    afinaDivider.className = "anki-controls-divider";
-
-    // Fila 2: caixa d'afinar d'una sola línia (estil Settings) + botó.
-    const afinaRow = document.createElement("div");
-    afinaRow.className = "anki-afina-row";
-    const focusInput = document.createElement("input");
-    focusInput.type = "text";
-    focusInput.className = "anki-afina-input";
-    focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
-    const focusBtn = document.createElement("button");
-    focusBtn.textContent = "Afinar";
-    focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
-    afinaRow.append(focusInput, focusBtn);
-
-    // Indicador "treballant" visible als controls (a prop d'on clica l'usuari).
-    const loading = document.createElement("div");
-    loading.id = "ankiLoading";
-    loading.className = "anki-loading hidden";
-    for (let k = 0; k < 3; k++) {
-        const dot = document.createElement("span");
-        dot.className = "loading-dot";
-        dot.textContent = ".";
-        loading.appendChild(dot);
-    }
-
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
         exportBtn.textContent = `Afegir a Obsidian (${getSelectedAnkiCards().length})`;
@@ -244,13 +217,46 @@ function renderAnkiPanel(ctx) {
     updateExportCount();
     updateSelectAllBtn();
 
+    // Els botons (Generar/Descarta/Selecciona/Afegir) van en flux normal.
+    controls.append(btnRow);
+
+    // ── Barra d'Afinar: FIXA al fons, just sobre la barra inferior (footer-status) ──
+    // Conté el feedback de generació (avís + puntets) i la caixa+botó d'afinar.
+    const afinaBar = document.createElement("div");
+    afinaBar.className = "anki-afina-bar";
+
     // Avís informatiu (no d'error): p.ex. quan no es poden generar més targetes.
     const notice = document.createElement("div");
     notice.id = "ankiNotice";
     notice.className = "anki-notice hidden";
 
-    controls.append(btnRow, afinaDivider, afinaRow, loading, notice);
+    // Indicador "treballant": puntets animats sempre visibles (barra fixa).
+    const loading = document.createElement("div");
+    loading.id = "ankiLoading";
+    loading.className = "anki-loading hidden";
+    for (let k = 0; k < 3; k++) {
+        const dot = document.createElement("span");
+        dot.className = "loading-dot";
+        dot.textContent = ".";
+        loading.appendChild(dot);
+    }
+
+    const afinaRow = document.createElement("div");
+    afinaRow.className = "anki-afina-row";
+    const focusInput = document.createElement("input");
+    focusInput.type = "text";
+    focusInput.className = "anki-afina-input";
+    focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
+    const focusBtn = document.createElement("button");
+    focusBtn.textContent = "Afinar";
+    focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
+    afinaRow.append(focusInput, focusBtn);
+
+    // Ordre: avís i puntets a dalt; la caixa d'afinar a baix (arran del footer).
+    afinaBar.append(notice, loading, afinaRow);
+
     panel.appendChild(controls);
+    panel.appendChild(afinaBar);
     contentDiv.appendChild(panel);
 }
 
