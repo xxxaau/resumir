@@ -229,9 +229,31 @@ function renderAnkiPanel(ctx) {
     updateExportCount();
     updateSelectAllBtn();
 
-    controls.append(btnRow, afinaRow);
+    // Avís informatiu (no d'error): p.ex. quan no es poden generar més targetes.
+    const notice = document.createElement("div");
+    notice.id = "ankiNotice";
+    notice.className = "anki-notice hidden";
+
+    controls.append(btnRow, afinaRow, notice);
     panel.appendChild(controls);
     contentDiv.appendChild(panel);
+}
+
+/**
+ * Mostra un avís INFORMATIU al panell Anki (estil neutre, no d'error vermell).
+ * Buit/null amaga l'avís.
+ */
+function showAnkiNotice(msg) {
+    if (typeof document === "undefined") return;
+    const n = document.getElementById("ankiNotice");
+    if (!n) return;
+    if (msg) {
+        n.textContent = msg;
+        n.classList.remove("hidden");
+    } else {
+        n.textContent = "";
+        n.classList.add("hidden");
+    }
 }
 
 // ── Exportació a Obsidian ───────────────────────────────────────────────────
@@ -315,6 +337,8 @@ async function generateMoreAnkiCards(ctx, focusText) {
     // Indicador "treballant": mostra els puntets animats mentre l'usuari espera.
     const loadingDiv = (typeof document !== "undefined") ? document.getElementById("loading") : null;
     if (loadingDiv) loadingDiv.classList.remove("hidden");
+    showAnkiNotice(null); // neteja avisos previs en començar
+    if (ctx.errorDiv) ctx.errorDiv.classList.add("hidden");
     try {
         // Clau d'API (storage.local) i configuració del model (storage.sync)
         const { apiKey } = await ext.storage.local.get(["apiKey"]);
@@ -349,25 +373,19 @@ async function generateMoreAnkiCards(ctx, focusText) {
         }
 
         // Parsejem i afegim les targetes noves
+        const NO_MORE_MSG = "No hi ha més punts nous per generar d'aquest contingut. Prova «Afinar» per centrar-te en un aspecte concret.";
         const newCards = parseAnkiCards(raw);
         if (newCards.length === 0) {
-            if (ctx.errorDiv) {
-                ctx.errorDiv.textContent = "No s'han pogut generar més targetes.";
-                ctx.errorDiv.classList.remove("hidden");
-            }
+            showAnkiNotice(NO_MORE_MSG);
             return;
         }
         const before = getAnkiCards().length;
         appendAnkiCards(newCards);
         const added = getAnkiCards().length - before;
         if (added === 0) {
-            if (ctx.errorDiv) {
-                ctx.errorDiv.textContent = "No s'han trobat punts nous per generar més targetes.";
-                ctx.errorDiv.classList.remove("hidden");
-            }
+            showAnkiNotice(NO_MORE_MSG);
             return;
         }
-        if (ctx.errorDiv) ctx.errorDiv.classList.add("hidden");
         renderAnkiPanel(ctx);
     } finally {
         if (loadingDiv) loadingDiv.classList.add("hidden");

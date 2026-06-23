@@ -1162,5 +1162,15 @@ body {
 .anki-controls { display: flex; flex-direction: column; gap: 8px; position: sticky; bottom: 0; background: var(--bg-color); padding-top: 8px; }
 .anki-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .anki-afina-row { display: flex; align-items: stretch; gap: 6px; }
-.anki-afina-input { flex: 1; min-height: 3.4em; line-height: 1.6; padding: 6px 8px; resize: vertical; background: var(--bg-color); color: var(--text-color); }
-.anki-afina-row button { white-space: nowrap; padding: 0 14px; }
+/* Botons dels controls amb el mateix estil que els de la pàgina de Settings (.btn). */
+.anki-controls button { padding: 9px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: var(--secondary-bg); color: var(--text-color); transition: all 0.2s; }
+.anki-controls button:hover:not(:disabled) { background: var(--secondary-hover); }
+.anki-controls button:disabled { opacity: 0.5; cursor: default; }
+/* Accions primàries (Afegir / Afinar) com .btn-primary de Settings. */
+#ankiExportBtn, .anki-afina-row button { background: var(--primary-color); color: var(--primary-text); border-color: var(--primary-color); }
+#ankiExportBtn:hover:not(:disabled), .anki-afina-row button:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+/* Caixa d'afinar amb l'estil de .form-control de Settings. */
+.anki-afina-input { flex: 1; min-height: 3.4em; padding: 10px 14px; font-size: 14px; font-family: inherit; line-height: 1.5; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-color); color: var(--text-color); resize: vertical; box-sizing: border-box; }
+.anki-afina-input:focus { outline: none; border-color: var(--primary-color); }
+/* Avís informatiu (neutre, NO d'error vermell). */
+.anki-notice { font-size: 13px; color: var(--text-muted); background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; }
