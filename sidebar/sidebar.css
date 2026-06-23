@@ -1159,7 +1159,8 @@ body {
 .anki-a-view { text-align: center; padding: 0 8px; }
 .anki-card textarea { width: 100%; background: var(--bg-color); color: var(--text-color); }
 .anki-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.anki-controls { display: flex; flex-direction: column; gap: 8px; position: sticky; bottom: 0; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 12px 2px; margin-top: 8px; }
+/* Controls fixats just sobre la barra inferior (footer-status, fixed ~32px d'alçada). */
+.anki-controls { display: flex; flex-direction: column; gap: 8px; position: sticky; bottom: 32px; z-index: 50; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 12px 2px; margin-top: 8px; }
 .anki-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .anki-afina-row { display: flex; align-items: stretch; gap: 6px; }
 /* Barra fina separadora sobre la línia d'afinar. */
