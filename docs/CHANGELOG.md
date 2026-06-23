@@ -7,6 +7,23 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+### Afegit
+- **Plugin «Targetes Anki»**: genera targetes de pregunta/resposta (flashcards) del
+  contingut de la pàgina amb Gemini i les exporta a Obsidian amb la sintaxi
+  `obsidian_to_anki`. Configurable a Settings: activació, **vault propi**
+  (independent del plugin d'Obsidian; la primera càrrega n'agafa el valor si
+  Obsidian està configurat), ruta de la nota, mida del paquet, idioma (CA/EN) i
+  prompt editable.
+- **Panell de targetes estil flashcard**: pregunta centrada a dalt, divisòria i
+  resposta a sota; cada targeta s'edita o es descarta individualment (`Edita` /
+  `Descarta`). Selecció **desmarcada per defecte**, amb toggle
+  `Selecciona-ho tot` / `Deselecciona-ho tot` i botó `Descarta-ho tot`.
+- **`Genera més` i `Afinar`**: «Genera més» empeny el model cap a detalls secundaris
+  per seguir produint targetes noves; «Afinar» centra la generació en un aspecte
+  concret (sense excloure les existents, perquè pugui aprofundir). Indicador de
+  càrrega (puntets) mentre s'espera i avís informatiu quan no hi ha més punts nous.
+  La caixa d'Afinar queda fixa al fons, just sobre la barra inferior.
+
 ### Eliminat
 - **Llibreria Defuddle (`defuddle.js`, ~571 KB)**: només s'usava per a Twitter/X
   i el scrape directe del DOM (`[data-testid="tweetText"]`) ja captura els fils
