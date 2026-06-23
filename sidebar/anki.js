@@ -205,17 +205,32 @@ function renderAnkiPanel(ctx) {
 
     btnRow.append(moreBtn, discardAllBtn, selectAllBtn, exportBtn);
 
-    // Fila 2: caixa d'afinar (gran) + botó de la mateixa alçada.
+    // Barra fina separadora sobre la línia d'afinar.
+    const afinaDivider = document.createElement("div");
+    afinaDivider.className = "anki-controls-divider";
+
+    // Fila 2: caixa d'afinar d'una sola línia (estil Settings) + botó.
     const afinaRow = document.createElement("div");
     afinaRow.className = "anki-afina-row";
-    const focusInput = document.createElement("textarea");
+    const focusInput = document.createElement("input");
+    focusInput.type = "text";
     focusInput.className = "anki-afina-input";
-    focusInput.rows = 2;
     focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
     const focusBtn = document.createElement("button");
     focusBtn.textContent = "Afinar";
     focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
     afinaRow.append(focusInput, focusBtn);
+
+    // Indicador "treballant" visible als controls (a prop d'on clica l'usuari).
+    const loading = document.createElement("div");
+    loading.id = "ankiLoading";
+    loading.className = "anki-loading hidden";
+    for (let k = 0; k < 3; k++) {
+        const dot = document.createElement("span");
+        dot.className = "loading-dot";
+        dot.textContent = ".";
+        loading.appendChild(dot);
+    }
 
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
@@ -223,7 +238,7 @@ function renderAnkiPanel(ctx) {
         exportBtn.disabled = getSelectedAnkiCards().length === 0;
     }
     function updateSelectAllBtn() {
-        selectAllBtn.textContent = isAllSelected() ? "Treu-ho tot" : "Selecciona-ho tot";
+        selectAllBtn.textContent = isAllSelected() ? "Deselecciona-ho tot" : "Selecciona-ho tot";
         selectAllBtn.disabled = ankiState.length === 0;
     }
     updateExportCount();
@@ -234,7 +249,7 @@ function renderAnkiPanel(ctx) {
     notice.id = "ankiNotice";
     notice.className = "anki-notice hidden";
 
-    controls.append(btnRow, afinaRow, notice);
+    controls.append(btnRow, afinaDivider, afinaRow, loading, notice);
     panel.appendChild(controls);
     contentDiv.appendChild(panel);
 }
@@ -334,8 +349,8 @@ async function generateMoreAnkiCards(ctx, focusText) {
     const rawPageText = (typeof window !== "undefined" && window.__ankiPageText) || "";
     if (!rawPageText) return;
 
-    // Indicador "treballant": mostra els puntets animats mentre l'usuari espera.
-    const loadingDiv = (typeof document !== "undefined") ? document.getElementById("loading") : null;
+    // Indicador "treballant": puntets animats als controls (visibles on clica l'usuari).
+    const loadingDiv = (typeof document !== "undefined") ? document.getElementById("ankiLoading") : null;
     if (loadingDiv) loadingDiv.classList.remove("hidden");
     showAnkiNotice(null); // neteja avisos previs en començar
     if (ctx.errorDiv) ctx.errorDiv.classList.add("hidden");
