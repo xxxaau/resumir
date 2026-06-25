@@ -5,9 +5,9 @@
 Resumir és una extensió de navegador que converteix qualsevol cosa que llegeixes o mires — articles, vídeos, fils, PDFs — en coneixement estructurat, comprensible i teu. Al teu navegador, amb la teva clau de Google Gemini, sense intermediaris: cap servidor propi, cap telemetria, cap seguiment.
 
 [![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/en-US/firefox/addon/resumir)
-[![Baixar de GitHub Releases](https://img.shields.io/badge/Chrome-Descarregar-4285F4?logo=googlechrome)](https://github.com/xxxaau/extensio-resumir-contingut/releases)
+[![Baixar de GitHub Releases](https://img.shields.io/badge/Chrome-Descarregar-4285F4?logo=googlechrome)](https://github.com/xxxaau/resumir/releases)
 [![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
-[![CI](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml/badge.svg)](https://github.com/xxxaau/extensio-resumir-contingut/actions/workflows/ci.yml)
+[![CI](https://github.com/xxxaau/resumir/actions/workflows/ci.yml/badge.svg)](https://github.com/xxxaau/resumir/actions/workflows/ci.yml)
 [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/xxxaau)
 
 ---
@@ -65,7 +65,7 @@ L'extensió es distribueix **exclusivament** via Mozilla Add-ons:
 L'extensió **no està al Chrome Web Store**. Per instal·lar-la:
 
 1. Ves a la secció **Releases** del GitHub:
-   https://github.com/xxxaau/extensio-resumir-contingut/releases
+   https://github.com/xxxaau/resumir/releases
 2. Baixa el fitxer `resumir-contingut-vX.X.X-chromium.zip` de l'última versió
 3. Descomprimeix-lo en una carpeta
 4. Obre `chrome://extensions` i activa el «Mode de desenvolupador»
@@ -172,12 +172,12 @@ Les contribucions són benvingudes! Consulta:
 - [Guia de contribució](docs/CONTRIBUTING.md) — com començar
 - [Codi de conducta](docs/CODE_OF_CONDUCT.md) — normes de la comunitat
 - [Backlog de millores](docs/BACKLOG.md) — funcionalitats pendents
-- [Issues](https://github.com/xxxaau/extensio-resumir-contingut/issues) — reporta bugs o demana funcionalitats
-- [Discussions](https://github.com/xxxaau/extensio-resumir-contingut/discussions) — preguntes generals
+- [Issues](https://github.com/xxxaau/resumir/issues) — reporta bugs o demana funcionalitats
+- [Discussions](https://github.com/xxxaau/resumir/discussions) — preguntes generals
 
 ## Reportar bugs
 
-Si trobes un error, obre una [issue](https://github.com/xxxaau/extensio-resumir-contingut/issues/new/choose)
+Si trobes un error, obre una [issue](https://github.com/xxxaau/resumir/issues/new/choose)
 i inclou: navegador/versió, passos per reproduir, comportament real vs. esperat.
 
 ---

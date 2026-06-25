@@ -202,7 +202,7 @@ async function main() {
   if (pushOk) {
     exec("git push origin main --tags", "Push a origin");
     console.log(green("\n  ✓ Push completat! El workflow de release s'ha disparat."));
-    console.log("    Ves a https://github.com/xxxaau/extensio-resumir-contingut/actions");
+    console.log("    Ves a https://github.com/xxxaau/resumir/actions");
     console.log("    per veure el proges del GitHub Release.");
   } else {
     console.log(yellow("  ! Push omes. Quan vulguis:"));
