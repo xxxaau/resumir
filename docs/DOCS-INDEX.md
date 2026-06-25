@@ -104,5 +104,5 @@ canvien, busca'ls i actualitza'ls tots (o millor, no els tornis a fixar a mà):
 - Els docs de release/store (`CHROME-STORE.md`, `SUBMISSION-CHECKLIST.md`) tracten
   el Chrome Web Store com a imminent i duen versions antigues; avui la distribució
   Chromium és només via GitHub Releases.
-- `repo rename` (extensio-resumir → resumir): inventari complet a
+- `repo rename` a `resumir`: canvis al repo fets; resta el rename a GitHub i AMO al proper release. Inventari a
   `docs/BACKLOG.md`.
