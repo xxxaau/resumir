@@ -127,14 +127,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnGithub = document.getElementById("btnGithub");
     if (btnGithub) {
         btnGithub.addEventListener("click", () => {
-            window.open("https://github.com/xxxaau/extensio-resumir-contingut", "_blank");
+            window.open("https://github.com/xxxaau/resumir", "_blank");
         });
     }
 
     const btnIssues = document.getElementById("btnIssues");
     if (btnIssues) {
         btnIssues.addEventListener("click", () => {
-            window.open("https://github.com/xxxaau/extensio-resumir-contingut/issues", "_blank");
+            window.open("https://github.com/xxxaau/resumir/issues", "_blank");
         });
     }
 

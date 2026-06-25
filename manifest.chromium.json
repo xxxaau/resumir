@@ -4,7 +4,7 @@
     "short_name": "Resumir",
     "version": "2.5.0",
     "author": "Sergi Xaudiera",
-    "homepage_url": "https://github.com/xxxaau/extensio-resumir-contingut",
+    "homepage_url": "https://github.com/xxxaau/resumir",
     "description": "Resumeix text seleccionat amb Gemini.",
     "minimum_chrome_version": "142",
     "permissions": [
