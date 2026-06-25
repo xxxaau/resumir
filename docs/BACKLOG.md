@@ -15,7 +15,7 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-## Renombrar el repositori a `resumir` (pendent per al proper bump)
+## Renombrar el repositori a `resumir` (canvis al repo FETS — resta GitHub rename + AMO al proper release)
 
 **Context (2026-06-12):** Decisió del propietari: el repo `extensio-resumir-contingut`
 passa a dir-se **`resumir`**, alineat amb la marca (vegeu `docs/COMUNICACIO.md`).
@@ -26,14 +26,14 @@ Cal fer-ho coordinat amb un bump perquè els manifests publicats duen la
 `grep -r "extensio-resumir-contingut"`):**
 
 *Dins de l'extensió (s'envia als usuaris):*
-- [ ] `manifest.base.json` → `homepage_url` (+ regenerar `manifest.json` i `manifest.chromium.json` amb `npm run manifests:gen`)
-- [ ] `options/settings.js` → enllaços a issues/repo
+- [x] `manifest.base.json` → `homepage_url` (+ regenerar `manifest.json` i `manifest.chromium.json` amb `npm run manifests:gen`)
+- [x] `options/settings.js` → enllaços a issues/repo
 
 *Meta del repo:*
-- [ ] `package.json` → `repository.url`
-- [ ] `README.md` → badges (CI, releases, sponsors), enllaços d'instal·lació Chromium i issues/discussions
-- [ ] `docs/`: `BUILD.md`, `CONTRIBUTING.md`, `MARKETS-COPY.md`, `listing/listing-texts.md`, `marketplace/` (CHROME-STORE, MARKETS-COPY, RELEASE-PROCESS, SUBMISSION-CHECKLIST), `user-guide/GUIA-INICI.md`
-- [ ] `scripts/prepare-release.mjs`
+- [x] `package.json` → `repository.url`
+- [x] `README.md` → badges (CI, releases, sponsors), enllaços d'instal·lació Chromium i issues/discussions
+- [x] `docs/`: `BUILD.md`, `CONTRIBUTING.md`, `MARKETS-COPY.md`, `listing/listing-texts.md`, `marketplace/` (CHROME-STORE, MARKETS-COPY, RELEASE-PROCESS, SUBMISSION-CHECKLIST), `user-guide/GUIA-INICI.md`
+- [x] `scripts/prepare-release.mjs`
 
 *Fora del repo (manual):*
 - [ ] GitHub → Settings → Rename a `resumir` (GitHub manté redireccions de l'URL antiga per a web i git, però es trenquen si mai es crea un repo nou amb el nom vell — no reutilitzar-lo)
