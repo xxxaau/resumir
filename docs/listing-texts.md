@@ -133,6 +133,6 @@ the extension — this is expected and only happens once.
 
 | Field | Value |
 |-------|-------|
-| Homepage URL | https://github.com/xxxaau/extensio-resumir-contingut |
-| Support URL | https://github.com/xxxaau/extensio-resumir-contingut/issues |
-| Privacy Policy URL | https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md |
+| Homepage URL | https://github.com/xxxaau/resumir |
+| Support URL | https://github.com/xxxaau/resumir/issues |
+| Privacy Policy URL | https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md |

@@ -96,7 +96,7 @@ Aquesta extensió SÍ:
 ✅ Codi obert (MPL-2.0), auditable per qualsevol
 
 Política de privacitat completa:
-https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md
+https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md
 
 ═══════════════════════════════
 
@@ -117,10 +117,10 @@ Resumir existeix gràcies a aquests projectes open source:
 • pdf.js (Mozilla, Apache-2.0) — lectura de PDFs
 
 🐛 Errors i suggeriments:
-https://github.com/xxxaau/extensio-resumir-contingut/issues
+https://github.com/xxxaau/resumir/issues
 
 📄 Llicència MPL-2.0 — codi font:
-https://github.com/xxxaau/extensio-resumir-contingut
+https://github.com/xxxaau/resumir
 
 Fet a Banyoles ❤️
 ```
@@ -230,9 +230,9 @@ Captura 5 — YouTube:
 |------|-------|
 | **Categoria** | Productivitat |
 | **Idioma de la interfície** | Català |
-| **Pàgina d'inici** | https://github.com/xxxaau/extensio-resumir-contingut |
-| **URL de suport** | https://github.com/xxxaau/extensio-resumir-contingut/issues |
-| **Política de privacitat** | https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md |
+| **Pàgina d'inici** | https://github.com/xxxaau/resumir |
+| **URL de suport** | https://github.com/xxxaau/resumir/issues |
+| **Política de privacitat** | https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md |
 | **Correu de contacte** | sergi@xaudiera.xyz |
 | **Llicència** | Mozilla Public License 2.0 |
 
@@ -243,7 +243,7 @@ Captura 5 — YouTube:
 L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrome, Edge o Brave, cal instal·lar-la manualment:
 
 1. Baixa el fitxer `resumir-contingut-vX.X.X-chromium.zip` de la secció **Releases** del GitHub:
-   https://github.com/xxxaau/extensio-resumir-contingut/releases
+   https://github.com/xxxaau/resumir/releases
 2. Descomprimeix el fitxer en una carpeta
 3. Obre `chrome://extensions`
 4. Activa el **Mode de desenvolupador** (interruptor a dalt a la dreta)

@@ -52,8 +52,8 @@ Description:
   • Connexió HTTPS única a Google Gemini API
   • Cap telemetria, cap seguiment
   
-  📖 Documentació: https://github.com/xxxaau/extensio-resumir-contingut
-  🐛 Reportar bugs: https://github.com/xxxaau/extensio-resumir-contingut/issues
+  📖 Documentació: https://github.com/xxxaau/resumir
+  🐛 Reportar bugs: https://github.com/xxxaau/resumir/issues
 
 Category:             Productivity
 Language:             Català (ca)
@@ -100,7 +100,7 @@ Aquesta extensió SÍ:
 ✅ Envia contingut de pàgina a Gemini API per resumir
 ✅ Guarda historial local de resums (opcional)
 
-Per a detalls complets: https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/PRIVACY_POLICY.md
+Per a detalls complets: https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md
 ```
 
 ### Pas 4: Pujar ZIP i Assets
@@ -222,7 +222,7 @@ CWS extraurà automàticament la secció de CHANGELOG.md `## [X.Y.Z]` per a most
 ## 📞 Suport
 
 - **CWS Help:** [support.google.com/chromewebstore](https://support.google.com/chromewebstore)
-- **Project Issues:** [github.com/xxxaau/extensio-resumir-contingut/issues](https://github.com/xxxaau/extensio-resumir-contingut/issues)
+- **Project Issues:** [github.com/xxxaau/resumir/issues](https://github.com/xxxaau/resumir/issues)
 - **Contact:** [sergi@xaudiera.xyz](mailto:sergi@xaudiera.xyz)
 
 ---

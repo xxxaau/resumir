@@ -322,8 +322,8 @@ POST-SUBMISSION:
 - Contact: sergi@xaudiera.xyz
 
 ### Project
-- GitHub: https://github.com/xxxaau/extensio-resumir-contingut
-- Issues: https://github.com/xxxaau/extensio-resumir-contingut/issues
+- GitHub: https://github.com/xxxaau/resumir
+- Issues: https://github.com/xxxaau/resumir/issues
 - Email: sergi@xaudiera.xyz
 
 ---

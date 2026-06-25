@@ -7,7 +7,7 @@ Guia pas a pas per a lançar una nova versió de **Resumir contingut** a producc
 - ✅ Branca `main` neta (cap canvi sense committejar)
 - ✅ Tots els tests passen: `npm run check` (lint + test)
 - ✅ Pre-release validation: `npm run prerelease` → 16/16 ✅
-- ✅ Access a [GitHub](https://github.com/xxxaau/extensio-resumir-contingut)
+- ✅ Access a [GitHub](https://github.com/xxxaau/resumir)
 - ✅ Access a [Firefox Add-ons (AMO)](https://addons.mozilla.org/)
 - ✅ Access a [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/developer/dashboard)
 
@@ -133,7 +133,7 @@ git push origin main
 git push origin v2.3.0
 
 # Verificar a GitHub:
-# https://github.com/xxxaau/extensio-resumir-contingut/releases
+# https://github.com/xxxaau/resumir/releases
 # (Hauria detectar-ho automàticament si hi ha workflow)
 ```
 
@@ -277,7 +277,7 @@ POST-RELEASE:
 
 ## 📞 Contacte & Suport
 
-- **Issues:** [github.com/xxxaau/extensio-resumir-contingut/issues](https://github.com/xxxaau/extensio-resumir-contingut/issues)
+- **Issues:** [github.com/xxxaau/resumir/issues](https://github.com/xxxaau/resumir/issues)
 - **Author:** [sergi@xaudiera.xyz](mailto:sergi@xaudiera.xyz)
 - **AMO Help:** [support.mozilla.org](https://support.mozilla.org)
 - **CWS Help:** [support.google.com/chromewebstore](https://support.google.com/chromewebstore)

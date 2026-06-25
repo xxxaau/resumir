@@ -42,8 +42,8 @@ transformers in your extension?"* answer **Yes**. Reason:
 | **merge-manifest.mjs** | Generates `manifest.json` from base + platform patches |
 
 Provide these URLs in the AMO form:
-- **Source code:** `https://github.com/xxxaau/extensio-resumir-contingut`
-- **Build instructions:** `https://github.com/xxxaau/extensio-resumir-contingut/blob/main/docs/BUILD.md`
+- **Source code:** `https://github.com/xxxaau/resumir`
+- **Build instructions:** `https://github.com/xxxaau/resumir/blob/main/docs/BUILD.md`
 
 The build is fully reproducible: `npm run build` from a clean checkout produces
 byte-identical ZIPs. Source files are readable JS in the repo — only the final

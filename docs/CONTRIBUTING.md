@@ -14,8 +14,8 @@ Gràcies per l'interès en contribuir a **Resumir**! Aquesta guia explica com ar
 ### Primer: clona i instal·la
 
 ```bash
-git clone https://github.com/xxxaau/extensio-resumir-contingut.git
-cd extensio-resumir-contingut
+git clone https://github.com/xxxaau/resumir.git
+cd resumir
 npm install
 npm run dev
 ```
