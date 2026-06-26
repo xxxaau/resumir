@@ -6,7 +6,7 @@ Guia pas a pas per a lançar una nova versió de **Resumir contingut** a producc
 
 - ✅ Branca `main` neta (cap canvi sense committejar)
 - ✅ Tots els tests passen: `npm run check` (lint + test)
-- ✅ Pre-release validation: `npm run prerelease` → 16/16 ✅
+- ✅ Pre-release validation: `npm run prerelease` → 18/18 ✅
 - ✅ Access a [GitHub](https://github.com/xxxaau/resumir)
 - ✅ Access a [Firefox Add-ons (AMO)](https://addons.mozilla.org/)
 - ✅ Access a [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/developer/dashboard)
@@ -62,7 +62,7 @@ npm run prod
 
 # Verificar que manifest NO té "(DEV)"
 grep '"name"' manifest.base.json
-# Expected: "name": "Resumir contingut" (no DEV!)
+# Expected: "name": "Resumir" (no DEV!)
 ```
 
 #### 2.2 Bump versió
@@ -86,9 +86,9 @@ npm version minor -m "chore: release v%s"  # o patch/major
 ```bash
 npm run build
 
-# Hauria generar:
-# ✅ resumir-contingut-v2.3.0-firefox.zip (111 KB)
-# ✅ resumir-contingut-v2.3.0-chromium.zip (110 KB)
+# Hauria generar (la mida creix amb el suport PDF embalat; límit < 4 MB):
+# ✅ resumir-contingut-vX.Y.Z-firefox.zip (~537 KB a v2.6.0)
+# ✅ resumir-contingut-vX.Y.Z-chromium.zip (~536 KB a v2.6.0)
 ```
 
 #### 2.4 Pre-release validation
@@ -99,7 +99,10 @@ npm run prerelease
 # ✅ Manifests: name sense '(DEV)' ✅
 # ✅ Manifests: gecko.id sense 'dev' ✅
 # ✅ Manifests: versió sincronitzada ✅
-# ✅ ... (16/16 total)
+# ✅ ... (18/18 total)
+#
+# Nota: l'auditoria lang="ca" cobreix només l'HTML que s'embala;
+# els fixtures de test (tests/) queden exclosos a posta.
 ```
 
 #### 2.5 Verificacions finals
@@ -130,12 +133,26 @@ git show v$(node -p "require('./package.json').version"):manifest.json | grep '"
 ```bash
 # Push commits + tags
 git push origin main
-git push origin v2.3.0
+git push origin vX.Y.Z   # el tag dispara release.yml (build + Release amb ZIPs)
 
 # Verificar a GitHub:
 # https://github.com/xxxaau/resumir/releases
-# (Hauria detectar-ho automàticament si hi ha workflow)
 ```
+
+> ⚠️ **Parany del pre-push hook:** el hook bloqueja el push si el *working
+> tree* està en mode DEV (icones taronges / name amb `(DEV)`). Si ja has
+> tornat a `npm run dev` per treballar en local, fes un stash temporal del
+> mode DEV mentre puges:
+>
+> ```bash
+> git stash push -- icons manifest.base.json manifest.json \
+>   manifest.chromium.json manifest.chromium.patch.json manifest.firefox.patch.json
+> git push origin main && git push origin vX.Y.Z
+> git stash pop   # restaura el mode DEV local
+> ```
+>
+> El commit taggejat ja és PROD (el bump es fa en mode PROD); això només
+> afecta l'estat sense committejar del working tree.
 
 ### Fase 5: Submissió a Firefox Add-ons (AMO) (10-15 min)
 
@@ -262,8 +279,8 @@ DURING RELEASE:
 [ ] npm run prod (dev mode OFF)
 [ ] npm version X.Y.Z (syncs everything)
 [ ] npm run build → 2 ZIPs < 4 MB
-[ ] npm run prerelease → 16/16 ✅
-[ ] git push origin main && git push origin vX.Y.Z
+[ ] npm run prerelease → 18/18 ✅
+[ ] git push origin main && git push origin vX.Y.Z (stash del mode DEV si cal)
 
 POST-RELEASE:
 [ ] Verificar GitHub release created automatically
@@ -284,6 +301,6 @@ POST-RELEASE:
 
 ---
 
-**Última actualització:** 19 de maig de 2026  
-**Versió:** 1.0  
+**Última actualització:** 26 de juny de 2026 (revisat amb la release v2.6.0)  
+**Versió:** 1.1  
 **Status:** ✅ Production Ready

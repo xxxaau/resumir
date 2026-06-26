@@ -7,7 +7,7 @@ Guia completa per a publicar **Resumir contingut** al Chrome Web Store (CWS).
 - ✅ Account Google Developer (actiu i verificat)
 - ✅ Chrome Web Store Developer Account (€5 one-time registration fee)
 - ✅ Build production: `npm run build` → `resumir-contingut-v2.2.4-chromium.zip`
-- ✅ All pre-release checks passed: `npm run prerelease` → 16/16 ✅
+- ✅ All pre-release checks passed: `npm run prerelease` → 18/18 ✅
 
 ## 🚀 Passos de Submissió
 
@@ -208,7 +208,7 @@ CWS extraurà automàticament la secció de CHANGELOG.md `## [X.Y.Z]` per a most
 ```
 [ ] manifest.chromium.json té versió correcta (X.Y.Z)
 [ ] BUILD.md instructions executades
-[ ] npm run prerelease → 16/16 ✅
+[ ] npm run prerelease → 18/18 ✅
 [ ] npm run build → 2 ZIPs generats (< 4 MB cada)
 [ ] 3 screenshots en format 1280×800 JPG/PNG
 [ ] PRIVACY_POLICY.md completada

@@ -47,14 +47,14 @@ Guia executiva de tots els artefactes, documentació i passos preparats per a su
 ```bash
 # 1. Run all checks
 npm run check              # lint + test
-npm run prerelease         # 16 automated checks
+npm run prerelease         # 18 automated checks
 npm audit --omit=dev       # 0 vulnerabilities
 ```
 
 Expected:
 - ✅ ESLint: 0 warnings
 - ✅ Tests: 0 failures (207 total)
-- ✅ Pre-release: 16/16 ✅
+- ✅ Pre-release: 18/18 ✅
 - ✅ npm audit: 0 vulnerabilities
 
 ### ✅ Fase 2: Build & Packaging
@@ -245,7 +245,7 @@ PRE-SUBMISSION CHECKLIST:
 
 CODE & BUILD:
 [ ] npm run check → 0 errors
-[ ] npm run prerelease → 16/16 ✅
+[ ] npm run prerelease → 18/18 ✅
 [ ] npm audit --omit=dev → 0 vulnerabilities
 [ ] npm run build → 2 ZIPs generated
 [ ] ZIPs < 4 MB each
