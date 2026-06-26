@@ -4,6 +4,20 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
+## Apuntar els enllaços públics al web propi (PROPER RELEASE)
+
+**Context (2026-06-26):** El web propi ja és viu a **https://xxxaau.github.io/resumir/** (vegeu `web/` i `.github/workflows/pages.yml`). Cal redirigir-hi els enllaços públics que ara apunten a GitHub. El canvi de `settings.html` viatja a l'usuari, així que va **lligat a una release de l'extensió**.
+
+**Pendent:**
+- [ ] `options/settings.html`: l'enllaç «Com obtinc una clau d'API?» (ara → `…/blob/main/docs/user-guide/API-KEY-GOOGLE.md`) → `https://xxxaau.github.io/resumir/guia/clau-api/`.
+- [ ] **AMO**: «Pàgina d'inici» (ara `github.com/xxxaau/resumir`) → el web. (URL de suport i Política de privadesa poden seguir a GitHub.)
+- [ ] `README.md`: afegir l'enllaç al web propi.
+
+**Criteris d'acceptació:**
+- [ ] Tots tres enllaços resolen al web (no 404) després del release.
+
+---
+
 ## Coherència visual dels botons de control del mapa conceptual (✅ FET, 2026-06-26)
 
 **Context (2026-06-05):** Els botons de control del mapa conceptual (sidebar + fullscreen) s'han unificat amb estil planer (32×32, padding 4px, border-radius 4px, hover amb background) per coincidir amb els botons de la toolbar.

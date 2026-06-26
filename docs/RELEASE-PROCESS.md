@@ -274,6 +274,7 @@ PRE-RELEASE:
 [ ] npm run check → 0 errors
 [ ] npm audit --omit=dev → 0 vulnerabilities
 [ ] (Opcional/recomanat) npm run smoke:connectors → detecta drift dels llocs externs (informatiu, no bloqueja)
+[ ] Enllaços públics al web propi: settings.html (guia clau API → https://xxxaau.github.io/resumir/guia/clau-api/), AMO (Pàgina d'inici → el web) i README. Vegeu BACKLOG.
 
 DURING RELEASE:
 [ ] npm run prod (dev mode OFF)
