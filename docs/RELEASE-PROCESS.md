@@ -269,6 +269,7 @@ git commit -m "chore: Sync manifests after version bump"
 ```
 PRE-RELEASE:
 [ ] Main branch net (git status clean)
+[ ] Revisar fitxers esborrables abans del bump (p. ex. buidar temp/ —captures compartides—, artefactes de build antics)
 [ ] CHANGELOG.md actualitzat
 [ ] Totes les features tested
 [ ] npm run check → 0 errors

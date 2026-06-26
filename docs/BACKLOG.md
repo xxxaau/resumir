@@ -4,6 +4,21 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
+## v2.6.1 — fixes pendents (proper bump)
+
+**Context (2026-06-26):** recollit en tancar la sessió del web propi. Fer un bump **2.6.1** (patch) amb:
+
+- [ ] **Botó «Targetes Anki» desactivat quan hi ha resum a la sidebar:** amb un resum mostrat a la barra lateral, el botó de Targetes Anki queda deshabilitat. Investigar la lògica d'habilitació del botó segons el contingut/estat actiu i corregir-ho perquè funcioni. Verificar amb un resum real a la sidebar.
+- [ ] **Dev a Edge no agafa l'última versió:** en carregar `build_chromium_dev` a Edge no surt el codi més recent (s'estava provant la build de prova/store). Solució habitual: `npm run dev:chromium` per regenerar la build i recarregar l'extensió desempaquetada a `edge://extensions`. Confirmar que el codi carregat és l'actual; si el problema persisteix, investigar el flux de `dev:chromium`. (`build_chromium_dev/` és gitignored i regenerable; vegeu [[chromium-dev-load]].)
+- [ ] **(procés) Revisió de fitxers esborrables abans del bump** — vegeu RELEASE-PROCESS (PRE-RELEASE). Ex.: buidar `temp/` (captures compartides; gitignored), artefactes de build antics.
+
+**Criteris d'acceptació:**
+- [ ] El botó de Targetes Anki s'activa correctament quan hi ha un resum a la sidebar.
+- [ ] La build dev a Edge mostra el codi actual.
+- [ ] Bump 2.6.1 publicat (seguint RELEASE-PROCESS).
+
+---
+
 ## Apuntar els enllaços públics al web propi (PROPER RELEASE)
 
 **Context (2026-06-26):** El web propi ja és viu a **https://xxxaau.github.io/resumir/** (vegeu `web/` i `.github/workflows/pages.yml`). Cal redirigir-hi els enllaços públics que ara apunten a GitHub. El canvi de `settings.html` viatja a l'usuari, així que va **lligat a una release de l'extensió**.
