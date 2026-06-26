@@ -33,6 +33,7 @@ export default function (eleventyConfig) {
   // Assets estàtics. Les imatges són font única a docs/user-guide/img/ i
   // sync-content.mjs les copia a src/_generated/img.
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
+  eleventyConfig.addPassthroughCopy({ "src/js": "js" });
   eleventyConfig.addPassthroughCopy({ "src/_generated/img": "img" });
 
   return {
