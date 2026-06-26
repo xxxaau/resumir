@@ -1,6 +1,28 @@
 import { EleventyHtmlBasePlugin } from "@11ty/eleventy";
 
 export default function (eleventyConfig) {
+  // Reescriu els enllaços relatius de les guies (markdown) a rutes del web.
+  // Usa addUrlTransform (priority 0) per córrer ABANS del HtmlBasePlugin (priority -2),
+  // que afegirà el /resumir/ als camins root-relative resultants.
+  const GUIDE_ROUTES = {
+    "GUIA-INICI.md": "/guia/inici/",
+    "API-KEY-GOOGLE.md": "/guia/clau-api/",
+    "PLUGINS.md": "/guia/plugins/",
+  };
+  eleventyConfig.htmlTransformer.addUrlTransform("html", function (url) {
+    // Reescriu ./FILE.md o FILE.md (amb àncora opcional) a /guia/<slug>/[#àncora]
+    for (const [file, route] of Object.entries(GUIDE_ROUTES)) {
+      const re = new RegExp(`^\\.?\\/?${file.replace(".", "\\.")}(#.*)?$`);
+      const m = url.match(re);
+      if (m) return `${route}${m[1] || ""}`;
+    }
+    // Reescriu ./img/... o img/... a /img/...
+    if (/^\.?\/?img\//.test(url)) {
+      return url.replace(/^\.?\/?img\//, "/img/");
+    }
+    return url;
+  });
+
   // pathPrefix aplicat a tots els enllaços root-relative i als assets
   eleventyConfig.addPlugin(EleventyHtmlBasePlugin);
 
