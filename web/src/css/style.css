@@ -1,16 +1,17 @@
 /* ── Paleta i tokens (derivats de la UI real de l'extensió: paper càlid,
    verd bosc i ambre dels botons) ───────────────────────────────────────── */
 :root {
-  --paper:   #f6f2e9;   /* fons parquet càlid */
-  --surface: #fffdf8;   /* targetes i panells */
-  --ink:     #1b2a21;   /* text principal (verd molt fosc) */
-  --muted:   #55665c;   /* text secundari */
-  --brand:   #1d5c3f;   /* verd bosc primari */
-  --brand-d: #0f3a27;   /* verd fosc (hover) */
-  --accent:  #b97e1f;   /* ambre (eyebrow, detalls) */
-  --line:    rgba(27,42,33,.14);
-  --shadow:  0 22px 48px -22px rgba(13,40,28,.5);
-  --maxw:    66rem;
+  --paper:    #f6f2e9;   /* fons parquet càlid (com la UI de l'extensió) */
+  --surface:  #fffdf8;   /* targetes i panells */
+  --ink:      #1b2630;   /* text principal (gris-blau molt fosc) */
+  --muted:    #55626d;   /* text secundari */
+  --brand:    #0b5cf0;   /* blau de la icona de l'extensió */
+  --brand-d:  #0a44b3;   /* blau fosc (hover) */
+  --brand-deep:#0a2e6e;  /* blau profund (franja de confiança) */
+  --accent:   #b97e1f;   /* ambre (eyebrow i detalls, dels botons de la UI) */
+  --line:     rgba(27,38,48,.14);
+  --shadow:   0 22px 48px -22px rgba(10,30,70,.45);
+  --maxw:     66rem;
 }
 
 * { box-sizing: border-box; }
@@ -46,7 +47,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 .btn-primary { background: var(--brand); color: #fff; }
 .btn-primary:hover { background: var(--brand-d); }
 .btn-ghost { background: transparent; color: var(--brand-d); border-color: var(--brand); }
-.btn-ghost:hover { background: rgba(29,92,63,.08); }
+.btn-ghost:hover { background: rgba(11,92,240,.08); }
 
 /* ── Hero ────────────────────────────────────────────────────────────────── */
 .hero { text-align: center; padding: 3.5rem 0 1rem; }
@@ -58,26 +59,27 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 
 /* ── Ventall de lents (firma) ────────────────────────────────────────────── */
 .lens-fan {
-  display: flex; justify-content: center; align-items: flex-end;
-  gap: 0; margin: 3.5rem auto 0; max-width: 40rem; min-height: 360px;
-  perspective: 1400px;
+  display: flex; justify-content: center; align-items: center;
+  margin: 3.5rem auto 0; min-height: 460px;
 }
 .lens-card {
-  margin: 0; width: clamp(180px, 42vw, 248px);
+  margin: 0 -30px; width: clamp(210px, 40vw, 290px);
   background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
   box-shadow: var(--shadow); overflow: hidden; position: relative;
   transition: transform .35s ease;
 }
 .lens-card img { display: block; width: 100%; height: auto; }
 .lens-card figcaption {
-  position: absolute; top: .6rem; left: .6rem;
-  background: var(--brand); color: #fff; font-size: .72rem; font-weight: 700;
-  padding: .28rem .6rem; border-radius: 999px; letter-spacing: .01em;
+  position: absolute; top: .65rem; left: .65rem;
+  background: var(--brand); color: #fff; font-size: .74rem; font-weight: 700;
+  padding: .3rem .65rem; border-radius: 999px; letter-spacing: .01em;
 }
-.lens-card--a { transform: rotate(-4deg); z-index: 2; }
-.lens-card--b { transform: rotate(6deg) translateX(-28px) translateY(10px); z-index: 1; }
-.lens-fan:hover .lens-card--a { transform: rotate(-5deg) translateY(-6px); }
-.lens-fan:hover .lens-card--b { transform: rotate(8deg) translateX(-34px) translateY(4px); }
+.lens-card--b { transform: rotate(-8deg) translateY(16px); z-index: 1; }
+.lens-card--a { transform: rotate(-1deg); z-index: 3; }
+.lens-card--c { transform: rotate(8deg) translateY(16px); z-index: 2; }
+.lens-fan:hover .lens-card--b { transform: rotate(-9deg) translateX(-12px) translateY(10px); }
+.lens-fan:hover .lens-card--a { transform: rotate(-1deg) translateY(-8px); }
+.lens-fan:hover .lens-card--c { transform: rotate(9deg) translateX(12px) translateY(10px); }
 .fan-caption { text-align: center; color: var(--muted); font-size: .95rem; max-width: 34rem; margin: 1.6rem auto 0; }
 
 /* ── Pipeline (captura · entén · conserva) ───────────────────────────────── */
@@ -105,7 +107,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 .lenses-foot { margin: 1.6rem 0 0; font-weight: 700; }
 
 /* ── Confiança ───────────────────────────────────────────────────────────── */
-.trust { margin: 4.5rem 0; background: var(--brand); color: #fff; border-radius: 18px; padding: 2.4rem clamp(1.4rem, 4vw, 3rem); }
+.trust { margin: 4.5rem 0; background: var(--brand-deep); color: #fff; border-radius: 18px; padding: 2.4rem clamp(1.4rem, 4vw, 3rem); }
 .trust h2 { color: #fff; }
 .trust em { color: #f1d49a; font-style: normal; }
 .trust-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
@@ -133,8 +135,9 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 /* ── Responsiu ───────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
   .showcase { grid-template-columns: 1fr; }
-  .lens-card--a, .lens-card--b { transform: none; }
-  .lens-fan { gap: 1rem; flex-wrap: wrap; min-height: 0; }
+  .lens-card { margin: .5rem; width: clamp(150px, 42vw, 200px); }
+  .lens-card--a, .lens-card--b, .lens-card--c { transform: none; }
+  .lens-fan { gap: .5rem; flex-wrap: wrap; min-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
