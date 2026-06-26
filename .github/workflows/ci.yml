@@ -40,4 +40,4 @@ jobs:
         run: npm run vendor:verify
 
       - name: web-ext lint (Firefox)
-        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.test.*' '*.zip'
+        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' 'web/**' '*.test.*' '*.zip'

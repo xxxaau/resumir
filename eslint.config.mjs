@@ -183,6 +183,7 @@ export default [
             "node_modules/**",
             "vendor/**",
             "scripts/**",             // Scripts d'utilitat (no part de l'extensió)
+            "web/**",                 // Subprojecte del web propi (Eleventy) — té el seu propi entorn
             "coverage/**",            // Reports de cobertura generats
             "**/.pw-extension/**",    // Playwright auto-generated test artifacts
         ],

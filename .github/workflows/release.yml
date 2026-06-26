@@ -33,7 +33,7 @@ jobs:
         run: npm run vendor:verify
 
       - name: web-ext lint (AMO compliance)
-        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' '*.zip'
+        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' 'web/**' '*.zip'
 
       - name: Crear GitHub Release amb els ZIPs
         uses: softprops/action-gh-release@v3
