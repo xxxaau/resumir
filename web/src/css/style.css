@@ -11,6 +11,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid currentColor; outline
 .btn { display: inline-block; padding: .7rem 1.2rem; border-radius: .5rem; background: #14452f; color: #fff; text-decoration: none; }
 .btn-secondary { background: transparent; border: 2px solid currentColor; color: inherit; }
 .hero-shot { max-width: 100%; height: auto; margin-top: 2rem; border-radius: .75rem; }
+.prose img { max-width: 100%; height: auto; display: block; margin: 1.25rem 0; border: 1px solid rgba(128,128,128,.3); border-radius: .5rem; }
+.prose h2 { margin-top: 2.5rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.5rem; padding: 0; list-style: none; }
 section { margin: 3rem 0; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

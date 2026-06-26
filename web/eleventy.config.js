@@ -30,9 +30,9 @@ export default function (eleventyConfig) {
   eleventyConfig.setUseGitIgnore(false);
   eleventyConfig.ignores.add("node_modules/**");
 
-  // Assets estàtics
+  // Assets estàtics. Les imatges són font única a docs/user-guide/img/ i
+  // sync-content.mjs les copia a src/_generated/img.
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
-  eleventyConfig.addPassthroughCopy({ "src/img": "img" });
   eleventyConfig.addPassthroughCopy({ "src/_generated/img": "img" });
 
   return {
