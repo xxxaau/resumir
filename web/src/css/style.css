@@ -111,7 +111,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 .trust { margin: 4.5rem 0; background: var(--brand-deep); color: #fff; border-radius: 18px; padding: 2.4rem clamp(1.4rem, 4vw, 3rem); }
 .trust h2 { color: #fff; }
 .trust em { color: #f1d49a; font-style: normal; }
-.trust-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.trust-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.6rem; grid-template-columns: repeat(3, 1fr); }
 .trust-list li { color: rgba(255,255,255,.85); }
 .trust-list strong { color: #fff; }
 
@@ -123,7 +123,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 .dl-card p { color: var(--muted); margin: 0 0 1.2rem; }
 .download-foot { color: var(--muted); margin-top: 1.6rem; }
 
-/* ── Pàgines de contingut (guies, FAQ, changelog) ────────────────────────── */
+/* ── Pàgines de contingut (guies, PMF, changelog) ────────────────────────── */
 .prose { max-width: 44rem; }
 .prose img { display: block; margin: 1.25rem 0; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 26px -16px rgba(13,40,28,.45); }
 .prose h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); letter-spacing: -.02em; }
@@ -151,6 +151,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
   .lens-card { margin: .5rem; width: clamp(150px, 42vw, 200px); }
   .lens-card--a, .lens-card--b, .lens-card--c { transform: none; }
   .lens-fan { gap: .5rem; flex-wrap: wrap; min-height: 0; }
+  .trust-list { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }

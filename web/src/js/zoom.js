@@ -22,7 +22,7 @@
     });
   });
 
-  // Imatges de contingut (guies, FAQ…): fes-les ampliables i accessibles per teclat.
+  // Imatges de contingut (guies, PMF…): fes-les ampliables i accessibles per teclat.
   document.querySelectorAll(".prose img").forEach(function (im) {
     im.tabIndex = 0;
     im.setAttribute("role", "button");
