@@ -5,7 +5,7 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
-## [Sense publicar]
+## [2.6.0] - 2026-06-26
 
 ### Afegit
 - **Plugin «Targetes Anki»**: genera targetes de pregunta/resposta (flashcards) del
