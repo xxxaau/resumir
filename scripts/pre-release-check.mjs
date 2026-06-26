@@ -59,11 +59,12 @@ const JS_FILES = collectFiles(root, (full, rel) =>
     !rel.startsWith("vendor")
 );
 
-/** Fitxers HTML propis */
+/** Fitxers HTML propis (els fixtures de test són snapshots de webs externes i no s'embalen) */
 const HTML_FILES = collectFiles(root, (full, rel) =>
     extname(full) === ".html" &&
     !rel.startsWith("node_modules") &&
-    !rel.startsWith("coverage")
+    !rel.startsWith("coverage") &&
+    !rel.startsWith("tests")
 );
 
 // ─── Sistema de resultats ────────────────────────────────────────────────────
