@@ -616,11 +616,11 @@ disparava** i no protegia contra push accidental amb mode DEV.
 
 ---
 
-## 7. Pre-release check: 17/17 com a gate
+## 7. Pre-release check: 18/18 com a gate
 
 ### Estat actual
 
-`scripts/pre-release-check.mjs` executa 17 checks automàtics abans de
+`scripts/pre-release-check.mjs` executa 18 checks automàtics abans de
 permetre una release. Inclou:
 
 - Manifests: name, gecko.id, versió sincronitzada, permisos
@@ -643,6 +643,13 @@ permetre una release. Inclou:
 - El check més útil pràcticament és el **darrer** ("tot `<script src>`
   existeix al paquet") — captura errors de bundling que altrament només
   es detectarien quan un usuari real instal·la l'extensió.
+- **Els checks de qualitat només han de cobrir l'HTML/JS que s'embala.**
+  L'auditoria `lang="ca"` falsava-positivava amb els fixtures de
+  connectors (`tests/fixtures/connectors/*.html`), que són snapshots de
+  webs externes amb el seu `lang` original (en, o cap) i no s'envien als
+  usuaris. Va aparèixer amb v2.6.0 (els fixtures es van afegir després de
+  v2.5.0). Solució: excloure `tests/` de l'auditoria d'HTML, no tocar els
+  fixtures (forçar-hi `lang="ca"` trencaria els tests d'extracció).
 
 ---
 
@@ -656,13 +663,23 @@ Resum del workflow que va funcionar bé en aquesta sessió:
 3. **Validació manual abans del bump** — l'usuari prova la build DEV
    manualment als navegadors abans de qualsevol acció de release.
 4. **`npm run prod`** per restaurar manifests i icones.
-5. **`npm version patch --no-git-tag-version`** (regenera manifests i HTML
-   del changelog via hook `postversion`).
-6. **`npm run build` + `npm run prerelease`** (17/17 OK).
-7. **Commit del bump versionatge únic** (`chore: bump vX.Y.Z`).
-8. **Tag annotated** (`git tag -a vX.Y.Z -m "..."`).
-9. **Push main + tag** (el hook hauria de deixar passar perquè ja és PROD).
-10. **GitHub Release** amb notes detallades + ZIPs adjunts.
-11. **AMO upload manual** (necessita 2FA del compte).
-12. **Actualitzar documentació** post-release (README, docs específics,
+5. **`npm run prod`** per posar manifests i icones en PROD; obrir el
+   CHANGELOG (`[Sense publicar]` → `[X.Y.Z] - data`) i commit
+   `chore: prepara vX.Y.Z` (arbre net abans del bump).
+6. **`npm version minor -m "chore: release v%s"`**. ⚠️ El sync de
+   manifests + HTML del changelog va al hook **`version`** (NO
+   `postversion`): així els fitxers bumpejats queden DINS del commit
+   taggejat. Amb `postversion` quedaven fora del tag i la release
+   compilava amb la versió antiga (fallada de v2.5.0). El bump **crea el
+   commit i el tag d'una tirada** (no cal `git tag` manual).
+7. **`npm run build` + `npm run prerelease`** (18/18 OK) + `npm run
+   vendor:verify` + `npx web-ext lint` (rèplica local del que farà la CI).
+8. **Push main + tag** (`git push origin main && git push origin vX.Y.Z`).
+   El tag dispara `release.yml`, que reconstrueix des de la font i publica
+   la GitHub Release amb els ZIPs. ⚠️ Si has tornat a `npm run dev`, el
+   pre-push hook bloqueja: stash temporal del mode DEV (vegeu
+   `RELEASE-PROCESS.md`).
+9. **AMO upload manual** (necessita 2FA del compte) + actualitzar les URLs
+   del listing si han canviat.
+10. **Actualitzar documentació** post-release (README, docs específics,
     aquest fitxer).
