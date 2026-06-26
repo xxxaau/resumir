@@ -4,14 +4,14 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-## Coherència visual dels botons de control del mapa conceptual
+## Coherència visual dels botons de control del mapa conceptual (✅ FET, 2026-06-26)
 
-**Context (2026-06-05):** Els botons de control del mapa conceptual (sidebar + fullscreen) s'han unificat amb estil planer (32×32, padding 4px, border-radius 4px, hover amb background) per coincidir amb els botons de la toolbar. El codi està aplicat però no s'ha pogut verificar en local (probablement cache del sidebar panel de Firefox).
+**Context (2026-06-05):** Els botons de control del mapa conceptual (sidebar + fullscreen) s'han unificat amb estil planer (32×32, padding 4px, border-radius 4px, hover amb background) per coincidir amb els botons de la toolbar.
 
-**Pendent:**
-- [ ] Verificar que els canvis CSS s'apliquen correctament al sidebar (`.markmap-control-btn`) i al fullscreen (`.markmap-fs-btn`).
-- [ ] Confirmar que el padding 4px i l'SVG 24×24 donen el mateix aspecte que els botons d'acció del menú de resumir.
-- [ ] Si el problema persisteix després de tancar/obrir la sidebar, investigar si Firefox cacheja el sidebar panel independentment de la recàrrega de l'extensió.
+**Resolt:**
+- [x] Els canvis CSS s'apliquen correctament al sidebar (`.markmap-control-btn`) i al fullscreen (`.markmap-fs-btn`).
+- [x] El padding 4px i l'SVG 24×24 donen el mateix aspecte que els botons d'acció del menú de resumir.
+- [x] Verificat en local (l'aparent problema era cache del sidebar panel de Firefox).
 
 ---
 
