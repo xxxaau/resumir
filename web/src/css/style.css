@@ -1,0 +1,6 @@
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; }
+main { max-width: 64rem; margin: 0 auto; padding: 2rem 1.25rem; }
+a:focus-visible, button:focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
+.site-header, .site-footer { padding: 1rem 1.25rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }

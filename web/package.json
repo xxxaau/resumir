@@ -1,0 +1,15 @@
+{
+  "name": "resumir-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "sync": "node scripts/sync-content.mjs",
+    "build": "npm run sync && eleventy",
+    "serve": "npm run sync && eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

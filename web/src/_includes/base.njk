@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if title %}{{ title }} · Resumir{% else %}Resumir — del contingut al coneixement{% endif %}</title>
+    <meta name="description" content="{{ description or 'Resumir converteix articles, vídeos, fils i PDFs en coneixement estructurat. Al navegador, amb la teva clau, sense intermediaris.' }}">
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Resumir</a>
+      <nav aria-label="Principal">
+        <a href="/guia/inici/">Guia</a>
+        <a href="/faq/">FAQ</a>
+        <a href="/changelog/">Novetats</a>
+        <a href="https://github.com/xxxaau/resumir">GitHub</a>
+      </nav>
+    </header>
+    <main id="contingut">
+      {{ content | safe }}
+    </main>
+    <footer class="site-footer">
+      <p>Resumir · codi obert (MPL-2.0) · fet a Banyoles.</p>
+      <nav aria-label="Peu">
+        <a href="https://addons.mozilla.org/firefox/addon/resumir">Firefox</a>
+        <a href="https://github.com/xxxaau/resumir/releases">Chrome/Edge</a>
+        <a href="https://github.com/xxxaau/resumir">Codi</a>
+      </nav>
+    </footer>
+  </body>
+</html>
