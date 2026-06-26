@@ -11,12 +11,12 @@ Aquesta guia et posa en marxa en pocs minuts.
 ## 1. Instal·la l'extensió
 
 **Firefox**
-Vés a [addons.mozilla.org/firefox/addon/resumir-contingut](https://addons.mozilla.org/firefox/addon/resumir-contingut/),
+Vés a [addons.mozilla.org/firefox/addon/resumir](https://addons.mozilla.org/firefox/addon/resumir/),
 clica **«Afegeix a Firefox»** i accepta els permisos.
 
 **Chrome / Edge / Brave**
 Descarrega l'últim paquet des de
-[Releases](https://github.com/xxxaau/extensio-resumir-contingut/releases) i segueix-hi
+[Releases](https://github.com/xxxaau/resumir/releases) i segueix-hi
 les instruccions d'instal·lació.
 
 ---
@@ -85,4 +85,4 @@ peticions per minut. Espera uns segons i torna-ho a provar.
 
 ---
 
-Dubtes o errors: [GitHub Issues](https://github.com/xxxaau/extensio-resumir-contingut/issues).
+Dubtes o errors: [GitHub Issues](https://github.com/xxxaau/resumir/issues).
