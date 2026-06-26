@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Resumir",
     "short_name": "Resumir",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "author": "Sergi Xaudiera",
     "homepage_url": "https://github.com/xxxaau/resumir",
     "description": "Resumeix text seleccionat amb Gemini.",

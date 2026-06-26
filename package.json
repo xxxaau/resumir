@@ -1,6 +1,6 @@
 {
   "name": "resumir-contingut",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Browser extension to summarize web content using Gemini AI",
   "author": "Sergi Xaudiera <sergi@xaudiera.xyz>",
   "license": "MPL-2.0",
