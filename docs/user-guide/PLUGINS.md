@@ -4,7 +4,7 @@ Resumir s'organitza en **plugins**: cada un és una eina amb el seu botó a la b
 lateral. Els pots **activar, desactivar i reordenar** des de Configuració (⚙️) →
 **Plugins**, perquè la barra mostri només el que fas servir.
 
-![Llista de plugins a Configuració, cadascun amb el seu interruptor, fletxes per reordenar i engranatge de configuració](./img/plugins-llista.png)
+![Llista de plugins a Configuració, cadascun amb el seu interruptor, fletxes per reordenar i engranatge de configuració](./img/plugins-llista.webp)
 
 Segueixen els tres moments del pipeline de Resumir: **captures** el contingut,
 l'**entens** amb la lent que necessites, i el **conserves**.
@@ -50,7 +50,7 @@ estructura fixa:
 - **Aprenentatges** (mínim 3 conclusions pràctiques),
 - **Cites** (màxim 3 cites literals).
 
-![Configuració de Resum amb el prompt per defecte (System Prompt) editable i el botó Restaurar](./img/prompt-resum.png)
+![Configuració de Resum amb el prompt per defecte (System Prompt) editable i el botó Restaurar](./img/prompt-resum.webp)
 
 ### Explica-ho fàcil
 Per a temes densos o d'un camp que no domines.
@@ -65,7 +65,7 @@ L'estructura de sortida:
 - **Paraules que potser no coneixes** (glossari dels termes que surten),
 - **Per què t'hauria d'importar?** (per què és rellevant).
 
-![Panell d'Explica-ho fàcil amb les seccions «De què va», «Per entendre-ho millor» i «Paraules que potser no coneixes»](./img/panell-explica-facil.png)
+![Panell d'Explica-ho fàcil amb les seccions «De què va», «Per entendre-ho millor» i «Paraules que potser no coneixes»](./img/panell-explica-facil.webp)
 
 ### Aprofundiment
 Quan no en vols el resum, sinó entendre-ho a fons.
@@ -91,7 +91,7 @@ en format de llista Markdown indentada — tema central, branques principals,
 sub-branques i detalls. Resumir el renderitza com un mapa **interactiu** amb nodes
 desplegables, pantalla completa i export a PNG.
 
-![Mapa conceptual interactiu generat per Resumir a partir de l'Estatut d'Autonomia de Catalunya](./img/mapa-conceptual.png)
+![Mapa conceptual interactiu generat per Resumir a partir de l'Estatut d'Autonomia de Catalunya](./img/mapa-conceptual.webp)
 
 ---
 
@@ -123,7 +123,7 @@ generi targetes pregunta/resposta autocontingudes i comprovables, sense inventar
 que no surti al contingut, en l'idioma configurat i en format JSON perquè Resumir les
 pugui mostrar i exportar.
 
-![Panell de Targetes Anki: cada targeta amb pregunta i resposta, i botons Edita/Descarta](./img/panell-anki.png)
+![Panell de Targetes Anki: cada targeta amb pregunta i resposta, i botons Edita/Descarta](./img/panell-anki.webp)
 
 ### Exportació a Markdown
 Copia el resum al porta-retalls en Markdown, amb una plantilla personalitzable (per
