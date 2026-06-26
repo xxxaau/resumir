@@ -25,8 +25,6 @@ en pots crear un a [accounts.google.com](https://accounts.google.com/signup).
 Vés a **[aistudio.google.com](https://aistudio.google.com/)** i clica **«Get
 started»**, a dalt a la dreta.
 
-![Pàgina d'inici de Google AI Studio amb el botó «Get started» a dalt a la dreta](./img/aistudio-welcome.png)
-
 ---
 
 ## Pas 2 — Inicia sessió amb Google
