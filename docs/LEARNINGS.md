@@ -683,3 +683,34 @@ Resum del workflow que va funcionar bé en aquesta sessió:
    del listing si han canviat.
 10. **Actualitzar documentació** post-release (README, docs específics,
     aquest fitxer).
+
+---
+
+## 9. El web propi (`/web`) és un subprojecte: aïllar-lo del tooling de l'extensió
+
+### Estat actual
+El web propi (Eleventy) viu a `/web`, dins el mateix repo que l'extensió. El
+tooling de l'extensió **escaneja tot el repo des de l'arrel** i no coneix
+l'entorn del web:
+
+- `npm run lint` = `eslint . --ext .js,.mjs` → linta TOT, inclòs `/web`.
+- `npm run prerelease` (`scripts/pre-release-check.mjs`) recull fitxers des de
+  l'arrel (només exclou `node_modules`, `.git`, `build*`).
+- `web-ext lint --source-dir .` (a `ci.yml` i `release.yml`) escaneja l'arrel.
+
+### Què va passar (2026-06-26)
+En arribar `/web` a `main`, la **CI va quedar vermella**: ESLint petava amb
+`no-undef` (`console` a `web/scripts/sync-content.mjs`, `document` a
+`web/src/js/zoom.js`) perquè aplicava la config de l'extensió (globals de
+navegador via `<script>`) a fitxers de Node/navegador del web.
+
+### Lliçó / com evitar barreres
+- **Qualsevol codi nou fora de l'extensió (com `/web`) s'ha d'excloure** del
+  lint i del web-ext lint de l'extensió, o donar-li la seva pròpia config.
+- Fet: `web/**` als `ignores` d'`eslint.config.mjs` i a `--ignore-files` del
+  `web-ext lint` (`ci.yml` + `release.yml`).
+- `pre-release-check.mjs` no va petar perquè només mira `.js` (no `.mjs`) i
+  `/web` no té `.html` (només `.njk`); si hi afegeixes `.js`/`.html` que no
+  s'embalen, revisa que no disparin els checks (console.log, lang="ca", etc.).
+- Regla general: el tooling de l'extensió cobreix només l'extensió. El web té
+  el seu propi `package.json` i build (vegeu la nota de memòria del web propi).
