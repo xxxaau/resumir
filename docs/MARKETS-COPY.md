@@ -230,7 +230,7 @@ Captura 5 — YouTube:
 |------|-------|
 | **Categoria** | Productivitat |
 | **Idioma de la interfície** | Català |
-| **Pàgina d'inici** | https://github.com/xxxaau/resumir |
+| **Pàgina d'inici** | https://xxxaau.github.io/resumir/ |
 | **URL de suport** | https://github.com/xxxaau/resumir/issues |
 | **Política de privacitat** | https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md |
 | **Correu de contacte** | sergi@xaudiera.xyz |
