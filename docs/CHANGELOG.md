@@ -5,6 +5,15 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2026-06-29
+
+### Arreglat
+- **Botó «Targetes Anki».** Després de generar un resum, el botó de Targetes
+  Anki es quedava desactivat i no es podia tornar a fer servir. Ara funciona
+  correctament en qualsevol moment.
+
+---
+
 ## [2.6.0] - 2026-06-26
 
 ### Afegit
