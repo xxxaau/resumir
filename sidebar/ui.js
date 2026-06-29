@@ -212,6 +212,8 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         if (explainSimpleBtn) explainSimpleBtn.disabled = false;
         const selectPdfBtn = document.getElementById("selectPdfBtn");
         if (selectPdfBtn) selectPdfBtn.disabled = false;
+        const ankiBtn = document.getElementById("ankiBtn");
+        if (ankiBtn) ankiBtn.disabled = false;
 
         if (summarizeBtn) summarizeBtn.disabled = false;
     }
@@ -245,6 +247,8 @@ function resetUI(hasContent, config = null) {
     if (explainSimpleBtn) explainSimpleBtn.disabled = false;
     const selectPdfBtn = document.getElementById("selectPdfBtn");
     if (selectPdfBtn) selectPdfBtn.disabled = false;
+    const ankiBtn = document.getElementById("ankiBtn");
+    if (ankiBtn) ankiBtn.disabled = false;
 
     if (config) {
         applyExtensionVisibility(config);
@@ -580,5 +584,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText };
+    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI };
 }

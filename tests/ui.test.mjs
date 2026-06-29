@@ -25,7 +25,7 @@ global.CURATED_MODELS = CURATED_MODELS;
 // getCuratedModelInfo és un global de browser definit a api.js — mock mínim
 global.getCuratedModelInfo = () => ({ rpd: 1500 });
 
-const { formatTextToFragment, formatBionicText } = require("../sidebar/ui.js");
+const { formatTextToFragment, formatBionicText, setGeneratingState } = require("../sidebar/ui.js");
 
 // ---------------------------------------------------------------------------
 // formatBionicText
@@ -152,4 +152,37 @@ test("formatTextToFragment - mode biònic actiu afegeix <b> a les paraules", () 
     const frag = formatTextToFragment("Paraula test", true);
     const boldElements = frag.querySelectorAll("b");
     assert.ok(boldElements.length > 0, "El mode biònic ha de generar elements <b>");
+});
+
+// ---------------------------------------------------------------------------
+// setGeneratingState — habilitació dels botons d'acció (inclòs ankiBtn)
+// ---------------------------------------------------------------------------
+
+const ACTION_BTN_IDS = [
+    "summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn",
+    "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn", "ankiBtn",
+];
+
+function setupToolbarDom() {
+    document.body.innerHTML =
+        `<div id="loading" class="hidden"></div>` +
+        ACTION_BTN_IDS.map(id => `<button id="${id}"></button>`).join("");
+}
+
+test("setGeneratingState - desactiva tots els botons d'acció mentre genera (inclòs ankiBtn)", () => {
+    setupToolbarDom();
+    setGeneratingState(true, true, "summarizeBtn");
+    for (const id of ACTION_BTN_IDS) {
+        if (id === "summarizeBtn") continue; // el botó actiu es manté
+        assert.equal(document.getElementById(id).disabled, true,
+            `${id} ha d'estar desactivat mentre es genera`);
+    }
+});
+
+test("setGeneratingState - reactiva ankiBtn en acabar la generació amb un resum a la sidebar", () => {
+    setupToolbarDom();
+    setGeneratingState(true, true, "summarizeBtn");   // generant
+    setGeneratingState(false, true, "summarizeBtn");  // acabat, amb resum (hasContent=true)
+    assert.equal(document.getElementById("ankiBtn").disabled, false,
+        "ankiBtn s'ha de reactivar quan acaba la generació");
 });
