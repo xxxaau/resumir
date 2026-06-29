@@ -4,17 +4,17 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 ---
 
-## v2.6.1 — fixes pendents (proper bump)
+## v2.6.1 — fixes (proper bump)
 
-**Context (2026-06-26):** recollit en tancar la sessió del web propi. Fer un bump **2.6.1** (patch) amb:
+**Context (2026-06-26):** recollit en tancar la sessió del web propi. **Fixes de codi resolts el 2026-06-29**; queda fer el bump **2.6.1** (patch).
 
-- [ ] **Botó «Targetes Anki» desactivat quan hi ha resum a la sidebar:** amb un resum mostrat a la barra lateral, el botó de Targetes Anki queda deshabilitat. Investigar la lògica d'habilitació del botó segons el contingut/estat actiu i corregir-ho perquè funcioni. Verificar amb un resum real a la sidebar.
-- [ ] **Dev a Edge no agafa l'última versió:** en carregar `build_chromium_dev` a Edge no surt el codi més recent (s'estava provant la build de prova/store). Solució habitual: `npm run dev:chromium` per regenerar la build i recarregar l'extensió desempaquetada a `edge://extensions`. Confirmar que el codi carregat és l'actual; si el problema persisteix, investigar el flux de `dev:chromium`. (`build_chromium_dev/` és gitignored i regenerable; vegeu [[chromium-dev-load]].)
+- [x] **Botó «Targetes Anki» desactivat quan hi ha resum a la sidebar:** el botó es desactivava a l'inici de qualsevol generació (`allActionBtns` a `setGeneratingState`) però no es reactivava mai (faltava a la branca `else` i a `resetUI`). Afegit `ankiBtn.disabled = false` als dos llocs + test de regressió. (commit `a95bddb`)
+- [x] **Dev a Edge no agafa l'última versió:** el script `dev:chromium` ja generava codi fresc; la causa real era que la carpeta dev tenia el mateix nom i versió que l'extensió de la store ("Resumir" v2.6.0) → impossible distingir-les a Edge (es provava la de la store). Ara `dev:chromium` marca el nom com a **«Resumir (DEV)»**. (commit `6c16064`; vegeu [[chromium-dev-load]].)
 - [ ] **(procés) Revisió de fitxers esborrables abans del bump** — vegeu RELEASE-PROCESS (PRE-RELEASE). Ex.: buidar `temp/` (captures compartides; gitignored), artefactes de build antics.
 
 **Criteris d'acceptació:**
-- [ ] El botó de Targetes Anki s'activa correctament quan hi ha un resum a la sidebar.
-- [ ] La build dev a Edge mostra el codi actual.
+- [x] El botó de Targetes Anki s'activa correctament quan hi ha un resum a la sidebar. (verificat en viu a Edge + test unitari; 274/274)
+- [x] La build dev a Edge mostra el codi actual i és distingible («Resumir (DEV)»).
 - [ ] Bump 2.6.1 publicat (seguint RELEASE-PROCESS).
 
 ---
@@ -23,13 +23,15 @@ Llista de millores pendents, no prioritzades. Cada entrada inclou context i crit
 
 **Context (2026-06-26):** El web propi ja és viu a **https://xxxaau.github.io/resumir/** (vegeu `web/` i `.github/workflows/pages.yml`). Cal redirigir-hi els enllaços públics que ara apunten a GitHub. El canvi de `settings.html` viatja a l'usuari, així que va **lligat a una release de l'extensió**.
 
-**Pendent:**
-- [ ] `options/settings.html`: l'enllaç «Com obtinc una clau d'API?» (ara → `…/blob/main/docs/user-guide/API-KEY-GOOGLE.md`) → `https://xxxaau.github.io/resumir/guia/clau-api/`.
-- [ ] **AMO**: «Pàgina d'inici» (ara `github.com/xxxaau/resumir`) → el web. (URL de suport i Política de privadesa poden seguir a GitHub.)
-- [ ] `README.md`: afegir l'enllaç al web propi.
+**Estat (2026-06-29):** canvis de codi fets (commit `46b0ac0`); queda l'acció manual a l'AMO durant el release.
+
+- [x] `options/settings.html`: l'enllaç «Com obtinc una clau d'API?» → `https://xxxaau.github.io/resumir/guia/clau-api/` (URL verificada en viu, no 404).
+- [ ] **AMO**: «Pàgina d'inici» (ara `github.com/xxxaau/resumir`) → el web. (URL de suport i Política de privadesa poden seguir a GitHub.) — **manual al dashboard, durant el release.**
+- [x] `README.md`: afegit badge al lloc web propi.
 
 **Criteris d'acceptació:**
-- [ ] Tots tres enllaços resolen al web (no 404) després del release.
+- [x] settings.html i README resolen al web (no 404).
+- [ ] AMO «Pàgina d'inici» actualitzada al web després del release.
 
 ---
 
