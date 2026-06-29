@@ -11,6 +11,9 @@
  *     sidebar.html referencia els fitxers individuals, com a l'arrel).
  *   - Deixa la carpeta (no fa zip ni la esborra) per poder carregar-la.
  *   - No té el guard de mode prod (és exclusivament per a dev).
+ *   - Marca el nom de l'extensió com a «Resumir (DEV)» perquè a Edge/Chrome
+ *     no es confongui amb la de la store (mateix nom i versió). No toca
+ *     manifest.base.json: el repo queda net (a diferència de set-mode dev).
  *
  * Ús:
  *   npm run dev:chromium
@@ -19,7 +22,7 @@
  *   Després de canviar codi, torna a executar-lo i clica "recarregar" a Edge.
  */
 
-import { existsSync, rmSync, mkdirSync, copyFileSync, readdirSync, statSync } from "fs";
+import { existsSync, rmSync, mkdirSync, copyFileSync, readdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
@@ -52,6 +55,15 @@ execSync("node scripts/build-chromium-bundle.mjs", { cwd: root, stdio: "inherit"
 
 // 3. manifest.json = variant Chromium (side_panel + service worker).
 execSync(`node scripts/merge-manifest.mjs chromium "${outName}/manifest.json"`, { cwd: root, stdio: "inherit" });
+
+// 3b. Marca el nom com a «(DEV)» perquè a Edge/Chrome no es confongui amb
+//     l'extensió de la store (mateix nom i versió). Independent de set-mode.
+const devManifestPath = resolve(outDir, "manifest.json");
+const devManifest = JSON.parse(readFileSync(devManifestPath, "utf8"));
+if (!devManifest.name.includes("(DEV)")) {
+    devManifest.name = `${devManifest.name} (DEV)`;
+}
+writeFileSync(devManifestPath, JSON.stringify(devManifest, null, 4), "utf8");
 
 // 4. Copia fitxers i directoris.
 for (const f of FILES) {
