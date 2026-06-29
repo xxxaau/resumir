@@ -65,6 +65,20 @@ grep '"name"' manifest.base.json
 # Expected: "name": "Resumir" (no DEV!)
 ```
 
+> ⚠️ **`npm version` (pas 2.2) avorta si el working tree no està net**
+> («Git working directory not clean»). Després d'editar el CHANGELOG (1.3) i de
+> `npm run prod`, deixa el tree net amb un commit de **preparació** que inclogui
+> el mode PROD i el CHANGELOG:
+>
+> ```bash
+> git commit -am "chore: prepara vX.Y.Z (mode PROD + CHANGELOG)"
+> git status   # ha de quedar net abans del bump
+> ```
+>
+> El hook `version` tornarà a fer `git add` del CHANGELOG i regenerarà
+> `settings.html` dins del commit del tag; el CHANGELOG ja commitejat aquí no fa
+> nosa (git add d'un fitxer sense canvis és no-op).
+
 #### 2.2 Bump versió
 
 > ⚠️ Des de v2.5.0 el sync va al hook **`version`** (NO `postversion`): npm
@@ -279,6 +293,7 @@ PRE-RELEASE:
 
 DURING RELEASE:
 [ ] npm run prod (dev mode OFF)
+[ ] git commit -am "chore: prepara vX.Y.Z (mode PROD + CHANGELOG)" (tree net; npm version avorta si no)
 [ ] npm version X.Y.Z (syncs everything)
 [ ] npm run build → 2 ZIPs < 4 MB
 [ ] npm run prerelease → 18/18 ✅
