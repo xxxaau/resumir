@@ -72,18 +72,27 @@ if (!noBackup) {
   console.log();
 }
 
-console.log("[2/4] Switching to PROD mode...");
+console.log("[2/5] Switching to PROD mode...");
 execSync(`node "${join(root, "scripts/set-mode.mjs")}" prod`, { stdio: "inherit", cwd: root });
 console.log();
 
-console.log("[3/4] Building extension...");
+console.log("[3/5] Building extension...");
 execSync(`node "${join(root, "scripts/build.mjs")}" ${target}`, { stdio: "inherit", cwd: root });
 console.log();
 
 if (!skipDevRestore) {
-  console.log(`[4/4] Restoring original mode (${originalMode})...`);
+  console.log(`[4/5] Restoring original mode (${originalMode})...`);
   execSync(`node "${join(root, "scripts/set-mode.mjs")}" ${originalMode}`, { stdio: "inherit", cwd: root });
   console.log();
+
+  // Si tornem a DEV, regenera la carpeta unpacked de Chromium perquè quedi
+  // al dia amb la versió actual (evita carregar codi/versió vells a Edge —
+  // la confusió que va motivar el sufix «(DEV)» a dev-chromium.mjs).
+  if (originalMode === "dev") {
+    console.log("[5/5] Regenerating build_chromium_dev (Edge/Chrome unpacked)...");
+    execSync(`node "${join(root, "scripts/dev-chromium.mjs")}"`, { stdio: "inherit", cwd: root });
+    console.log();
+  }
 }
 
 console.log("=== RELEASE BUILD COMPLETED ===");
