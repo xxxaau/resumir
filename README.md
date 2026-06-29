@@ -4,6 +4,7 @@
 
 Resumir és una extensió de navegador que converteix qualsevol cosa que llegeixes o mires — articles, vídeos, fils, PDFs — en coneixement estructurat, comprensible i teu. Al teu navegador, amb la teva clau de Google Gemini, sense intermediaris: cap servidor propi, cap telemetria, cap seguiment.
 
+[![Lloc web](https://img.shields.io/badge/Lloc_web-xxxaau.github.io%2Fresumir-4285F4)](https://xxxaau.github.io/resumir/)
 [![Disponible a Firefox Add-ons](https://img.shields.io/badge/Firefox-Descarregar-FF7139?logo=firefox-browser)](https://addons.mozilla.org/en-US/firefox/addon/resumir)
 [![Baixar de GitHub Releases](https://img.shields.io/badge/Chrome-Descarregar-4285F4?logo=googlechrome)](https://github.com/xxxaau/resumir/releases)
 [![Llicència MPL-2.0](https://img.shields.io/badge/Llicència-MPL--2.0-blue)](LICENSE)
