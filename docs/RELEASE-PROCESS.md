@@ -290,7 +290,8 @@ POST-RELEASE:
 [ ] Submitir a CWS (Upload new package)
 [ ] Monitorizar email per a approvals
 [ ] Update GitHub release description (copy CHANGELOG)
-[ ] Regenerar la build local d'Edge: npm run dev:chromium (deixa build_chromium_dev a la versió nova; evita carregar codi/versió vells a Edge). Si fas servir `npm run release` i tornes a mode DEV, ja ho fa automàticament (pas 5/5).
+[ ] Tornar a mode DEV en local: npm run dev (l'extensió torna a mode desenvolupament; `npm run release` ja ho fa al pas 4/5). SEMPRE després del bump.
+[ ] Regenerar la build local d'Edge: npm run dev:chromium (deixa build_chromium_dev a la versió nova; evita carregar codi/versió vells a Edge; `npm run release` ho fa al pas 5/5).
 ```
 
 ---
