@@ -124,6 +124,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // --- About Links (CSP Safe) ---
+    const btnWeb = document.getElementById("btnWeb");
+    if (btnWeb) {
+        btnWeb.addEventListener("click", () => {
+            window.open("https://xxxaau.github.io/resumir/", "_blank");
+        });
+    }
+
     const btnGithub = document.getElementById("btnGithub");
     if (btnGithub) {
         btnGithub.addEventListener("click", () => {
