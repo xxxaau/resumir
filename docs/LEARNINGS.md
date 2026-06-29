@@ -1,3 +1,40 @@
+# Release v2.6.1 — Sessió 2026-06-29
+
+## El botó Anki es desactivava i no es reactivava (simetria de `setGeneratingState`)
+
+`setGeneratingState(true, …)` desactiva tots els botons de `allActionBtns`
+(inclòs `ankiBtn`) mentre es genera. En acabar (branca `else`) i a `resetUI`, els
+botons es reactiven **un per un** — i `ankiBtn` hi faltava als dos llocs. Quedava
+penjat en `disabled=true` mentre hi havia un resum a la sidebar.
+
+**Fix:** afegir `ankiBtn.disabled = false` a les dues branques de reactivació.
+**Lliçó:** la llista que DESACTIVA (`allActionBtns`) i el codi que REACTIVA han
+d'estar sincronitzats; si afegeixes un botó d'acció, toca'l als dos llocs. Test de
+regressió a `tests/ui.test.mjs` (es van exportar `setGeneratingState`/`resetUI`).
+
+## La build dev d'Edge era indistingible de la store (no era un bug de build)
+
+«Dev a Edge no agafa l'última versió»: `dev:chromium` SÍ generava codi fresc
+(verificat amb `grep` del fix a la carpeta acabada de generar). El problema real
+era que `build_chromium_dev` tenia el mateix `name` i `version` que l'extensió de
+la store ("Resumir" v2.6.0) → a `edge://extensions` no es podia saber quina
+provaves. **Fix:** `dev-chromium.mjs` força `name = "Resumir (DEV)"` al manifest
+generat (idempotent; NO toca `manifest.base.json`, el repo queda net).
+
+**Lliçó:** abans de buscar un bug de build, verifica QUÈ estàs carregant; dues
+extensions amb el mateix nom a `edge://extensions` són una trampa silenciosa.
+
+## La carpeta dev queda desfasada després d'un bump
+
+`build_chromium_dev` es genera des de `manifest.base.json` en el moment del
+`dev:chromium`; un bump posterior no l'actualitza (versió vella a Edge). **Fix:**
+`release.mjs` afegeix un pas 5/5 que la regenera en restaurar el mode DEV;
+documentat també a RELEASE-PROCESS (POST-RELEASE) per al flux manual
+(`npm run dev:chromium`). El flux manual (`npm version` + `npm run build`) NO
+passa per `release.mjs` — per això cal el pas manual a la checklist.
+
+---
+
 # Release v2.5.0 — Sessió 2026-06-12 (tarda)
 
 ## El hook `postversion` deixa els manifests fora del commit taggejat
