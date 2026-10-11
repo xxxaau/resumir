@@ -25,7 +25,7 @@ global.CURATED_MODELS = CURATED_MODELS;
 // getCuratedModelInfo és un global de browser definit a api.js — mock mínim
 global.getCuratedModelInfo = () => ({ rpd: 1500 });
 
-const { formatTextToFragment, formatBionicText, setGeneratingState, startGenerationTimer, stopGenerationTimer } = require("../sidebar/ui.js");
+const { formatTextToFragment, formatBionicText, setGeneratingState, startGenerationTimer, stopGenerationTimer, applyExtensionOrder, TOOLBAR_GROUPS } = require("../sidebar/ui.js");
 
 // ---------------------------------------------------------------------------
 // formatBionicText
@@ -245,4 +245,58 @@ test("cronòmetre - sense colors fixos hexadecimals", () => {
     startGenerationTimer();
     stopGenerationTimer();
     assert.doesNotMatch(el.style.color, /#/);
+});
+
+// ---------------------------------------------------------------------------
+// Barra d'eines agrupada (2.1): Generar | Exportar | Vista, amb separadors; l'ordre
+// de l'usuari es respecta DINS de cada grup. Abans era una fila plana on els
+// exportadors es barrejaven amb els generadors segons l'ordre desat.
+// ---------------------------------------------------------------------------
+const ALL_TOOLBAR_BTNS = ["bionicBtn", "copyBtn", "summarizeBtn", "selectPdfBtn", "ankiBtn", "obsidianBtn", "deepDiveBtn", "scienceBtn", "conceptMapBtn", "explainSimpleBtn"];
+
+function setupGroupedToolbar(hidden = []) {
+    document.body.innerHTML = `<div class="toolbar">` +
+        ALL_TOOLBAR_BTNS.map(id => `<button id="${id}" style="display:${hidden.includes(id) ? "none" : "flex"}"></button>`).join("") +
+        `<button id="settingsBtn"></button></div>`;
+    return document.querySelector(".toolbar");
+}
+const toolbarSequence = (tb) => [...tb.children].map(el => el.classList.contains("toolbar-sep") ? "|" : el.id);
+
+test("barra d'eines - agrupa Generar | Exportar | Vista i respecta l'ordre de l'usuari dins de cada grup", () => {
+    const tb = setupGroupedToolbar(["scienceBtn", "conceptMapBtn", "explainSimpleBtn"]);
+    // Ordre desat «barrejat»: biònica i copiar abans dels generadors
+    applyExtensionOrder(["bionic", "markdown", "resum", "selectpdf", "anki", "obsidian", "deepdive"]);
+    assert.deepEqual(toolbarSequence(tb).filter(x => !["scienceBtn", "conceptMapBtn", "explainSimpleBtn"].includes(x)), [
+        "summarizeBtn", "selectPdfBtn", "ankiBtn", "deepDiveBtn",   // Generar (ordre de l'usuari)
+        "|",
+        "copyBtn", "obsidianBtn",                                    // Exportar (ordre de l'usuari)
+        "|",
+        "bionicBtn",                                                  // Vista
+        "settingsBtn",
+    ]);
+});
+
+test("barra d'eines - els grups buits no deixen separadors orfes i el de configuració és l'últim", () => {
+    const tb = setupGroupedToolbar(["copyBtn", "obsidianBtn", "scienceBtn", "conceptMapBtn", "explainSimpleBtn", "deepDiveBtn"]);
+    applyExtensionOrder(["resum", "selectpdf", "anki", "bionic"]);
+    const seq = toolbarSequence(tb).filter(x => !["copyBtn", "obsidianBtn", "scienceBtn", "conceptMapBtn", "explainSimpleBtn", "deepDiveBtn"].includes(x));
+    assert.deepEqual(seq, ["summarizeBtn", "selectPdfBtn", "ankiBtn", "|", "bionicBtn", "settingsBtn"]);
+    assert.equal(tb.lastElementChild.id, "settingsBtn");
+});
+
+test("barra d'eines - reaplicar l'ordre no duplica separadors", () => {
+    const tb = setupGroupedToolbar();
+    const order = ["resum", "selectpdf", "simple", "deepdive", "science", "conceptmap", "obsidian", "markdown", "bionic", "anki"];
+    applyExtensionOrder(order);
+    applyExtensionOrder(order);
+    applyExtensionOrder(order);
+    assert.equal(tb.querySelectorAll(".toolbar-sep").length, 2);
+    for (const sep of tb.querySelectorAll(".toolbar-sep")) {
+        assert.equal(sep.getAttribute("aria-hidden"), "true", "Els separadors són decoratius");
+    }
+});
+
+test("barra d'eines - tots els botons coneguts pertanyen a un grup (cap queda fora)", () => {
+    const grouped = TOOLBAR_GROUPS.flat().sort();
+    assert.deepEqual(grouped, ALL_TOOLBAR_BTNS.slice().sort());
 });

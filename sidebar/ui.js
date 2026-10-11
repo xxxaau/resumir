@@ -73,6 +73,13 @@ function applyExtensionVisibility(config) {
 
 }
 
+// Grups de la barra d'eines, en ordre fix (ids dels botons).
+const TOOLBAR_GROUPS = [
+    ["summarizeBtn", "selectPdfBtn", "explainSimpleBtn", "deepDiveBtn", "scienceBtn", "conceptMapBtn", "ankiBtn"], // Generar
+    ["copyBtn", "obsidianBtn"],                                                                                  // Exportar
+    ["bionicBtn"],                                                                                               // Vista
+];
+
 /**
  * Applies the user-defined order to the extension buttons
  */
@@ -130,11 +137,29 @@ function applyExtensionOrder(order) {
         }
     });
 
-    // Insert ordered extension buttons before settingsBtn
+    // Grups fixos: Generar | Exportar | Vista. L'ordre de l'usuari es respecta
+    // DINS de cada grup (sort estable); abans una sola fila barrejava generadors,
+    // exportadors i el commutador de vista segons l'ordre desat.
+    const groupOf = (btn) => {
+        const g = TOOLBAR_GROUPS.findIndex(ids => ids.includes(btn.id));
+        return g === -1 ? TOOLBAR_GROUPS.length : g;
+    };
+    orderedButtons.sort((a, b) => groupOf(a) - groupOf(b));
+
+    // Separadors visuals entre grups no buits (es recreen a cada ordenació)
+    toolbar.querySelectorAll(".toolbar-sep").forEach(el => el.remove());
+    let previousGroup = null;
     orderedButtons.forEach(btn => {
+        const g = groupOf(btn);
+        if (previousGroup !== null && g !== previousGroup && btn.parentNode === toolbar) {
+            const sep = document.createElement("span");
+            sep.className = "toolbar-sep";
+            sep.setAttribute("aria-hidden", "true");
+            toolbar.insertBefore(sep, settingsBtnEl || null);
+        }
+        previousGroup = g;
         if (btn.parentNode === toolbar) {
-            const insertBefore = settingsBtnEl || null;
-            toolbar.insertBefore(btn, insertBefore);
+            toolbar.insertBefore(btn, settingsBtnEl || null);
         }
     });
 
@@ -620,5 +645,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus };
+    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

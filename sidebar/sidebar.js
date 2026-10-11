@@ -71,6 +71,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setGeneratingState(false, true);
     };
 
+    // La barra d'eines és fixa i pot baixar de línia: el títol de la pàgina,
+    // també fix, s'ancora just a sota amb la seva alçada real.
+    const toolbarEl = document.querySelector(".toolbar");
+    if (toolbarEl && typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(() => {
+            document.documentElement.style.setProperty("--toolbar-height", toolbarEl.offsetHeight + "px");
+        }).observe(toolbarEl);
+    }
+
     // --- Context object for summary.js ---
     const ctx = {
         contentDiv,

@@ -38,3 +38,12 @@ for (const [file, selector, props] of CONTROLS) {
         });
     }
 }
+
+test("sidebar.css: la barra d'eines és fixa i baixa de línia (no surt de pantalla a amplades estretes)", () => {
+    const css = readFileSync(resolve(ROOT, "sidebar/sidebar.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const body = ruleBody(css, ".toolbar");
+    assert.ok(body, "No s'ha trobat .toolbar");
+    assert.match(body, /flex-wrap:\s*wrap/);
+    assert.match(body, /position:\s*sticky/);
+    assert.match(body, /top:\s*0/);
+});

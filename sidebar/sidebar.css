@@ -5,7 +5,7 @@
   --text-color: #100f0f; /* Flexoki Black */
   --text-muted: #6f6e69; /* Flexoki Base-70 */
   --border-color: #e0e0e0;
-  --toolbar-bg: transparent;
+  --toolbar-bg: #f9f9fb; /* = --bg-color: la barra és fixa i ha de tapar el que passa per sota */
   --button-hover: #e0e0e0;
   --button-text: #100f0f;
   --primary-color: #205ea6; /* Flexoki Blue */
@@ -108,15 +108,25 @@ body {
 /* Toolbar Styles */
 .toolbar {
   display: flex;
+  flex-wrap: wrap; /* a amplades estretes baixa de línia en lloc de sortir de pantalla */
   align-items: center;
-  gap: 12px;
+  gap: 4px 6px;
   margin-bottom: 10px;
   padding: 4px 0;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--toolbar-bg) !important;
   border-radius: 4px;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 20;
+}
+
+/* Separador entre els grups de la barra (Generar | Exportar | Vista) */
+.toolbar-sep {
+  align-self: stretch;
+  width: 1px;
+  margin: 6px 3px;
+  background-color: var(--border-color);
 }
 
 /* Button Styles */
@@ -637,7 +647,7 @@ body {
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-color);
   position: sticky;
-  top: 0;
+  top: var(--toolbar-height, 0px); /* just sota la barra, que també és fixa */
   z-index: 10;
 }
 
