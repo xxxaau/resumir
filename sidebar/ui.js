@@ -665,6 +665,30 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
 }
 
 /**
+ * Línia de procedència sota el resum: de quant text es basa, amb quin model i
+ * quants tokens, i un avís explícit si el text s'ha tallat.
+ * @param {{words?: number, model?: string, inputTokens?: number, outputTokens?: number, truncated?: boolean}} info
+ */
+function renderProvenance(info) {
+    const el = document.getElementById("provenance");
+    if (!el) return;
+    const parts = [];
+    if (info.words > 0) parts.push(`Basat en ${formatTokenTooltipCount(info.words)} paraules`);
+    if (info.model) parts.push(typeof describeModel === "function" ? describeModel(info.model).name : info.model);
+    const tokens = Math.round((info.inputTokens || 0) + (info.outputTokens || 0));
+    if (tokens > 0) parts.push(`${formatTokenTooltipCount(tokens)} tokens`);
+    if (info.truncated) parts.push("text tallat: només s'ha resumit el principi");
+    el.textContent = parts.join(" · ");
+    el.classList.toggle("is-warning", !!info.truncated);
+    el.classList.toggle("hidden", parts.length === 0);
+}
+
+function hideProvenance() {
+    const el = document.getElementById("provenance");
+    if (el) el.classList.add("hidden");
+}
+
+/**
  * Renders the API key missing warning screen with configuration buttons.
  */
 function renderApiKeyWarning(contentDiv) {
@@ -801,5 +825,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { renderProvenance, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

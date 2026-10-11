@@ -1457,3 +1457,14 @@ body {
   #generation-timer { display: none; }
   #footer-status { padding-left: 6px; padding-right: 6px; gap: 4px; }
 }
+
+/* Línia de procedència sota el resum */
+.provenance {
+    margin: 8px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+.provenance.is-warning {
+    color: var(--error-text);
+}

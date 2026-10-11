@@ -142,6 +142,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
     const generationStartMs = startGenerationTimer();
     updateTokenStats(0, 0);  // Reset tokens display for new generation
+    if (typeof hideProvenance === "function") hideProvenance();
 
     try {
         // 1. Get Configuration
@@ -347,10 +348,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // Nota: s'usa CURATED_MODELS.find() directament (no getCuratedModelInfo)
         // per evitar dep. creuada amb api.js en tests.
         // El ratio chars/token canvia de 3.5 (original) a 4 per aproximació més precisa per Gemini.
+        let wasTruncated = false;
         function truncateForModel(text, modelId) {
             const modelEntry = CURATED_MODELS.find(m => m.id === modelId);
             const safeLimit = Math.floor(((modelEntry && modelEntry.contextWindow) || 200_000) * 0.8);
             if (estimateTokens(text) > safeLimit) {
+                wasTruncated = true;
                 const charLimit = safeLimit * 4; // ~4 chars/token (abans era 3.5 — intencionadament canviat)
                 // El tall pot caure abans del tancament </UNTRUSTED_CONTENT> del
                 // wrapper (unes línies més amunt) — el reafegim explícitament
@@ -564,6 +567,15 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             inputEstimated: false,
             outputEstimated: false
         });
+        if (typeof renderProvenance === "function") {
+            renderProvenance({
+                words: String(pageData.text || "").trim().split(/\s+/).filter(Boolean).length,
+                model: modelName,
+                inputTokens,
+                outputTokens,
+                truncated: wasTruncated || pageData.truncated === true,
+            });
+        }
 
     } catch (err) {
         // Només és una aturada de l'usuari si el SEU signal s'ha avortat: un

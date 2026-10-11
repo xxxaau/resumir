@@ -785,3 +785,40 @@ test("estat en repòs - sense pàgina web (chrome://…) s'amaga", async () => {
         assert.equal(h.document.getElementById("idle-state").hidden, true);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Línia de procedència (Fase E): sota el resum, de què es basa i amb què s'ha fet
+// ---------------------------------------------------------------------------
+
+test("procedència - mostra paraules, model i tokens sota el resum", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "paraula ".repeat(1200),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const el = h.document.getElementById("provenance");
+        assert.ok(el && !el.classList.contains("hidden"), "la línia és visible");
+        assert.match(el.textContent, /Basat en 1\.200 paraules/);
+        assert.match(el.textContent, /tokens/);
+        assert.doesNotMatch(el.textContent, /tallat|truncat/i);
+    } finally { h.close(); }
+});
+
+test("procedència - avisa quan el text s'ha tallat (PDF llarg)", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "paraula ".repeat(300),
+        pageExtra: { truncated: true },
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const el = h.document.getElementById("provenance");
+        assert.match(el.textContent, /text tallat/i);
+        assert.ok(el.classList.contains("is-warning"));
+    } finally { h.close(); }
+});

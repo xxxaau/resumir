@@ -276,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     title: pdfResult.title || file.name,
                     text: pdfResult.text,
                     url: tabUrl,
+                    truncated: pdfResult.metadata?.truncated === true,
                 };
                 // Injecta el contingut al pipeline normal de resum.
                 // summary.js comprovara si el URL comenca per "pdf-local:" i usara

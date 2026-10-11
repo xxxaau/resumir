@@ -59,6 +59,7 @@ export function makeStorageArea(area, onChanged, initial) {
  *   tabs           → resultat de tabs.query
  *   pageText       → si es dona, getPageContent() retorna aquesta pàgina (evita
  *                    la injecció de scripts real)
+ *   pageExtra      → camps addicionals de la pàgina (p. ex. { truncated: true })
  *   fetchHandler   → (url, opts) => resposta simulada (per a comprovacions de clau)
  *   modelReply     → si es dona, fetch() respon amb un stream SSE de Gemini amb
  *                    aquest text (un sol chunk), i s'hi registra a calls.fetches
@@ -66,7 +67,7 @@ export function makeStorageArea(area, onChanged, initial) {
 export async function loadSidebar({
     sync = {}, local = {},
     tabs = [{ id: 1, url: "https://example.com/article", title: "Article", active: true }],
-    pageText = null, modelReply = null, fetchHandler = null,
+    pageText = null, pageExtra = {}, modelReply = null, fetchHandler = null,
 } = {}) {
     const html = readFileSync(resolve(SIDEBAR_DIR, "sidebar.html"), "utf8");
     const dom = new JSDOM(html, { runScripts: "outside-only", pretendToBeVisual: true, url: "chrome-extension://test/sidebar/sidebar.html" });
@@ -134,7 +135,7 @@ export async function loadSidebar({
     }
 
     if (pageText !== null) {
-        const page = { title: tabs[0].title, url: tabs[0].url, text: pageText };
+        const page = { title: tabs[0].title, url: tabs[0].url, text: pageText, ...pageExtra };
         // Les funcions globals dels scripts són propietats de window: es poden substituir
         window.getPageContent = async () => ({ ...page });
     }

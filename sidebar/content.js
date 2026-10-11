@@ -253,6 +253,7 @@ async function getPageContent() {
                 title: pdfResult.title || tabTitle || "PDF",
                 text: pdfResult.text,
                 url: tabUrl,
+                truncated: pdfResult.metadata?.truncated === true,
             };
         } catch (e) {
             console.error("[PDF] Error final:", e?.code, e?.message, e);

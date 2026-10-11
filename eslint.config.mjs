@@ -91,6 +91,8 @@ const extensionGlobals = {
     announceStatus: "readonly",
     openSettings: "readonly",
     setLoadingStage: "readonly",
+    renderProvenance: "readonly",
+    hideProvenance: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",
     TYPE_ICON_PATHS: "readonly",
