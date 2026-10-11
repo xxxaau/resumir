@@ -102,6 +102,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (input) input.addEventListener("input", () => updatePathPreview(inputId, previewId));
     });
 
+    // Text editat i no desat: avís visible i confirmació en tancar la pestanya
+    document.querySelector(".main-content").addEventListener("input", (e) => {
+        const t = e.target;
+        if (t.matches && t.matches('textarea, input[type="text"], input[type="password"], input[type="number"], input[type="range"]')) setDirty(true);
+    });
+    window.addEventListener("beforeunload", (e) => {
+        if (isDirty()) { e.preventDefault(); e.returnValue = ""; }
+    });
+
     const modelInput = getEl("modelName");
     if (modelInput) modelInput.addEventListener("input", updateModelSummary);
 

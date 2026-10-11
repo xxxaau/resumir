@@ -494,3 +494,73 @@ test("navegació - «Resum» és una entrada fixa i «Sobre» l'última", async 
         assert.ok(h.document.getElementById("tab-resum").classList.contains("active"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Desat (2.4): un prompt massa gran feia fallar TOT el desat amb «Error guardant
+// configuració» sense dir quin camp ni quant ocupava; i tancar la pàgina amb
+// text editat sense desar el perdia sense avís.
+// ---------------------------------------------------------------------------
+test("desar - si un camp supera la quota diu quin és i quant ocupa", async () => {
+    const h = await loadSettings({});
+    try {
+        h.storage.sync.set = async () => { throw new Error("QUOTA_BYTES_PER_ITEM quota exceeded"); };
+        h.document.getElementById("systemPrompt").value = "x".repeat(9000);
+        h.document.getElementById("saveCustom").click();
+        await h.flush();
+        const msg = h.document.getElementById("status").textContent;
+        assert.match(msg, /Instruccions de l'assistent/, "Nomena el camp");
+        assert.match(msg, /8\s?KB/, "Diu el màxim per camp");
+        assert.match(msg, /[89][.,]\d KB/, "Diu la mida actual");
+    } finally { h.close(); }
+});
+
+test("canvis sense desar - editar un text mostra l'avís i desar-lo l'amaga", async () => {
+    const h = await loadSettings({});
+    try {
+        const note = h.document.getElementById("dirtyNote");
+        assert.ok(note, "Ha d'existir #dirtyNote");
+        assert.ok(note.hidden, "Amagat al principi");
+        const ta = h.document.getElementById("systemPrompt");
+        ta.value = ta.value + " canvi";
+        ta.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        assert.equal(note.hidden, false);
+        const ev = new h.window.Event("beforeunload", { cancelable: true });
+        h.window.dispatchEvent(ev);
+        assert.equal(ev.defaultPrevented, true, "Tancar amb canvis pendents demana confirmació");
+        h.document.getElementById("saveCustom").click();
+        await h.flush();
+        assert.ok(note.hidden, "Desat: ja no hi ha canvis pendents");
+        const ev2 = new h.window.Event("beforeunload", { cancelable: true });
+        h.window.dispatchEvent(ev2);
+        assert.equal(ev2.defaultPrevented, false);
+    } finally { h.close(); }
+});
+
+// ---------------------------------------------------------------------------
+// «Restaurar» (2.4): sobreescrivia el prompt personalitzat sense avís ni volta
+// enrere. Ara marca canvis pendents i ofereix «Desfer».
+// ---------------------------------------------------------------------------
+test("restaurar - ofereix «Desfer» que recupera el text personalitzat", async () => {
+    const h = await loadSettings({});
+    try {
+        const ta = h.document.getElementById("systemPrompt");
+        ta.value = "el meu prompt personalitzat";
+        h.document.getElementById("resetSystemPrompt").click();
+        assert.notEqual(ta.value, "el meu prompt personalitzat", "Restaura el valor per defecte");
+        assert.equal(h.document.getElementById("dirtyNote").hidden, false, "Queda pendent de desar");
+        const undo = h.document.querySelector("#status button");
+        assert.ok(undo, "El toast porta un botó Desfer");
+        assert.match(undo.textContent, /Desfer/);
+        undo.click();
+        assert.equal(ta.value, "el meu prompt personalitzat");
+    } finally { h.close(); }
+});
+
+test("restaurar - si ja era el valor per defecte no fa soroll", async () => {
+    const h = await loadSettings({});
+    try {
+        h.document.getElementById("resetSystemPrompt").click();
+        assert.equal(h.document.querySelector("#status button"), null);
+        assert.equal(h.document.getElementById("dirtyNote").hidden, true);
+    } finally { h.close(); }
+});

@@ -142,12 +142,8 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 - **Revelació progressiva:** prompts plegats sota «Personalitzar instruccions
   (avançat)» amb insígnia «Personalitzat», llegenda de variables (`{{COUNT}}`,
   `{{LANG}}`) i bloqueig de prompt buit.
-- **Desat automàtic dels camps de text i sliders** (els interruptors, l'ordre i el
-  tema ja es desen sols), amb indicador de canvis pendents i guarda
-  `beforeunload` per a les àrees de text llargues; «Restaurar» amb confirmació o
-  «Desfer».
-- Un prompt massa gran (quota per element de `storage.sync`) fa fallar tot el
-  desat amb un error genèric: mostrar la mida i el camp.
+- **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
+  sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
 
 ### 2.6 Historial
 

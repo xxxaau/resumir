@@ -83,13 +83,45 @@ function saveOptions(e) {
       ext.storage.sync.set(settings),
       ext.storage.local.set({ apiKey: apiKeyValue })
   ]).then(() => {
+     setDirty(false);
      showStatus("Configuració desada correctament!");
      updateSidebar(); 
   }).catch(err => {
      console.error("Error saving options:", err);
-     showStatus("Error guardant configuració.");
+     showStatus(describeSaveError(err, settings));
   });
 }
+
+// Quota per element de storage.sync (Chrome i Firefox): 8192 bytes per clau.
+const SYNC_ITEM_QUOTA_BYTES = 8192;
+
+// Id del camp (clau de settings) → id de l'element del formulari, per llegir-ne
+// l'etiqueta visible. Les claus que no hi són coincideixen amb l'id.
+function describeSaveError(err, settings) {
+  const quota = /quota/i.test(String((err && err.message) || err));
+  if (!quota) return "Error guardant configuració.";
+  const enc = new TextEncoder();
+  let worst = null;
+  for (const [key, value] of Object.entries(settings)) {
+    if (typeof value !== "string") continue;
+    const bytes = enc.encode(key + JSON.stringify(value)).length;
+    if (!worst || bytes > worst.bytes) worst = { key, bytes };
+  }
+  if (!worst) return "No s'ha pogut desar: configuració massa gran.";
+  const label = document.querySelector(`label[for="${worst.key}"]`);
+  const name = label ? label.textContent.replace(/\s+/g, " ").trim() : worst.key;
+  const kb = (worst.bytes / 1024).toFixed(1).replace(".", ",");
+  return `No s'ha pogut desar: «${name}» ocupa ${kb} KB i el màxim per camp és ${SYNC_ITEM_QUOTA_BYTES / 1024} KB. Escurça'l i torna a desar.`;
+}
+
+// --- Canvis sense desar ---
+let dirty = false;
+function setDirty(value) {
+  dirty = value;
+  const note = document.querySelector("#dirtyNote");
+  if (note) note.hidden = !value;
+}
+function isDirty() { return dirty; }
 
 /**
  * Desat immediat d'UN canvi discret (interruptor, ordre, tema). Escriu només
@@ -263,25 +295,41 @@ function linkHelpTexts() {
   });
 }
 
+/**
+ * Restaura un camp de text al valor per defecte sense perdre el que hi havia:
+ * el toast ofereix «Desfer». El canvi queda pendent de desar (no es persisteix).
+ */
+function restoreField(id, defaultValue, label) {
+    const el = document.querySelector("#" + id);
+    const previous = el.value;
+    if (previous === defaultValue) return false;
+    el.value = defaultValue;
+    setDirty(true);
+    showStatus(`${label} restaurat al valor per defecte.`, {
+        undo: () => { el.value = previous; setDirty(true); showStatus("Restauració desfeta."); },
+    });
+    return true;
+}
+
 function resetTemplate() {
-    document.querySelector("#markdownTemplate").value = DEFAULT_MARKDOWN_TEMPLATE;
+    restoreField("markdownTemplate", DEFAULT_MARKDOWN_TEMPLATE, "La plantilla");
 }
 
 function resetObsidianTemplate() {
-    document.querySelector("#obsidianTemplate").value = DEFAULT_OBSIDIAN_TEMPLATE;
+    restoreField("obsidianTemplate", DEFAULT_OBSIDIAN_TEMPLATE, "La plantilla");
 }
 
 function resetSystemPrompt() {
-    document.querySelector("#systemPrompt").value = DEFAULT_SYSTEM_PROMPT;
+    restoreField("systemPrompt", DEFAULT_SYSTEM_PROMPT, "El prompt");
 }
 
 function resetDeepDivePrompt() {
-    document.querySelector("#deepDivePrompt").value = DEFAULT_DEEP_DIVE_PROMPT;
+    restoreField("deepDivePrompt", DEFAULT_DEEP_DIVE_PROMPT, "El prompt");
     dismissPromptUpdate("deepdive");
 }
 
 function resetSciencePrompt() {
-    document.querySelector("#sciencePrompt").value = DEFAULT_SCIENCE_PROMPT;
+    restoreField("sciencePrompt", DEFAULT_SCIENCE_PROMPT, "El prompt");
     dismissPromptUpdate("science");
 }
 
@@ -296,17 +344,17 @@ function dismissPromptUpdate(type) {
 }
 
 function resetConceptMapPrompt() {
-    document.querySelector("#conceptMapPrompt").value = DEFAULT_CONCEPTMAP_PROMPT;
+    restoreField("conceptMapPrompt", DEFAULT_CONCEPTMAP_PROMPT, "El prompt");
     dismissPromptUpdate("conceptmap");
 }
 
 function resetSimplePrompt() {
-    document.querySelector("#simplePrompt").value = DEFAULT_SIMPLE_PROMPT;
+    restoreField("simplePrompt", DEFAULT_SIMPLE_PROMPT, "El prompt");
     dismissPromptUpdate("simple");
 }
 
 function resetAnkiPrompt() {
-    document.querySelector("#ankiPrompt").value = DEFAULT_ANKI_PROMPT;
+    restoreField("ankiPrompt", DEFAULT_ANKI_PROMPT, "El prompt");
 }
 
 function resetBionic() {
@@ -325,12 +373,20 @@ function resetBionic() {
 // reinicia a cada missatge: abans el primer timeout amagava el segon missatge
 // abans d'hora.
 let statusTimer = null;
-function showStatus(text) {
+function showStatus(text, { undo } = {}) {
   const status = document.querySelector("#status");
   status.textContent = text;
+  if (undo) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "toast-action";
+    btn.textContent = "Desfer";
+    btn.addEventListener("click", undo);
+    status.appendChild(btn);
+  }
   status.classList.add("show");
   clearTimeout(statusTimer);
   statusTimer = setTimeout(() => {
     status.classList.remove("show");
-  }, 4000);
+  }, undo ? 10000 : 4000);
 }
