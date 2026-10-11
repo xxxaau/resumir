@@ -343,6 +343,7 @@ body {
 }
 
 #model-select {
+  min-height: 24px; /* objectiu tàctil mínim (WCAG 2.5.8) */
   /* appearance:none elimina la fletxa nativa, que a Chromium/Edge se superposa
      amb el text del model i el fa il·legible. La substituïm per un caret SVG
      propi amb espai reservat (padding-right) i truncat net amb el·lipsi. */
@@ -380,6 +381,9 @@ body {
 }
 
 .footer-btn {
+  /* Objectiu tàctil mínim de 24×24 px (WCAG 2.5.8) */
+  min-width: 24px;
+  min-height: 24px;
   background: none;
   border: none;
   cursor: pointer;

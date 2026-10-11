@@ -358,13 +358,20 @@ label {
 }
 
 .model-star {
+    /* Objectiu tàctil mínim de 24×24 px (WCAG 2.5.8) */
+    min-width: 24px;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 1em;
     color: var(--toggle-off);
     transition: color 0.15s, transform 0.15s;
     -webkit-user-select: none;
     user-select: none;
-    padding: 0 8px 0 0;
+    padding: 0;
+    margin-right: 4px;
     flex-shrink: 0;
 }
 
