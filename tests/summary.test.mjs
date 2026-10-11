@@ -100,3 +100,10 @@ test("buildFallbackList - inclou models de CURATED_MODELS amb fallback:true com 
     assert.ok(list.includes("gemini-2.5-flash"), "Ha d'incloure flash com a fallback");
     assert.ok(list.includes("gemini-3.5-flash"), "Ha d'incloure 3.5 flash com a fallback");
 });
+
+// Regressió (microcopy): el missatge [001] ara diu «clau d'API» (no «API Key»)
+// i classifyError l'ha de seguir reconeixent per oferir el botó de configuració.
+test("classifyError - [001] amb «clau d'API» ofereix configurar", () => {
+    const result = classifyError(new Error("[001] No s'ha configurat la clau d'API. Ves a la pàgina d'opcions."));
+    assert.equal(result.showConfig, true);
+});

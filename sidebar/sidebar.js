@@ -364,7 +364,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!promptUpdateBanner || !promptUpdateText || !promptUpdateLink) return;
         _currentUpdateKey = updateKey;
         _currentCallback = callback;
-        promptUpdateText.textContent = `Nova versió del prompt de ${type} disponible. `;
+        // «de» s'apostrofa davant de vocal: «d'aprofundiment», «d'explicació»
+        const preposition = /^[aeiouàèéíòóúh]/i.test(type) ? `d'${type}` : `de ${type}`;
+        promptUpdateText.textContent = `Nova versió del prompt ${preposition} disponible. `;
         promptUpdateLink.onclick = (e) => {
             e.preventDefault();
             // NO esborrem el flag ni amaguem l'avís aquí: Configuració només

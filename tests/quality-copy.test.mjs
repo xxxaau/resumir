@@ -3,7 +3,7 @@
  * Control de qualitat del text visible (català): frases que el pla de
  * microcopy (docs/PLA-UI-UX.md, Nivell 1) vol eliminar. És un RATCHET: cada
  * patró té un màxim igual al recompte actual; no pot créixer, i quan baixa cal
- * abaixar-lo aquí (així la llista només es pot escurçar). Objectiu: tot a 0.
+ * abaixar-lo aquí (així la llista només es pot escurçar). Tots a 0: qualsevol reaparició d'aquestes frases fa fallar la suite.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -39,13 +39,16 @@ function count(pattern) {
 
 const CEILINGS = [
     // [fragment, màxim actual, per què / alternativa]
-    ["API Key",   6, "anglicisme: «clau d'API»"],
-    ["Estimacio", 2, "falta l'accent: «Estimació»"],
-    ["Resumidor", 1, "el producte es diu «Resumir»"],
-    ["(F5)",      1, "F5 no val a macOS: «Recarrega la pestanya»"],
-    ["Proveu-ho", 3, "tracte de tu, no de vosaltres: «Prova-ho»"],
-    ["afegiu",    1, "tracte de tu: «afegeix»"],
-    ["canvieu",   1, "tracte de tu: «canvia»"],
+    ["API Key",       0, "anglicisme: «clau d'API»"],
+    ["Estimacio",     0, "falta l'accent: «Estimació»"],
+    ["Resumidor",     0, "el producte es diu «Resumir»"],
+    ["(F5)",          0, "F5 no val a macOS: «Recarrega la pestanya»"],
+    ["Proveu-ho",     0, "tracte de tu, no de vosaltres: «Prova-ho»"],
+    ["afegiu",        0, "tracte de tu: «afegeix»"],
+    ["canvieu",       0, "tracte de tu: «canvia»"],
+    ["Configurar Ara",0, "majúscula injustificada: «Configurar ara»"],
+    ["Obre configuració", 0, "infinitiu: «Obrir la configuració»"],
+    ["prompt de aprofundiment", 0, "apostrofació: «d'aprofundiment»"],
 ];
 
 for (const [fragment, ceiling, why] of CEILINGS) {

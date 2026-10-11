@@ -147,7 +147,7 @@ async function refreshModels(e) {
     const statusDiv = document.getElementById("refreshModelsStatus");
 
     if (!apiKey) {
-        alert("Primer introdueix la API Key per actualitzar els models.");
+        alert("Primer introdueix la clau d'API per actualitzar els models.");
         return;
     }
 

@@ -197,7 +197,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         if (!apiKey) {
-            throw new Error("[001] No s'ha configurat la API Key. Ves a la pàgina d'opcions de l'extensió.");
+            throw new Error("[001] No s'ha configurat la clau d'API. Ves a la pàgina d'opcions de l'extensió.");
         }
 
         if (signal.aborted) {
@@ -604,7 +604,7 @@ function classifyError(err) {
     }
 
     // API key missing (no HTTP yet — surfaced from summary.js as an Error)
-    if (!status && msgLower.includes("api key")) {
+    if (!status && (msgLower.includes("api key") || msgLower.includes("clau d'api"))) {
         return {
             message: msg,
             showConfig: true
@@ -614,7 +614,7 @@ function classifyError(err) {
     // Quota exceeded (429) — checked before generic 4xx so it gets its own message
     if (status === 429 || msgLower.includes("quota") || msgLower.includes("exhausted")) {
         return {
-            message: "Tots els models alternatius han excedit la quota diària. Proveu-ho demà o afegiu més models favorits a la configuració.",
+            message: "Tots els models alternatius han excedit la quota diària. Prova-ho demà o afegeix més models favorits a la configuració.",
             showConfig: false
         };
     }
@@ -622,7 +622,7 @@ function classifyError(err) {
     // Service unavailable (5xx)
     if ((status && status >= 500) || msgLower.includes("service unavailable") || msgLower.includes("overloaded")) {
         return {
-            message: "El servei de Gemini no està disponible ara mateix. Proveu-ho d'aquí a uns minuts.",
+            message: "El servei de Gemini no està disponible ara mateix. Prova-ho d'aquí a uns minuts.",
             showConfig: false
         };
     }
@@ -630,7 +630,7 @@ function classifyError(err) {
     // Model not found (404) — not a config issue, just the model is unavailable
     if (status === 404 || msgLower.includes("model not found") || msgLower.includes("model unavailable") || msgLower.includes("model is not available")) {
         return {
-            message: "Cap dels models disponibles ha respost. Pot ser que els models triats no estiguin disponibles ara mateix. Proveu-ho més tard o canvieu els models favorits a la configuració.",
+            message: "Cap dels models disponibles ha respost. Pot ser que els models triats no estiguin disponibles ara mateix. Prova-ho més tard o canvia els models favorits a la configuració.",
             showConfig: true
         };
     }

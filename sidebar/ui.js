@@ -539,12 +539,12 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
     }
 
     if (tokensIn) {
-        const prefix = inputEstimated ? "Estimacio: " : "";
+        const prefix = inputEstimated ? "Estimació: " : "";
         tokensIn.title = `${prefix}${formatTokenTooltipCount(inputTokens)} tokens enviats`;
     }
 
     if (tokensOut) {
-        const prefix = outputEstimated ? "Estimacio: " : "";
+        const prefix = outputEstimated ? "Estimació: " : "";
         tokensOut.title = `${prefix}${formatTokenTooltipCount(outputTokens)} tokens rebuts`;
     }
 }
@@ -555,7 +555,7 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
 function renderApiKeyWarning(contentDiv) {
     const modelSelect = document.getElementById("model-select");
     const opt = document.createElement("option");
-    opt.textContent = "Falta API Key";
+    opt.textContent = "Falta la clau d'API";
     modelSelect.replaceChildren(opt);
     modelSelect.disabled = true;
     modelSelect.classList.add("error-state");
@@ -571,11 +571,11 @@ function renderApiKeyWarning(contentDiv) {
 
     const title = document.createElement("p");
     title.className = "api-key-title";
-    title.textContent = "Falta configurar l'API Key";
+    title.textContent = "Falta la clau d'API de Gemini";
 
     const desc = document.createElement("p");
     desc.className = "api-key-desc";
-    desc.textContent = "Necessària per connectar amb Google Gemini.";
+    desc.textContent = "Necessària per connectar-se a Google Gemini.";
 
     iconWrapper.appendChild(title);
     iconWrapper.appendChild(desc);
@@ -583,7 +583,7 @@ function renderApiKeyWarning(contentDiv) {
     const configBtn = document.createElement("button");
     configBtn.id = "configApiKeyBtn";
     configBtn.className = "btn-primary api-key-btn-primary";
-    configBtn.textContent = "Configurar Ara";
+    configBtn.textContent = "Configurar ara";
 
     const ctaFooter = document.createElement("div");
     ctaFooter.className = "api-key-cta-footer";
@@ -596,7 +596,7 @@ function renderApiKeyWarning(contentDiv) {
     ctaLink.id = "getApiKeyLink";
     ctaLink.href = "#";
     ctaLink.className = "api-key-cta-link";
-    ctaLink.textContent = "Obtenir API Key gratuïta →";
+    ctaLink.textContent = "Obtenir una clau d'API gratuïta →";
 
     ctaFooter.appendChild(ctaText);
     ctaFooter.appendChild(ctaLink);

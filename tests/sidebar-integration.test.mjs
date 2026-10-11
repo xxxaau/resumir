@@ -190,3 +190,21 @@ test("regió d'estat - anuncia «Resum complet» en acabar una generació", asyn
         assert.match(h.document.getElementById("sr-status").textContent, /Resum complet/);
     } finally { h.close(); }
 });
+
+test("avís de prompt nou - «de» s'apostrofa davant de vocal («d'aprofundiment»)", async () => {
+    const h = await loadSidebar({
+        sync: {
+            enableDeepdive: true,
+            deepDivePrompt: "El meu prompt",
+            promptVersions: { deepDivePrompt: 1, sciencePrompt: 2, conceptMapPrompt: 2, simplePrompt: 1 },
+        },
+        local: { apiKey: "AIza_test" },
+    });
+    try {
+        h.document.getElementById("deepDiveBtn").click();
+        await h.flush();
+        const text = h.document.getElementById("prompt-update-text").textContent;
+        assert.match(text, /prompt d'aprofundiment/);
+        assert.doesNotMatch(text, /de aprofundiment/);
+    } finally { h.close(); }
+});
