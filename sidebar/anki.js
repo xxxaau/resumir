@@ -301,7 +301,7 @@ async function exportAnkiToObsidian(ctx) {
     const pathTemplate = config.ankiPath || DEFAULT_ANKI_PATH;
     if (!config.ankiVault && !config.obsidianVault) {
         if (confirm("El vault d'Obsidian no està configurat. Vols obrir la configuració?")) {
-            ext.runtime.openOptionsPage();
+            openSettings({ tab: "anki", focus: "ankiVault" });
         }
         return;
     }

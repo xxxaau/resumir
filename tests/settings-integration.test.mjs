@@ -349,3 +349,52 @@ test("General - la privadesa diu que el text de les pàgines s'envia a Google Ge
         assert.match(text, /només\s+en aquest navegador/, "La clau es desa només en aquest navegador");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Enllaços profunds (2.4): `#tab=<pestanya>&focus=<camp>`. La pàgina s'obria
+// sempre a «General»; el sidebar no podia portar l'usuari al camp que calia.
+// ---------------------------------------------------------------------------
+const activeTab = (h) => h.document.querySelector(".tab-pane.active")?.id;
+
+test("enllaç profund - #tab=deepdive obre la pestanya d'aprofundiment", async () => {
+    const h = await loadSettings({ hash: "#tab=deepdive" });
+    try {
+        assert.equal(activeTab(h), "tab-deepdive");
+    } finally { h.close(); }
+});
+
+test("enllaç profund - #tab=general&focus=apiKey enfoca el camp de la clau", async () => {
+    const h = await loadSettings({ hash: "#tab=general&focus=apiKey" });
+    try {
+        assert.equal(activeTab(h), "tab-general");
+        assert.equal(h.document.activeElement, h.document.getElementById("apiKey"));
+    } finally { h.close(); }
+});
+
+test("enllaç profund - una pestanya inexistent o amb caràcters estranys s'ignora (queda a General)", async () => {
+    for (const hash of ["#tab=no-existeix", "#tab=%3Cscript%3E", "#focus=../../x", ""]) {
+        const h = await loadSettings({ hash });
+        try {
+            assert.equal(activeTab(h), "tab-general", `hash ${hash}`);
+        } finally { h.close(); }
+    }
+});
+
+test("enllaç profund - canviar de pestanya actualitza l'adreça (recarregar hi torna)", async () => {
+    const h = await loadSettings({});
+    try {
+        h.document.querySelector('.nav-item[data-tab="about"]').click();
+        assert.match(h.window.location.hash, /tab=about/);
+    } finally { h.close(); }
+});
+
+test("enllaç profund - parseSettingsHash només accepta ids segurs", async () => {
+    const h = await loadSettings({});
+    try {
+        // L'objecte ve d'un altre realm (jsdom): es compara per camps, no per prototip
+        const p = (hash) => { const r = h.window.parseSettingsHash(hash); return { tab: r.tab, focus: r.focus }; };
+        assert.deepEqual(p("#tab=anki&focus=ankiVault"), { tab: "anki", focus: "ankiVault" });
+        assert.deepEqual(p("#tab=a b"), { tab: null, focus: null });
+        assert.deepEqual(p(""), { tab: null, focus: null });
+    } finally { h.close(); }
+});

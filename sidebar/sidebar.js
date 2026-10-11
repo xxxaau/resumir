@@ -396,6 +396,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const promptUpdateLink = document.getElementById("prompt-update-link");
     const promptUpdateDismiss = document.getElementById("prompt-update-dismiss");
 
+    // Flag d'avís de prompt → pestanya de configuració d'aquell prompt
+    const PROMPT_UPDATE_TABS = {
+        deepDivePromptUpdateAvailable: "deepdive",
+        sciencePromptUpdateAvailable: "science",
+        conceptMapPromptUpdateAvailable: "conceptmap",
+        simplePromptUpdateAvailable: "simple",
+    };
+
     let _currentUpdateKey = null;
     let _currentCallback = null;
 
@@ -411,7 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // NO esborrem el flag ni amaguem l'avís aquí: Configuració només
             // mostra el seu avís (mantenir o restaurar) si el flag és true, i
             // l'avís d'aquí és el que permet tornar i continuar (×).
-            ext.runtime.openOptionsPage();
+            // Obre directament la pestanya del prompt afectat.
+            openSettings({ tab: PROMPT_UPDATE_TABS[updateKey] });
         };
         promptUpdateBanner.classList.remove("hidden");
     }
@@ -593,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Revertir al model anterior i obrir configuració
             const saved = await ext.storage.sync.get({ modelName: DEFAULT_MODEL_ID });
             modelSelect.value = saved.modelName;
-            ext.runtime.openOptionsPage();
+            openSettings({ tab: "general", focus: "checkModels" });
             return;
         }
         await ext.storage.sync.set({ modelName: e.target.value });

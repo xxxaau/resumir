@@ -42,7 +42,34 @@ function initializeSidebarNavigation() {
         if (tab) {
             tab.classList.add('active');
         }
+        // La pestanya queda a l'adreça: recarregar o compartir l'enllaç hi torna
+        if (tabId && window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", `#tab=${encodeURIComponent(tabId)}`);
+        }
     });
+}
+
+// Enllaç profund: `#tab=<pestanya>&focus=<id del camp>`. La pàgina s'obria
+// sempre a «General»; ara el sidebar pot portar l'usuari directament al camp que
+// cal (p. ex. la clau d'API) i recarregar no perd la pestanya.
+function parseSettingsHash(hash) {
+    const params = new URLSearchParams((hash || "").replace(/^#/, ""));
+    const tab = params.get("tab");
+    const focus = params.get("focus");
+    return {
+        tab: tab && /^[\w-]+$/.test(tab) ? tab : null,
+        focus: focus && /^[\w-]+$/.test(focus) ? focus : null,
+    };
+}
+
+function applySettingsHash() {
+    const { tab, focus } = parseSettingsHash(window.location.hash);
+    if (tab && document.getElementById(`tab-${tab}`)) navigateToTab(tab);
+    if (focus) {
+        const el = document.getElementById(focus);
+        // Només s'enfoca si és visible (dins la pestanya activa)
+        if (el && el.closest(".tab-pane.active")) el.focus();
+    }
 }
 
 // Navigate to tab helper

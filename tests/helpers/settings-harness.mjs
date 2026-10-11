@@ -15,9 +15,9 @@ import { makeEvent, makeStorageArea } from "./sidebar-harness.mjs";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const OPTIONS_DIR = resolve(ROOT, "options");
 
-export async function loadSettings({ sync = {}, local = {}, confirmAnswer = true, fetchHandler = null } = {}) {
+export async function loadSettings({ sync = {}, local = {}, confirmAnswer = true, fetchHandler = null, hash = "" } = {}) {
     const html = readFileSync(resolve(OPTIONS_DIR, "settings.html"), "utf8");
-    const dom = new JSDOM(html, { runScripts: "outside-only", pretendToBeVisual: true, url: "chrome-extension://test/options/settings.html" });
+    const dom = new JSDOM(html, { runScripts: "outside-only", pretendToBeVisual: true, url: "chrome-extension://test/options/settings.html" + hash });
     const { window } = dom;
 
     const onChanged = makeEvent();

@@ -586,7 +586,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                btn.textContent = "Configurar";
                btn.className = "btn-primary";
                btn.style.marginTop = "10px";
-               btn.onclick = () => ext.runtime.openOptionsPage();
+               btn.onclick = () => openSettings({ tab: "general", focus: "apiKey" });
                errorDiv.appendChild(document.createElement("br"));
                errorDiv.appendChild(btn);
             }

@@ -88,6 +88,7 @@ const extensionGlobals = {
     isProseType: "readonly",
     // sidebar/ui.js
     announceStatus: "readonly",
+    openSettings: "readonly",
     setLoadingStage: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",
@@ -182,6 +183,8 @@ const settingsGlobals = {
     toggleApiKeyVisibility: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
+    applySettingsHash: "readonly",
+    parseSettingsHash: "readonly",
     navigateToTab: "readonly",
     updateSidebar: "readonly",
 };

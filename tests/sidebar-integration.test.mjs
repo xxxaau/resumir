@@ -41,7 +41,8 @@ test("avís de prompt nou - l'enllaç obre Configuració SENSE esborrar el flag 
         h.document.getElementById("prompt-update-link").click();
         await h.flush();
 
-        assert.equal(h.calls.openOptionsPage, 1, "Ha d'obrir Configuració");
+        assert.equal(h.calls.tabsCreate.length, 1, "Ha d'obrir Configuració");
+        assert.match(h.calls.tabsCreate[0].url, /settings\.html#tab=deepdive$/, "…directament a la pestanya del prompt afectat");
         const { deepDivePromptUpdateAvailable } = await h.storage.sync.get("deepDivePromptUpdateAvailable");
         assert.equal(deepDivePromptUpdateAvailable, true,
             "El flag ha de seguir actiu perquè Configuració mostri l'avís de mantenir/restaurar");
@@ -625,5 +626,31 @@ test("historial - data relativa fins a una setmana i absoluta (amb títol comple
         assert.equal(meta("Ahir").textContent, "ahir");
         assert.doesNotMatch(meta("Vella").textContent, /^fa \d+ dies$/, "Passada una setmana, data absoluta");
         assert.ok(meta("Vella").title.length > 0, "El títol de l'element té la data completa");
+    } finally { h.close(); }
+});
+
+// Enllaços profunds des de la barra lateral cap a la configuració
+test("«Configurar» d'un error de clau obre la configuració ja sobre el camp de la clau", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: async () => ({ ok: false, status: 403, statusText: "Forbidden", json: async () => ({ error: { message: "bad" } }), headers: { get: () => null } }),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const btn = h.document.querySelector("#error button");
+        assert.ok(btn, "L'error de clau ha d'oferir el botó «Configurar»");
+        btn.click();
+        assert.match(h.calls.tabsCreate.at(-1).url, /settings\.html#tab=general&focus=apiKey$/);
+    } finally { h.close(); }
+});
+
+test("el botó de configuració de la barra continua obrint-la tal qual (sense destí)", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        h.document.getElementById("settingsBtn").click();
+        assert.equal(h.calls.openOptionsPage, 1);
+        assert.equal(h.calls.tabsCreate.length, 0);
     } finally { h.close(); }
 });

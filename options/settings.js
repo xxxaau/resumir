@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     restoreOptions(syncData, localData);
     if (typeof updateSidebar === 'function') updateSidebar();
     if (typeof initializeSidebarNavigation === 'function') initializeSidebarNavigation();
+    applySettingsHash();
+    window.addEventListener("hashchange", applySettingsHash);
     if (typeof initializeSettingsPageUI === 'function') initializeSettingsPageUI();
 
     // Bind event listeners

@@ -170,6 +170,23 @@ function applyExtensionOrder(order) {
 }
 
 /**
+ * Obre la configuració, opcionalment directament a una pestanya i enfocant un
+ * camp (enllaç profund `#tab=…&focus=…`). Sense destí, comportament de sempre
+ * (openOptionsPage reusa la pestanya oberta). Amb destí, un clic a «Configurar»
+ * d'un error de clau cau ja sobre el camp de la clau, i no a «General».
+ */
+function openSettings(target) {
+    if (!target || (!target.tab && !target.focus)) {
+        ext.runtime.openOptionsPage();
+        return;
+    }
+    const params = [];
+    if (target.tab) params.push(`tab=${encodeURIComponent(target.tab)}`);
+    if (target.focus) params.push(`focus=${encodeURIComponent(target.focus)}`);
+    ext.tabs.create({ url: ext.runtime.getURL(`options/settings.html#${params.join("&")}`) });
+}
+
+/**
  * Anuncia un missatge d'estat als lectors de pantalla via la regió polida
  * #sr-status (present i buida des de la càrrega: una regió creada i omplerta
  * en el mateix render sovint no s'anuncia). El contingut en streaming NO és una
@@ -784,5 +801,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }
