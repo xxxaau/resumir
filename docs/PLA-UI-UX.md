@@ -48,10 +48,8 @@ mínim per defecte.
 
 Un commit i un test de regressió per bug (`CLAUDE.md`: el test ha de fallar sense
 el fix). Els marcats ✔ s'han verificat directament al codi; la resta porten
-referència de línia dels auditors. El 0.12 i el 0.13 són de severitat menor (text
-i script de build). **Els bugs 0.1–0.9, 0.14 i 0.15 ja estan corregits** (vegeu
-`git log` i `LEARNINGS.md`); aquí només queden els de configuració i el que en
-penja de la Fase A:
+referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** (vegeu
+`git log` i `LEARNINGS.md`); aquí només queda el que en penja:
 
 - **0.2 (navegació de l'historial):** la integritat de dades ja està resolta
   (Copiar/Obsidian exporten l'entrada visible); queda redissenyar la navegació
@@ -60,13 +58,6 @@ penja de la Fase A:
 - **0.6:** desactivar els generadors mentre falta la clau, amb tooltip; es fa amb
   l'onboarding de 2.2.
 - **0.14:** etiqueta/tooltip «Regenerar» quan es veu la versió de memòria cau.
-
-| # | Problema | On | Impacte | Solució |
-| --- | --- | --- | --- | --- |
-| 0.10 ✔ | Els interruptors de plugins només fan `updateSidebar()`; res es desa fins a «Desar», sense guarda de sortida | `options/settings.js:79-86` | L'usuari activa plugins, tanca la pestanya i no passa res | Desat automàtic que escrigui només la clau de l'interruptor tocat (no la funció de desar global, que commiteja prompts i clau a mig editar); sliders i selects amb debounce per les quotes de `storage.sync`; avís «Desat» |
-| 0.11 ✔ | Desar qualsevol pestanya posa a `false` els 4 avisos de prompt nou | `options/settings-options.js:66-70` | Es perden avisos que l'usuari mai ha vist | Netejar només el flag de la pestanya que es desa |
-| 0.12 ✔ | «Buidar memòria cau» esborra les claus `summary_cache:*`, que són l'historial | `options/settings-cache.js:13` | L'historial desapareix sense que el diàleg ho digui | Text: «S'esborrarà tot l'historial (N resums). No es pot desfer.» |
-| 0.13 | L'historial de canvis talla les línies de continuació i no escapa `<` `>` | `scripts/update-changelog-html.mjs:28-34,67` | Frases a mitges; `<all_urls>` desapareix | Acumular línies sagnades; escapar HTML abans de les substitucions inline (si no, s'escapen els tags generats); exportar `parseChangelog` per poder-hi posar test |
 
 **Confirmat també:** el «✓ Afegit a Obsidian» (`sidebar/anki.js:299-305`) surt només
 en obrir l'URL `obsidian://`; reformular com «Enviat a Obsidian», perquè
@@ -309,8 +300,7 @@ excepte on s'indica.
 
 1. **Fase A — Integritat del resultat: feta** (queden només els tres ítems
    enllaçats a la secció del Nivell 0, que van amb les fases B i D).
-2. **Fase B — Configuració que no perd canvis** (0.10–0.13 + desat automàtic de
-   2.4). El desat automàtic s'ha de fer abans de redissenyar la pàgina.
+2. **Fase B — Configuració que no perd canvis: feta** (desat automàtic d'interruptors, ordre i tema; avisos de prompt per pestanya; historial de canvis; avís en buidar la memòria cau). Del 2.4 queda el desat automàtic dels camps de text i sliders, amb indicador de canvis pendents.
 3. **Fase C — Tokens compartits i accessibilitat** (Nivell 1).
    `shared/tokens.css` primer, amb mapa semàntic. Revisió amb lector de pantalla
    durant el streaming, no només al final.
