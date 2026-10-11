@@ -541,7 +541,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             if (errorInfo.showConfig) {
                const btn = document.createElement("button");
                btn.textContent = "Configurar";
-               btn.className = "primary";
+               btn.className = "btn-primary";
                btn.style.marginTop = "10px";
                btn.onclick = () => ext.runtime.openOptionsPage();
                errorDiv.appendChild(document.createElement("br"));

@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   /* Classic Light Theme (clean base, Flexoki UI elements) */
   --bg-color: #f9f9fb;
   --text-color: #100f0f; /* Flexoki Black */
@@ -23,6 +24,7 @@
 }
 
 [data-actual-theme="dark"] {
+  color-scheme: dark;
   /* Flexoki Dark Theme */
   --bg-color: #100f0f; /* Flexoki Base-00/Black */
   --text-color: #cecdc3; /* Flexoki Base-100/Paper */
@@ -46,6 +48,7 @@
 }
 
 [data-actual-theme="solarized"] {
+  color-scheme: light;
   /* Solarized/Sepia adapted with Flexoki Warmth.
      text/muted enfosquits per complir WCAG AA (abans 4,45:1 i 3,2:1 sobre #f2f0e5). */
   --bg-color: #f2f0e5;
@@ -70,6 +73,7 @@
 }
 
 [data-actual-theme="soft-gray"] {
+  color-scheme: light;
   /* Soft Gray (clean base, Flexoki Greys) */
   --bg-color: #f5f5f5; /* Clean light gray */
   --text-color: #100f0f;
@@ -268,37 +272,12 @@ body {
   color: var(--error-text) !important;
 }
 
-#summarizeBtn.primary {
-  /* Icon color is inherited from button color usually, but primary has white text */
-  color: var(--primary-color);
-}
-#summarizeBtn.primary:hover {
-  background-color: var(--button-hover); /* Keep consistent with toolbar */
-}
-/* Wait, the implementation of summarizeBtn in HTML is inside .toolbar now? 
-   No, looking at HTML: 
-   <div class="toolbar">
-      <button id="summarizeBtn" ...>
-   So it is a toolbar button. 
-   Original CSS had .primary class with blue background. 
-   But in the toolbar design (icon only), usually we don't want a big blue block unless it's the main action. 
-   The original CSS had:
-   .primary { background-color: #0060df; color: white; }
-   But also .toolbar button { ... background: none ... } 
-   Let's see if specific classes override.
-   Yes, .primary overrides if it has higher specificity or comes later.
-   In original CSS, .primary was later.
-   However, for an icon-only toolbar, a filled background might look heavy.
-   Let's stick to the subtle design: transparent background, color changes on hover, OR icon color is primary.
-   Let's make the "Play" icon primary color, but background transparent until hover.
-*/
-
+/* El botó Resumir de la barra: icona en color primari, fons transparent. */
 #summarizeBtn.primary {
   color: var(--primary-color);
   background-color: transparent;
 }
 #summarizeBtn.primary:hover {
-  background-color: __rgba_primary_weak__; /* We don't have alpha var yet. Let's use button-hover */
   background-color: var(--button-hover);
 }
 
@@ -538,7 +517,7 @@ body {
 }
 
 .api-key-icon {
-  color: var(--border-color);
+  color: var(--text-muted);
   display: block;
   margin: 0 auto 10px auto;
 }
@@ -552,6 +531,26 @@ body {
 .api-key-desc {
   font-size: 0.9em;
   margin: 0 !important;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .api-key-btn-primary {

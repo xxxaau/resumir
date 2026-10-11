@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   /* Classic Light Theme */
   --primary-color: #100F0F; /* Flexoki Black */
   --primary-hover: #6F6E69;
@@ -26,6 +27,7 @@
 }
 
 [data-actual-theme="dark"] {
+  color-scheme: dark;
   /* Flexoki Dark Theme */
   --primary-color: #CECDC3; /* Flexoki Base-100 Light */
   --primary-hover: #FFFCF0;
@@ -52,6 +54,7 @@
 }
  
 [data-actual-theme="solarized"] {
+  color-scheme: light;
   /* Solarized via Flexoki */
   --primary-color: #806000; /* Yellow */
   --primary-hover: #BC5215; /* Orange */
@@ -78,6 +81,7 @@
 }
  
 [data-actual-theme="soft-gray"] {
+  color-scheme: light;
   /* Clean Soft Greys */
   --primary-color: #555555;
   --primary-hover: #333333;

@@ -566,7 +566,7 @@ function renderApiKeyWarning(contentDiv) {
 
     const configBtn = document.createElement("button");
     configBtn.id = "configApiKeyBtn";
-    configBtn.className = "primary api-key-btn-primary";
+    configBtn.className = "btn-primary api-key-btn-primary";
     configBtn.textContent = "Configurar Ara";
 
     const ctaFooter = document.createElement("div");

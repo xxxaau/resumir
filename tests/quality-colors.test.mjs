@@ -52,3 +52,25 @@ for (const file of FILES) {
         });
     }
 }
+
+// Cada tema declara `color-scheme` (si no, selects, barres de desplaçament i
+// caselles natives es queden en clar dins del tema fosc).
+for (const [file, schemes] of [["sidebar/sidebar.css", null], ["options/settings.css", null]]) {
+    const css = readFileSync(resolve(ROOT, file), "utf8");
+    for (const [theme, expected] of [["light", "light"], ["dark", "dark"], ["solarized", "light"], ["soft-gray", "light"]]) {
+        test(`${file}: el tema ${theme} declara color-scheme: ${expected}`, () => {
+            const sel = theme === "light" ? ":root" : `[data-actual-theme="${theme}"]`;
+            const m = css.match(new RegExp(`(?:^|\\n)${sel.replace(/[[\]"]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+            assert.ok(m, `No s'ha trobat el bloc ${sel}`);
+            assert.match(m[1], new RegExp(`color-scheme:\\s*${expected}\\s*;`));
+        });
+    }
+    void schemes;
+}
+
+test("sidebar.css: els CTA usen .btn-primary (estilat), no una classe sense regla", () => {
+    const css = readFileSync(resolve(ROOT, "sidebar/sidebar.css"), "utf8");
+    assert.match(css, /\n\.btn-primary\s*\{/);
+    const ui = readFileSync(resolve(ROOT, "sidebar/ui.js"), "utf8");
+    assert.match(ui, /className = "btn-primary api-key-btn-primary"/);
+});
