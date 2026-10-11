@@ -140,9 +140,9 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ## Nivell 3 — Estratègia de producte
 
-> **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la línia de procedència i
-> les pestanyes per tipus (vegeu `git log`). Següent: format/llargada com a controls,
-> segells de temps/pàgines.
+> **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la procedència (amb text enviat),
+> les pestanyes per tipus i l'avís de resum d'una altra pàgina (vegeu `git log`).
+> Següent: segells de temps/pàgines, refinadors ràpids, dreceres, format/llargada.
 > Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
 > `npm run dev:chromium` abans de commitejar, i treure del pla el que es completi.
 
