@@ -340,6 +340,12 @@ label {
     padding: 4px 0;
 }
 
+.field-label {
+    margin: 0 0 6px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
 .models-list-info {
     font-size: 0.7em;
     color: #999;

@@ -233,9 +233,9 @@ test("l'ajuda de cada camp està associada amb aria-describedby", async () => {
         const apiKey = h.document.getElementById("apiKey");
         const ids = (apiKey.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
         assert.ok(ids.length > 0, "#apiKey ha de tenir aria-describedby");
-        const help = h.document.getElementById(ids[0]);
-        assert.ok(help, "L'id referenciat ha d'existir");
-        assert.match(help.textContent, /Necessària/);
+        assert.ok(ids.every(id => h.document.getElementById(id)), "Els ids referenciats han d'existir");
+        const described = ids.map(id => h.document.getElementById(id).textContent).join(" ");
+        assert.match(described, /Necessària/);
         // Cap aria-describedby penja d'un id inexistent
         for (const el of h.document.querySelectorAll("[aria-describedby]")) {
             for (const id of el.getAttribute("aria-describedby").split(/\s+/)) {
@@ -269,5 +269,83 @@ test("el toast reinicia el temporitzador: el segon missatge no el pot amagar el 
         const st = h.document.getElementById("status");
         assert.equal(st.textContent, "segon");
         assert.ok(st.classList.contains("show"));
+    } finally { h.close(); }
+});
+
+// ---------------------------------------------------------------------------
+// Pantalla General (2.4): la clau va abans del model, es pot comprovar sense
+// fer un resum, es pot mostrar/amagar i es desa neta.
+// ---------------------------------------------------------------------------
+test("General - la clau d'API va ABANS del model (sense clau no es poden actualitzar els models)", async () => {
+    const h = await loadSettings({});
+    try {
+        const pos = (id) => {
+            const el = h.document.getElementById(id);
+            return [...h.document.querySelectorAll("#tab-general input, #tab-general select")].indexOf(el);
+        };
+        assert.ok(pos("apiKey") > -1 && pos("modelName") > -1);
+        assert.ok(pos("apiKey") < pos("modelName"));
+        assert.equal(h.document.getElementById("apiKey").getAttribute("autocomplete"), "off");
+        assert.equal(h.document.getElementById("modelName").placeholder, "gemini-3.1-flash-lite", "Placeholder = el model per defecte actual, no un d'obsolet");
+    } finally { h.close(); }
+});
+
+test("General - mostrar/amagar la clau commuta el tipus, l'estat i el nom", async () => {
+    const h = await loadSettings({ local: { apiKey: "AIzaX" } });
+    try {
+        const input = h.document.getElementById("apiKey");
+        const btn = h.document.getElementById("toggleApiKey");
+        btn.click();
+        assert.equal(input.type, "text");
+        assert.equal(btn.getAttribute("aria-pressed"), "true");
+        assert.equal(btn.getAttribute("aria-label"), "Amagar la clau");
+        btn.click();
+        assert.equal(input.type, "password");
+    } finally { h.close(); }
+});
+
+test("General - «Comprovar» valida i desa la clau (neta) sense prémer «Desar»", async () => {
+    const h = await loadSettings({ fetchHandler: async () => ({ status: 200 }) });
+    try {
+        h.document.getElementById("apiKey").value = '  "Bearer AIza' + "z".repeat(35) + '"  ';
+        // «Bearer» dins de cometes: es treuen les cometes i el prefix
+        h.document.getElementById("verifyApiKey").click();
+        await h.flush(15);
+        const { apiKey } = await h.storage.local.get("apiKey");
+        assert.equal(apiKey, "AIza" + "z".repeat(35));
+        assert.equal(h.document.getElementById("apiKey").value, apiKey, "El camp mostra la clau neta");
+        assert.match(h.document.getElementById("apiKeyStatus").textContent, /Clau vàlida i desada/);
+        assert.equal(h.calls.fetches[0].headers["x-goog-api-key"], apiKey);
+    } finally { h.close(); }
+});
+
+test("General - «Comprovar» amb una clau incorrecta NO la desa i diu què fer", async () => {
+    const h = await loadSettings({ local: { apiKey: "AIza_antiga" }, fetchHandler: async () => ({ status: 400 }) });
+    try {
+        h.document.getElementById("apiKey").value = "AIzaMALA";
+        h.document.getElementById("verifyApiKey").click();
+        await h.flush(15);
+        assert.match(h.document.getElementById("apiKeyStatus").textContent, /no és vàlida/);
+        assert.equal((await h.storage.local.get("apiKey")).apiKey, "AIza_antiga", "No es sobreescriu la clau que ja funcionava");
+        assert.equal(h.document.activeElement, h.document.getElementById("apiKey"));
+    } finally { h.close(); }
+});
+
+test("General - «Desar» treu espais, cometes i «Bearer» de la clau", async () => {
+    const h = await loadSettings({});
+    try {
+        h.document.getElementById("apiKey").value = "  Bearer AIzaSENSE  ";
+        h.document.getElementById("save").click();
+        await h.flush();
+        assert.equal((await h.storage.local.get("apiKey")).apiKey, "AIzaSENSE");
+    } finally { h.close(); }
+});
+
+test("General - la privadesa diu que el text de les pàgines s'envia a Google Gemini", async () => {
+    const h = await loadSettings({});
+    try {
+        const text = h.document.getElementById("tab-general").textContent;
+        assert.match(text, /s'envia a l'API de Google\s+Gemini/);
+        assert.match(text, /només\s+en aquest navegador/, "La clau es desa només en aquest navegador");
     } finally { h.close(); }
 });

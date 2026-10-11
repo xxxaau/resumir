@@ -93,6 +93,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         themeSelect.addEventListener("change", () => autosave({ theme: themeSelect.value }));
     }
 
+    bindClick("verifyApiKey", checkApiKey);
+    bindClick("toggleApiKey", toggleApiKeyVisibility);
+
     // Bind all save buttons to saveOptions
     ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple", "saveAnki"].forEach(id => {
         bindClick(id, saveOptions);

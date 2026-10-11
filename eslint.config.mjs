@@ -178,6 +178,8 @@ const settingsGlobals = {
     resetBionic: "readonly",
     showStatus: "readonly",
     autosave: "readonly",
+    checkApiKey: "readonly",
+    toggleApiKeyVisibility: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
     navigateToTab: "readonly",

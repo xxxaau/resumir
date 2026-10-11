@@ -18,7 +18,8 @@ const SAVE_BUTTON_UPDATE_KEYS = {
 function saveOptions(e) {
   if(e) e.preventDefault();
   
-  const apiKeyValue = document.querySelector("#apiKey").value;
+  // Sense espais, cometes ni prefix «Bearer» (errors habituals en enganxar-la)
+  const apiKeyValue = normalizeApiKey(document.querySelector("#apiKey").value);
   const settings = {
     modelName: document.querySelector("#modelName").value,
     theme: document.querySelector("#themeSelect").value,
@@ -104,8 +105,41 @@ function autosave(patch) {
     });
 }
 
+/**
+ * «Comprovar»: valida la clau amb una consulta barata i, si funciona, la desa.
+ * Abans l'única manera de saber si era vàlida era fer un resum i veure l'error.
+ */
+async function checkApiKey() {
+  const input = document.querySelector("#apiKey");
+  const status = document.querySelector("#apiKeyStatus");
+  const btn = document.querySelector("#verifyApiKey");
+  btn.disabled = true;
+  status.textContent = "Comprovant…";
+  const result = await verifyApiKey(input.value);
+  btn.disabled = false;
+  status.textContent = result.message;
+  if (result.ok) {
+    input.value = result.key;
+    await ext.storage.local.set({ apiKey: result.key });
+    status.textContent = "Clau vàlida i desada.";
+  } else {
+    input.focus();
+  }
+}
+
+function toggleApiKeyVisibility() {
+  const input = document.querySelector("#apiKey");
+  const btn = document.querySelector("#toggleApiKey");
+  const show = input.type === "password";
+  input.type = show ? "text" : "password";
+  btn.textContent = show ? "Amagar" : "Mostrar";
+  btn.setAttribute("aria-pressed", String(show));
+  btn.setAttribute("aria-label", show ? "Amagar la clau" : "Mostrar la clau");
+}
+
 function restoreOptions(syncData, localData) {
     document.querySelector("#apiKey").value = (localData && localData.apiKey) || "";
+    document.querySelector("#modelName").placeholder = DEFAULT_MODEL_ID;
     document.querySelector("#modelName").value = (syncData && syncData.modelName) || DEFAULT_MODEL_ID;
     document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
     document.querySelector("#systemPrompt").value = (syncData && syncData.systemPrompt) || DEFAULT_SYSTEM_PROMPT;

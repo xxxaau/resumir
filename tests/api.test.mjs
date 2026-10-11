@@ -109,7 +109,7 @@ test("EUR_RATE és exportada des de shared/models.js i és un número entre 0.5 
 // Comprovació de la clau d'API (onboarding dins del panell)
 // ---------------------------------------------------------------------------
 import { createRequire as _createRequire } from "node:module";
-const _api = _createRequire(import.meta.url)("../sidebar/api.js");
+const _api = _createRequire(import.meta.url)("../shared/api-key.js");
 
 test("normalizeApiKey - treu espais, cometes i el prefix «Bearer»", () => {
     assert.equal(_api.normalizeApiKey("  AIzaABC  \n"), "AIzaABC");

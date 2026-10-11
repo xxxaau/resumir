@@ -35,6 +35,37 @@
         <div class="section">
           <h3>Claus i models</h3>
 
+          <!-- La clau va PRIMER: sense ella no es poden actualitzar els models. -->
+          <div class="form-group">
+            <label for="apiKey">Clau d'API de Google Gemini</label>
+            <div class="model-input-group">
+              <input
+                type="password"
+                id="apiKey"
+                class="form-control"
+                placeholder="AIza…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button id="toggleApiKey" type="button" class="btn btn-secondary" aria-pressed="false" aria-label="Mostrar la clau">
+                Mostrar
+              </button>
+              <button id="verifyApiKey" type="button" class="btn btn-secondary">
+                Comprovar
+              </button>
+            </div>
+            <div id="apiKeyStatus" class="help-text" role="status" aria-live="polite"></div>
+            <div class="help-text">
+              Necessària per connectar amb els serveis de Google AI. Es desa només
+              en aquest navegador (no es sincronitza).
+              <a
+                href="https://xxxaau.github.io/resumir/guia/clau-api/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Com obtinc una clau d'API? →</a>
+            </div>
+          </div>
+
           <div class="form-group">
             <label for="modelName">Model de resum</label>
             <div class="model-input-group">
@@ -42,37 +73,19 @@
                 type="text"
                 id="modelName"
                 class="form-control"
-                placeholder="gemini-1.5-flash"
               />
               <button id="checkModels" class="btn btn-secondary" aria-expanded="false" aria-controls="modelsList">
-                Seleccionar
+                Triar model…
               </button>
               <button id="refreshModels" class="btn btn-secondary" title="Consulta l'API de Google i actualitza la llista de models disponibles a la barra lateral">
                 Actualitzar
               </button>
             </div>
             <div id="modelsList"></div>
-            <div id="refreshModelsStatus" class="help-text hidden"></div>
+            <div id="refreshModelsStatus" class="help-text hidden" role="status" aria-live="polite"></div>
             <div class="help-text">
-              El model utilitzat per generar els resums.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="apiKey">Clau d'API de Google Gemini</label>
-            <input
-              type="password"
-              id="apiKey"
-              class="form-control"
-              placeholder="Introdueix la teva clau API"
-            />
-            <div class="help-text">
-              Necessària per connectar amb els serveis de Google AI.
-              <a
-                href="https://xxxaau.github.io/resumir/guia/clau-api/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >Com obtinc una clau d'API? →</a>
+              El model utilitzat per generar els resums. Els models marcats amb ★
+              apareixen al selector de la barra lateral.
             </div>
           </div>
         </div>
@@ -96,18 +109,22 @@
         <div class="section">
           <h3>Emmagatzematge i privadesa</h3>
           <div class="form-group">
-            <label>Memòria cau local</label>
+            <p class="field-label">Historial de resums</p>
             <div class="help-text">
-              L'extensió guarda còpies locals dels resums per estalviar costos i
-              millorar la velocitat. Aquesta informació no surt mai del teu
-              ordinador.
+              L'extensió guarda còpies locals dels resums (és el que veus a
+              l'historial de la barra lateral) per estalviar costos i millorar la
+              velocitat. Aquesta còpia no surt mai del teu ordinador.
+            </div>
+            <div class="help-text">
+              El text de les pàgines que resumeixes sí que s'envia a l'API de Google
+              Gemini per generar el resum.
             </div>
             <div class="flex-row-gap">
               <button
                 id="clearCache"
                 class="btn btn-secondary error-button"
               >
-                Buidar memòria cau
+                Esborrar l'historial de resums
               </button>
               
             </div>
@@ -1435,6 +1452,7 @@
     <script defer src="../ext.js"></script>
     <script defer src="../shared/models.js"></script>
     <script defer src="../shared/defaults.js"></script>
+    <script defer src="../shared/api-key.js"></script>
     <script defer src="settings-defaults.js"></script>
     <script defer src="settings-order.js"></script>
     <script defer src="settings-cache.js"></script>

@@ -4,13 +4,15 @@
  *
  * Guia l'usuari pas a pas: cada accio requereix confirmacio explicita.
  * Mai avança sense dir-li "si" a una pregunta.
+ * Qualsevol pas fallit (build, commit, tag, push) ATURA l'script — mai
+ * imprimeix un "✓" d'èxit per a una accio que ha fallat.
  *
  * Usage:
  *   node scripts/prepare-release.mjs
  *   npm run prepare-release
  */
 
-import { readFileSync, existsSync, readdirSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
@@ -24,19 +26,53 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
 function question(prompt) {
   return new Promise(resolve => rl.question(prompt, resolve));
 }
 
-function exec(cmd, label) {
+/**
+ * Executa una comanda via shell. Retorna false en fallada.
+ * Amb `fatal: true`, qualsevol fallada imprimeix un missatge clar i surt (1) —
+ * l'script mai continua amb un pas fallit.
+ */
+function exec(cmd, label, { fatal = false } = {}) {
   console.log(`\n--- ${label} ---`);
   console.log(`> ${cmd}`);
   try {
     execSync(cmd, { cwd: root, stdio: "inherit" });
     return true;
   } catch {
+    if (fatal) {
+      console.log(red(`  ✗ ${label} ha fallat. Aturat.`));
+      process.exit(1);
+    }
     return false;
   }
+}
+
+/**
+ * Executa un comando git SENSE shell (args com a array): evita la
+ * interpolacio d'input d'usuari a la shell (command injection).
+ */
+function execGit(args, label, { fatal = false } = {}) {
+  console.log(`\n--- ${label} ---`);
+  console.log(`> git ${args.join(" ")}`);
+  try {
+    execSync("git", args, { cwd: root, stdio: "inherit" });
+    return true;
+  } catch {
+    if (fatal) {
+      console.log(red(`  ✗ ${label} ha fallat. Aturat.`));
+      process.exit(1);
+    }
+    return false;
+  }
+}
+
+function gitOutput(args) {
+  return execSync("git", args, { cwd: root }).toString().trim();
 }
 
 function readJson(file) {
@@ -65,6 +101,47 @@ function yellow(text) {
   return `\x1b[33m${text}\x1b[0m`;
 }
 
+// Fitxers de mode DEV/PROD: es commitejen NOMÉS al pas de release (mode PROD).
+// Mai en el commit "de canvis" del pas 2 — es quedaria mode DEV commitejat.
+const MODE_PREFIXES = [
+  "manifest.base.json",
+  "manifest.json",
+  "manifest.chromium.json",
+  "manifest.firefox.patch.json",
+  "manifest.firefox.prod.patch.json",
+  "manifest.chromium.patch.json",
+  "manifest.chromium.prod.patch.json",
+  "icons",
+];
+
+const RELEASE_FILES = [
+  "package.json",
+  "package-lock.json",
+  "manifest.base.json",
+  "manifest.json",
+  "manifest.chromium.json",
+  "manifest.firefox.patch.json",
+  "manifest.firefox.prod.patch.json",
+  "manifest.chromium.patch.json",
+  "manifest.chromium.prod.patch.json",
+  "icons",
+  "docs/CHANGELOG.md",
+  "options/settings.html",
+];
+
+function isModeFile(path) {
+  return MODE_PREFIXES.some(p => path === p || path.startsWith(p + "/"));
+}
+
+/** Extreu la ruta relativa de cada línia de `git status --porcelain`. */
+function statusPaths() {
+  return gitOutput(["status", "--porcelain"])
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean)
+    .map(l => l.slice(3).trim());
+}
+
 async function main() {
   console.log("\n" + "=".repeat(60));
   console.log(bold("  PREPARACIO DE RELEASE — Resumir"));
@@ -72,16 +149,18 @@ async function main() {
 
   // ─── Step 1: Branch check ──────────────────────────────────────
   console.log(yellow("[1/9]") + " Verificant branca...");
-  const branch = execSync("git rev-parse --abbrev-ref HEAD", { cwd: root })
-    .toString().trim();
+  let branch;
+  try {
+    branch = gitOutput(["rev-parse", "--abbrev-ref", "HEAD"]);
+  } catch {
+    console.log(red("  ✗ No s'ha pogut llegir la branca actual (git falla). Aturat."));
+    process.exit(1);
+  }
   if (branch !== "main") {
     console.log(red(`  ✗ Ets a la branca '${branch}', no a 'main'.`));
     const ok = await confirm(`  Canviar a main?`);
     if (ok) {
-      if (!exec("git checkout main", "Canvi a main")) {
-        console.log(red("  ✗ No s'ha pogut canviar a main. Aturat."));
-        process.exit(1);
-      }
+      if (!execGit(["checkout", "main"], "Canvi a main", { fatal: true })) process.exit(1);
     } else {
       console.log(red("  ✗ Release nomes des de main. Aturat."));
       process.exit(1);
@@ -92,16 +171,33 @@ async function main() {
 
   // ─── Step 2: Working tree clean ─────────────────────────────────
   console.log(`\n${yellow("[2/9]")} Verificant working tree...`);
-  const status = execSync("git status --porcelain", { cwd: root })
-    .toString().trim();
+  let status;
+  try {
+    status = gitOutput(["status", "--porcelain"]);
+  } catch {
+    console.log(red("  ✗ No s'ha pogut llegir l'estat de git. Aturat."));
+    process.exit(1);
+  }
   if (status) {
     console.log(red("  ✗ Working tree no esta net:"));
     console.log(status);
     const ok = await confirm(`  Fer commit de tots els canvis?`);
     if (ok) {
       const msg = await question("  Missatge del commit: ");
-      exec(`git add -A && git commit -m "${msg}"`, "Commit");
-      console.log(green("  ✓ Canvis commitats"));
+      const dirty = statusPaths();
+      const nonMode = dirty.filter(p => !isModeFile(p));
+      const modeFiles = dirty.filter(p => isModeFile(p));
+
+      if (nonMode.length > 0) {
+        execGit(["add", ...nonMode], "Stage canvis (sense fitxers de mode)");
+        if (modeFiles.length > 0) {
+          console.log(yellow(`  ! ${modeFiles.length} fitxer(s) de mode DEV/PROD es commitejaran al pas de release.`));
+        }
+        execGit(["commit", "-m", msg], "Commit de canvis", { fatal: true });
+        console.log(green("  ✓ Canvis commitats"));
+      } else {
+        console.log(yellow("  ! Només hi ha canvis de mode DEV/PROD (es resoldran al pas 7). Sense commit."));
+      }
     } else {
       console.log(red("  ✗ Working tree ha d'estar net. Aturat."));
       process.exit(1);
@@ -117,7 +213,7 @@ async function main() {
     console.log(yellow("  ! Mode DEV detectat"));
     const ok = await confirm(`  Canviar a mode PROD?`);
     if (ok) {
-      exec("npm run prod", "Switch a PROD");
+      exec("npm run prod", "Switch a PROD", { fatal: true });
       console.log(green("  ✓ Mode PROD actiu"));
     } else {
       console.log(yellow("  ! Continuant en mode DEV (no recomanat per release)"));
@@ -126,28 +222,11 @@ async function main() {
     console.log(green("  ✓ Mode PROD"));
   }
 
-  // ─── Step 4: Prerelease check ───────────────────────────────────
-  console.log(`\n${yellow("[4/9]")} Executant prerelease audit...`);
-  const prereleaseOk = exec("npm run prerelease", "Prerelease audit (17 checks)");
-
-  if (!prereleaseOk) {
-    console.log(red("\n  ✗ Prerelease audit ha fallat. Corregeix els errors i torna a executar."));
-    process.exit(1);
-  }
-  console.log(green("\n  ✓ Prerelease audit: 17/17 checks OK"));
-
-  // ─── Step 5: Build ──────────────────────────────────────────────
-  console.log(`\n${yellow("[5/9]")} Build...`);
-  const buildOk = await confirm(`  Generar ZIPs de produccio?`);
-  if (buildOk) {
-    exec("npm run build", "Build Firefox + Chromium");
-    console.log(green("  ✓ Build completat"));
-  } else {
-    console.log(yellow("  ! Build omes. No es generaran ZIPs."));
-  }
-
-  // ─── Step 6: Version bump ───────────────────────────────────────
-  console.log(`\n${yellow("[6/9]")} Version...`);
+  // ─── Step 4: Version bump ───────────────────────────────────────
+  // Abans del build: els ZIPs han de dur la versio NOVA. Si es bumpeja
+  // despres del build, build/ queda amb ZIPs de la versio antiga i el
+  // prerelease valida l'estat anterior, no el que es publica.
+  console.log(`\n${yellow("[4/9]")} Version...`);
   const pkg = readJson(join(root, "package.json"));
   console.log(`  Versio actual: ${pkg.version}`);
 
@@ -160,11 +239,35 @@ async function main() {
       process.exit(1);
     }
 
-    exec(`npm version ${type} --no-git-tag-version`, `Bump ${type}`);
+    exec(`npm version ${type} --no-git-tag-version`, `Bump ${type}`, { fatal: true });
     console.log(green(`  ✓ Versio actualitzada a ${readJson(join(root, "package.json")).version}`));
   } else {
     console.log(yellow("  ! Versio no canviada"));
   }
+
+  // ─── Step 5: Build ──────────────────────────────────────────────
+  // Abans del prerelease: els checks de ZIP del prerelease requereixen que
+  // els ZIPs ja existeixin a build/.
+  console.log(`\n${yellow("[5/9]")} Build...`);
+  const buildOk = await confirm(`  Generar ZIPs de produccio?`);
+  if (buildOk) {
+    exec("npm run build", "Build Firefox + Chromium", { fatal: true });
+    console.log(green("  ✓ Build completat"));
+  } else {
+    console.log(yellow("  ! Build omes. El prerelease fallara al check de ZIPs si no existeixen."));
+  }
+
+  // ─── Step 6: Prerelease check ───────────────────────────────────
+  // Despres del build: els checks 9 i 13 (ZIPs) validen els artefactes reals
+  // de la versio que s'acaba de bumpejar.
+  console.log(`\n${yellow("[6/9]")} Executant prerelease audit...`);
+  const prereleaseOk = exec("npm run prerelease", "Prerelease audit");
+
+  if (!prereleaseOk) {
+    console.log(red("\n  ✗ Prerelease audit ha fallat. Corregeix els errors i torna a executar."));
+    process.exit(1);
+  }
+  console.log(green("\n  ✓ Prerelease audit superat"));
 
   // ─── Step 7: Commit + tag ───────────────────────────────────────
   console.log(`\n${yellow("[7/9]")} Commit i tag...`);
@@ -172,27 +275,24 @@ async function main() {
   const newVer = newPkg.version;
   const tag = `v${newVer}`;
 
-  const tagExists = execSync(`git tag -l "${tag}"`, { cwd: root })
-    .toString().trim();
+  let tagExists = "";
+  try {
+    tagExists = gitOutput(["tag", "-l", tag]);
+  } catch {
+    console.log(red(`  ✗ No s'ha pogut llegir els tags. Aturat.`));
+    process.exit(1);
+  }
   if (tagExists) {
-    console.log(yellow(`  ! El tag ${tag} ja existeix.`));
-    const force = await confirm(`  Sobreescriure?`);
-    if (force) {
-      exec(`git tag -f ${tag}`, `Tag ${tag}`);
-    }
+    console.log(red(`  ✗ El tag ${tag} ja existeix. No es sobreescriu: revisa l'estat i esborra'l manualment si cal.`));
+    process.exit(1);
   }
 
   const commitOk = await confirm(`  Crear commit de release + tag ${tag}?`);
   if (commitOk) {
-    const manifestUpdated = existsSync(join(root, "manifest.base.json"));
-    const changelogUpdated = existsSync(join(root, "docs/CHANGELOG.md"));
-
     const commitMsg = `chore: release ${tag}`;
-    exec(
-      `git add -A && git commit -m "${commitMsg}"`,
-      `Commit release ${tag}`
-    );
-    exec(`git tag ${tag}`, `Tag ${tag}`);
+    execGit(["add", ...RELEASE_FILES], `Stage fitxers de release ${tag}`, { fatal: true });
+    execGit(["commit", "-m", commitMsg], `Commit release ${tag}`, { fatal: true });
+    execGit(["tag", tag], `Tag ${tag}`, { fatal: true });
     console.log(green(`  ✓ Commit i tag ${tag} creats`));
   }
 
@@ -200,7 +300,7 @@ async function main() {
   console.log(`\n${yellow("[8/9]")} Push...`);
   const pushOk = await confirm(`  Fer push a origin/main + tags?`);
   if (pushOk) {
-    exec("git push origin main --tags", "Push a origin");
+    execGit(["push", "origin", "main", "--tags"], "Push a origin", { fatal: true });
     console.log(green("\n  ✓ Push completat! El workflow de release s'ha disparat."));
     console.log("    Ves a https://github.com/xxxaau/resumir/actions");
     console.log("    per veure el proges del GitHub Release.");

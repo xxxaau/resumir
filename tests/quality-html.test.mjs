@@ -115,3 +115,26 @@ test("sidebar: els scripts de sidebar.html cobreixen tots els fitxers carregats 
     const inBuild = [...m[1].matchAll(/"([\w-]+\.js)"/g)].map(x => x[1]);
     assert.deepEqual(inBuild, inHtml, "L'ordre/llista de scripts de la build ha de coincidir amb sidebar.html");
 });
+
+test("la build de producció (bundle) carrega els mateixos scripts, en el mateix ordre, que sidebar.html", () => {
+    // Un script nou a sidebar.html que no consti al bundle faria que la versió
+    // publicada (Chromium) no el carregués i petés només en producció.
+    const html = readFileSync(resolve(ROOT, "sidebar/sidebar.html"), "utf8");
+    const htmlSrcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1])
+        .filter(s => !["../vendor/pdf.min.js", "../Readability.js", "../theme.js"].includes(s)); // no van al bundle
+    const bundle = readFileSync(resolve(ROOT, "scripts/build-sidebar-bundle.mjs"), "utf8");
+    const files = [...bundle.matchAll(/resolve\(root, "([^"]+\.js)"\)/g)].map(m => m[1]);
+    const toSrc = (f) => f.startsWith("sidebar/") ? f.slice("sidebar/".length) : "../" + f;
+    assert.deepEqual(files.map(toSrc), htmlSrcs, "scripts/build-sidebar-bundle.mjs:files ha de coincidir amb sidebar.html");
+    const bundled = bundle.match(/const BUNDLED_SRCS = new Set\(\[([\s\S]*?)\]\)/);
+    assert.ok(bundled, "No s'ha trobat BUNDLED_SRCS");
+    const bundledSrcs = [...bundled[1].matchAll(/"([^"]+)"/g)].map(m => m[1]);
+    assert.deepEqual(bundledSrcs, htmlSrcs, "BUNDLED_SRCS ha de coincidir amb sidebar.html");
+});
+
+test("els scripts de configuració que carrega settings.html existeixen i api-key.js hi és abans dels mòduls que l'usen", () => {
+    const html = readFileSync(resolve(ROOT, "options/settings.html"), "utf8");
+    const srcs = [...html.matchAll(/<script(?: defer)? src="([^"]+)"><\/script>/g)].map(m => m[1]);
+    assert.ok(srcs.indexOf("../shared/api-key.js") > -1);
+    assert.ok(srcs.indexOf("../shared/api-key.js") < srcs.indexOf("settings.js"));
+});
