@@ -106,6 +106,21 @@ function applyBionicStyles(element, isEnabled, config = {}) {
  * @param {boolean} isSimple - Whether this is a plain-language explanation ("Explica-ho fàcil")
  * @returns {AbortController} The abort controller for cancellation
  */
+/**
+ * Adapta el prompt del mapa conceptual a la configuració (profunditat, branques,
+ * descripcions). Es basa en tres ancoratges del text del prompt per defecte;
+ * tests/default-prompts.test.mjs vigila que continuïn existint.
+ */
+function buildConceptMapPrompt(basePrompt, depth, branches, showDesc) {
+    let prompt = basePrompt
+        .replace(/Màxim \d+ nivells de profunditat\./, `Màxim ${depth} nivells de profunditat.`)
+        .replace(/Segon nivell: \d+-\d+ branques principals\./, `Segon nivell: ${Math.max(3, branches - 2)}-${branches} branques principals.`);
+    if (!showDesc) {
+        prompt = prompt.replace(/9\. Opcionalment.*?: " \(dos punts \+ espai\)\.\n/, "");
+    }
+    return prompt;
+}
+
 // Instruccions afegides al prompt pels refinadors ràpids de sota el resum.
 const REFINE_INSTRUCTIONS = {
     shorter: "Instrucció addicional: fes el resultat molt més curt i concís que de costum, només l'essencial.",
@@ -162,7 +177,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
                 "conceptMapAutoExpand",
                 "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation",
-                "ankiPrompt", "ankiLang"
+                "ankiPrompt", "ankiLang", "ankiPacket"
             ]),
             ext.storage.local.get(["apiKey"])
         ]);
@@ -184,19 +199,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 .replace(/\{\{LANG\}\}/g, langName)
                 .replace(/\{\{COUNT\}\}/g, ankiCount);
         } else if (isConceptMap) {
-            // Build dynamic prompt based on config
-            const basePrompt = config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT;
-            const depth = config.conceptMapDepth || 4;
-            const branches = config.conceptMapBranches || 6;
-            const showDesc = config.conceptMapShowDescriptions !== false;
-            
-            systemPrompt = basePrompt
-                .replace(/Màxim \d+ nivells de profunditat\./, `Màxim ${depth} nivells de profunditat.`)
-                .replace(/Segon nivell: \d+-\d+ branques principals\./, `Segon nivell: ${Math.max(3, branches - 2)}-${branches} branques principals.`);
-            
-            if (!showDesc) {
-                systemPrompt = systemPrompt.replace(/9\. Opcionalment.*?: " \(dos punts \+ espai\)\.\n/, "");
-            }
+            systemPrompt = buildConceptMapPrompt(
+                config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT,
+                config.conceptMapDepth || 4,
+                config.conceptMapBranches || 6,
+                config.conceptMapShowDescriptions !== false
+            );
         }
 
         // Refinador ràpid: instrucció afegida al prompt del tipus actual.
@@ -730,5 +738,5 @@ function buildAnkiCtx(ctx) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { classifyError, buildFallbackList, startSummary, buildAnkiCtx };
+    module.exports = { buildConceptMapPrompt, classifyError, buildFallbackList, startSummary, buildAnkiCtx };
 }
