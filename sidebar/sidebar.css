@@ -8,7 +8,7 @@
   --button-hover: #e0e0e0;
   --button-text: #100f0f;
   --primary-color: #205ea6; /* Flexoki Blue */
-  --primary-hover: #4385be;
+  --primary-hover: #184d8a;
   --primary-text: #ffffff;
   --secondary-bg: #e0e0e6;
   --secondary-hover: #cecdc3;
@@ -16,7 +16,7 @@
   --error-text: #af3029; /* Flexoki Red */
   --footer-bg: #f0f0f4;
   --footer-border: #e0e0e0;
-  --footer-text: #6f6e69;
+  --footer-text: #6b6a65;
   --icon-color: currentColor;
 }
 
@@ -30,12 +30,12 @@
   --button-hover: #1c1b1a; /* Flexoki Base-20 */
   --button-text: #cecdc3;
   --primary-color: #4385be; /* Flexoki Dark Blue */
-  --primary-hover: #205ea6;
+  --primary-hover: #6fa0d1;
   --primary-text: #100f0f;
   --secondary-bg: #282726;
   --secondary-hover: #343331;
   --error-bg: #1c1b1a;
-  --error-text: #d14d41; /* Flexoki Dark Red */
+  --error-text: #e0675c; /* Flexoki Dark Red */
   --footer-bg: #100f0f;
   --footer-border: #282726;
   --footer-text: #878580;
@@ -46,13 +46,13 @@
      text/muted enfosquits per complir WCAG AA (abans 4,45:1 i 3,2:1 sobre #f2f0e5). */
   --bg-color: #f2f0e5;
   --text-color: #403e3c; /* Flexoki warm ~9:1 sobre el fons */
-  --text-muted: #6f6e69; /* ~4,6:1 — AA per a text secundari */
+  --text-muted: #66655f; /* ~4,6:1 — AA per a text secundari */
   --border-color: #e6e4d9;
   --toolbar-bg: #f2f0e5;
   --button-hover: #e6e4d9;
-  --button-text: #ad8301; /* Flexoki Yellow */
-  --primary-color: #ad8301;
-  --primary-hover: #bc5215; /* Flexoki Orange */
+  --button-text: #806000; /* Flexoki Yellow */
+  --primary-color: #806000;
+  --primary-hover: #a8450f; /* Flexoki Orange */
   --primary-text: #fffcf0;
   --secondary-bg: #e6e4d9;
   --secondary-hover: #dad8ce;
@@ -60,7 +60,7 @@
   --error-text: #af3029;
   --footer-bg: #f2f0e5;
   --footer-border: #e6e4d9;
-  --footer-text: #6f6e69;
+  --footer-text: #66655f;
 }
 
 [data-actual-theme="soft-gray"] {
@@ -81,7 +81,7 @@
   --error-text: #af3029;
   --footer-bg: #e8e8e8;
   --footer-border: #cccccc;
-  --footer-text: #6f6e69;
+  --footer-text: #5f5e59;
 }
 
 body {

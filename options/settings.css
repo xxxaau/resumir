@@ -25,7 +25,7 @@
   /* Flexoki Dark Theme */
   --primary-color: #CECDC3; /* Flexoki Base-100 Light */
   --primary-hover: #FFFCF0;
-  --button-color: #4385BE; /* Flexoki Blue Dark */
+  --button-color: #2F6FAE; /* Flexoki Blue Dark */
   --button-hover-bg: #205EA6;
   --bg-color: #100F0F; /* Flexoki Black */
   --sidebar-bg: #1C1B1A; /* Surface */
@@ -45,14 +45,14 @@
  
 [data-actual-theme="solarized"] {
   /* Solarized via Flexoki */
-  --primary-color: #AD8301; /* Yellow */
+  --primary-color: #806000; /* Yellow */
   --primary-hover: #BC5215; /* Orange */
-  --button-color: #AD8301;
+  --button-color: #806000;
   --button-hover-bg: #BC5215;
   --bg-color: #FFFCF0; /* Flexoki's paper naturally warm */
   --sidebar-bg: #F2F0E5; 
-  --text-color: #6F6E69;
-  --text-muted: #878580;
+  --text-color: #403E3C;
+  --text-muted: #66655F;
   --border-color: #E6E4D9;
   --input-bg: #F2F0E5;
   --input-border: #DAD8CE;
@@ -74,7 +74,7 @@
   --bg-color: #f5f5f5; /* Clean light gray */
   --sidebar-bg: #e8e8e8;
   --text-color: #100F0F;
-  --text-muted: #6F6E69;
+  --text-muted: #5F5E59;
   --border-color: #e0e0e0;
   --input-bg: #e8e8e8;
   --input-border: #cccccc;

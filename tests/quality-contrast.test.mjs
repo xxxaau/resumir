@@ -23,6 +23,8 @@ const SIDEBAR_PAIRS = [
     ["--primary-color","--bg-color",     4.5],
     ["--primary-text", "--primary-color",4.5],
     ["--error-text",   "--error-bg",     4.5],
+    ["--primary-hover","--bg-color",     4.5], // color dels enllaços en hover
+    ["--button-text",  "--bg-color",     3],   // icones de la barra d'eines (UI)
 ];
 const SETTINGS_PAIRS = [
     ["--text-color", "--bg-color",     4.5],
@@ -30,6 +32,9 @@ const SETTINGS_PAIRS = [
     ["--text-muted", "--sidebar-bg",   4.5],
     ["--text-muted", "--input-bg",     4.5],
     ["--text-color", "--input-bg",     4.5],
+    ["--primary-color", "--bg-color",  4.5], // enllaços i element actiu
+    ["--button-color",  "--bg-color",  3],   // interruptors (UI)
+    ["#ffffff",         "--button-color", 4.5], // text blanc dels botons primaris
 ];
 
 const SURFACES = [
@@ -39,19 +44,7 @@ const SURFACES = [
 
 // Fallades conegudes (mesurades; vegeu docs/PLA-UI-UX.md, Nivell 1). Clau: superfície/tema/text/fons
 const KNOWN_FAILURES = new Set([
-    "sidebar/solarized/--text-muted/--bg-color",
-    "sidebar/solarized/--footer-text/--footer-bg",
-    "sidebar/solarized/--primary-color/--bg-color",
-    "sidebar/solarized/--primary-text/--primary-color",
-    "sidebar/light/--footer-text/--footer-bg",
-    "sidebar/soft-gray/--footer-text/--footer-bg",
-    "sidebar/dark/--error-text/--error-bg",
-    "settings/solarized/--text-muted/--bg-color",
-    "settings/solarized/--text-muted/--sidebar-bg",
-    "settings/solarized/--text-muted/--input-bg",
-    "settings/solarized/--text-color/--input-bg",
-    "settings/soft-gray/--text-muted/--sidebar-bg",
-    "settings/soft-gray/--text-muted/--input-bg",
+    // (buida: tots els parells compleixen AA)
 ]);
 
 for (const { name, css, pairs } of SURFACES) {
@@ -62,7 +55,7 @@ for (const { name, css, pairs } of SURFACES) {
     for (const [theme, tokens] of Object.entries(themes)) {
         for (const [fg, bg, min] of pairs) {
             const key = `${name}/${theme}/${fg}/${bg}`;
-            const a = tokens[fg], b = tokens[bg];
+            const a = fg.startsWith("#") ? fg : tokens[fg], b = bg.startsWith("#") ? bg : tokens[bg];
             test(`contrast ${key}`, () => {
                 assert.ok(/^#[0-9a-f]{3,6}$/i.test(a || "") && /^#[0-9a-f]{3,6}$/i.test(b || ""),
                     `tokens no hexadecimals: ${fg}=${a} ${bg}=${b}`);
