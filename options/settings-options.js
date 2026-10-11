@@ -6,6 +6,15 @@
 
 // --- Options Management ---
 
+// Botó «Desar» de cada pestanya de prompt → flag de l'avís de prompt nou que
+// aquella pestanya mostra. Els altres botons no toquen cap flag.
+const SAVE_BUTTON_UPDATE_KEYS = {
+  saveDeepDive:   "deepDivePromptUpdateAvailable",
+  saveScience:    "sciencePromptUpdateAvailable",
+  saveConceptMap: "conceptMapPromptUpdateAvailable",
+  saveSimple:     "simplePromptUpdateAvailable",
+};
+
 function saveOptions(e) {
   if(e) e.preventDefault();
   
@@ -63,11 +72,11 @@ function saveOptions(e) {
   };
 
 
-  // Netejar flags d'actualització en desar (l'usuari ja ha vist l'avís)
-  settings.deepDivePromptUpdateAvailable = false;
-  settings.sciencePromptUpdateAvailable = false;
-  settings.conceptMapPromptUpdateAvailable = false;
-  settings.simplePromptUpdateAvailable = false;
+  // Netejar NOMÉS el flag d'actualització de la pestanya que es desa (l'usuari
+  // ja ha vist aquell avís). Abans es posaven els quatre a false en desar
+  // qualsevol cosa (p. ex. el tema), amagant avisos que mai havia vist.
+  const clearedUpdateKey = SAVE_BUTTON_UPDATE_KEYS[e && e.currentTarget && e.currentTarget.id];
+  if (clearedUpdateKey) settings[clearedUpdateKey] = false;
 
   Promise.all([
       ext.storage.sync.set(settings),

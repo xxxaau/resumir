@@ -60,3 +60,37 @@ test("buidar memòria cau - sense res desat no demana confirmació i ho diu", as
         assert.match(h.document.getElementById("status").textContent, /No hi havia cap resum/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.11): desar QUALSEVOL pestanya posava a false els 4 avisos de
+// «nova versió del prompt», també els de pestanyes que l'usuari no havia obert.
+// ---------------------------------------------------------------------------
+const ALL_UPDATE_FLAGS = {
+    deepDivePromptUpdateAvailable: true,
+    sciencePromptUpdateAvailable: true,
+    conceptMapPromptUpdateAvailable: true,
+    simplePromptUpdateAvailable: true,
+};
+
+test("desar la pestanya General no esborra cap avís de prompt nou", async () => {
+    const h = await loadSettings({ sync: { ...ALL_UPDATE_FLAGS } });
+    try {
+        h.document.getElementById("save").click();
+        await h.flush();
+        const flags = await h.storage.sync.get(Object.keys(ALL_UPDATE_FLAGS));
+        assert.deepEqual(flags, ALL_UPDATE_FLAGS);
+    } finally { h.close(); }
+});
+
+test("desar la pestanya d'Aprofundiment només esborra el SEU avís", async () => {
+    const h = await loadSettings({ sync: { ...ALL_UPDATE_FLAGS } });
+    try {
+        h.document.getElementById("saveDeepDive").click();
+        await h.flush();
+        const flags = await h.storage.sync.get(Object.keys(ALL_UPDATE_FLAGS));
+        assert.equal(flags.deepDivePromptUpdateAvailable, false);
+        assert.equal(flags.sciencePromptUpdateAvailable, true);
+        assert.equal(flags.conceptMapPromptUpdateAvailable, true);
+        assert.equal(flags.simplePromptUpdateAvailable, true);
+    } finally { h.close(); }
+});
