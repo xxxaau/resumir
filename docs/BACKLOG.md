@@ -179,3 +179,41 @@ de zero. **Bonus:** elimina el procés manual de 10 passos de `CREAR-PLUGIN.md`.
 - [ ] Es pot editar, reordenar, desactivar i esborrar com els plugins integrats.
 - [ ] La icona pujada es desa i es mostra correctament (i no peta el límit de `storage`).
 - [ ] No hi ha regressió amb els plugins integrats.
+
+---
+
+## Millorar els prompts per defecte
+
+**Context (2026-10-11):** Els prompts per defecte (`shared/defaults.js`: resum,
+aprofundiment, validació científica, mapa conceptual, explica-ho fàcil i Anki) són
+el que defineix la qualitat del producte i no s'han revisat de manera sistemàtica.
+Surt a banda de l'auditoria d'UI (`docs/PLA-UI-UX.md`), que no els toca.
+
+**Comportament esperat:**
+- Cada prompt s'avalua amb una bateria petita de continguts reals (article
+  llarg, fil de Hacker News, transcripció de YouTube, PDF acadèmic, text curt) i
+  es millora només si el resultat és mesurablement millor (format respectat,
+  llargada adequada, sense inventar dades, en català).
+- El de resum i el d'Anki tenen la **mateixa estructura que ja es parseja**
+  (`extractExecutiveSummary` busca capçaleres; Anki espera un array JSON): no es
+  pot canviar el format de sortida sense tocar el parser.
+- La instrucció d'anti-injecció (bloc `SEGURETAT` / `<UNTRUSTED_CONTENT>`) es
+  manté a tots els prompts que la porten.
+
+**Consideracions tècniques (importants):**
+- **Versionat per-prompt:** en canviar un prompt cal pujar NOMÉS la seva entrada
+  a `PROMPT_VERSIONS`; així només els usuaris que l'hagin personalitzat veuen
+  l'avís «nova versió» (vegeu `computePromptMigration` i
+  `tests/prompt-migration.test.mjs`).
+- **`systemPrompt` i `ankiPrompt` no són a `PROMPT_VERSIONS`:** només es migren
+  els prompts que hi consten. Si es millora el de resum o el d'Anki, abans cal
+  afegir-los-hi i, a la configuració, desar només el valor quan difereix del
+  per defecte; si no, els usuaris que ja han premut «Desar» mai rebran la millora.
+- Els prompts personalitzats no es toquen mai (la migració mai els esborra).
+
+**Criteris d'acceptació mínims:**
+- [ ] Hi ha una bateria de continguts de prova i un criteri explícit de «millor» abans de canviar res.
+- [ ] Cada prompt canviat puja la seva versió a `PROMPT_VERSIONS` i els tests de migració segueixen passant.
+- [ ] El de resum i el d'Anki entren al sistema de versionat (i a la política de «desar només si difereix del defecte»).
+- [ ] El format de sortida segueix sent compatible amb els parsers existents.
+- [ ] No hi ha regressió en el bloc de seguretat contra injecció de prompt.
