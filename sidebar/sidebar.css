@@ -1356,3 +1356,65 @@ body {
 .anki-afina-input:focus { outline: none; border-color: var(--primary-color); }
 /* Avís informatiu (neutre, NO d'error vermell). */
 .anki-notice { font-size: 13px; color: var(--text-muted); background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; }
+
+/* Historial: cerca, esborrar i desfer */
+.history-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0;
+  padding: 6px 8px;
+  font: inherit;
+  color: var(--text-color);
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.history-search:focus-visible,
+.history-delete:focus-visible,
+.history-undo:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.history-delete {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8em;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.history-delete:hover {
+  color: var(--error-text);
+  background: var(--active-bg);
+}
+
+.history-toast {
+  position: sticky;
+  bottom: 44px; /* per sobre del peu fix */
+  margin-top: 8px;
+  padding: 8px 10px;
+  font-size: 0.85em;
+  color: var(--text-color);
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.history-undo {
+  margin-left: 4px;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}

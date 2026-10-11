@@ -500,3 +500,130 @@ test("l'avís i l'error surten ABANS del contingut al DOM (no al final d'un text
         assert.ok(order.indexOf("model-notice") < order.indexOf("content"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Historial útil (2.6): cerca, esborrar per entrada amb «Desfer», estat buit
+// que explica la retenció i dates llegibles.
+// ---------------------------------------------------------------------------
+function seedEntries(specs) {
+    const local = { summary_cache_index: [] };
+    for (const { url, title, type = "summary", ageDays = 0 } of specs) {
+        const key = `summary_cache:${url}:${type}`;
+        local[key] = {
+            url, title, summary: `Resum de ${title}`, model: "m",
+            timestamp: new Date(Date.now() - ageDays * 86400000).toISOString(),
+            version: "1.0", stats: { input: 1, output: 1 }, type,
+        };
+        local.summary_cache_index.push(key);
+    }
+    return local;
+}
+const items = (h) => [...h.document.querySelectorAll("#history-panel .history-item")];
+const typeInto = (h, el, value) => { el.value = value; el.dispatchEvent(new h.window.Event("input", { bubbles: true })); };
+
+test("historial - estat buit: explica com s'omple i quant es guarda", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        const text = h.document.getElementById("history-panel").textContent;
+        assert.match(text, /Aquí apareixeran els resums que generis/);
+        assert.match(text, /\d+ dies, només en aquest navegador/);
+        assert.equal(h.document.querySelector(".history-search"), null, "Sense entrades no cal cercador");
+    } finally { h.close(); }
+});
+
+test("historial - la cerca filtra per títol o adreça i anuncia el recompte", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedEntries([
+        { url: "https://a.example/ciencia", title: "Notícia de ciència" },
+        { url: "https://b.example/esports", title: "Resum d'esports" },
+        { url: "https://c.example/cuina", title: "Recepta" },
+    ]) } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        assert.equal(items(h).length, 3);
+        const search = h.document.querySelector(".history-search");
+        assert.ok(search.getAttribute("aria-label"));
+
+        typeInto(h, search, "ciència");
+        assert.equal(items(h).length, 1);
+        assert.match(items(h)[0].textContent, /Notícia de ciència/);
+        assert.match(h.document.querySelector("#history-panel [role='status']").textContent, /1 resultat/);
+
+        typeInto(h, search, "b.example"); // per adreça
+        assert.equal(items(h).length, 1);
+
+        typeInto(h, search, "zzz");
+        assert.equal(items(h).length, 0);
+        assert.match(h.document.getElementById("history-panel").textContent, /Cap resultat/);
+
+        typeInto(h, search, "");
+        assert.equal(items(h).length, 3);
+    } finally { h.close(); }
+});
+
+test("historial - esborrar una entrada l'elimina (tots els tipus) i es pot desfer", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedEntries([
+        { url: "https://a.example/x", title: "Pàgina A", type: "summary" },
+        { url: "https://a.example/x", title: "Pàgina A", type: "deepdive" },
+        { url: "https://b.example/y", title: "Pàgina B" },
+    ]) } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        assert.equal(items(h).length, 2);
+        const itemA = items(h).find(li => li.textContent.includes("Pàgina A"));
+        const del = itemA.querySelector(".history-delete");
+        assert.match(del.getAttribute("aria-label"), /Pàgina A/);
+
+        del.click();
+        await h.flush();
+        assert.equal(items(h).length, 1, "L'entrada A ja no surt");
+        const keys = Object.keys(await h.storage.local.get(null)).filter(k => k.startsWith("summary_cache:"));
+        assert.equal(keys.length, 1, "S'han esborrat els dos tipus d'A");
+        const toast = h.document.getElementById("history-toast");
+        assert.ok(!toast.classList.contains("hidden"));
+        assert.match(toast.textContent, /Entrada esborrada/);
+
+        toast.querySelector(".history-undo").click();
+        await h.flush();
+        assert.equal(items(h).length, 2, "Desfer torna l'entrada");
+        const after = Object.keys(await h.storage.local.get(null)).filter(k => k.startsWith("summary_cache:"));
+        assert.equal(after.length, 3, "I els dos tipus d'A");
+        const idx = (await h.storage.local.get("summary_cache_index")).summary_cache_index;
+        assert.equal(idx.length, 3);
+    } finally { h.close(); }
+});
+
+test("historial - desfer conserva la data original de l'entrada", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedEntries([{ url: "https://a.example/x", title: "Antiga", ageDays: 10 }]) } });
+    try {
+        const before = (await h.storage.local.get("summary_cache:https://a.example/x:summary"))["summary_cache:https://a.example/x:summary"].timestamp;
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        items(h)[0].querySelector(".history-delete").click();
+        await h.flush();
+        h.document.querySelector(".history-undo").click();
+        await h.flush();
+        const after = (await h.storage.local.get("summary_cache:https://a.example/x:summary"))["summary_cache:https://a.example/x:summary"].timestamp;
+        assert.equal(after, before);
+    } finally { h.close(); }
+});
+
+test("historial - data relativa fins a una setmana i absoluta (amb títol complet) després", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedEntries([
+        { url: "https://a.example/ara", title: "Ara", ageDays: 0 },
+        { url: "https://b.example/ahir", title: "Ahir", ageDays: 1 },
+        { url: "https://c.example/vella", title: "Vella", ageDays: 20 },
+    ]) } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        const meta = (title) => items(h).find(li => li.textContent.includes(title)).querySelector(".history-item-meta");
+        assert.equal(meta("Ara").textContent, "ara mateix");
+        assert.equal(meta("Ahir").textContent, "ahir");
+        assert.doesNotMatch(meta("Vella").textContent, /^fa \d+ dies$/, "Passada una setmana, data absoluta");
+        assert.ok(meta("Vella").title.length > 0, "El títol de l'element té la data completa");
+    } finally { h.close(); }
+});

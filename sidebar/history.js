@@ -162,7 +162,18 @@ async function loadHistoryEntry(entry) {
     }
 }
 
+// Entrades que es mostren ara (per a esborrar/desfer i re-renderitzar).
+let _historyEntries = [];
+let _undoTimer = null;
+
+function _matchesFilter(group, query) {
+    if (!query) return true;
+    const q = query.trim().toLowerCase();
+    return (group.title || "").toLowerCase().includes(q) || (group.url || "").toLowerCase().includes(q);
+}
+
 function _renderHistoryPanel(panel, entries) {
+    _historyEntries = entries;
     panel.replaceChildren();
 
     const header = document.createElement("div");
@@ -182,23 +193,69 @@ function _renderHistoryPanel(panel, entries) {
     header.appendChild(heading);
     panel.appendChild(header);
 
-    if (entries.length === 0) {
-        const empty = document.createElement("p");
-        empty.className = "history-empty";
-        empty.textContent = "Sense historial disponible.";
-        panel.appendChild(empty);
-        return;
+    // Cerca (només si hi ha prou entrades perquè serveixi de res)
+    const listHost = document.createElement("div");
+    listHost.className = "history-list-host";
+    let searchInput = null;
+    if (entries.length > 0) {
+        searchInput = document.createElement("input");
+        searchInput.type = "search";
+        searchInput.className = "history-search";
+        searchInput.placeholder = "Cerca per títol o adreça…";
+        searchInput.setAttribute("aria-label", "Cerca a l'historial");
+        searchInput.addEventListener("input", () => fill());
+        panel.appendChild(searchInput);
     }
+    const resultCount = document.createElement("p");
+    resultCount.className = "sr-only";
+    resultCount.setAttribute("role", "status");
+    resultCount.setAttribute("aria-live", "polite");
+    panel.appendChild(resultCount);
+    panel.appendChild(listHost);
 
-    const groups = _groupEntriesByUrl(entries);
+    const toast = document.createElement("div");
+    toast.id = "history-toast";
+    toast.className = "history-toast hidden";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    panel.appendChild(toast);
+
+    function fill() {
+        listHost.replaceChildren();
+        if (_historyEntries.length === 0) {
+            const empty = document.createElement("p");
+            empty.className = "history-empty";
+            const days = typeof CACHE_TTL_DAYS === "number" ? CACHE_TTL_DAYS : 30;
+            empty.textContent = `Aquí apareixeran els resums que generis. Es guarden ${days} dies, només en aquest navegador.`;
+            listHost.appendChild(empty);
+            resultCount.textContent = "";
+            return;
+        }
+        const query = searchInput ? searchInput.value : "";
+        const groups = _groupEntriesByUrl(_historyEntries).filter(g => _matchesFilter(g, query));
+        if (groups.length === 0) {
+            const none = document.createElement("p");
+            none.className = "history-empty";
+            none.textContent = "Cap resultat per a aquesta cerca.";
+            listHost.appendChild(none);
+            resultCount.textContent = "Cap resultat.";
+            return;
+        }
+        resultCount.textContent = query ? `${groups.length} ${groups.length === 1 ? "resultat" : "resultats"}.` : "";
+        listHost.appendChild(_buildHistoryList(groups, toast, fill));
+    }
+    fill();
+}
+
+function _buildHistoryList(groups, toast, refill) {
     const list = document.createElement("ul");
     list.className = "history-list";
 
     for (const group of groups) {
         const li = document.createElement("li");
         li.className = "history-item";
-        // L'<li> és un contenidor; els controls interactius (títol i icones de
-        // tipus) són <button> germans. Abans l'<li> era role=button amb
+        // L'<li> és un contenidor; els controls interactius (títol, icones de
+        // tipus i esborrar) són <button> germans. Abans l'<li> era role=button amb
         // role=button a dins (interactius niats: els interns quedaven inaccessibles).
 
         const topRow = document.createElement("div");
@@ -234,11 +291,25 @@ function _renderHistoryPanel(panel, entries) {
             topRow.appendChild(typesRow);
         }
 
+        // Esborrar l'entrada (tots els seus tipus), amb «Desfer»
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "history-delete";
+        del.textContent = "\u2715";
+        del.title = "Esborrar de l'historial";
+        del.setAttribute("aria-label", `Esborrar de l'historial: ${rawTitle}`);
+        del.addEventListener("click", (e) => {
+            e.stopPropagation();
+            _deleteGroup(group, toast, refill);
+        });
+        topRow.appendChild(del);
+
         li.appendChild(topRow);
 
         const metaEl = document.createElement("span");
         metaEl.className = "history-item-meta";
         metaEl.textContent = _relativeTime(group.latestTimestamp);
+        metaEl.title = new Date(group.latestTimestamp).toLocaleString("ca");
         li.appendChild(metaEl);
 
         const openEntry = () => {
@@ -252,7 +323,38 @@ function _renderHistoryPanel(panel, entries) {
 
         list.appendChild(li);
     }
-    panel.appendChild(list);
+    return list;
+}
+
+async function _deleteGroup(group, toast, refill) {
+    const removed = _historyEntries.filter(e => e.url === group.url);
+    for (const e of removed) {
+        await deleteSummaryCache(e.url, e.type || "summary");
+    }
+    _historyEntries = _historyEntries.filter(e => e.url !== group.url);
+    refill();
+
+    // Avís amb «Desfer» durant uns segons (no hi ha confirmació prèvia: és més
+    // ràpid i es pot revertir)
+    if (_undoTimer) clearTimeout(_undoTimer);
+    toast.replaceChildren();
+    const msg = document.createElement("span");
+    msg.textContent = "Entrada esborrada. ";
+    const undo = document.createElement("button");
+    undo.type = "button";
+    undo.className = "history-undo";
+    undo.textContent = "Desfer";
+    undo.addEventListener("click", async () => {
+        await restoreSummaryCacheEntries(removed);
+        _historyEntries = _historyEntries.concat(removed)
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        toast.classList.add("hidden");
+        toast.replaceChildren();
+        refill();
+    });
+    toast.append(msg, undo);
+    toast.classList.remove("hidden");
+    _undoTimer = setTimeout(() => { toast.classList.add("hidden"); toast.replaceChildren(); }, 8000);
 }
 
 async function _loadTypeFromCache(url, type) {
@@ -296,11 +398,14 @@ function _groupEntriesByUrl(entries) {
 function _relativeTime(isoString) {
     const diffMs = Date.now() - new Date(isoString).getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 60) return diffMin <= 1 ? "fa 1 min" : `fa ${diffMin} min`;
+    if (diffMin < 1) return "ara mateix";
+    if (diffMin < 60) return diffMin === 1 ? "fa 1 min" : `fa ${diffMin} min`;
     const diffH = Math.floor(diffMin / 60);
     if (diffH < 24) return diffH === 1 ? "fa 1 h" : `fa ${diffH} h`;
     const diffD = Math.floor(diffH / 24);
     if (diffD === 1) return "ahir";
+    // Passada una setmana, «fa 23 dies» no diu res: data absoluta
+    if (diffD > 7) return new Date(isoString).toLocaleDateString("ca", { day: "numeric", month: "short", year: "numeric" });
     return `fa ${diffD} dies`;
 }
 

@@ -225,6 +225,32 @@ async function deleteSummaryCache(url, type) {
     }
 }
 
+/**
+ * Torna a escriure entrades esborrades (desfer de l'Historial), conservant el
+ * timestamp original. `entries` són les que retorna listCachedSummaries().
+ */
+async function restoreSummaryCacheEntries(entries) {
+    try {
+        if (!Array.isArray(entries) || entries.length === 0) return false;
+        const cacheIndex = await getSummaryCacheIndex();
+        const toSet = {};
+        for (const e of entries) {
+            const type = e.type || "summary";
+            const key = getCacheKey(e.url, type);
+            toSet[key] = {
+                url: e.url, title: e.title, summary: e.summary, model: e.model,
+                timestamp: e.timestamp, version: "1.0", stats: e.stats || { input: 0, output: 0 }, type,
+            };
+            if (!cacheIndex.includes(key)) cacheIndex.push(key);
+        }
+        await ext.storage.local.set({ ...toSet, [SUMMARY_CACHE_INDEX_KEY]: cacheIndex });
+        return true;
+    } catch (e) {
+        console.error("Error restoring cache entries:", e);
+        return false;
+    }
+}
+
 async function saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, title, url, cacheTokens) {
     if (!contentType) contentType = "summary";
     if (cacheTokens === undefined) cacheTokens = 0;
@@ -267,5 +293,5 @@ async function saveUsageStats(inputTokens, outputTokens, contentType, modelName,
 }
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, listCachedSummaries, getAvailableTypes, deleteSummaryCache, getCacheKey };
+    module.exports = { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, listCachedSummaries, getAvailableTypes, deleteSummaryCache, restoreSummaryCacheEntries, getCacheKey };
 }

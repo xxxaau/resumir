@@ -188,10 +188,9 @@ test("openHistoryPanel - renderitza missatge buit si no hi ha entrades", async (
     await openHistoryPanel();
 
     const panel = dom.els["history-panel"];
-    const hasEmpty = panel._children.some(c =>
-        c._children?.some(e => e.textContent?.includes("Sense historial"))
-    ) || panel._children.some(c => c.textContent?.includes("Sense historial"));
-    assert.ok(hasEmpty, "Ha de mostrar el missatge 'Sense historial disponible.'");
+    const host = panel._children.find(c => c.className === "history-list-host");
+    const hasEmpty = host?._children.some(c => c.textContent?.includes("Aquí apareixeran els resums"));
+    assert.ok(hasEmpty, "Ha de mostrar el missatge d'estat buit amb la retenció");
 });
 
 test("openHistoryPanel - renderitza les entrades de l'historial", async () => {
@@ -204,8 +203,9 @@ test("openHistoryPanel - renderitza les entrades de l'historial", async () => {
     await openHistoryPanel();
 
     const panel = dom.els["history-panel"];
-    // La llista és el darrer fill del panel
-    const list = panel._children.find(c => c.className === "history-list");
+    // La llista viu dins del contenidor (la cerca la re-renderitza)
+    const host = panel._children.find(c => c.className === "history-list-host");
+    const list = host?._children.find(c => c.className === "history-list");
     assert.ok(list, "Ha d'existir una history-list");
     assert.equal(list._children.length, 2, "Ha de tenir 2 ítems");
     const titles = list._children.map(li => {
@@ -225,7 +225,8 @@ test("openHistoryPanel - trunca títols llargs a 120 caràcters", async () => {
     await openHistoryPanel();
 
     const panel = dom.els["history-panel"];
-    const list  = panel._children.find(c => c.className === "history-list");
+    const host  = panel._children.find(c => c.className === "history-list-host");
+    const list  = host._children.find(c => c.className === "history-list");
     const topRow = list._children[0]._children.find(c => c.className === "history-item-top");
     const titleEl = topRow?._children.find(c => c.className === "history-item-title");
     assert.ok(titleEl.textContent.length <= 122, // 120 + "…"

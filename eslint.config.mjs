@@ -77,6 +77,9 @@ const extensionGlobals = {
     purgeStaleCacheEntries: "readonly",
     listCachedSummaries: "readonly",
     getAvailableTypes: "readonly",
+    CACHE_TTL_DAYS: "readonly",
+    deleteSummaryCache: "readonly",
+    restoreSummaryCacheEntries: "readonly",
     getCacheKey: "readonly",
     // shared/models.js
     sortModelsByPriority: "readonly",
