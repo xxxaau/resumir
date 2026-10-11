@@ -878,13 +878,14 @@
               type="text"
               id="obsidianPath"
               class="form-control"
-              placeholder="ex: [Notes/]YYYY/gggg-Www"
             />
+            <div id="obsidianPathPreview" class="help-text path-preview" role="status" aria-live="polite"></div>
             <div class="field-legend">
               <span
-                ><strong>Camps de data:</strong> <code>YYYY</code>,
-                <code>MM</code>, <code>DD</code>, <code>HH</code>,
-                <code>mm</code>, <code>gggg</code>, <code>ww</code></span
+                ><strong>Camps de data:</strong> <code>YYYY</code> any,
+                <code>MM</code> mes, <code>DD</code> dia, <code>HH</code> hora,
+                <code>mm</code> minut, <code>ww</code> setmana ISO. El text
+                entre claudàtors, com <code>[Notes/]</code>, es copia tal qual.</span
               >
             </div>
             <div class="help-text">
@@ -1188,9 +1189,9 @@
               type="text"
               id="ankiPath"
               class="form-control"
-              placeholder="ex: 3 Recursos/Anki.md"
             />
-            <div class="help-text">Ruta relativa dins el vault on s'afegiran les targetes exportades.</div>
+            <div id="ankiPathPreview" class="help-text path-preview" role="status" aria-live="polite"></div>
+            <div class="help-text">Ruta relativa dins el vault on s'afegiran les targetes exportades. Admet els mateixos camps de data que la ruta d'Obsidian.</div>
           </div>
 
           <div class="form-group">
@@ -1453,6 +1454,7 @@
     <script defer src="../shared/models.js"></script>
     <script defer src="../shared/defaults.js"></script>
     <script defer src="../shared/api-key.js"></script>
+    <script defer src="../sidebar/utils.js"></script>
     <script defer src="settings-defaults.js"></script>
     <script defer src="settings-order.js"></script>
     <script defer src="settings-cache.js"></script>

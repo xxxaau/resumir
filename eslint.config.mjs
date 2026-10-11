@@ -132,6 +132,8 @@ const extensionGlobals = {
     setAnkiCards: "readonly",
     // shared/defaults.js — constants Anki
     DEFAULT_ANKI_PROMPT: "readonly",
+    DEFAULT_MARKDOWN_TEMPLATE: "readonly",
+    DEFAULT_OBSIDIAN_PATH: "readonly",
     DEFAULT_ANKI_PATH: "readonly",
     DEFAULT_ANKI_PACKET: "readonly",
     DEFAULT_ANKI_LANG: "readonly",
@@ -140,7 +142,6 @@ const extensionGlobals = {
 /** Globals cross-file específics de la pàgina d'opcions (settings-*.js) */
 const settingsGlobals = {
     // settings-defaults.js
-    DEFAULT_MARKDOWN_TEMPLATE: "readonly",
     DEFAULT_SYSTEM_PROMPT: "readonly",
     DEFAULT_OBSIDIAN_TEMPLATE: "readonly",
     DEFAULT_DEEP_DIVE_PROMPT: "readonly",
@@ -180,6 +181,7 @@ const settingsGlobals = {
     showStatus: "readonly",
     autosave: "readonly",
     checkApiKey: "readonly",
+    updatePathPreview: "readonly",
     toggleApiKeyVisibility: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",

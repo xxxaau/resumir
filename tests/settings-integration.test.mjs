@@ -398,3 +398,49 @@ test("enllaç profund - parseSettingsHash només accepta ids segurs", async () =
         assert.deepEqual(p(""), { tab: null, focus: null });
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Rutes de nota (2.4): els valors per defecte eren l'estructura de carpetes
+// personal de l'autor i els tokens (gggg, ww…) no es podien descobrir.
+// ---------------------------------------------------------------------------
+test("rutes - els valors per defecte són neutres (no la carpeta personal de l'autor)", async () => {
+    const h = await loadSettings({});
+    try {
+        assert.equal(h.document.getElementById("obsidianPath").value, "Resumir/YYYY-MM-DD");
+        assert.equal(h.document.getElementById("ankiPath").value, "Resumir/Anki.md");
+        assert.doesNotMatch(h.document.getElementById("tab-obsidian").textContent + h.document.getElementById("tab-anki").textContent,
+            /4 Arxiu|3 Recursos/);
+    } finally { h.close(); }
+});
+
+test("rutes - la vista prèvia mostra la ruta resolta amb la data d'avui i s'actualitza en escriure", async () => {
+    const h = await loadSettings({});
+    try {
+        const preview = h.document.getElementById("obsidianPathPreview");
+        assert.match(preview.textContent, /^Exemple: Resumir\/\d{4}-\d{2}-\d{2}\.md$/);
+
+        const input = h.document.getElementById("obsidianPath");
+        input.value = "[Notes/]YYYY/ww";
+        input.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        const year = String(new Date().getFullYear());
+        assert.match(preview.textContent, new RegExp(`^Exemple: Notes/${year}/\\d{2}\\.md$`));
+        assert.equal(preview.getAttribute("role"), "status");
+
+        assert.match(h.document.getElementById("ankiPathPreview").textContent, /^Exemple: Resumir\/Anki\.md$/);
+    } finally { h.close(); }
+});
+
+test("rutes - una ruta desada per l'usuari es respecta (no es trepitja amb el valor per defecte nou)", async () => {
+    const h = await loadSettings({ sync: { obsidianPath: "[4 Arxiu/Notes/]YYYY/gggg-[W]ww", ankiPath: "3 Recursos/Anki.md" } });
+    try {
+        assert.equal(h.document.getElementById("obsidianPath").value, "[4 Arxiu/Notes/]YYYY/gggg-[W]ww");
+        assert.equal(h.document.getElementById("ankiPath").value, "3 Recursos/Anki.md");
+    } finally { h.close(); }
+});
+
+test("plantilla de Markdown - la configuració mostra la MATEIXA que fa servir la barra lateral", async () => {
+    const h = await loadSettings({});
+    try {
+        assert.equal(h.document.getElementById("markdownTemplate").value, "# [{{title}}]({{url}})\n\n{{summary}}");
+    } finally { h.close(); }
+});

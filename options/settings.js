@@ -95,6 +95,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         themeSelect.addEventListener("change", () => autosave({ theme: themeSelect.value }));
     }
 
+    // Vista prèvia de les rutes de nota (data d'avui) en carregar i en escriure
+    [["obsidianPath", "obsidianPathPreview"], ["ankiPath", "ankiPathPreview"]].forEach(([inputId, previewId]) => {
+        updatePathPreview(inputId, previewId);
+        const input = getEl(inputId);
+        if (input) input.addEventListener("input", () => updatePathPreview(inputId, previewId));
+    });
+
     bindClick("verifyApiKey", checkApiKey);
     bindClick("toggleApiKey", toggleApiKeyVisibility);
 

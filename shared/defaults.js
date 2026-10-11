@@ -283,9 +283,18 @@ ESTRUCTURA DE LA RESPOSTA:
 
 CONTINGUT A EXPLICAR:`;
 
+// --- Obsidian / Markdown ---
+// Valors per defecte d'exportació. Font única: la configuració, la barra lateral
+// i els tests els llegeixen d'aquí (abans la plantilla de Markdown i la ruta
+// d'Obsidian estaven copiades i divergien entre configuració i sidebar). Les
+// rutes són NEUTRES: abans eren l'estructura de carpetes personal de l'autor.
+// Tokens de data: YYYY any, MM mes, DD dia, ww setmana ISO; «[text]» es copia literal.
+const DEFAULT_MARKDOWN_TEMPLATE = "# [{{title}}]({{url}})\n\n{{summary}}";
+const DEFAULT_OBSIDIAN_PATH = "Resumir/YYYY-MM-DD";
+
 // --- Anki ---
 // Valors per defecte del plugin d'Anki.
-const DEFAULT_ANKI_PATH = "3 Recursos/Anki.md";
+const DEFAULT_ANKI_PATH = "Resumir/Anki.md";
 const DEFAULT_ANKI_PACKET = 5;
 const DEFAULT_ANKI_LANG = "ca";
 
@@ -317,6 +326,8 @@ if (typeof module !== "undefined" && module.exports) {
         DEFAULT_EXTENSION_ORDER,
         DEFAULT_ANKI_PROMPT,
         DEFAULT_ANKI_PATH,
+        DEFAULT_OBSIDIAN_PATH,
+        DEFAULT_MARKDOWN_TEMPLATE,
         DEFAULT_ANKI_PACKET,
         DEFAULT_ANKI_LANG,
     };

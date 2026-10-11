@@ -654,3 +654,37 @@ test("el botó de configuració de la barra continua obrint-la tal qual (sense d
         assert.equal(h.calls.tabsCreate.length, 0);
     } finally { h.close(); }
 });
+
+test("Obsidian - sense ruta desada s'usa la neutra per defecte (no la personal de l'autor)", async () => {
+    const h = await loadSidebar({
+        sync: { enableObsidian: true, obsidianVault: "MeuVault" },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        h.document.getElementById("obsidianBtn").click();
+        await h.flush(10);
+        const url = h.calls.tabsCreate.at(-1).url;
+        assert.match(url, /^obsidian:\/\/new\?vault=MeuVault&file=Resumir%2F\d{4}-\d{2}-\d{2}/);
+        assert.doesNotMatch(decodeURIComponent(url), /4 Arxiu/);
+    } finally { h.close(); }
+});
+
+test("copiar Markdown - sense plantilla desada usa la plantilla per defecte compartida", async () => {
+    const h = await loadSidebar({
+        sync: { enableMarkdown: true },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum complet.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        h.document.getElementById("copyBtn").click();
+        await h.flush(10);
+        assert.match(h.calls.clipboard[0], /^# \[Article\]\(https:\/\/example\.com\/article\)\n\nEl resum complet\./);
+    } finally { h.close(); }
+});

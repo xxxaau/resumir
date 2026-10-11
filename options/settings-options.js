@@ -137,9 +137,31 @@ function toggleApiKeyVisibility() {
   btn.setAttribute("aria-label", show ? "Amagar la clau" : "Mostrar la clau");
 }
 
+/**
+ * Vista prèvia de la ruta d'una nota amb la data d'ara («Exemple: …»). Els
+ * tokens (gggg, ww…) no es descobreixen sense veure'n el resultat.
+ */
+function updatePathPreview(inputId, previewId, suffix = ".md") {
+  const input = document.querySelector("#" + inputId);
+  const preview = document.querySelector("#" + previewId);
+  if (!input || !preview) return;
+  const template = input.value || (inputId === "obsidianPath" ? DEFAULT_OBSIDIAN_PATH : DEFAULT_ANKI_PATH);
+  let path;
+  try {
+    path = parseObsidianPath(template);
+  } catch {
+    preview.textContent = "";
+    return;
+  }
+  if (suffix && !path.toLowerCase().endsWith(suffix)) path += suffix;
+  preview.textContent = `Exemple: ${path}`;
+}
+
 function restoreOptions(syncData, localData) {
     document.querySelector("#apiKey").value = (localData && localData.apiKey) || "";
     document.querySelector("#modelName").placeholder = DEFAULT_MODEL_ID;
+    document.querySelector("#obsidianPath").placeholder = DEFAULT_OBSIDIAN_PATH;
+    document.querySelector("#ankiPath").placeholder = DEFAULT_ANKI_PATH;
     document.querySelector("#modelName").value = (syncData && syncData.modelName) || DEFAULT_MODEL_ID;
     document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
     document.querySelector("#systemPrompt").value = (syncData && syncData.systemPrompt) || DEFAULT_SYSTEM_PROMPT;
@@ -149,7 +171,7 @@ function restoreOptions(syncData, localData) {
 
     document.querySelector("#enableObsidian").checked = syncData && syncData.enableObsidian === true;
     document.querySelector("#obsidianVault").value = (syncData && syncData.obsidianVault) || "Obsidian";
-    document.querySelector("#obsidianPath").value = (syncData && syncData.obsidianPath) || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
+    document.querySelector("#obsidianPath").value = (syncData && syncData.obsidianPath) || DEFAULT_OBSIDIAN_PATH;
     document.querySelector("#obsidianTemplate").value = (syncData && syncData.obsidianTemplate) || DEFAULT_OBSIDIAN_TEMPLATE;
 
     document.querySelector("#enableBionic").checked = syncData && syncData.enableBionic === true;

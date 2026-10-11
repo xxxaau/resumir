@@ -59,6 +59,8 @@ const CEILINGS = [
     ["Descarta-ho tot",     0, "infinitiu: «Descartar-ho tot»"],
     ["Selecciona-ho tot",   0, "infinitiu: «Seleccionar-ho tot»"],
     ["Afegeix (",           0, "diu on va: «Afegir a Obsidian (N)»"],
+    ["4 Arxiu",             0, "ruta personal de l'autor: usa DEFAULT_OBSIDIAN_PATH"],
+    ["3 Recursos",          0, "ruta personal de l'autor: usa DEFAULT_ANKI_PATH"],
 ];
 
 for (const [fragment, ceiling, why] of CEILINGS) {

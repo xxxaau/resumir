@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
     copyBtn.addEventListener("click", async () => {
         if (!currentMetadata.summary) return;
         try {
-            const template = globalConfigCache.markdownTemplate || "# [{{title}}]({{url}})\n\n{{summary}}";
+            const template = globalConfigCache.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
             const markdown = formatMarkdownContent(template, currentMetadata);
             await navigator.clipboard.writeText(markdown);
             
@@ -334,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!currentMetadata.summary) return;
         try {
             const vault = globalConfigCache.obsidianVault || "Obsidian";
-            const pathTemplate = globalConfigCache.obsidianPath || "[4 Arxiu/Notes/]YYYY/gggg-[W]ww";
+            const pathTemplate = globalConfigCache.obsidianPath || DEFAULT_OBSIDIAN_PATH;
             const contentTemplate = globalConfigCache.obsidianTemplate || "- [{{title}}]({{url}})\n\t- {{summary_executive}}";
 
             const filePath = parseObsidianPath(pathTemplate);
