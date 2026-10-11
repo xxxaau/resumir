@@ -164,7 +164,7 @@ test("typeIconSvg - cada tipus de contingut té la seva icona SVG", async () => 
 // Cada pàgina de plugin explica què fa, per què serveix i com configurar-lo
 test("settings: cada pàgina de plugin té la seva descripció detallada", () => {
     const doc = load("options/settings.html");
-    const panes = ["obsidian", "markdown", "deepdive", "science", "bionic", "conceptmap", "simple", "selectpdf", "anki"];
+    const panes = ["resum", "obsidian", "markdown", "deepdive", "science", "bionic", "conceptmap", "simple", "selectpdf", "anki"];
     for (const id of panes) {
         const about = doc.querySelector(`#tab-${id} .plugin-about`);
         assert.ok(about, `#tab-${id} sense .plugin-about`);

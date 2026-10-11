@@ -145,10 +145,22 @@
       <div id="tab-resum" class="tab-pane">
         <h1 class="page-title">Configuració de Resum</h1>
 
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> És la funció principal: resumeix la pàgina, el vídeo (a partir de la transcripció) o el PDF en punts clau, en català i fidel al text original.</p>
+          <p><strong>Per què és útil.</strong> Et deixa decidir en segons si val la pena llegir-ho o mirar-ho sencer, i recuperar després les idees principals.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><strong>Instruccions:</strong> el text de sota és el que rep el model abans de cada resum. Aquí pots canviar l'idioma, el to, la llargada o l'estructura (per exemple, «màxim 5 punts»).</li>
+            <li>El de per defecte ja funciona bé per a la majoria de pàgines; si el canvies, apareix la insígnia <em>Personalitzat</em> i <em>Restaurar</em> el recupera.</li>
+            <li>El model i la clau es trien a <strong>General</strong>. Per ajustar el resultat sense editar res, fes servir «Més curt» i «Més detall» sota cada resum.</li>
+          </ul>
+        </details>
+
         <div class="section">
           <div class="form-group">
             <label for="systemPrompt"
-              >Instruccions de l'assistent (System Prompt)</label
+              >Instruccions de l'assistent</label
             >
             <span id="systemPromptBadge" class="prompt-badge" hidden>Personalitzat</span>
             <textarea
