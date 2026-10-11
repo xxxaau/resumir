@@ -564,3 +564,39 @@ test("restaurar - si ja era el valor per defecte no fa soroll", async () => {
         assert.equal(h.document.getElementById("dirtyNote").hidden, true);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Prompts (2.4): un prompt buit es podia desar i deixava l'extensió sense
+// instruccions; i no es veia quins prompts estaven modificats.
+// ---------------------------------------------------------------------------
+test("desar - un prompt buit es bloqueja, enfoca el camp i no escriu res", async () => {
+    const h = await loadSettings({});
+    try {
+        let writes = 0;
+        const orig = h.storage.sync.set;
+        h.storage.sync.set = async (...a) => { writes++; return orig(...a); };
+        const ta = h.document.getElementById("deepDivePrompt");
+        ta.value = "   ";
+        h.document.getElementById("saveDeepDive").click();
+        await h.flush();
+        assert.equal(writes, 0);
+        assert.match(h.document.getElementById("status").textContent, /Prompt d'aprofundiment.*buit/);
+        assert.equal(h.document.activeElement, ta);
+    } finally { h.close(); }
+});
+
+test("prompts - la insígnia «Personalitzat» apareix només si el text difereix del per defecte", async () => {
+    const h = await loadSettings({});
+    try {
+        const badge = h.document.getElementById("systemPromptBadge");
+        assert.ok(badge, "Ha d'existir #systemPromptBadge");
+        assert.equal(badge.hidden, true);
+        const ta = h.document.getElementById("systemPrompt");
+        ta.value = ta.value + " extra";
+        ta.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        assert.equal(badge.hidden, false);
+        assert.match(badge.textContent, /Personalitzat/);
+        h.document.getElementById("resetSystemPrompt").click();
+        assert.equal(badge.hidden, true, "Restaurar la fa desaparèixer");
+    } finally { h.close(); }
+});

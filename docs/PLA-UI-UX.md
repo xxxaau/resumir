@@ -139,9 +139,9 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ### 2.4 Configuració
 
-- **Revelació progressiva:** prompts plegats sota «Personalitzar instruccions
-  (avançat)» amb insígnia «Personalitzat», llegenda de variables (`{{COUNT}}`,
-  `{{LANG}}`) i bloqueig de prompt buit.
+- **Revelació progressiva:** plegar els prompts sota «Personalitzar instruccions
+  (avançat)» (la insígnia «Personalitzat» i el bloqueig de prompt buit ja hi són;
+  els prompts per defecte no tenen variables, no cal llegenda).
 - **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
   sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
 

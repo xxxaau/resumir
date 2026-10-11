@@ -184,6 +184,7 @@ const settingsGlobals = {
     autosave: "readonly",
     setDirty: "readonly",
     restoreField: "readonly",
+    updatePromptBadges: "readonly",
     isDirty: "readonly",
     checkApiKey: "readonly",
     updatePathPreview: "readonly",

@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Text editat i no desat: avís visible i confirmació en tancar la pestanya
     document.querySelector(".main-content").addEventListener("input", (e) => {
         const t = e.target;
+        if (t.matches && t.matches("textarea")) updatePromptBadges();
         if (t.matches && t.matches('textarea, input[type="text"], input[type="password"], input[type="number"], input[type="range"]')) setDirty(true);
     });
     window.addEventListener("beforeunload", (e) => {

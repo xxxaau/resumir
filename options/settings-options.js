@@ -15,8 +15,39 @@ const SAVE_BUTTON_UPDATE_KEYS = {
   saveSimple:     "simplePromptUpdateAvailable",
 };
 
+// Camps de prompt i el seu valor per defecte (insígnia «Personalitzat» i
+// bloqueig de prompt buit).
+const PROMPT_FIELDS = [
+  ["systemPrompt", () => DEFAULT_SYSTEM_PROMPT],
+  ["deepDivePrompt", () => DEFAULT_DEEP_DIVE_PROMPT],
+  ["sciencePrompt", () => DEFAULT_SCIENCE_PROMPT],
+  ["conceptMapPrompt", () => DEFAULT_CONCEPTMAP_PROMPT],
+  ["simplePrompt", () => DEFAULT_SIMPLE_PROMPT],
+  ["ankiPrompt", () => DEFAULT_ANKI_PROMPT],
+];
+
+function updatePromptBadges() {
+  for (const [id, getDefault] of PROMPT_FIELDS) {
+    const el = document.querySelector("#" + id);
+    const badge = document.querySelector(`#${id}Badge`);
+    if (el && badge) badge.hidden = el.value === getDefault();
+  }
+}
+
 function saveOptions(e) {
   if(e) e.preventDefault();
+
+  // Un prompt buit deixaria l'extensió sense instruccions: no es desa res.
+  for (const [id] of PROMPT_FIELDS) {
+    const el = document.querySelector("#" + id);
+    if (el && !el.value.trim()) {
+      const label = document.querySelector(`label[for="${id}"]`);
+      const name = label ? label.textContent.replace(/\s+/g, " ").trim() : id;
+      showStatus(`«${name}» no pot estar buit. Escriu-hi instruccions o prem «Restaurar».`);
+      el.focus();
+      return;
+    }
+  }
   
   // Sense espais, cometes ni prefix «Bearer» (errors habituals en enganxar-la)
   const apiKeyValue = normalizeApiKey(document.querySelector("#apiKey").value);
@@ -260,6 +291,7 @@ function restoreOptions(syncData, localData) {
         // que captura getCurrentExtensionOrder en desar) reflecteixi el default.
         applyExtensionOrder([...DEFAULT_EXTENSION_ORDER]);
     }
+    updatePromptBadges();
 }
 
 function showPromptUpdateBanner(type, isAvailable) {
@@ -304,9 +336,10 @@ function restoreField(id, defaultValue, label) {
     const previous = el.value;
     if (previous === defaultValue) return false;
     el.value = defaultValue;
+    updatePromptBadges();
     setDirty(true);
     showStatus(`${label} restaurat al valor per defecte.`, {
-        undo: () => { el.value = previous; setDirty(true); showStatus("Restauració desfeta."); },
+        undo: () => { el.value = previous; updatePromptBadges(); setDirty(true); showStatus("Restauració desfeta."); },
     });
     return true;
 }
