@@ -534,7 +534,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (types.includes(ct.id)) {
                         const icon = document.createElement("span");
                         icon.className = "cache-badge-type";
-                        icon.textContent = ct.icon;
+                        if (typeof typeIconSvg === "function") icon.appendChild(typeIconSvg(ct.id));
+                        else icon.textContent = ct.icon;
                         icon.title = ct.label;
                         icon.dataset.type = ct.id;
                         // Operable amb teclat: el clic el gestiona el handler delegat

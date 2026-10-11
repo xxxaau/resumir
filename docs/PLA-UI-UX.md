@@ -127,10 +127,8 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ### 2.1 Barra d'eines
 
-- Un sol joc d'icones SVG per tipus (barra, peu i historial); fora els emoji
-  🔬📊🧠🃏🕐⚡. «Aprofundir» deixa de ser un «+». El peu a 320 px es solapa (les
-  estadístiques i els botons): amagar separadors i cronòmetre per sota d'una
-  amplada, o moure les icones de tipus (vegeu «Pestanyes per tipus», Nivell 3).
+- «Aprofundir» continua sent un «+» a la barra (la resta d'icones de tipus ja
+  són SVG).
 
 ### 2.4 Configuració
 

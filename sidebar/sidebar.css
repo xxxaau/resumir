@@ -1444,3 +1444,16 @@ body {
 .idle-saved-label { flex-basis: 100%; margin: 0; font-size: 0.85em; color: var(--text-muted); }
 .idle-saved-btn { min-height: 24px; padding: 4px 10px; font: inherit; font-size: 0.9em; color: var(--text-color); background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
 .idle-saved-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
+
+/* Icones SVG dels tipus (substitueixen els emoji) */
+.type-svg { vertical-align: -2px; flex-shrink: 0; }
+.history-filter .type-svg { margin-right: 4px; }
+
+/* Peu en un panell estret: les estadístiques no es solapen amb els botons */
+.footer-section-left { overflow: hidden; }
+#model-select { min-width: 0; flex-shrink: 1; text-overflow: ellipsis; }
+@media (max-width: 340px) {
+  .footer-section-left .section-divider,
+  #generation-timer { display: none; }
+  #footer-status { padding-left: 6px; padding-right: 6px; gap: 4px; }
+}

@@ -138,3 +138,25 @@ test("els scripts de configuració que carrega settings.html existeixen i api-ke
     assert.ok(srcs.indexOf("../shared/api-key.js") > -1);
     assert.ok(srcs.indexOf("../shared/api-key.js") < srcs.indexOf("settings.js"));
 });
+
+// ---------------------------------------------------------------------------
+// Icones (2.1): un sol joc d'icones SVG. Els emoji es veuen diferent a cada
+// sistema, no hereten el color del tema i fan l'interfície poc coherent.
+// ---------------------------------------------------------------------------
+test("la barra lateral no usa emoji com a icones (SVG)", () => {
+    const html = readFileSync(resolve(ROOT, "sidebar/sidebar.html"), "utf8")
+        .replace(/<!--[\s\S]*?-->/g, "");
+    const found = html.match(/\p{Extended_Pictographic}/gu) || [];
+    assert.deepEqual(found, [], "Hi ha emoji a sidebar.html: " + found.join(" "));
+});
+
+test("typeIconSvg - cada tipus de contingut té la seva icona SVG", async () => {
+    const { createRequire } = await import("node:module");
+    const require = createRequire(import.meta.url);
+    const { TYPE_ICON_PATHS } = require("../shared/icons.js");
+    const { CONTENT_TYPES } = require("../shared/content-types.js");
+    for (const ct of CONTENT_TYPES) {
+        assert.ok(TYPE_ICON_PATHS[ct.id], `Falta la icona SVG del tipus ${ct.id}`);
+    }
+    assert.ok(TYPE_ICON_PATHS.cache && TYPE_ICON_PATHS.history);
+});

@@ -93,6 +93,8 @@ const extensionGlobals = {
     setLoadingStage: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",
+    TYPE_ICON_PATHS: "readonly",
+    typeIconSvg: "readonly",
     // sidebar/content.js
     isPdfUrl: "readonly",
     looksLikePdfByHead: "readonly",

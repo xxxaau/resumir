@@ -214,12 +214,13 @@ function _renderHistoryPanel(panel, entries) {
         bar.className = "history-filters";
         bar.setAttribute("role", "group");
         bar.setAttribute("aria-label", "Filtra per tipus");
-        const mk = (type, text, title) => {
+        const mk = (type, text, title, iconId) => {
             const b = document.createElement("button");
             b.type = "button";
             b.className = "history-filter";
             if (type) b.dataset.type = type;
-            b.textContent = text;
+            if (iconId && typeof typeIconSvg === "function") b.appendChild(typeIconSvg(iconId, 12));
+            b.appendChild(document.createTextNode(text));
             if (title) b.setAttribute("aria-label", title);
             b.addEventListener("click", () => {
                 typeFilter = type;
@@ -230,7 +231,7 @@ function _renderHistoryPanel(panel, entries) {
             bar.appendChild(b);
         };
         mk(null, "Tots");
-        for (const ct of presentTypes) mk(ct.id, `${ct.icon} ${ct.label}`, ct.label);
+        for (const ct of presentTypes) mk(ct.id, ct.label, ct.label, ct.id);
         panel.appendChild(bar);
     }
     const resultCount = document.createElement("p");
@@ -305,7 +306,8 @@ function _buildHistoryList(groups, toast, refill) {
                 const typeIcon = document.createElement("button");
                 typeIcon.type = "button";
                 typeIcon.className = "type-icon";
-                typeIcon.textContent = ct.icon;
+                if (typeof typeIconSvg === "function") typeIcon.appendChild(typeIconSvg(ct.id));
+                else typeIcon.textContent = ct.icon;
                 typeIcon.title = ct.label;
                 typeIcon.setAttribute("aria-label", `${ct.label}: ${rawTitle}`);
                 typeIcon.dataset.type = ct.id;
