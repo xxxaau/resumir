@@ -31,7 +31,8 @@ L'inventari complet amb categories i fonts de veritat és a
   **SCREENSHOTS-GUIDE.md**
 
 ### Registres i backlog
-- **BACKLOG.md** (idees pendents, no històric) · **CHANGELOG.md** (canvis
+- **PLA-UI-UX.md** (pla de millora d'interfícies, només pendent) ·
+  **BACKLOG.md** (idees pendents, no històric) · **CHANGELOG.md** (canvis
   publicats) · **LEARNINGS.md** (lliçons tècniques sessió a sessió, amb
   taula de continguts al capdamunt)
 
