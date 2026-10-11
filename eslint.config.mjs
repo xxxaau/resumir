@@ -85,6 +85,8 @@ const extensionGlobals = {
     isPdfUrl: "readonly",
     looksLikePdfByHead: "readonly",
     extractPdfText: "readonly",
+    // sidebar/pdf-zoom.js
+    computePdfScale: "readonly",
     // sidebar/pdf-extract.js, sidebar/pdf-viewer.js
     pdfjsLib: "readonly",
     // sidebar/history.js

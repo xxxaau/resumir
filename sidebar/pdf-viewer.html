@@ -11,8 +11,11 @@
       #header .title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
       #header .close-btn { background: none; border: 1px solid #555; color: #ccc; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
       #header .close-btn:hover { background: #e74c3c; border-color: #e74c3c; color: #fff; }
-      #canvas-container { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 16px; position: relative; }
-      #page-wrapper { position: relative; display: inline-block; box-shadow: 0 2px 20px rgba(0,0,0,0.5); background: #fff; }
+      /* margin:auto al #page-wrapper centra quan la pàgina hi cap i deixa desplaçar
+         quan és més gran (amb align/justify:center, el costat superior/esquerre
+         quedava tallat i inabastable en apropar). */
+      #canvas-container { flex: 1; display: flex; overflow: auto; padding: 16px; position: relative; }
+      #page-wrapper { position: relative; display: inline-block; margin: auto; flex-shrink: 0; box-shadow: 0 2px 20px rgba(0,0,0,0.5); background: #fff; }
       #canvas-container canvas { display: block; }
       /* Capa de text de pdf.js (v3.11): spans transparents posicionats sobre el canvas
          perquè el text sigui seleccionable i copiable. */
@@ -62,6 +65,7 @@
 
     <script src="../ext.js"></script>
     <script src="../vendor/pdf.min.js"></script>
+    <script src="pdf-zoom.js"></script>
     <script src="pdf-viewer.js"></script>
   </body>
 </html>

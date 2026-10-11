@@ -20,7 +20,8 @@
 
     let pdfDoc = null;
     let pageNum = 1;
-    let scale = 2.0;
+    // Zoom de l'usuari: 1 = pàgina sencera visible (ajust a pàgina).
+    let zoom = 1.0;
     let sessionKey = null;
     let currentTextTask = null;
 
@@ -42,7 +43,7 @@
     }
 
     function updateZoomLabel() {
-        zoomLabel.textContent = Math.round(scale * 100) + "%";
+        zoomLabel.textContent = Math.round(zoom * 100) + "%";
     }
 
     async function renderPage(num) {
@@ -55,13 +56,14 @@
         }
         try {
             const page = await pdfDoc.getPage(num);
-            const viewport = page.getViewport({ scale });
+            const baseViewport = page.getViewport({ scale: 1 });
 
             const containerRect = container.getBoundingClientRect();
-            const maxW = containerRect.width - 32;
-            const maxH = containerRect.height - 32;
-            const fitScale = Math.min(maxW / viewport.width, maxH / viewport.height, 1);
-            const finalScale = scale * fitScale;
+            const finalScale = computePdfScale(
+                baseViewport.width, baseViewport.height,
+                containerRect.width - 32, containerRect.height - 32,
+                zoom
+            );
 
             const finalViewport = page.getViewport({ scale: finalScale });
             const dpr = window.devicePixelRatio || 1;
@@ -204,13 +206,13 @@
     });
 
     zoomOutBtn.addEventListener("click", () => {
-        scale = Math.max(0.25, scale - 0.25);
+        zoom = Math.max(0.25, zoom - 0.25);
         updateZoomLabel();
         renderPage(pageNum);
     });
 
     zoomInBtn.addEventListener("click", () => {
-        scale = Math.min(3.0, scale + 0.25);
+        zoom = Math.min(4.0, zoom + 0.25);
         updateZoomLabel();
         renderPage(pageNum);
     });
