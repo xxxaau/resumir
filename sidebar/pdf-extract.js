@@ -221,17 +221,20 @@ async function extractPdfText(urlOrBuffer, options = {}) {
         try { pdfDoc.destroy(); } catch { /* ignore */ }
     }
 
-    const text = pageTexts.join("\n\n");
+    const rawText = pageTexts.join("\n\n");
 
     // ---- Pas 6: detecció de PDF escanejat ----
     // Heurística: <10 caràcters per pàgina en mitjana, amb un mínim absolut de 100.
     const minExpected = Math.max(100, totalPages * 10);
-    if (text.length < minExpected) {
+    if (rawText.length < minExpected) {
         throw Object.assign(
             new Error("PDF sembla escanejat (sense capa de text). OCR no suportat encara."),
-            { code: "SCANNED", pageCount: totalPages, extractedChars: text.length }
+            { code: "SCANNED", pageCount: totalPages, extractedChars: rawText.length }
         );
     }
+
+    // Marques de pàgina: permeten que el resum citi «(p. N)» i enllaçar-hi.
+    const text = pageTexts.map((t, i) => `[Pàgina ${i + 1}]\n${t}`).join("\n\n");
 
     return {
         title,

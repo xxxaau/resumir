@@ -710,6 +710,40 @@ function hideRefiners() {
     if (el) el.classList.add("hidden");
 }
 
+/**
+ * Converteix les cites «(p. N)» d'un resum de PDF web en enllaços a `url#page=N`
+ * (el visor de PDF del navegador entén #page=N). No fa res si no és un PDF.
+ */
+function linkPdfPages(container, url) {
+    if (!container || typeof isPdfUrl !== "function" || !isPdfUrl(url)) return;
+    const base = url.split("#")[0];
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+        const n = walker.currentNode;
+        if (/\(p\. \d+\)/.test(n.nodeValue) && !n.parentElement.closest("a")) nodes.push(n);
+    }
+    for (const node of nodes) {
+        const frag = document.createDocumentFragment();
+        let last = 0;
+        node.nodeValue.replace(/\(p\. (\d+)\)/g, (m, num, idx) => {
+            frag.append(node.nodeValue.slice(last, idx));
+            const a = document.createElement("a");
+            a.href = `${base}#page=${num}`;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.dataset.pdfPage = num;
+            a.title = `Obre el PDF a la pàgina ${num}`;
+            a.textContent = m;
+            frag.append(a);
+            last = idx + m.length;
+            return m;
+        });
+        frag.append(node.nodeValue.slice(last));
+        node.replaceWith(frag);
+    }
+}
+
 function hideProvenance() {
     const el = document.getElementById("provenance");
     if (el) el.classList.add("hidden");
@@ -852,5 +886,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

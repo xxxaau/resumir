@@ -118,6 +118,7 @@ async function loadHistoryEntry(entry) {
     // applyBionicStyles (summary.js) és l'únic punt que estila #content en mode
     // biònic — manté la mida coherent amb la resta de camins (streaming, toggle).
     applyBionicStyles(contentDiv, bionicEnabled, bionicConfig);
+    if (!isConceptMap && !isAnki && typeof linkPdfPages === "function") linkPdfPages(contentDiv, entry.url);
     contentDiv.classList.remove("hidden");
 
     const historyPanel = document.getElementById("history-panel");

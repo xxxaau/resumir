@@ -94,6 +94,7 @@ const extensionGlobals = {
     renderProvenance: "readonly",
     hideProvenance: "readonly",
     showRefiners: "readonly",
+    linkPdfPages: "readonly",
     hideRefiners: "readonly",
     REFINE_INSTRUCTIONS: "readonly",
     looksLikeCookieBanner: "readonly",

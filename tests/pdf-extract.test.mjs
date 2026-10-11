@@ -136,6 +136,8 @@ test("extractPdfText: extrau text de PDF amb 3 pàgines", async () => {
     assert.match(result.text, /First page content/);
     assert.match(result.text, /Second page more/);
     assert.match(result.text, /Third page wraps/);
+    assert.match(result.text, /\[Pàgina 1\]\nFirst page content/);
+    assert.match(result.text, /\[Pàgina 3\]\nThird page wraps/);
     // Separador entre pàgines
     assert.match(result.text, /\n\n/);
     assert.equal(result.title, "Mocked Doc");

@@ -980,3 +980,38 @@ test("botó de tornar - etiquetes que diuen on tornes", async () => {
         assert.match(h.document.querySelector("#history-panel .history-back-btn").textContent, /Tancar l'historial/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Pàgines als PDF (Fase E): «(p. N)» al resum enllaça amb la pàgina del PDF
+// ---------------------------------------------------------------------------
+test("pàgines de PDF - les cites (p. N) són enllaços #page=N i el prompt les demana", async () => {
+    const url = "https://example.com/doc.pdf";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url, title: "Doc", active: true }],
+        pageText: "[Pàgina 1]\n" + "text ".repeat(80) + "\n\n[Pàgina 3]\n" + "més ".repeat(80),
+        modelReply: "Idea clau (p. 3).",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const a = h.document.querySelector("#content a[data-pdf-page]");
+        assert.ok(a, "ha d'haver-hi un enllaç de pàgina");
+        assert.equal(a.getAttribute("href"), url + "#page=3");
+        assert.match(h.calls.fetches[0].body, /\(p\. N\)/);
+    } finally { h.close(); }
+});
+
+test("pàgines de PDF - una pàgina web normal no porta enllaços ni instrucció", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "Idea clau (p. 3).",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.document.querySelector("#content a[data-pdf-page]"), null);
+        assert.doesNotMatch(h.calls.fetches[0].body, /\(p\. N\)/);
+    } finally { h.close(); }
+});

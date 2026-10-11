@@ -341,6 +341,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const safeContent = String(pageData.text || "").replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
         let pageText = `<UNTRUSTED_CONTENT>\n${safeContent}\n</UNTRUSTED_CONTENT>`;
         ctx.setSourceText(pageData.text);
+        // PDF amb marques de pàgina: demanem citar-les perquè el resum enllaci amb el document.
+        if (isProseType(requestedType) && /^\[Pàgina 1\]/.test(String(pageData.text || ""))) {
+            systemPrompt += "\n\nEl text conté marques [Pàgina N]. Quan una idea provingui d'una pàgina concreta, afegeix al final del punt la cita (p. N), amb el número de pàgina.";
+        }
         // Desa el text brut per a la regeneració Anki (Task 6). Guard per a tests Node.
         if (typeof window !== "undefined") window.__ankiPageText = pageData.text;
 
@@ -553,6 +557,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         applyBionicStyles(contentDiv, bionicEnabled, config);
+        if (typeof linkPdfPages === "function" && isProseType(requestedType)) linkPdfPages(contentDiv, currentMetadata.url);
 
         setGeneratingState(false, true);
 
