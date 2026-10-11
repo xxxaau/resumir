@@ -176,6 +176,29 @@
           </div>
         </div>
 
+        <div class="section">
+          <div class="form-group">
+            <label for="summaryFormat">Format del resum</label>
+            <select id="summaryFormat" class="form-control">
+              <option value="default">Per defecte (paràgraf i punts clau)</option>
+              <option value="bullets">Llista de punts clau</option>
+              <option value="tldr">TL;DR (2-3 frases)</option>
+              <option value="prose">Prosa contínua</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="summaryLength">Llargada</label>
+            <select id="summaryLength" class="form-control">
+              <option value="short">Curt</option>
+              <option value="medium">Mitjà (per defecte)</option>
+              <option value="long">Llarg</option>
+            </select>
+            <div class="help-text">
+              S'afegeix com a instrucció extra al resum. Només afecta el plugin Resum; a la barra lateral, «Més curt» i «Més detall» ho ajusten resum a resum.
+            </div>
+          </div>
+        </div>
+
         <div class="section-actions">
           <button id="saveCustom" class="btn btn-primary">Desar</button>
           <button id="resetSystemPrompt" class="btn btn-secondary">Restaurar</button>

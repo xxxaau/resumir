@@ -99,6 +99,7 @@ const extensionGlobals = {
     youtubeVideoId: "readonly",
     hideRefiners: "readonly",
     REFINE_INSTRUCTIONS: "readonly",
+    STYLE_INSTRUCTIONS: "readonly",
     looksLikeCookieBanner: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",

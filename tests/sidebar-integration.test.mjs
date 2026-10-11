@@ -1072,3 +1072,49 @@ test("instruccions de cites - indiquen el número de la marca, una cita per pàg
         assert.match(h.calls.fetches[0].body, /mai intervals/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Format i llargada del resum (Fase E): preferències de la configuració de Resum
+// ---------------------------------------------------------------------------
+test("estil del resum - format i llargada triats s'afegeixen al prompt del Resum", async () => {
+    const h = await loadSidebar({
+        sync: { summaryFormat: "bullets", summaryLength: "short" },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const body = h.calls.fetches[0].body;
+        assert.match(body, /Instrucció addicional de format: presenta el resum com una llista/);
+        assert.match(body, /Instrucció addicional de llargada: fes-lo molt breu/);
+    } finally { h.close(); }
+});
+
+test("estil del resum - per defecte no s'afegeix res al prompt", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.doesNotMatch(h.calls.fetches[0].body, /Instrucció addicional de (format|llargada):/);
+    } finally { h.close(); }
+});
+
+test("estil del resum - no afecta Aprofundir", async () => {
+    const h = await loadSidebar({
+        sync: { summaryFormat: "tldr", summaryLength: "short", enableDeepdive: true },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "L'anàlisi.",
+    });
+    try {
+        h.document.getElementById("deepDiveBtn").click();
+        await h.flush(30);
+        assert.doesNotMatch(h.calls.fetches[0].body, /molt breu|TL;DR/i);
+    } finally { h.close(); }
+});

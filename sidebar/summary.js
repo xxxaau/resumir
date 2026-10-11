@@ -121,6 +121,19 @@ function buildConceptMapPrompt(basePrompt, depth, branches, showDesc) {
     return prompt;
 }
 
+// Preferències de format i llargada de la configuració de Resum (només tipus «summary»).
+const STYLE_INSTRUCTIONS = {
+    format: {
+        bullets: "Instrucció addicional de format: presenta el resum com una llista de punts clau, amb un paràgraf introductori d'una sola frase com a molt.",
+        tldr: "Instrucció addicional de format: dóna només un TL;DR de 2-3 frases, sense seccions ni llistes.",
+        prose: "Instrucció addicional de format: redacta el resum com a prosa contínua en paràgrafs, sense llistes.",
+    },
+    length: {
+        short: "Instrucció addicional de llargada: fes-lo molt breu (aproximadament 80 paraules).",
+        long: "Instrucció addicional de llargada: fes-lo més detallat (aproximadament 400 paraules).",
+    },
+};
+
 // Instruccions afegides al prompt pels refinadors ràpids de sota el resum.
 const REFINE_INSTRUCTIONS = {
     shorter: "Instrucció addicional: fes el resultat molt més curt i concís que de costum, només l'essencial.",
@@ -177,7 +190,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
                 "conceptMapAutoExpand",
                 "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation",
-                "ankiPrompt", "ankiLang", "ankiPacket"
+                "ankiPrompt", "ankiLang", "ankiPacket", "summaryFormat", "summaryLength"
             ]),
             ext.storage.local.get(["apiKey"])
         ]);
@@ -205,6 +218,14 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 config.conceptMapBranches || 6,
                 config.conceptMapShowDescriptions !== false
             );
+        }
+
+        // Preferències d'estil del Resum (la configuració les desa; «default»/«medium» no afegeixen res).
+        if (requestedType === "summary") {
+            const f = STYLE_INSTRUCTIONS.format[config.summaryFormat];
+            const l = STYLE_INSTRUCTIONS.length[config.summaryLength];
+            if (f) systemPrompt += "\n\n" + f;
+            if (l) systemPrompt += "\n\n" + l;
         }
 
         // Refinador ràpid: instrucció afegida al prompt del tipus actual.

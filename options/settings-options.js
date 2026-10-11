@@ -55,7 +55,9 @@ function saveOptions(e) {
     modelName: document.querySelector("#modelName").value,
     theme: document.querySelector("#themeSelect").value,
     systemPrompt: document.querySelector("#systemPrompt").value,
-    
+    summaryFormat: document.querySelector("#summaryFormat").value,
+    summaryLength: document.querySelector("#summaryLength").value,
+
     // Extensions
     enableMarkdown: document.querySelector("#enableMarkdown").checked,
     markdownTemplate: document.querySelector("#markdownTemplate").value,
@@ -239,6 +241,8 @@ function restoreOptions(syncData, localData) {
     updateModelSummary();
     document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
     document.querySelector("#systemPrompt").value = (syncData && syncData.systemPrompt) || DEFAULT_SYSTEM_PROMPT;
+    document.querySelector("#summaryFormat").value = (syncData && syncData.summaryFormat) || "default";
+    document.querySelector("#summaryLength").value = (syncData && syncData.summaryLength) || "medium";
 
     document.querySelector("#enableMarkdown").checked = syncData && syncData.enableMarkdown === true;
     document.querySelector("#markdownTemplate").value = (syncData && syncData.markdownTemplate) || DEFAULT_MARKDOWN_TEMPLATE;

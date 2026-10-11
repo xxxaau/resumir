@@ -9,7 +9,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // Single batch — read all settings once (elimina 3 lectures storage redundants)
     const ALL_CONFIG_KEYS = [
-        "modelName", "theme", "systemPrompt",
+        "modelName", "theme", "systemPrompt", "summaryFormat", "summaryLength",
         "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
         "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
         "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight",
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(".main-content").addEventListener("input", (e) => {
         const t = e.target;
         if (t.matches && t.matches("textarea")) updatePromptBadges();
-        if (t.matches && t.matches('textarea, input[type="text"], input[type="password"], input[type="number"], input[type="range"]')) setDirty(true);
+        if (t.matches && t.matches('textarea, input[type="text"], input[type="password"], input[type="number"], input[type="range"], select:not(#themeSelect)')) setDirty(true);
     });
     window.addEventListener("beforeunload", (e) => {
         if (isDirty()) { e.preventDefault(); e.returnValue = ""; }

@@ -615,3 +615,20 @@ test("desar - un prompt igual al default no es desa (no es congela amb el text a
         assert.equal(stored.sciencePrompt, "editat", "l'edició es conserva");
     } finally { h.close(); }
 });
+
+test("estil del resum - els selectors es desen, es restauren i marquen canvis sense desar", async () => {
+    const h = await loadSettings({ sync: { summaryFormat: "prose", summaryLength: "long" } });
+    try {
+        assert.equal(h.document.querySelector("#summaryFormat").value, "prose");
+        assert.equal(h.document.querySelector("#summaryLength").value, "long");
+        const sel = h.document.querySelector("#summaryLength");
+        sel.value = "short";
+        sel.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        assert.ok(!h.document.getElementById("dirtyNote").hidden, "el select ha de marcar canvis pendents");
+        h.document.querySelector("#saveCustom").click();
+        await h.flush(20);
+        const stored = await h.storage.sync.get(["summaryFormat", "summaryLength"]);
+        assert.equal(stored.summaryLength, "short");
+        assert.equal(stored.summaryFormat, "prose");
+    } finally { h.close(); }
+});
