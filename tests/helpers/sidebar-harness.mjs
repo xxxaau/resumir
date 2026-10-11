@@ -91,6 +91,7 @@ export async function loadSidebar({
         },
         tabs: {
             query: async () => tabs,
+            get: async (id) => tabs.find(t => t.id === id) || tabs[0],
             create: async (opts) => { calls.tabsCreate.push(opts); return { id: 99 }; },
             remove: async () => {},
             sendMessage: async () => ({}),

@@ -142,7 +142,7 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 > **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la línia de procedència i
 > les pestanyes per tipus (vegeu `git log`). Següent: format/llargada com a controls,
-> segells de temps/pàgines, calaix «Text enviat», avís de resum d'una altra pàgina.
+> segells de temps/pàgines, calaix «Text enviat».
 > Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
 > `npm run dev:chromium` abans de commitejar, i treure del pla el que es completi.
 
@@ -156,7 +156,6 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 | Vinyetes amb cita verificada | Cada punt porta un ↗ que fa scroll i ressalta el passatge a la pestanya (`#:~:text=`); la cita es comprova literalment contra el text extret | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
 | Segells de temps a YouTube i pàgines als PDF | Enllaços que porten el vídeo a l'instant o el visor a `#page=N` | Mínim en tots els competidors de vídeo; fan també de font | Eightify, Merlin, Glasp | M |
 | Calaix «Text enviat» millorat | El botó ja existeix al peu; fer-lo visible a la línia de procedència i destacar si s'ha capturat un bàner de galetes en lloc de l'article | Converteix errors d'extracció silenciosos en errors visibles | Shape of AI: Footprints | S |
-| Avís de resum d'una altra pàgina | «Aquest resum és de [títol]. Resumir aquesta pestanya →» en canviar de pestanya | La barra lateral de Firefox és global per finestra | Gemini en Chrome (xip de context) | S |
 | Refinadors ràpids | Botons «Més curt» i «Més detall» sota el resum (Explica-ho fàcil ja existeix com a plugin) | Seguiment sense xat complet | NN/g «Prompt controls» | M |
 | Dreceres de teclat | `commands` al manifest: obrir el panell i resumir; Esc per aturar o tancar panells | Avui no n'hi ha cap | — | S |
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |

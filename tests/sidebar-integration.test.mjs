@@ -871,3 +871,30 @@ test("pestanyes per tipus - amagades si la pàgina no té res desat", async () =
         assert.ok(h.document.getElementById("type-tabs").classList.contains("hidden"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Avís de resum d'una altra pàgina (Fase E): la barra lateral és global per finestra
+// ---------------------------------------------------------------------------
+test("avís de resum antic - en canviar de pestanya ofereix resumir la nova", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const banner = h.document.getElementById("stale-banner");
+        assert.ok(banner.classList.contains("hidden"), "mateixa pàgina: sense avís");
+
+        const other = { id: 2, url: "https://altra.example/x", title: "Altra pàgina", active: true };
+        h.window.chrome.tabs.onUpdated._fire(2, { url: other.url }, other);
+        await h.flush();
+        assert.ok(!banner.classList.contains("hidden"));
+        assert.match(banner.textContent, /Aquest resum és de «Article»/);
+
+        h.window.chrome.tabs.onUpdated._fire(1, { url: "https://example.com/article" }, { id: 1, url: "https://example.com/article", title: "Article", active: true });
+        await h.flush();
+        assert.ok(banner.classList.contains("hidden"), "en tornar, l'avís desapareix");
+    } finally { h.close(); }
+});

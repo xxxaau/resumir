@@ -70,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentMetadata.type = entry.type;
         setGeneratingState(false, true);
         updateTypeTabs(currentMetadata.url);
+        updateStaleBanner();
     };
 
     // La barra d'eines és fixa i pot baixar de línia: el títol de la pàgina,
@@ -123,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
             isGenerating = false;
             abortController = null;
             if (currentMetadata.url) updateTypeTabs(currentMetadata.url);
+            updateStaleBanner();
         });
     };
 
@@ -558,6 +560,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 150);
     }
 
+    // La barra lateral és global per finestra: en canviar de pestanya el resum
+    // visible pot ser d'una altra pàgina. Ho diem i oferim resumir l'actual.
+    let lastActiveTab = null;
+    function updateStaleBanner(tab) {
+        if (tab) lastActiveTab = tab;
+        const banner = document.getElementById("stale-banner");
+        if (!banner) return;
+        const shownUrl = (currentMetadata.url || "").replace(/^seleccio:/, "");
+        const viewingHistory = !document.getElementById("history-back-bar")?.classList.contains("hidden");
+        const stale = !!currentMetadata.summary && !viewingHistory && !shownUrl.startsWith("pdf-local:")
+            && lastActiveTab && /^https?:/i.test(lastActiveTab.url || "") && lastActiveTab.url !== shownUrl;
+        banner.classList.toggle("hidden", !stale);
+        if (stale) {
+            document.getElementById("stale-banner-text").textContent =
+                `Aquest resum és de «${currentMetadata.title || shownUrl}».`;
+        }
+    }
+    const staleBtn = document.getElementById("stale-banner-btn");
+    if (staleBtn) staleBtn.addEventListener("click", () => {
+        document.getElementById("stale-banner").classList.add("hidden");
+        summarizeBtn.click();
+    });
+
     // Estat en repòs: títol de la pestanya activa, botó de resumir i els resums
     // ja desats d'aquesta URL. La visibilitat real (només si el panell és buit)
     // la decideix el CSS; aquí només s'omple.
@@ -598,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const tab = await ext.tabs.get(activeInfo.tabId);
             updateTypeTabs(tab.url);
             updateIdleState(tab);
+            updateStaleBanner(tab);
         } catch (e) {}
     });
 
@@ -605,6 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if ((changeInfo.url || changeInfo.title) && tab.active) {
             if (changeInfo.url) updateTypeTabs(tab.url);
             updateIdleState(tab);
+            updateStaleBanner(tab);
         }
     });
 
@@ -740,6 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Inicialitzar badge de caché per a la URL del tab actiu
         ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
             if (tabs[0]?.url) updateTypeTabs(tabs[0].url);
+            lastActiveTab = tabs[0] || null;
             updateIdleState(tabs[0]);
         }).catch(() => {});
         try {
