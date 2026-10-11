@@ -27,10 +27,17 @@ function sourceFiles() {
 // Línies que NO compten: comentaris de codi (no són text visible)
 const isComment = (line) => /^\s*(\/\/|\*|\/\*|<!--)/.test(line);
 
+// El bloc de l'historial de canvis de settings.html es genera a partir de
+// docs/CHANGELOG.md (registre històric: no es reescriu), no compta.
+function visibleSource(file) {
+    return readFileSync(file, "utf8")
+        .replace(/<!-- CHANGELOG_START -->[\s\S]*?<!-- CHANGELOG_END -->/, "");
+}
+
 function count(pattern) {
     let n = 0;
     for (const f of sourceFiles()) {
-        for (const line of readFileSync(f, "utf8").split("\n")) {
+        for (const line of visibleSource(f).split("\n")) {
             if (!isComment(line) && line.includes(pattern)) n++;
         }
     }
@@ -49,6 +56,9 @@ const CEILINGS = [
     ["Configurar Ara",0, "majúscula injustificada: «Configurar ara»"],
     ["Obre configuració", 0, "infinitiu: «Obrir la configuració»"],
     ["prompt de aprofundiment", 0, "apostrofació: «d'aprofundiment»"],
+    ["Descarta-ho tot",     0, "infinitiu: «Descartar-ho tot»"],
+    ["Selecciona-ho tot",   0, "infinitiu: «Seleccionar-ho tot»"],
+    ["Afegeix (",           0, "diu on va: «Afegir a Obsidian (N)»"],
 ];
 
 for (const [fragment, ceiling, why] of CEILINGS) {

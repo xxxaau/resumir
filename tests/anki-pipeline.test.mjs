@@ -30,6 +30,7 @@ function makeEl() {
         appendChild(n) { (this._children = this._children || []).push(n); return n; },
         querySelector() { return null; },
         addEventListener() {},
+        setAttribute() {},
         append(...nodes) { nodes.forEach(n => (this._children = this._children || []).push(n)); },
         value: "",
         options: [],

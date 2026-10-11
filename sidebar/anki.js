@@ -106,6 +106,9 @@ function renderAnkiPanel(ctx) {
         sel.className = "anki-select";
         sel.checked = card.selected;
         sel.title = "Incloure a l'exportació";
+        // Totes les caselles es deien igual: el nom ha d'identificar la targeta.
+        const labelSel = () => sel.setAttribute("aria-label", `Incloure a l'exportació: ${card.q}`);
+        labelSel();
         sel.addEventListener("change", () => {
             card.selected = sel.checked;
             updateExportCount();
@@ -126,13 +129,16 @@ function renderAnkiPanel(ctx) {
                 const qField = document.createElement("textarea");
                 qField.className = "anki-q";
                 qField.value = card.q;
-                qField.addEventListener("input", () => { card.q = qField.value; });
+                qField.setAttribute("aria-label", "Pregunta");
+                qField.addEventListener("input", () => { card.q = qField.value; labelSel(); });
                 const aField = document.createElement("textarea");
                 aField.className = "anki-a";
                 aField.value = card.a;
+                aField.setAttribute("aria-label", "Resposta");
                 aField.addEventListener("input", () => { card.a = aField.value; });
                 body.append(qField, aField);
                 editBtn.textContent = "Fet";
+                editBtn.setAttribute("aria-label", `Acabar d'editar la targeta: ${card.q}`);
             } else {
                 const qView = document.createElement("div");
                 qView.className = "anki-q-view";
@@ -143,7 +149,8 @@ function renderAnkiPanel(ctx) {
                 aView.className = "anki-a-view";
                 aView.textContent = card.a;
                 body.append(qView, divider, aView);
-                editBtn.textContent = "Edita";
+                editBtn.textContent = "Editar";
+                editBtn.setAttribute("aria-label", `Editar la targeta: ${card.q}`);
             }
         }
         editBtn.addEventListener("click", () => { editing = !editing; renderBody(); });
@@ -154,7 +161,8 @@ function renderAnkiPanel(ctx) {
         footer.className = "anki-card-footer";
         const discard = document.createElement("button");
         discard.className = "anki-discard";
-        discard.textContent = "Descarta";
+        discard.textContent = "Descartar";
+        discard.setAttribute("aria-label", `Descartar la targeta: ${card.q}`);
         discard.addEventListener("click", () => {
             const idx = ankiState.indexOf(card);
             if (idx !== -1) ankiState.splice(idx, 1);
@@ -177,12 +185,12 @@ function renderAnkiPanel(ctx) {
     btnRow.className = "anki-btn-row";
 
     const moreBtn = document.createElement("button");
-    moreBtn.textContent = "Genera més";
+    moreBtn.textContent = "Generar més";
     moreBtn.addEventListener("click", () => ctx.onGenerateMore(""));
 
     const discardAllBtn = document.createElement("button");
     discardAllBtn.className = "anki-discard-all";
-    discardAllBtn.textContent = "Descarta-ho tot";
+    discardAllBtn.textContent = "Descartar-ho tot";
     discardAllBtn.disabled = ankiState.length === 0;
     discardAllBtn.addEventListener("click", () => {
         if (ankiState.length === 0) return;
@@ -207,11 +215,11 @@ function renderAnkiPanel(ctx) {
 
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
-        exportBtn.textContent = `Afegeix (${getSelectedAnkiCards().length})`;
+        exportBtn.textContent = `Afegir a Obsidian (${getSelectedAnkiCards().length})`;
         exportBtn.disabled = getSelectedAnkiCards().length === 0;
     }
     function updateSelectAllBtn() {
-        selectAllBtn.textContent = isAllSelected() ? "Deselecciona-ho tot" : "Selecciona-ho tot";
+        selectAllBtn.textContent = isAllSelected() ? "Desseleccionar-ho tot" : "Seleccionar-ho tot";
         selectAllBtn.disabled = ankiState.length === 0;
     }
     updateExportCount();
@@ -229,11 +237,15 @@ function renderAnkiPanel(ctx) {
     const notice = document.createElement("div");
     notice.id = "ankiNotice";
     notice.className = "anki-notice hidden";
+    // Regió d'estat: els avisos (p. ex. «no hi ha més punts nous») s'anuncien.
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
 
     // Indicador "treballant": puntets animats sempre visibles (barra fixa).
     const loading = document.createElement("div");
     loading.id = "ankiLoading";
     loading.className = "anki-loading hidden";
+    loading.setAttribute("aria-hidden", "true"); // decoratiu; l'estat el diu announceStatus
     for (let k = 0; k < 3; k++) {
         const dot = document.createElement("span");
         dot.className = "loading-dot";
@@ -247,6 +259,7 @@ function renderAnkiPanel(ctx) {
     focusInput.type = "text";
     focusInput.className = "anki-afina-input";
     focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
+    focusInput.setAttribute("aria-label", "Afinar la generació de targetes");
     const focusBtn = document.createElement("button");
     focusBtn.textContent = "Afinar";
     focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
