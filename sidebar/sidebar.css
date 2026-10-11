@@ -1518,3 +1518,18 @@ body {
   cursor: pointer;
   text-decoration: underline;
 }
+
+/* Refinadors ràpids sota el resum */
+.refiners { display: flex; gap: 6px; margin: 6px 0; }
+.refiners.hidden { display: none; }
+.refine-btn {
+  font: inherit;
+  font-size: 0.82em;
+  padding: 3px 10px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.refine-btn:hover { background: var(--button-hover); }

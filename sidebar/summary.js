@@ -106,7 +106,13 @@ function applyBionicStyles(element, isEnabled, config = {}) {
  * @param {boolean} isSimple - Whether this is a plain-language explanation ("Explica-ho fàcil")
  * @returns {AbortController} The abort controller for cancellation
  */
-async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false) {
+// Instruccions afegides al prompt pels refinadors ràpids de sota el resum.
+const REFINE_INSTRUCTIONS = {
+    shorter: "Instrucció addicional: fes el resultat molt més curt i concís que de costum, només l'essencial.",
+    detailed: "Instrucció addicional: fes el resultat més detallat que de costum, amb més matisos, xifres i exemples del text.",
+};
+
+async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false, refine = null) {
     if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isAnki && !isUserInitiated) {
         return null;
     }
@@ -143,6 +149,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     const generationStartMs = startGenerationTimer();
     updateTokenStats(0, 0);  // Reset tokens display for new generation
     if (typeof hideProvenance === "function") hideProvenance();
+    if (typeof hideRefiners === "function") hideRefiners();
 
     try {
         // 1. Get Configuration
@@ -192,6 +199,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             }
         }
 
+        // Refinador ràpid: instrucció afegida al prompt del tipus actual.
+        if (refine && REFINE_INSTRUCTIONS[refine]) systemPrompt += "\n\n" + REFINE_INSTRUCTIONS[refine];
+
         applyExtensionVisibility(config);
         if (config.extensionOrder) {
             applyExtensionOrder(config.extensionOrder);
@@ -236,7 +246,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // existeix, en lloc de gastar tokens per a res.
         const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache && currentMetadata.type === requestedType);
 
-        if (!isRefresh && !pageData && !overrideText) {
+        if (!isRefresh && !refine && !pageData && !overrideText) {
             const cachedEntry = await getSummaryCache(currentUrl, requestedType);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
@@ -567,6 +577,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             inputEstimated: false,
             outputEstimated: false
         });
+        if (typeof showRefiners === "function" && isProseType(contentType)) showRefiners();
         if (typeof renderProvenance === "function") {
             renderProvenance({
                 words: String(pageData.text || "").trim().split(/\s+/).filter(Boolean).length,

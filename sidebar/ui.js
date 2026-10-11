@@ -700,6 +700,16 @@ function looksLikeCookieBanner(text) {
     return words < 400 && hits >= 3;
 }
 
+function showRefiners() {
+    const el = document.getElementById("refiners");
+    if (el) el.classList.remove("hidden");
+}
+
+function hideRefiners() {
+    const el = document.getElementById("refiners");
+    if (el) el.classList.add("hidden");
+}
+
 function hideProvenance() {
     const el = document.getElementById("provenance");
     if (el) el.classList.add("hidden");
@@ -842,5 +852,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

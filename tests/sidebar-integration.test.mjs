@@ -916,3 +916,42 @@ test("procedència - detecta un bàner de galetes i ofereix veure el text enviat
         assert.ok(!h.document.getElementById("source-panel").classList.contains("hidden"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Refinadors ràpids (Fase E): «Més curt» / «Més detall» sota el resum
+// ---------------------------------------------------------------------------
+test("refinadors - «Més curt» torna a generar amb la instrucció afegida", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        const box = h.document.getElementById("refiners");
+        assert.ok(box.classList.contains("hidden"), "sense resum no hi són");
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(!box.classList.contains("hidden"));
+        assert.equal(h.calls.fetches.length, 1);
+
+        h.document.getElementById("refine-shorter").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 2, "ha de regenerar, no reutilitzar la memòria cau");
+        assert.match(h.calls.fetches[1].body, /més curt/i);
+        assert.doesNotMatch(h.calls.fetches[0].body, /més curt/i);
+    } finally { h.close(); }
+});
+
+test("refinadors - amagats en un mapa conceptual", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        sync: { enableConceptMap: true },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "# Tema\n## Subtema",
+    });
+    try {
+        h.document.getElementById("conceptMapBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.getElementById("refiners").classList.contains("hidden"));
+    } finally { h.close(); }
+});

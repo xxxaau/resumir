@@ -93,6 +93,9 @@ const extensionGlobals = {
     setLoadingStage: "readonly",
     renderProvenance: "readonly",
     hideProvenance: "readonly",
+    showRefiners: "readonly",
+    hideRefiners: "readonly",
+    REFINE_INSTRUCTIONS: "readonly",
     looksLikeCookieBanner: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",

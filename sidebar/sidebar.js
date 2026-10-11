@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Bound summary starter (partially applied with ctx)
-    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki) => {
+    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki, refine = null) => {
         if (isGenerating && abortController) {
             abortController.abort();
             abortController = null;
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         isGenerating = true;
-        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki).then(ctrl => {
+        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki, refine).then(ctrl => {
             abortController = ctrl;
         }).finally(() => {
             isGenerating = false;
@@ -558,6 +558,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 bar.appendChild(tab);
             }
         }, 150);
+    }
+
+    // Refinadors ràpids: tornen a generar el mateix tipus amb una instrucció afegida.
+    for (const [id, mode] of [["refine-shorter", "shorter"], ["refine-detailed", "detailed"]]) {
+        const btn = document.getElementById(id);
+        if (!btn) continue;
+        btn.addEventListener("click", () => {
+            const t = currentMetadata.type;
+            doSummary(null, t === "deepdive", t === "science", true, false, t === "simple", false, mode);
+        });
     }
 
     // La barra lateral és global per finestra: en canviar de pestanya el resum
