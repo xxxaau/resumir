@@ -7,6 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
+- Fase A del pla UI/UX + harness d'integració i tests de qualitat — Sessió 2026-10-11
 - Auditoria funcional + catàleg de models — Sessió 2026-08-09
 - Release v2.6.2 — Sessió 2026-07-27
 - Release v2.6.1 — Sessió 2026-06-29
@@ -18,6 +19,53 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 - Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
 - Aprenentatges — Sessió v2.3.1+ (2026-06-05)
 - Aprenentatges — Sessió v2.2.10 (2026-05-22)
+
+---
+
+# Fase A del pla UI/UX + harness d'integració i tests de qualitat — Sessió 2026-10-11
+
+## `sidebar.js` no es podia provar: un harness jsdom amb `vm.Script` ho resol
+
+`sidebar.js` viu dins un `DOMContentLoaded` i depèn de 15+ globals d'altres
+scripts, així que els bugs de la barra lateral (biònica, historial, avís de
+prompt) no tenien cap cobertura. `tests/helpers/sidebar-harness.mjs` carrega
+`sidebar.html` i els seus scripts reals dins jsdom, en l'ordre del HTML, amb
+una API d'extensió simulada. Dos detalls que fan o desfan el harness:
+
+- **Cal `vm.Script(...).runInContext(dom.getInternalVMContext())`, no
+  `window.eval`.** Els `const`/`let` de nivell superior d'un `<script>` real
+  comparteixen l'àmbit lèxic global; amb `eval` indirecte cada script en té
+  un de propi i els altres no hi arriben. Les funcions globals sí que són
+  propietats de `window` i es poden substituir (p. ex. `getPageContent`).
+- **No despatxis `DOMContentLoaded` a mà si el document encara s'està
+  analitzant:** jsdom ja el dispara i `sidebar.js` s'inicialitzava dues
+  vegades (listeners duplicats: «Copiar» escrivia al porta-retalls dos cops).
+  Va aparèixer com un `2 !== 1` aparentment sense relació.
+
+## Tests de qualitat com a ratchet, no com a llista de desitjos
+
+`quality-contrast`, `quality-html` i `quality-copy` codifiquen l'estat actual
+com a llista de fallades conegudes (o màxims de recompte) i exigeixen que
+**segueixin existint**: un parell de colors que ja passa fa fallar el test
+fins que el treus de la llista, i un recompte que baixa obliga a abaixar el
+màxim. Així la deuda només es pot escurçar, i un canvi de CSS que empitjora
+el contrast no passa desapercebut. El primer pas va confirmar l'auditoria
+manual: de ~40 parells només 2 estaven mal classificats a la llista.
+
+## Verificar «falla sense el fix» també als tests d'integració
+
+Amb `git stash` del fitxer font no n'hi ha prou quan el fix és en un fitxer
+amb altres canvis: desactivar el fix amb un `sed` temporal (o canviant el nom
+del hook) i comprovar que el test cau, després restaurar. Així es va
+descobrir que el test de l'Historial passava pels motius equivocats fins que
+es va arreglar el doble init del harness.
+
+## Dos errors de l'auditoria que va caçar la revisió
+
+El contrast del color Crema proposat (`#8a6a00`) tampoc passava AA (4,43:1);
+calia `#806000`. I «Regenerar al segon clic de Resumir» no era un bug sinó
+una funció volguda. Calcular el contrast i llegir el flux abans de proposar el
+fix evita arreglar el que no està trencat.
 
 ---
 

@@ -49,25 +49,24 @@ mínim per defecte.
 Un commit i un test de regressió per bug (`CLAUDE.md`: el test ha de fallar sense
 el fix). Els marcats ✔ s'han verificat directament al codi; la resta porten
 referència de línia dels auditors. El 0.12 i el 0.13 són de severitat menor (text
-i script de build) i el 0.14 és només mig bug.
+i script de build). **Els bugs 0.1–0.9, 0.14 i 0.15 ja estan corregits** (vegeu
+`git log` i `LEARNINGS.md`); aquí només queden els de configuració i el que en
+penja de la Fase A:
+
+- **0.2 (navegació de l'historial):** la integritat de dades ja està resolta
+  (Copiar/Obsidian exporten l'entrada visible); queda redissenyar la navegació
+  (barra d'eines visible en veure una entrada, «Tornar a l'historial» només si
+  s'hi ha vingut). Es fa amb les pestanyes per tipus del Nivell 3.
+- **0.6:** desactivar els generadors mentre falta la clau, amb tooltip; es fa amb
+  l'onboarding de 2.2.
+- **0.14:** etiqueta/tooltip «Regenerar» quan es veu la versió de memòria cau.
 
 | # | Problema | On | Impacte | Solució |
 | --- | --- | --- | --- | --- |
-| 0.1 ✔ | Activar/desactivar la lectura biònica re-renderitza `currentMetadata.summary` com a text; el listener d'storage la força quan es toca la biònica a Configuració | `sidebar/sidebar.js:311`, `:139-147` | El mapa conceptual passa a llista i el panell d'Anki a JSON cru | Guardar el tipus de contingut; per a mapa/Anki només canviar estils |
-| 0.2 | L'historial no actualitza `currentMetadata` i amaga la barra d'eines; «← Tornar» deixa l'entrada a la vista amb la barra activa | `sidebar/history.js:60-136`, `:32-54` | Copiar/Obsidian exporten un resum diferent del que es veu | Callback `setCurrentEntry`; mantenir Copiar/Obsidian/Biònica visibles. A la Fase A només la part d'integritat de dades; la navegació es redissenya amb les pestanyes per tipus |
-| 0.3 ✔ | Quan un model esgota quota i se'n prova un altre, es desa `modelName` permanentment | `sidebar/summary.js:384` | L'usuari queda canviat a un model pitjor sense saber-ho | No persistir; avís «S'ha usat X perquè Y ha esgotat la quota»; recordar a la sessió els models esgotats fins al reset diari |
-| 0.4 ✔ | Qualsevol fallada de tots els models es reporta com a quota | `sidebar/summary.js:431` | Davant d'un 503 transitori es diu «proveu-ho demà» | Si algun intent ha donat 429, dir quota; si no, rellançar `lastError` amb el seu `status` |
-| 0.5 ✔ | El timeout d'inactivitat es tracta com a `AbortError` | `sidebar/summary.js:481`, `sidebar/api.js:86-95` | «Generació aturada per l'usuari» quan l'usuari no ha fet res | Distingir per `signal.aborted`; tractar el timeout com a reintentable amb el model següent; motiu `TimeoutError` |
-| 0.6 | Clicar Resumir sense clau esborra la targeta d'onboarding | `sidebar/summary.js:80-83` | L'usuari nou perd la guia i veu «[001]…» | Comprovar la clau abans; desactivar generadors sense clau |
-| 0.7 ✔ | El botó d'aturar canvia `title` però no `aria-label` | `sidebar/ui.js:165-172` | El lector de pantalla anuncia «Resumir»; aturar és invisible | Canviar `aria-label`; icona de quadrat (no pausa) |
-| 0.8 | Enllaços exportats `seleccio:…` i `pdf-local:…`; el títol fa `href="#"` amb `target=_blank` | `summary.js:267`, `sidebar.js:43,215`, `history.js:125` | Enllaços morts a Obsidian; obre una còpia de la barra lateral en una pestanya | `sourceUrl` separat de la clau de memòria cau; `<span>` si no hi ha http; treure el prefix també en carregar entrades antigues (`history.js:128`) |
-| 0.9 ✔ | El zoom del visor PDF mai supera l'ajust a pàgina; l'etiqueta comença a 100 % i salta | `sidebar/pdf-viewer.js:60-64` | No es pot ampliar lletra petita; els botons semblen trencats | Calcular `fitScale` a escala 1 i multiplicar pel zoom de l'usuari |
 | 0.10 ✔ | Els interruptors de plugins només fan `updateSidebar()`; res es desa fins a «Desar», sense guarda de sortida | `options/settings.js:79-86` | L'usuari activa plugins, tanca la pestanya i no passa res | Desat automàtic que escrigui només la clau de l'interruptor tocat (no la funció de desar global, que commiteja prompts i clau a mig editar); sliders i selects amb debounce per les quotes de `storage.sync`; avís «Desat» |
 | 0.11 ✔ | Desar qualsevol pestanya posa a `false` els 4 avisos de prompt nou | `options/settings-options.js:66-70` | Es perden avisos que l'usuari mai ha vist | Netejar només el flag de la pestanya que es desa |
 | 0.12 ✔ | «Buidar memòria cau» esborra les claus `summary_cache:*`, que són l'historial | `options/settings-cache.js:13` | L'historial desapareix sense que el diàleg ho digui | Text: «S'esborrarà tot l'historial (N resums). No es pot desfer.» |
 | 0.13 | L'historial de canvis talla les línies de continuació i no escapa `<` `>` | `scripts/update-changelog-html.mjs:28-34,67` | Frases a mitges; `<all_urls>` desapareix | Acumular línies sagnades; escapar HTML abans de les substitucions inline (si no, s'escapen els tags generats); exportar `parseChangelog` per poder-hi posar test |
-| 0.14 | Els botons de mode (Aprofundir, Mapa…) ignoren la memòria cau (que Resumir regeneri al segon clic és volgut) | `sidebar/summary.js:189-191` | Despesa de tokens innecessària | Consultar la memòria cau per tipus (la clau ja inclou el tipus); etiqueta «Regenerar» quan n'hi ha |
-| 0.15 ✔ | L'enllaç «veure nova versió» de l'avís de prompt posa el flag a false abans d'obrir Configuració, que només mostra l'avís si és true; el clic al mode es perd perquè el callback pendent no s'executa | `sidebar/sidebar.js:349-351` | L'usuari mai veu «mantenir o restaurar» | No esborrar el flag a la barra lateral; enllaç profund `#tab=…`; conservar l'acció |
 
 **Confirmat també:** el «✓ Afegit a Obsidian» (`sidebar/anki.js:299-305`) surt només
 en obrir l'URL `obsidian://`; reformular com «Enviat a Obsidian», perquè
@@ -308,10 +307,8 @@ l'abast d'una millora d'UI.
 Cinc fases; cada una deixa l'extensió publicable i no depèn de les següents,
 excepte on s'indica.
 
-1. **Fase A — Integritat del resultat** (Nivell 0: 0.1–0.9, 0.14, 0.15; del 0.2
-   només la part d'integritat de dades). Un fix + un test de regressió per commit,
-   que falli sense el fix. Primer, perquè avui l'extensió pot exportar el resum
-   equivocat.
+1. **Fase A — Integritat del resultat: feta** (queden només els tres ítems
+   enllaçats a la secció del Nivell 0, que van amb les fases B i D).
 2. **Fase B — Configuració que no perd canvis** (0.10–0.13 + desat automàtic de
    2.4). El desat automàtic s'ha de fer abans de redissenyar la pàgina.
 3. **Fase C — Tokens compartits i accessibilitat** (Nivell 1).

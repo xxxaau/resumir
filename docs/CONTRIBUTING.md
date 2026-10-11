@@ -54,6 +54,13 @@ npm run dev
 - **Lint:** ESLint sense avisos (0 warnings). Corregeix els errors; afegeix `// eslint-disable-line` si un avís és justificat.
 - **Globals cross-file:** L'extensió usa `<script>` tags (no mòduls). Les constants/funcions compartides entre fitxers s'han de registrar a `eslint.config.mjs` → `extensionGlobals` o `settingsGlobals`. Si no, ESLint donarà falsos `no-undef`. Les variables registrades s'ignoren automàticament a `no-unused-vars`.
 - **Tests:** Executa `npm test` per veure el compte actual. Qualsevol funcionalitat nova requereix els seus tests corresponents.
+- **Tests de qualitat (ratchet):** `tests/quality-*.test.mjs` vigilen contrast
+  WCAG dels temes, accessibilitat estàtica de l'HTML i microcopy. Les fallades
+  conegudes són a una llista dins de cada fitxer i el test exigeix que
+  *segueixin* fallant: si en corregeixes una, el test et diu que la treguis; si
+  n'introdueixes una de nova, falla. `tests/helpers/sidebar-harness.mjs`
+  carrega la barra lateral real a jsdom per als tests d'integració
+  (`tests/sidebar-integration.test.mjs`).
 - **Noms:** utilitza camelCase per a variables/funcions, kebab-case per a fitxers. Preferiblement en català per als comentaris.
 
 ### Commit
