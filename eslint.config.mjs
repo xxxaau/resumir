@@ -63,7 +63,7 @@ const extensionGlobals = {
     getIcon: "readonly",
     CHECK_ICON_STR: "readonly",
     PLAY_ICON_STR: "readonly",
-    PAUSE_ICON_STR: "readonly",
+    STOP_ICON_STR: "readonly",
     formatTextToFragment: "readonly",
     updateTokenStats: "readonly",
     // sidebar/cache.js

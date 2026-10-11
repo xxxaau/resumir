@@ -186,3 +186,30 @@ test("setGeneratingState - reactiva ankiBtn en acabar la generació amb un resum
     assert.equal(document.getElementById("ankiBtn").disabled, false,
         "ankiBtn s'ha de reactivar quan acaba la generació");
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.7): el botó d'aturar ha de canviar també l'aria-label (preval
+// sobre el title) i la icona ha de ser un quadrat, no una «pausa».
+// ---------------------------------------------------------------------------
+test("setGeneratingState - el botó actiu anuncia «Aturar» (aria-label) i el restaura en acabar", () => {
+    setupToolbarDom();
+    const btn = document.getElementById("deepDiveBtn");
+    btn.setAttribute("aria-label", "Aprofundir");
+    btn.title = "Aprofundir";
+
+    setGeneratingState(true, false, "deepDiveBtn");
+    assert.equal(btn.getAttribute("aria-label"), "Aturar la generació");
+    assert.equal(btn.title, "Aturar la generació");
+
+    setGeneratingState(false, true, "deepDiveBtn");
+    assert.equal(btn.getAttribute("aria-label"), "Aprofundir");
+    assert.equal(btn.title, "Aprofundir");
+});
+
+test("setGeneratingState - la icona d'aturar és un quadrat (un sol <rect>), no una pausa", () => {
+    setupToolbarDom();
+    setGeneratingState(true, false, "summarizeBtn");
+    const rects = document.getElementById("summarizeBtn").querySelectorAll("rect");
+    assert.equal(rects.length, 1, "Una pausa en tindria 2");
+    setGeneratingState(false, false, "summarizeBtn");
+});

@@ -5,7 +5,8 @@
 // Handles UI updates, timers, formatting, and DOM manipulation
 
 const PLAY_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
-const PAUSE_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+// Quadrat d'aturar (no «pausa»: una generació aturada no es pot represa).
+const STOP_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
 const CHECK_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" color="#28a745"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
 
 const htmlParser = new DOMParser();
@@ -163,13 +164,17 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         }
         
         if (activeBtn) {
-            activeBtn.replaceChildren(getIcon(PAUSE_ICON_STR));
+            activeBtn.replaceChildren(getIcon(STOP_ICON_STR));
             activeBtn.classList.add("stop-btn");
             if (currentActiveBtnId === "summarizeBtn") {
                 activeBtn.classList.remove("primary");
             }
             activeBtn.dataset.originalTitle = activeBtn.title || "";
+            activeBtn.dataset.originalAriaLabel = activeBtn.getAttribute("aria-label") || "";
             activeBtn.title = "Aturar la generació";
+            // L'aria-label estàtic preval sobre el title: sense això el lector
+            // de pantalla seguiria anunciant «Resumir» en lloc d'«Aturar».
+            activeBtn.setAttribute("aria-label", "Aturar la generació");
         }
         
         const allActionBtns = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "copyBtn", "obsidianBtn", "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn", "ankiBtn"];
@@ -195,6 +200,11 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
             }
             if (activeBtn.dataset.originalTitle) {
                 activeBtn.title = activeBtn.dataset.originalTitle;
+            }
+            if (activeBtn.dataset.originalAriaLabel) {
+                activeBtn.setAttribute("aria-label", activeBtn.dataset.originalAriaLabel);
+            } else {
+                activeBtn.removeAttribute("aria-label");
             }
         }
         
