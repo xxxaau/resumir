@@ -250,7 +250,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const pdfResult = await extractPdfText(buffer);
                 // Només ara (extracció feta) canvia el títol: abans mostrava el
                 // fitxer nou sobre el resum antic, i si fallava s'hi quedava.
-                showPageTitleStrip(file.name, `pdf-local:${file.name}`);
+                // Clau amb mida i data: dos «document.pdf» diferents no es trepitgen.
+                const tabUrl = `pdf-local:${file.name}:${file.size}:${file.lastModified}`;
+                showPageTitleStrip(file.name, tabUrl);
                 // Obre el PDF en una pestanya per consultar-lo via visor personalitzat.
                 // Usem storage.session (compartit entre pàgines d'extensió) per passar
                 // el buffer, ja que blob: URLs no funcionen al visor nadiu de Firefox.
@@ -270,7 +272,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         active: false // no robar el focus de la barra lateral abans que acabi el resum
                     });
                 }
-                const tabUrl = `pdf-local:${file.name}`;
                 const pageData = {
                     title: pdfResult.title || file.name,
                     text: pdfResult.text,

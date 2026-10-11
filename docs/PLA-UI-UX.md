@@ -145,12 +145,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 - **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
   sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
 
-### 2.6 Historial
-
-- Filtre per tipus (amb les icones).
-- Clau de memòria cau dels PDF locals amb mida i data, no només el nom (dos
-  `document.pdf` es trepitgen).
-
 ## Nivell 3 — Estratègia de producte
 
 La direcció és fer de Resumir el resumidor més **verificable**: el mercat ja ha

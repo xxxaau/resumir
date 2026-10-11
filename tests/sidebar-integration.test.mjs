@@ -450,9 +450,9 @@ test("onboarding - Enter al camp comprova la clau", async () => {
 // 2.3: l'extracció d'un PDF local pot trigar; ha de mostrar l'estat de càrrega,
 // bloquejar els botons i NO canviar el títol fins que s'ha llegit el fitxer.
 // ---------------------------------------------------------------------------
-async function pickPdf(h, name = "informe.pdf") {
+async function pickPdf(h, name = "informe.pdf", extraBytes = 0) {
     const input = h.document.getElementById("pdfFileInput");
-    const file = new h.window.File([new Uint8Array([37, 80, 68, 70])], name, { type: "application/pdf" });
+    const file = new h.window.File([new Uint8Array(4 + extraBytes)], name, { type: "application/pdf" });
     if (!file.arrayBuffer) file.arrayBuffer = async () => new Uint8Array([37, 80, 68, 70]).buffer;
     Object.defineProperty(input, "files", { value: [file], configurable: true });
     input.dispatchEvent(new h.window.Event("change", { bubbles: true }));
@@ -724,5 +724,20 @@ test("historial - sense varietat de tipus no es mostra el filtre", async () => {
         h.document.getElementById("historyBtn").click();
         await h.flush();
         assert.equal(h.document.querySelector("#history-panel .history-filter"), null);
+    } finally { h.close(); }
+});
+
+// Dos fitxers diferents amb el mateix nom (document.pdf) es trepitjaven a la
+// memòria cau perquè la clau era només el nom.
+test("PDF local - dos fitxers amb el mateix nom però mida diferent no es trepitgen", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true }, modelReply: "Resum." });
+    try {
+        h.window.extractPdfText = async () => ({ title: "Doc", text: "Text. ".repeat(40) });
+        await pickPdf(h, "document.pdf", 0);
+        await h.flush(30);
+        await pickPdf(h, "document.pdf", 10);
+        await h.flush(30);
+        const keys = Object.keys(await h.storage.local.get(null)).filter(k => k.startsWith("summary_cache:pdf-local:"));
+        assert.equal(keys.length, 2, `Claus: ${keys.join(", ")}`);
     } finally { h.close(); }
 });
