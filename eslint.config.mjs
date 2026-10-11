@@ -168,6 +168,7 @@ const settingsGlobals = {
     dismissPromptUpdate: "readonly",
     resetBionic: "readonly",
     showStatus: "readonly",
+    autosave: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
     navigateToTab: "readonly",

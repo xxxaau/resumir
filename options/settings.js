@@ -82,8 +82,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!el) return;
         el.addEventListener('change', () => {
             updateSidebar();
+            // Es desa a l'instant: el menú lateral ja mostra el canvi, i abans
+            // no es persistia fins a «Desar» (es perdia en tancar la pestanya).
+            autosave({ [id]: el.checked });
         });
     });
+
+    const themeSelect = getEl("themeSelect");
+    if (themeSelect) {
+        themeSelect.addEventListener("change", () => autosave({ theme: themeSelect.value }));
+    }
 
     // Bind all save buttons to saveOptions
     ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple", "saveAnki"].forEach(id => {

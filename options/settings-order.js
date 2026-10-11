@@ -79,6 +79,7 @@ function moveExtension(extensionId, direction) {
 
     updateMoveButtonsState();
     updateSidebar();
+    autosave({ extensionOrder: getCurrentExtensionOrder() });
 }
 
 function updateMoveButtonsState() {

@@ -94,3 +94,62 @@ test("desar la pestanya d'Aprofundiment només esborra el SEU avís", async () =
         assert.equal(flags.simplePromptUpdateAvailable, true);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.10): els interruptors de plugins actualitzaven el menú lateral a
+// l'instant però NO es desaven fins a «Desar»; tancar la pestanya els perdia.
+// El desat automàtic ha d'escriure NOMÉS el que s'ha tocat.
+// ---------------------------------------------------------------------------
+test("interruptor de plugin - es desa a l'instant, sense prémer «Desar»", async () => {
+    const h = await loadSettings({ sync: { enableDeepdive: false } });
+    try {
+        h.document.getElementById("enableDeepdive").click();
+        await h.flush();
+        const { enableDeepdive } = await h.storage.sync.get("enableDeepdive");
+        assert.equal(enableDeepdive, true);
+        assert.match(h.document.getElementById("status").textContent, /Desat/);
+    } finally { h.close(); }
+});
+
+test("interruptor de plugin - NO commiteja prompts ni la clau a mig editar", async () => {
+    const h = await loadSettings({ sync: { systemPrompt: "prompt desat" }, local: { apiKey: "AIza_desada" } });
+    try {
+        h.document.getElementById("systemPrompt").value = "edició a mig fer, sense desar";
+        h.document.getElementById("apiKey").value = "AIza_a_mig_escriure";
+
+        h.document.getElementById("enableMarkdown").click();
+        await h.flush();
+
+        const sync = await h.storage.sync.get(["systemPrompt", "enableMarkdown"]);
+        const local = await h.storage.local.get("apiKey");
+        assert.equal(sync.enableMarkdown, true, "L'interruptor sí que es desa");
+        assert.equal(sync.systemPrompt, "prompt desat", "El prompt a mig editar no s'ha de desar");
+        assert.equal(local.apiKey, "AIza_desada", "La clau a mig escriure no s'ha de desar");
+    } finally { h.close(); }
+});
+
+test("canviar el tema es desa a l'instant", async () => {
+    const h = await loadSettings({ sync: { theme: "light" } });
+    try {
+        const sel = h.document.getElementById("themeSelect");
+        sel.value = "dark";
+        sel.dispatchEvent(new h.window.Event("change", { bubbles: true }));
+        await h.flush();
+        const { theme } = await h.storage.sync.get("theme");
+        assert.equal(theme, "dark");
+    } finally { h.close(); }
+});
+
+test("moure un plugin amunt/avall desa l'ordre a l'instant", async () => {
+    const h = await loadSettings({ sync: {} });
+    try {
+        const before = (await h.storage.sync.get("extensionOrder")).extensionOrder;
+        const down = h.document.querySelector(".btn-move-down:not([disabled])");
+        assert.ok(down, "Ha d'haver-hi un botó de baixar");
+        down.click();
+        await h.flush();
+        const after = (await h.storage.sync.get("extensionOrder")).extensionOrder;
+        assert.ok(Array.isArray(after) && after.length > 0, "S'ha de desar extensionOrder");
+        assert.notDeepEqual(after, before, "L'ordre desat ha de canviar");
+    } finally { h.close(); }
+});

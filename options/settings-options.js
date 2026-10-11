@@ -90,6 +90,20 @@ function saveOptions(e) {
   });
 }
 
+/**
+ * Desat immediat d'UN canvi discret (interruptor, ordre, tema). Escriu només
+ * les claus indicades: NO reutilitza saveOptions, que commitejaria també els
+ * prompts i la clau d'API que l'usuari tingui a mig editar a altres pestanyes.
+ */
+function autosave(patch) {
+  return ext.storage.sync.set(patch)
+    .then(() => showStatus("Desat"))
+    .catch(err => {
+      console.error("Error desant automàticament:", err);
+      showStatus("No s'ha pogut desar el canvi.");
+    });
+}
+
 function restoreOptions(syncData, localData) {
     document.querySelector("#apiKey").value = (localData && localData.apiKey) || "";
     document.querySelector("#modelName").value = (syncData && syncData.modelName) || DEFAULT_MODEL_ID;
