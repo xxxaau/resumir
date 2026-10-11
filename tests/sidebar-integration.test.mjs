@@ -898,3 +898,21 @@ test("avís de resum antic - en canviar de pestanya ofereix resumir la nova", as
         assert.ok(banner.classList.contains("hidden"), "en tornar, l'avís desapareix");
     } finally { h.close(); }
 });
+
+test("procedència - detecta un bàner de galetes i ofereix veure el text enviat", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Fem servir cookies. Accepta les cookies o gestiona el consentiment de cookies. ".repeat(4),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const el = h.document.getElementById("provenance");
+        assert.match(el.textContent, /avís de galetes/);
+        assert.ok(el.classList.contains("is-warning"));
+        el.querySelector("button").click();
+        await h.flush();
+        assert.ok(!h.document.getElementById("source-panel").classList.contains("hidden"));
+    } finally { h.close(); }
+});

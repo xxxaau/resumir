@@ -1482,6 +1482,15 @@ body {
     line-height: 1.4;
     color: var(--text-muted);
 }
+.provenance .btn-link {
+    font: inherit;
+    color: var(--primary-color);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
 .provenance.is-warning {
     color: var(--error-text);
 }

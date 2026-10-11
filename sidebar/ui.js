@@ -678,9 +678,26 @@ function renderProvenance(info) {
     const tokens = Math.round((info.inputTokens || 0) + (info.outputTokens || 0));
     if (tokens > 0) parts.push(`${formatTokenTooltipCount(tokens)} tokens`);
     if (info.truncated) parts.push("text tallat: només s'ha resumit el principi");
+    if (info.cookieBanner) parts.push("el text capturat sembla un avís de galetes, no l'article");
     el.textContent = parts.join(" · ");
-    el.classList.toggle("is-warning", !!info.truncated);
+    if (parts.length > 0 && info.words > 0) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-link";
+        btn.textContent = "Veure el text enviat";
+        btn.addEventListener("click", () => document.getElementById("sourceTextBtn")?.click());
+        el.append(" · ", btn);
+    }
+    el.classList.toggle("is-warning", !!(info.truncated || info.cookieBanner));
     el.classList.toggle("hidden", parts.length === 0);
+}
+
+/** Heurística: text curt i ple de «cookies» = s'ha capturat el bàner, no l'article. */
+function looksLikeCookieBanner(text) {
+    const t = String(text || "");
+    const words = t.trim().split(/\s+/).filter(Boolean).length;
+    const hits = (t.match(/cookies?|galetes|consent|consentiment/gi) || []).length;
+    return words < 400 && hits >= 3;
 }
 
 function hideProvenance() {
@@ -825,5 +842,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { renderProvenance, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

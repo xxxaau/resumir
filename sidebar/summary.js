@@ -574,6 +574,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 inputTokens,
                 outputTokens,
                 truncated: wasTruncated || pageData.truncated === true,
+                cookieBanner: typeof looksLikeCookieBanner === "function" && looksLikeCookieBanner(pageData.text),
             });
         }
 
