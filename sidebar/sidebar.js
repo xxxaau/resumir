@@ -355,8 +355,9 @@ document.addEventListener("DOMContentLoaded", () => {
         promptUpdateText.textContent = `Nova versió del prompt de ${type} disponible. `;
         promptUpdateLink.onclick = (e) => {
             e.preventDefault();
-            ext.storage.sync.set({ [updateKey]: false }).catch(() => {});
-            promptUpdateBanner.classList.add("hidden");
+            // NO esborrem el flag ni amaguem l'avís aquí: Configuració només
+            // mostra el seu avís (mantenir o restaurar) si el flag és true, i
+            // l'avís d'aquí és el que permet tornar i continuar (×).
             ext.runtime.openOptionsPage();
         };
         promptUpdateBanner.classList.remove("hidden");
