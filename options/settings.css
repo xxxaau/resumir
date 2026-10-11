@@ -685,7 +685,7 @@ input:checked + .slider:before {
 
 .version-date {
   font-weight: normal;
-  color: #666;
+  color: var(--text-muted);
   font-size: 13px;
   margin-left: 8px;
 }
@@ -693,7 +693,13 @@ input:checked + .slider:before {
 .version-list {
   margin: 5px 0;
   padding-left: 20px;
-  color: #444;
+  color: var(--text-color);
+}
+
+.version-milestone {
+  margin: 4px 0 6px;
+  color: var(--text-muted);
+  font-size: 0.9em;
 }
 
 /* ── Changelog ────────────────────────────────────────────── */
