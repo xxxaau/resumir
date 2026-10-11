@@ -163,6 +163,7 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#obsidianPath").placeholder = DEFAULT_OBSIDIAN_PATH;
     document.querySelector("#ankiPath").placeholder = DEFAULT_ANKI_PATH;
     document.querySelector("#modelName").value = (syncData && syncData.modelName) || DEFAULT_MODEL_ID;
+    updateModelSummary();
     document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
     document.querySelector("#systemPrompt").value = (syncData && syncData.systemPrompt) || DEFAULT_SYSTEM_PROMPT;
 

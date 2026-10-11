@@ -86,3 +86,20 @@ test("ensureFavoriteModels - una llista de favorits buida es manté buida (no es
 
     assert.deepEqual(favorites, []);
 });
+
+// ---------------------------------------------------------------------------
+// describeModel: nom llegible + nivell per a la configuració
+// ---------------------------------------------------------------------------
+test("describeModel - nivell segons la família i «Recomanat» només el model per defecte", () => {
+    const { describeModel } = require("../shared/models.js");
+    assert.equal(describeModel("gemini-2.5-flash-lite").tier, "fast");
+    assert.equal(describeModel("gemma-3-27b-it").tier, "fast");
+    assert.equal(describeModel("gemini-3.6-flash").tier, "balanced");
+    assert.equal(describeModel("gemini-2.5-pro").tier, "max");
+    assert.equal(describeModel("gemini-2.5-pro").tierLabel, "Màxima qualitat");
+    assert.equal(describeModel("gemini-9-ultra").tier, null);
+    assert.equal(describeModel("gemini-9-ultra").name, "gemini-9-ultra");
+    assert.equal(describeModel(DEFAULT_MODEL_ID).recommended, true);
+    assert.equal(describeModel("gemini-2.5-pro").recommended, false);
+    assert.equal(describeModel("gemini-2.5-flash").name, "Gemini 2.5 Flash");
+});

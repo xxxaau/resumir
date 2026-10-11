@@ -139,9 +139,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ### 2.4 Configuració
 
-- **Selector de models comprensible:** nom llegible al camp (no l'ID),
-  insígnies «Ràpid i econòmic / Equilibrat / Màxima qualitat» i «Recomanat». Les
-  dades ja són a `CURATED_MODELS`; avui no es mostren.
 - **Ordre de la navegació:** el prompt principal de resum fora del submenú de
   plugins (avui només s'hi arriba des de l'engranatge del plugin Resum) i
   «Sobre» al final.

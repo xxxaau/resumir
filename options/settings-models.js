@@ -119,6 +119,40 @@ function renderModelList(allModels, favoriteIds, currentModel, container) {
     }
 }
 
+/** Crea la insígnia de nivell («Ràpid i econòmic»…) o «Recomanat». */
+function createModelBadges(id) {
+    const info = describeModel(id);
+    const frag = document.createDocumentFragment();
+    if (info.tierLabel) {
+        const b = document.createElement("span");
+        b.className = `model-badge tier-${info.tier}`;
+        b.textContent = info.tierLabel;
+        frag.appendChild(b);
+    }
+    if (info.recommended) {
+        const b = document.createElement("span");
+        b.className = "model-badge recommended";
+        b.textContent = "Recomanat";
+        frag.appendChild(b);
+    }
+    return frag;
+}
+
+/** Mostra sota el camp el nom llegible del model triat i el seu nivell. */
+function updateModelSummary() {
+    const out = document.querySelector("#modelSummary");
+    const input = document.querySelector("#modelName");
+    if (!out || !input) return;
+    out.replaceChildren();
+    const id = input.value.trim();
+    if (!id) return;
+    const info = describeModel(id);
+    const name = document.createElement("strong");
+    name.textContent = info.name;
+    out.appendChild(name);
+    out.appendChild(createModelBadges(id));
+}
+
 /**
  * Crea una fila: ★ estrella | nom del model (clic per seleccionar)
  */
@@ -163,11 +197,13 @@ function createModelRow(model, isFavorite, currentModel, favoriteIds, allModels,
     }
     nameBtn.addEventListener("click", () => {
         document.querySelector("#modelName").value = model.id;
+        updateModelSummary();
         setModelsListOpen(false);
         const trigger = document.querySelector("#checkModels");
         if (trigger) trigger.focus();
     });
 
+    nameBtn.appendChild(createModelBadges(model.id));
     row.appendChild(star);
     row.appendChild(nameBtn);
     return row;

@@ -102,6 +102,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (input) input.addEventListener("input", () => updatePathPreview(inputId, previewId));
     });
 
+    const modelInput = getEl("modelName");
+    if (modelInput) modelInput.addEventListener("input", updateModelSummary);
+
     bindClick("verifyApiKey", checkApiKey);
     bindClick("toggleApiKey", toggleApiKeyVisibility);
 
@@ -182,6 +185,7 @@ ext.storage.onChanged.addListener((changes, area) => {
         const modelEl = document.querySelector("#modelName");
         if (modelEl && modelEl.value !== changes.modelName.newValue) {
             modelEl.value = changes.modelName.newValue;
+            updateModelSummary();
         }
     }
 });

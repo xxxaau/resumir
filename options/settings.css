@@ -943,3 +943,31 @@ input:checked + .slider:before {
     gap: 12px;
   }
 }
+
+/* Nom llegible i insígnies de nivell del model */
+.model-summary {
+    margin-top: 6px;
+    font-size: 0.9em;
+    color: var(--text-color);
+}
+
+.model-summary:empty {
+    display: none;
+}
+
+.model-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.78em;
+    font-weight: 400;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.model-badge.recommended {
+    font-weight: 700;
+    border-color: var(--text-color);
+}

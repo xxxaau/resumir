@@ -83,6 +83,7 @@ const extensionGlobals = {
     getCacheKey: "readonly",
     // shared/models.js
     sortModelsByPriority: "readonly",
+    describeModel: "readonly",
     // shared/content-types.js
     CONTENT_TYPES: "readonly",
     isProseType: "readonly",
@@ -163,6 +164,7 @@ const settingsGlobals = {
     // settings-models.js
     modelNote: "readonly",
     listModels: "readonly",
+    updateModelSummary: "readonly",
     refreshModels: "readonly",
     // settings-options.js
     saveOptions: "readonly",

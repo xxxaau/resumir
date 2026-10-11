@@ -444,3 +444,37 @@ test("plantilla de Markdown - la configuració mostra la MATEIXA que fa servir l
         assert.equal(h.document.getElementById("markdownTemplate").value, "# [{{title}}]({{url}})\n\n{{summary}}");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Selector de models (2.4): el camp mostrava l'ID cru i res deia què és cada
+// model. Ara hi ha nom llegible, nivell i «Recomanat».
+// ---------------------------------------------------------------------------
+test("selector de models - sota el camp es veu el nom llegible, el nivell i «Recomanat»", async () => {
+    const h = await loadSettings({ sync: { modelName: "gemini-3.1-flash-lite" } });
+    try {
+        const sum = h.document.getElementById("modelSummary");
+        assert.ok(sum, "Ha d'existir #modelSummary");
+        assert.match(sum.textContent, /Gemini 3\.1 Flash Lite/);
+        assert.match(sum.textContent, /Ràpid i econòmic/);
+        assert.match(sum.textContent, /Recomanat/);
+        const input = h.document.getElementById("modelName");
+        input.value = "gemini-2.5-pro";
+        input.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        assert.match(sum.textContent, /Màxima qualitat/);
+        assert.doesNotMatch(sum.textContent, /Recomanat/);
+        input.value = "model-inventat";
+        input.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        assert.match(sum.textContent, /model-inventat/, "Un ID desconegut es mostra tal qual");
+    } finally { h.close(); }
+});
+
+test("selector de models - cada fila de la llista porta la seva insígnia de nivell", async () => {
+    const h = await loadSettings({ sync: { favoriteModels: [] } });
+    try {
+        const list = await openModelPicker(h);
+        const rows = [...list.querySelectorAll(".model-item-row")];
+        assert.ok(rows.length > 0);
+        assert.ok(rows.every(r => r.querySelector(".model-badge")), "Totes les files tenen insígnia");
+        assert.equal(list.querySelectorAll(".model-badge.recommended").length, 1);
+    } finally { h.close(); }
+});

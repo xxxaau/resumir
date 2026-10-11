@@ -111,6 +111,29 @@ function sortModelsByPriority(models) {
 }
 
 /**
+ * Nom llegible i nivell d'un model, per mostrar-los a la configuració en lloc
+ * de l'ID cru. El nivell es dedueix de l'ID (també per als models que només
+ * arriben per l'API i no són a CURATED_MODELS).
+ * @param {string} id
+ * @returns {{name:string, tier:"fast"|"balanced"|"max"|null, tierLabel:string, recommended:boolean}}
+ */
+function describeModel(id) {
+    const lower = String(id || "").toLowerCase();
+    const curated = CURATED_MODELS.find(m => m.id === id);
+    let tier = null;
+    if (lower.includes("flash-lite") || lower.includes("gemma")) tier = "fast";
+    else if (lower.includes("flash")) tier = "balanced";
+    else if (lower.includes("pro")) tier = "max";
+    const labels = { fast: "Ràpid i econòmic", balanced: "Equilibrat", max: "Màxima qualitat" };
+    return {
+        name: curated ? curated.label : String(id || ""),
+        tier,
+        tierLabel: tier ? labels[tier] : "",
+        recommended: id === DEFAULT_MODEL_ID,
+    };
+}
+
+/**
  * Assegura que favoriteModels existeix a storage.sync.
  * Si no existeix (primer ús), l'inicialitza amb el model per defecte.
  * Si ja existeix (encara que l'usuari n'hagi tret el model per defecte
@@ -132,5 +155,5 @@ async function ensureFavoriteModels() {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID, DEFAULT_MODEL_INFO, EUR_RATE, sortModelsByPriority, ensureFavoriteModels };
+    module.exports = { CURATED_MODELS, DEFAULT_MODEL_ID, DEFAULT_MODEL_INFO, EUR_RATE, sortModelsByPriority, describeModel, ensureFavoriteModels };
 }
