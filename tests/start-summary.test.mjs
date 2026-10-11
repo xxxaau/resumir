@@ -1022,3 +1022,55 @@ test("etapes de càrrega - en un fallback es diu quin model es prova i per què"
     assert.ok(global.__stages.some(s => /Provant Gemini 2\.5 Flash \(Gemini 2\.0 Flash no ha respost\)…/.test(s)),
         `etapes: ${global.__stages.join(" | ")}`);
 });
+
+// ---------------------------------------------------------------------------
+// 2.3: el streaming ja es renderitza formatat (abans text cru amb ** i #), i
+// per a mapa/Anki només es mostra progrés (l'esquema/JSON a mitges no es llegeix).
+// ---------------------------------------------------------------------------
+test("streaming - el text es renderitza formatat des del primer chunk (no com a text cru)", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    const rendered = [];
+    let rawText = "";
+    const ctx = makeCtx();
+    Object.defineProperty(ctx.contentDiv, "textContent", { get: () => rawText, set: (v) => { rawText = v; }, configurable: true });
+    ctx.contentDiv.replaceChildren = (...n) => { rendered.push(...n); };
+    setupGlobals({
+        getSummaryCache: async () => null,
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk, onUsage) => {
+            onChunk("**Negreta** parcial");
+            assert.ok(rendered.includes("**Negreta** parcial"), "El primer chunk s'ha de passar pel renderitzador");
+            assert.equal(rawText, "", "No s'ha d'escriure el text cru a textContent");
+            onUsage({ promptTokenCount: 1, candidatesTokenCount: 1 });
+            return { inputTokens: 1, outputTokens: 1, cacheTokens: 0 };
+        },
+    });
+    await startSummary(ctx, null, false, false, true);
+});
+
+test("streaming - un mapa conceptual mostra només «Generant el mapa…», no l'esquema a mitges", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    global.DEFAULT_CONCEPTMAP_PROMPT = "Mapa.";
+    global.renderMarkmapInteractive = () => ({});
+    const seen = [];
+    const ctx = makeCtx();
+    Object.defineProperty(ctx.contentDiv, "textContent", { get: () => seen[seen.length - 1] ?? "", set: (v) => { seen.push(v); }, configurable: true });
+    setupGlobals({
+        getSummaryCache: async () => null,
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk, onUsage) => {
+            onChunk("- Arrel\n  - Fi");
+            onUsage({ promptTokenCount: 1, candidatesTokenCount: 1 });
+            return { inputTokens: 1, outputTokens: 1, cacheTokens: 0 };
+        },
+    });
+    await startSummary(ctx, null, false, false, true, true);
+    assert.ok(seen.includes("Generant el mapa…"), `s'ha vist: ${seen.join(" | ")}`);
+    assert.ok(!seen.some(t => t.includes("- Arrel")), "No s'ha de mostrar l'esquema a mitges");
+});

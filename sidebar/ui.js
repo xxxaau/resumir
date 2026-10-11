@@ -368,8 +368,6 @@ function formatTextToFragment(text, bionic = false, fixation = 0.45) {
     const fragment = document.createDocumentFragment();
     const lines = text.split(/\n/);
     
-    let currentList = null;
-
     const parseTextWithLinks = (str) => {
         const frag = document.createDocumentFragment();
         // Detects markdown links [text](url), bare https:// URLs, and DOIs
@@ -406,73 +404,136 @@ function formatTextToFragment(text, bionic = false, fixation = 0.45) {
         return frag;
     };
 
+    // En línia: **gras**, *cursiva* i `codi` (la resta, text amb enllaços/biònica).
+    // Abans només s'entenia el gras: la cursiva i el codi es veien amb els
+    // asteriscs i les cometes literals.
+    const INLINE_TOKEN = /(\*\*.+?\*\*|`[^`\n]+`|\*[^*\s][^*\n]*?\*)/g;
     const formatInline = (textStr) => {
         const span = document.createElement('span');
-        const parts = textStr.split(/\*\*(.*?)\*\*/g);
-        parts.forEach((part, index) => {
-            if (index % 2 === 1) { // Bold
+        textStr.split(INLINE_TOKEN).forEach((part) => {
+            if (!part) return;
+            if (part.length > 4 && part.startsWith("**") && part.endsWith("**")) {
                 const strong = document.createElement('strong');
-                strong.textContent = part;
+                strong.textContent = part.slice(2, -2);
                 span.appendChild(strong);
-            } else if (part) {
+            } else if (part.length > 2 && part.startsWith("`") && part.endsWith("`")) {
+                const code = document.createElement('code');
+                code.textContent = part.slice(1, -1);
+                span.appendChild(code);
+            } else if (part.length > 2 && part.startsWith("*") && part.endsWith("*") && !part.startsWith("**")) {
+                const em = document.createElement('em');
+                em.textContent = part.slice(1, -1);
+                span.appendChild(em);
+            } else {
                 span.appendChild(parseTextWithLinks(part));
             }
         });
         return span;
     };
 
+    // Piles de llistes imbricades: [{ indent, type, el, lastLi }]
+    let listStack = [];
+    const closeLists = () => { listStack = []; };
+    const indentOf = (ws) => ws.replace(/\t/g, "    ").length;
+    let inFence = false;
+    let fenceLines = [];
+
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const trimmed = line.trim();
 
-        if (trimmed === "") {
-            if (currentList) {
-                fragment.appendChild(currentList);
-                currentList = null;
+        // Blocs de codi ```
+        if (trimmed.startsWith("```")) {
+            if (inFence) {
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = fenceLines.join("\n");
+                pre.appendChild(code);
+                fragment.appendChild(pre);
+                fenceLines = [];
+            } else {
+                closeLists();
             }
+            inFence = !inFence;
+            continue;
+        }
+        if (inFence) { fenceLines.push(line); continue; }
+
+        // Una línia en blanc NO tanca la llista (els models separen els items
+        // amb línies en blanc i es trencava en llistes d'un item amb la
+        // numeració reiniciada); la tanca el primer bloc que no sigui item.
+        if (trimmed === "") continue;
+
+        // Regla horitzontal
+        if (/^([-*_])(\s*\1){2,}$/.test(trimmed)) {
+            closeLists();
+            fragment.appendChild(document.createElement('hr'));
             continue;
         }
 
         // Headers
         const headerMatch = line.match(/^(#{1,6})\s+(.*)/);
         if (headerMatch) {
-            if (currentList) {
-                fragment.appendChild(currentList);
-                currentList = null;
-            }
+            closeLists();
             const level = headerMatch[1].length;
-            const content = headerMatch[2];
             const h = document.createElement(`h${level}`);
-            h.appendChild(formatInline(content));
+            h.appendChild(formatInline(headerMatch[2]));
             fragment.appendChild(h);
             continue;
         }
 
-        // List Items
-        const listMatch = line.match(/^(\*|-)\s+(.*)/);
-        if (listMatch) {
-            if (!currentList) {
-                currentList = document.createElement('ul');
+        // Items de llista: -, *, + o 1. / 1), amb sagnat → llistes imbricades
+        const itemMatch = line.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)/);
+        if (itemMatch) {
+            const indent = indentOf(itemMatch[1]);
+            const ordered = /\d/.test(itemMatch[2]);
+            const type = ordered ? "ol" : "ul";
+
+            while (listStack.length && indent < listStack[listStack.length - 1].indent) listStack.pop();
+            let top = listStack[listStack.length - 1];
+
+            const makeList = () => {
+                const list = document.createElement(type);
+                if (ordered) {
+                    const start = parseInt(itemMatch[2], 10);
+                    if (start > 1) list.start = start;
+                }
+                const parent = listStack.length ? listStack[listStack.length - 1].lastLi : null;
+                (parent || fragment).appendChild(list);
+                return { indent, type, el: list, lastLi: null };
+            };
+
+            if (!top || indent > top.indent) {
+                top = makeList();
+                listStack.push(top);
+            } else if (top.type !== type) {
+                // Mateix sagnat però canvia el tipus (ul ↔ ol): llista germana nova
+                listStack.pop();
+                top = makeList();
+                listStack.push(top);
             }
+
             const li = document.createElement('li');
-            li.appendChild(formatInline(listMatch[2]));
-            currentList.appendChild(li);
+            li.appendChild(formatInline(itemMatch[3]));
+            top.el.appendChild(li);
+            top.lastLi = li;
             continue;
         }
 
         // Regular Paragraph
-        if (currentList) {
-            fragment.appendChild(currentList);
-            currentList = null;
-        }
-        
+        closeLists();
         const p = document.createElement('p');
         p.appendChild(formatInline(line));
         fragment.appendChild(p);
     }
-    
-    if (currentList) {
-        fragment.appendChild(currentList);
+
+    // Bloc de codi sense tancar (resposta tallada): es mostra tal com és
+    if (inFence && fenceLines.length) {
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        code.textContent = fenceLines.join("\n");
+        pre.appendChild(code);
+        fragment.appendChild(pre);
     }
 
     return fragment;

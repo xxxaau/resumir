@@ -300,3 +300,100 @@ test("barra d'eines - tots els botons coneguts pertanyen a un grup (cap queda fo
     const grouped = TOOLBAR_GROUPS.flat().sort();
     assert.deepEqual(grouped, ALL_TOOLBAR_BTNS.slice().sort());
 });
+
+// ---------------------------------------------------------------------------
+// Renderitzador Markdown (2.3): Gemini fa servir subllistes, llistes numerades,
+// cursiva, codi i separadors, i es veien amb els símbols literals (white-space:
+// pre-wrap mostrava fins i tot els espais del sagnat).
+// ---------------------------------------------------------------------------
+test("markdown - subllistes sagnades generen <ul> imbricats (no paràgrafs amb «-» literal)", () => {
+    const frag = formatTextToFragment("- Pare\n  - Fill A\n  - Fill B\n    - Nét\n- Altre pare");
+    const root = frag.querySelector("ul");
+    assert.equal(frag.querySelectorAll("p").length, 0, "Cap paràgraf amb guió literal");
+    assert.equal(root.children.length, 2, "Dos items al primer nivell");
+    const nested = root.children[0].querySelector("ul");
+    assert.ok(nested, "El primer item ha de tenir una subllista");
+    assert.equal(nested.children.length, 2);
+    assert.ok(nested.children[1].querySelector("ul li"), "El segon fill té un nét");
+    assert.equal(root.children[1].querySelector("ul"), null);
+});
+
+test("markdown - llista numerada genera <ol> i conserva el número d'inici", () => {
+    const frag = formatTextToFragment("1. Primer\n2. Segon\n3. Tercer");
+    const ol = frag.querySelector("ol");
+    assert.ok(ol);
+    assert.equal(ol.children.length, 3);
+    const from3 = formatTextToFragment("3. Tres\n4. Quatre").querySelector("ol");
+    assert.equal(from3.start, 3);
+});
+
+test("markdown - una línia en blanc entre items numerats NO trenca la llista", () => {
+    const ol = formatTextToFragment("1. A\n\n2. B\n\n3. C").querySelectorAll("ol");
+    assert.equal(ol.length, 1, "Una sola llista (si no, cada item reiniciaria a 1)");
+    assert.equal(ol[0].children.length, 3);
+});
+
+test("markdown - llista numerada amb subpunts imbrica un <ul> dins de l'<li>", () => {
+    const frag = formatTextToFragment("1. Pas\n   - detall\n2. Altre");
+    const ol = frag.querySelector("ol");
+    assert.equal(ol.children.length, 2);
+    assert.ok(ol.children[0].querySelector("ul li"));
+});
+
+test("markdown - un paràgraf després d'una llista la tanca", () => {
+    const frag = formatTextToFragment("- A\n- B\n\nText posterior");
+    assert.equal(frag.querySelectorAll("ul").length, 1);
+    assert.equal(frag.querySelector("p").textContent, "Text posterior");
+});
+
+test("markdown - *cursiva* genera <em> i `codi` genera <code>", () => {
+    const frag = formatTextToFragment("Això és *important* i `x = 1` també");
+    assert.equal(frag.querySelector("em").textContent, "important");
+    assert.equal(frag.querySelector("code").textContent, "x = 1");
+    assert.ok(!frag.textContent.includes("*"), "Sense asteriscs literals");
+    assert.ok(!frag.textContent.includes("`"), "Sense cometes inverses literals");
+});
+
+test("markdown - el gras continua funcionant i no es confon amb cursiva", () => {
+    const frag = formatTextToFragment("**gras** i *cursiva*");
+    assert.equal(frag.querySelector("strong").textContent, "gras");
+    assert.equal(frag.querySelector("em").textContent, "cursiva");
+});
+
+test("markdown - un asterisc solt o una multiplicació no es converteix en cursiva", () => {
+    const frag = formatTextToFragment("2 * 3 = 6 i a*b");
+    assert.equal(frag.querySelector("em"), null);
+    assert.match(frag.textContent, /2 \* 3 = 6/);
+});
+
+test("markdown - --- genera <hr> (i no una llista)", () => {
+    const frag = formatTextToFragment("Abans\n\n---\n\nDesprés");
+    assert.ok(frag.querySelector("hr"));
+    assert.equal(frag.querySelector("ul"), null);
+});
+
+test("markdown - bloc de codi ``` genera <pre><code> amb el text literal", () => {
+    const frag = formatTextToFragment("Exemple:\n```\n- no és llista\n**ni gras**\n```\nFi");
+    const code = frag.querySelector("pre code");
+    assert.ok(code);
+    assert.equal(code.textContent, "- no és llista\n**ni gras**");
+    assert.equal(frag.querySelector("ul"), null);
+    assert.equal(frag.querySelector("strong"), null);
+});
+
+test("markdown - un bloc de codi sense tancar (resposta tallada) es mostra igualment", () => {
+    const frag = formatTextToFragment("```\nlinia 1\nlinia 2");
+    assert.equal(frag.querySelector("pre code").textContent, "linia 1\nlinia 2");
+});
+
+test("markdown - el contingut no s'interpreta com a HTML (sense injecció)", () => {
+    const frag = formatTextToFragment("- <img src=x onerror=alert(1)>\n\n**<b>x</b>**");
+    assert.equal(frag.querySelector("img"), null);
+    assert.equal(frag.querySelector("b"), null);
+    assert.match(frag.textContent, /<img src=x onerror=alert\(1\)>/);
+});
+
+test("markdown - amb biònica activa les subllistes i la cursiva també funcionen", () => {
+    const frag = formatTextToFragment("- Pare\n  - Fill amb paraules llargues", true);
+    assert.ok(frag.querySelector("ul ul li b"), "El text del fill ha de dur negretes biòniques");
+});

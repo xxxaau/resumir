@@ -420,9 +420,18 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     receivedChunks = true;
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
-                    if (now - lastUpdate > 100) {
-                        // Text pla durant el streaming (ràpid, sense parse)
-                        contentDiv.textContent = currentMetadata.summary;
+                    // Markdown formatat mentre arriba (abans: text cru amb **, # i
+                    // un salt de maquetació en acabar). Es limita la freqüència i
+                    // s'espaia més en textos llargs, perquè re-analitzar tot el
+                    // text a cada chunk seria quadràtic.
+                    const interval = 250 + Math.floor(currentMetadata.summary.length / 20000) * 250;
+                    if (now - lastUpdate > interval || lastUpdate === 0) {
+                        if (isAnki || isConceptMap) {
+                            // L'esquema/JSON a mitges no és text per llegir: només progrés.
+                            contentDiv.textContent = isAnki ? "Generant targetes…" : "Generant el mapa…";
+                        } else {
+                            contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
+                        }
                         lastUpdate = now;
                     }
                     if (now - lastTokenUiUpdate > 200) {
