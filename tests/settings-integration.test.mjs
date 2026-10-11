@@ -478,3 +478,19 @@ test("selector de models - cada fila de la llista porta la seva insígnia de niv
         assert.equal(list.querySelectorAll(".model-badge.recommended").length, 1);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Navegació (2.4): el prompt principal només s'assolia des de l'engranatge del
+// plugin Resum i «Sobre» quedava enmig. Ara «Resum» és fix i «Sobre» va al final.
+// ---------------------------------------------------------------------------
+test("navegació - «Resum» és una entrada fixa i «Sobre» l'última", async () => {
+    const h = await loadSettings({ sync: { enableResum: false } });
+    try {
+        const items = [...h.document.querySelectorAll(".sidebar .nav-item")].map(b => b.dataset.tab);
+        assert.deepEqual(items.slice(0, 3), ["general", "resum", "extensions"]);
+        assert.equal(items[items.length - 1], "about");
+        assert.equal(items.filter(t => t === "resum").length, 1, "No es duplica a «Plugins actius»");
+        h.document.querySelector('.nav-item[data-tab="resum"]').click();
+        assert.ok(h.document.getElementById("tab-resum").classList.contains("active"));
+    } finally { h.close(); }
+});

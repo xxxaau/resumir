@@ -139,9 +139,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ### 2.4 Configuració
 
-- **Ordre de la navegació:** el prompt principal de resum fora del submenú de
-  plugins (avui només s'hi arriba des de l'engranatge del plugin Resum) i
-  «Sobre» al final.
 - **Revelació progressiva:** prompts plegats sota «Personalitzar instruccions
   (avançat)» amb insígnia «Personalitzat», llegenda de variables (`{{COUNT}}`,
   `{{LANG}}`) i bloqueig de prompt buit.
