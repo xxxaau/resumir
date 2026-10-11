@@ -140,6 +140,14 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ## Nivell 3 — Estratègia de producte
 
+> **Estat (2026-10-11):** Fases A–D fetes (vegeu `git log`). Següent pas: **Fase E**,
+> començant per la *línia de procedència* (S–M): sota cada resum, paraules de la
+> font, model, tokens i avís de truncament (`metadata.truncated` del PDF no es
+> mostra mai). Després, *pestanyes per tipus* (reutilitza `typeIconSvg` i
+> `getAvailableTypes`; l'estat en repòs ja llista els resums desats). Mètode: test de
+> regressió primer, commit atòmic, `npm test` + `npm run lint` + `npm run dev:chromium`
+> abans de commitejar, i treure del pla el que es completi.
+
 La direcció és fer de Resumir el resumidor més **verificable**: el mercat ja ha
 convertit en mínim el xat de seguiment i els segells de temps, i la diferència ara
 és la confiança. Ordenat per relació impacte/esforç.
