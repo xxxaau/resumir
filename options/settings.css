@@ -128,6 +128,7 @@ body {
   flex-direction: column;
   padding: 20px 0;
   flex-shrink: 0;
+  overflow-y: auto; /* amb molts plugins actius la navegació ha de poder fer scroll */
 }
 
 .sidebar-header {
@@ -333,7 +334,7 @@ label {
     display: none;
     box-shadow: 0 4px 12px var(--shadow-color);
     position: absolute; 
-    width: 400px; 
+    width: min(400px, 100%); 
     z-index: 100;
     color: var(--text-color);
     padding: 4px 0;
@@ -844,4 +845,95 @@ input:checked + .slider:before {
 .btn-sm {
   padding: 6px 14px;
   font-size: 13px;
+}
+
+/* ── Responsiu: finestres estretes (pantalla partida, finestra petita) ──────
+   El menú lateral fix de 240 px deixava el contingut en columnes d'una paraula.
+   Per sota de 720 px la navegació passa a una barra horitzontal amb scroll a dalt. */
+@media (max-width: 720px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .sidebar-header,
+  #activeExtensionsHeader,
+  .sidebar-spacer {
+    /* !important: settings-sidebar.js posa display inline a #activeExtensionsHeader */
+    display: none !important;
+  }
+
+  #activeExtensionsList {
+    display: flex;
+  }
+
+  .nav-item {
+    width: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 12px 14px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .nav-item.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--primary-color);
+  }
+
+  .main-content {
+    padding: 24px 16px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  /* Cada plugin: descripció a dalt i els controls a sota, no esprémer el text */
+  .extension-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .extension-info {
+    flex: 1 1 160px;
+    min-width: 0;
+  }
+
+  .extension-actions {
+    flex: 1 1 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+
+  /* El camp del model i els seus botons baixen de línia en lloc d'esprémer el camp */
+  .model-input-group {
+    flex-wrap: wrap;
+  }
+
+  .model-input-group .form-control {
+    flex: 1 1 100%;
+  }
+
+  .about-section {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .app-info {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 }
