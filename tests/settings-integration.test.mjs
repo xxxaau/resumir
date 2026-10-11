@@ -222,3 +222,52 @@ test("selector de models - triar un model omple el camp, tanca la llista i retor
         assert.equal(h.document.activeElement, h.document.getElementById("checkModels"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Formularis i feedback (6.1–6.3): ajuda associada al camp, toast com a regió
+// d'estat i temporitzador que es reinicia.
+// ---------------------------------------------------------------------------
+test("l'ajuda de cada camp està associada amb aria-describedby", async () => {
+    const h = await loadSettings({});
+    try {
+        const apiKey = h.document.getElementById("apiKey");
+        const ids = (apiKey.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+        assert.ok(ids.length > 0, "#apiKey ha de tenir aria-describedby");
+        const help = h.document.getElementById(ids[0]);
+        assert.ok(help, "L'id referenciat ha d'existir");
+        assert.match(help.textContent, /Necessària/);
+        // Cap aria-describedby penja d'un id inexistent
+        for (const el of h.document.querySelectorAll("[aria-describedby]")) {
+            for (const id of el.getAttribute("aria-describedby").split(/\s+/)) {
+                assert.ok(h.document.getElementById(id), `aria-describedby apunta a #${id}, que no existeix`);
+            }
+        }
+    } finally { h.close(); }
+});
+
+test("el toast és una regió role=status sempre al DOM i buida de bon principi", async () => {
+    const h = await loadSettings({});
+    try {
+        const st = h.document.getElementById("status");
+        assert.equal(st.getAttribute("role"), "status");
+        assert.equal(st.getAttribute("aria-live"), "polite");
+        assert.equal(st.textContent, "", "Buit fins que hi ha un missatge (perquè se n'anunciï el canvi)");
+        assert.ok(!st.classList.contains("show"));
+    } finally { h.close(); }
+});
+
+test("el toast reinicia el temporitzador: el segon missatge no el pot amagar el primer", async () => {
+    const h = await loadSettings({});
+    try {
+        const cleared = [];
+        const realClear = h.window.clearTimeout.bind(h.window);
+        h.window.clearTimeout = (id) => { cleared.push(id); realClear(id); };
+        h.window.showStatus("primer");
+        h.window.showStatus("segon");
+        assert.ok(cleared.some(id => id !== undefined && id !== null),
+            "Cal esborrar el temporitzador anterior en mostrar un missatge nou");
+        const st = h.document.getElementById("status");
+        assert.equal(st.textContent, "segon");
+        assert.ok(st.classList.contains("show"));
+    } finally { h.close(); }
+});

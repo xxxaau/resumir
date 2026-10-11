@@ -237,9 +237,17 @@ label {
 }
 
 .form-control:focus {
-    outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--nav-active-bg);
+}
+
+/* Anell de focus visible i consistent (abans, un box-shadow del 5 % d'alfa que
+   no es veia): mateix color que els controls, contrast >= 3:1 en tots els temes. */
+.form-control:focus-visible,
+.btn:focus-visible,
+.btn-icon:focus-visible,
+.nav-item:focus-visible {
+    outline: 2px solid var(--button-color);
+    outline-offset: 2px;
 }
 
 .help-text {
@@ -427,8 +435,22 @@ label {
     padding: 12px 24px;
     border-radius: 50px;
     box-shadow: 0 4px 12px var(--shadow-color);
-    display: none;
     font-size: 14px;
+}
+/* Sempre al DOM (role=status): quan no es mostra, només s'amaga visualment */
+.toast:not(.show) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    box-shadow: none;
+}
+.toast.show {
     animation: fadeUp 0.3s ease-out;
 }
 [data-actual-theme="dark"] .toast {

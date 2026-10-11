@@ -186,6 +186,24 @@ function showPromptUpdateBanner(type, isAvailable) {
 function initializeSettingsPageUI() {
   const manifest = ext.runtime.getManifest();
   document.getElementById("appVersion").textContent = manifest.version;
+  linkHelpTexts();
+}
+
+/**
+ * Vincula cada .help-text al control del seu .form-group amb aria-describedby,
+ * perquè el lector de pantalla llegeixi l'ajuda en enfocar el camp (abans no hi
+ * havia cap aria-describedby a tota la pàgina).
+ */
+function linkHelpTexts() {
+  document.querySelectorAll(".help-text").forEach((help, i) => {
+    const group = help.parentElement;
+    const control = group && group.querySelector("input:not([type=checkbox]):not([type=hidden]), select, textarea");
+    if (!control) return;
+    if (!help.id) help.id = `help-${control.id || i}`;
+    const ids = (control.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+    if (!ids.includes(help.id)) ids.push(help.id);
+    control.setAttribute("aria-describedby", ids.join(" "));
+  });
 }
 
 function resetTemplate() {
@@ -244,11 +262,18 @@ function resetBionic() {
     showStatus("Valors de lectura biònica restaurats als valors per defecte.");
 }
 
+// #status és una regió role=status sempre present al DOM: quan no es mostra
+// només s'amaga visualment (classe), perquè els lectors de pantalla anunciïn el
+// canvi de text (amb display:none no s'anunciava res). El temporitzador es
+// reinicia a cada missatge: abans el primer timeout amagava el segon missatge
+// abans d'hora.
+let statusTimer = null;
 function showStatus(text) {
   const status = document.querySelector("#status");
   status.textContent = text;
-  status.style.display = "block";
-  setTimeout(() => {
-    status.style.display = "none";
-  }, 2000);
+  status.classList.add("show");
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    status.classList.remove("show");
+  }, 4000);
 }
