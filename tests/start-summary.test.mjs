@@ -624,3 +624,60 @@ for (const [label, args, expected] of [
         assert.equal(ctx.currentMetadata.type, expected);
     });
 }
+
+// ---------------------------------------------------------------------------
+// Regressió (0.5): un timeout d'inactivitat (TimeoutError) és reintentable amb
+// el model següent, i si l'usuari no ha aturat res no se li diu que sí.
+// ---------------------------------------------------------------------------
+test("startSummary - timeout d'inactivitat: prova el model següent", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    const modelsTried = [];
+    setupGlobals({
+        getSummaryCache: async () => null,
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        CURATED_MODELS: [
+            { id: "gemini-2.0-flash", fallback: true, contextWindow: 100_000 },
+            { id: "gemini-2.5-flash", fallback: true, contextWindow: 100_000 },
+        ],
+        callGeminiStream: async (_k, model, _p, _t, _s, onChunk, onUsage) => {
+            modelsTried.push(model);
+            if (model === "gemini-2.0-flash") {
+                throw new DOMException("Idle timeout", "TimeoutError");
+            }
+            onChunk("Resum del segon model.");
+            onUsage({ promptTokenCount: 10, candidatesTokenCount: 5 });
+            return { inputTokens: 10, outputTokens: 5, cacheTokens: 0 };
+        },
+    });
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true);
+
+    assert.deepEqual(modelsTried, ["gemini-2.0-flash", "gemini-2.5-flash"]);
+    assert.ok(ctx.currentMetadata.summary.includes("Resum del segon model."));
+});
+
+test("startSummary - AbortError sense aturada de l'usuari no diu 'aturada per l'usuari'", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    setupGlobals({
+        getSummaryCache: async () => null,
+        CURATED_MODELS: [{ id: "gemini-2.0-flash", fallback: true, contextWindow: 100_000 }],
+        callGeminiStream: async () => {
+            throw new DOMException("The operation was aborted.", "AbortError");
+        },
+    });
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true);
+
+    assert.ok(!ctx.errorDiv.textContent.includes("aturada per l'usuari"),
+        `No s'ha de culpar l'usuari, té: "${ctx.errorDiv.textContent}"`);
+    assert.ok(ctx.errorDiv.textContent.length > 0, "Ha de mostrar algun error");
+});

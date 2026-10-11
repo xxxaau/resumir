@@ -83,11 +83,17 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
     // El signal d'usuari és optatiu (p.ex. la regeneració de targetes Anki no
     // en passa cap), així que filtrem els buits abans de combinar:
     // AbortSignal.any() peta amb undefined.
+    // S'avorta amb un motiu `TimeoutError`: fetch()/reader.read() rebutgen amb
+    // el `reason` del signal, i així el cridant pot distingir un timeout
+    // d'una aturada de l'usuari (`AbortError`) en lloc de culpar-lo.
     const timeoutController = new AbortController();
-    let idleTimeoutId = setTimeout(() => timeoutController.abort(), STREAM_IDLE_TIMEOUT_MS);
+    const abortOnIdle = () => timeoutController.abort(
+        new DOMException("Idle timeout", "TimeoutError")
+    );
+    let idleTimeoutId = setTimeout(abortOnIdle, STREAM_IDLE_TIMEOUT_MS);
     function resetIdleTimeout() {
         clearTimeout(idleTimeoutId);
-        idleTimeoutId = setTimeout(() => timeoutController.abort(), STREAM_IDLE_TIMEOUT_MS);
+        idleTimeoutId = setTimeout(abortOnIdle, STREAM_IDLE_TIMEOUT_MS);
     }
     const signals = [signal, timeoutController.signal].filter(Boolean);
     const fetchSignal = (typeof AbortSignal.any === 'function')

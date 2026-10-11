@@ -246,7 +246,8 @@ test("callGeminiStream - un stream que s'encalla a mig camí s'avorta pel timeou
             // d'inactivitat) s'avorta.
             return new Promise((_resolve, reject) => {
                 if (!capturedSignal) return;
-                const onAbort = () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+                // Com fa el navegador: es rebutja amb el `reason` del signal.
+                const onAbort = () => reject(capturedSignal.reason);
                 if (capturedSignal.aborted) { onAbort(); return; }
                 capturedSignal.addEventListener("abort", onAbort, { once: true });
             });
@@ -275,6 +276,8 @@ test("callGeminiStream - un stream que s'encalla a mig camí s'avorta pel timeou
 
     t.mock.timers.tick(60_001); // supera el timeout d'inactivitat
 
-    await assert.rejects(resultPromise, /aborted|AbortError/i);
+    // Ha de ser un TimeoutError (no un AbortError): el cridant ho necessita per
+    // no dir-li a l'usuari que ha aturat ell la generació.
+    await assert.rejects(resultPromise, (err) => err.name === "TimeoutError");
     assert.deepEqual(chunks, ["primer"], "El primer chunk s'ha d'haver processat abans d'encallar-se");
 });

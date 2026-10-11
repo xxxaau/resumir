@@ -400,6 +400,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 const isRetryable = status
                     ? (status === 404 || status === 429 || status === 500 || status === 502 || status === 503)
                     : (
+                        e.name === "TimeoutError" ||
                         msg.includes("quota") ||
                         msg.includes("exhausted") ||
                         msg.includes("overloaded") ||
@@ -480,7 +481,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         });
 
     } catch (err) {
-        if (signal.aborted || err.name === 'AbortError') {
+        // Només és una aturada de l'usuari si el SEU signal s'ha avortat: un
+        // AbortError sense això ve del timeout d'inactivitat (o de la xarxa).
+        if (signal.aborted) {
             errorDiv.textContent = "Generació aturada per l'usuari.";
             errorDiv.classList.remove("hidden");
         } else {
@@ -564,7 +567,7 @@ function classifyError(err) {
     }
 
     // Timeout or connection abort
-    if (err.name === 'AbortError' || msgLower.includes('aborted') || msgLower.includes('timeout')) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError' || msgLower.includes('aborted') || msgLower.includes('timeout')) {
         return {
             message: "La petició ha expirat o s'ha interromput la connexió. Comprova la connexió i torna-ho a provar.",
             showConfig: false
