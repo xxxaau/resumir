@@ -49,3 +49,54 @@ test("avís de prompt nou - l'enllaç obre Configuració SENSE esborrar el flag 
             "L'avís es manté per poder tornar-hi i continuar");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.1): el botó de lectura biònica re-renderitzava el resum com a
+// text encara que el contingut fos el mapa conceptual, que es convertia en una
+// llista i perdia l'SVG interactiu pagat en tokens.
+// ---------------------------------------------------------------------------
+test("biònica - activar/desactivar NO destrueix el mapa conceptual a pantalla", async () => {
+    const h = await loadSidebar({
+        sync: { enableConceptMap: true, enableBionic: true },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article llarg sobre ciència. ".repeat(20),
+        modelReply: "- Ciència\n  - Mètode\n  - Dades",
+    });
+    try {
+        h.document.getElementById("conceptMapBtn").click();
+        await h.flush(30);
+
+        const mapBefore = h.document.querySelector("#content .markmap-container");
+        assert.ok(mapBefore, "Després de generar el mapa, ha de veure's el contenidor del mapa");
+
+        const bionic = h.document.getElementById("bionicBtn");
+        bionic.click();
+        await h.flush(10);
+        assert.ok(h.document.querySelector("#content .markmap-container"),
+            "Activar la biònica no pot substituir el mapa per text");
+
+        bionic.click();
+        await h.flush(10);
+        assert.ok(h.document.querySelector("#content .markmap-container"),
+            "Desactivar-la tampoc");
+    } finally { h.close(); }
+});
+
+test("biònica - amb un resum de text SÍ es re-renderitza (no és un no-op)", async () => {
+    const h = await loadSidebar({
+        sync: { enableBionic: true },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article llarg sobre ciència. ".repeat(20),
+        modelReply: "Resum curt del contingut.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.getElementById("content").textContent.includes("Resum curt"));
+
+        h.document.getElementById("bionicBtn").click();
+        await h.flush(10);
+        assert.ok(h.document.querySelector("#content b, #content strong, #content .bionic"),
+            "Amb la biònica activa el text ha de dur negretes");
+    } finally { h.close(); }
+});

@@ -53,13 +53,26 @@ function makeStorageArea(area, onChanged, initial) {
     };
 }
 
-export async function loadSidebar({ sync = {}, local = {}, tabs = [{ id: 1, url: "https://example.com/article", title: "Article", active: true }] } = {}) {
+/**
+ * Opcions:
+ *   sync / local   → contingut inicial de storage
+ *   tabs           → resultat de tabs.query
+ *   pageText       → si es dona, getPageContent() retorna aquesta pàgina (evita
+ *                    la injecció de scripts real)
+ *   modelReply     → si es dona, fetch() respon amb un stream SSE de Gemini amb
+ *                    aquest text (un sol chunk), i s'hi registra a calls.fetches
+ */
+export async function loadSidebar({
+    sync = {}, local = {},
+    tabs = [{ id: 1, url: "https://example.com/article", title: "Article", active: true }],
+    pageText = null, modelReply = null,
+} = {}) {
     const html = readFileSync(resolve(SIDEBAR_DIR, "sidebar.html"), "utf8");
     const dom = new JSDOM(html, { runScripts: "outside-only", pretendToBeVisual: true, url: "chrome-extension://test/sidebar/sidebar.html" });
     const { window } = dom;
 
     const onChanged = makeEvent();
-    const calls = { openOptionsPage: 0, tabsCreate: [], clipboard: [] };
+    const calls = { openOptionsPage: 0, tabsCreate: [], clipboard: [], fetches: [] };
 
     window.chrome = {
         storage: {
@@ -88,6 +101,23 @@ export async function loadSidebar({ sync = {}, local = {}, tabs = [{ id: 1, url:
     };
     window.matchMedia = window.matchMedia || (() => ({ matches: false, addListener() {}, addEventListener() {} }));
     Object.defineProperty(window.navigator, "clipboard", { value: { writeText: async (t) => { calls.clipboard.push(t); } }, configurable: true });
+    window.TextDecoder = TextDecoder;
+    window.TextEncoder = TextEncoder;
+    window.ReadableStream = ReadableStream;
+    if (modelReply !== null) {
+        window.fetch = async (url, opts) => {
+            calls.fetches.push({ url, body: opts && opts.body });
+            const frame = `data: ${JSON.stringify({
+                candidates: [{ content: { parts: [{ text: modelReply }] } }],
+                usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 },
+            })}\n\n`;
+            return {
+                ok: true, status: 200, statusText: "OK",
+                headers: { get: (h) => h.toLowerCase() === "content-type" ? "text/event-stream" : null },
+                body: new ReadableStream({ start(c) { c.enqueue(new TextEncoder().encode(frame)); c.close(); } }),
+            };
+        };
+    }
     // Stubs de les llibreries grans
     window.eval("var pdfjsLib = { GlobalWorkerOptions: {} }; var Readability = function () { this.parse = () => null; };");
 
@@ -98,6 +128,12 @@ export async function loadSidebar({ sync = {}, local = {}, tabs = [{ id: 1, url:
         const file = resolve(SIDEBAR_DIR, src);
         // vm.Script comparteix l'àmbit lèxic global entre scripts (com <script> reals)
         new vm.Script(readFileSync(file, "utf8"), { filename: file }).runInContext(ctx);
+    }
+
+    if (pageText !== null) {
+        const page = { title: tabs[0].title, url: tabs[0].url, text: pageText };
+        // Les funcions globals dels scripts són propietats de window: es poden substituir
+        window.getPageContent = async () => ({ ...page });
     }
 
     window.document.dispatchEvent(new window.Event("DOMContentLoaded"));
