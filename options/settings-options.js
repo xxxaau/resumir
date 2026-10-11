@@ -110,10 +110,20 @@ function saveOptions(e) {
   const clearedUpdateKey = SAVE_BUTTON_UPDATE_KEYS[e && e.currentTarget && e.currentTarget.id];
   if (clearedUpdateKey) settings[clearedUpdateKey] = false;
 
+  // Un prompt igual al default no es desa: així, quan el default canviï, l'usuari
+  // que mai l'ha editat el rep sense quedar congelat amb el text antic.
+  const defaultPromptKeys = [];
+  for (const [id, getDefault] of PROMPT_FIELDS) {
+    if (settings[id] !== undefined && settings[id] === getDefault()) {
+      delete settings[id];
+      defaultPromptKeys.push(id);
+    }
+  }
+
   Promise.all([
       ext.storage.sync.set(settings),
       ext.storage.local.set({ apiKey: apiKeyValue })
-  ]).then(() => {
+  ]).then(() => defaultPromptKeys.length ? ext.storage.sync.remove(defaultPromptKeys) : null).then(() => {
      setDirty(false);
      showStatus("Configuració desada correctament!");
      updateSidebar(); 

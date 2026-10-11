@@ -12,6 +12,8 @@
 // PROMPT_DEFAULTS_VERSION global feia aparèixer banners falsos a tots els prompts
 // personalitzats encara que no haguessin canviat).
 const PROMPT_VERSIONS = {
+    systemPrompt: 1,        // Resum: entra al versionat (sense avís propi, vegeu sidebar.js)
+    ankiPrompt: 1,          // Anki: idem
     sciencePrompt: 2,       // v2.4.0: bloc SEGURETAT afegit
     deepDivePrompt: 2,      // v2.4.0: bloc SEGURETAT afegit
     conceptMapPrompt: 2,    // v2.3.x: 4 nivells de profunditat
@@ -29,6 +31,34 @@ const PROMPT_VERSIONS = {
  * @param {object} versions - mapa key→versió actual (PROMPT_VERSIONS)
  * @returns {{toSet: object, toRemove: string[]}}
  */
+/**
+ * Hash FNV-1a (32 bits, hex) d'un prompt normalitzat (sense \r i espais als extrems).
+ * Serveix per reconèixer els defaults RETIRATS sense haver d'incrustar-ne el text:
+ * saveOptions desava el literal del default, i sense això un usuari que mai l'ha
+ * editat quedaria congelat amb el text antic i rebria un avís fals de «personalitzat».
+ */
+function promptHash(text) {
+    const t = String(text).replace(/\r/g, "").trim();
+    let h = 0x811c9dc5;
+    for (let i = 0; i < t.length; i++) {
+        h ^= t.charCodeAt(i);
+        h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16).padStart(8, "0");
+}
+
+// Hashes dels textos per defecte ja retirats, per prompt (vegeu promptHash).
+// Quan canviïs un default, afegeix-hi aquí el hash del text que retires
+// (node -e "console.log(require('./shared/defaults.js').promptHash(text))").
+const LEGACY_PROMPT_HASHES = {
+    systemPrompt: ["14151845"],
+    deepDivePrompt: ["0ccf681e"],
+    sciencePrompt: ["d021d05b"],
+    conceptMapPrompt: ["9e85940d"],
+    simplePrompt: ["b8b2d4cf"],
+    ankiPrompt: ["1cb4dda1"],
+};
+
 function computePromptMigration(stored, defs, versions) {
     const s = stored || {};
     const toSet = {};
@@ -39,7 +69,9 @@ function computePromptMigration(stored, defs, versions) {
     for (const { key, defaultVal, customizedKey, updateKey } of defs) {
         const cur = versions[key];
         const saved = s[key];
-        const isDefault = (saved === undefined || saved === defaultVal);
+        const legacy = LEGACY_PROMPT_HASHES[key] || [];
+        const isDefault = (saved === undefined || saved === defaultVal ||
+            (typeof saved === "string" && legacy.includes(promptHash(saved))));
 
         if (savedVersions[key] === cur) {
             // Aquest prompt ja és al dia: només neteja flags obsolets si ja no és personalitzat.
@@ -53,7 +85,7 @@ function computePromptMigration(stored, defs, versions) {
         // La versió d'aquest prompt ha canviat (o encara no existeix per a l'usuari).
         newVersions[key] = cur;
         if (isDefault) {
-            if (saved === defaultVal) toRemove.push(key);  // cau al default
+            if (saved !== undefined) toRemove.push(key);  // cau al default (nou o retirat)
             toSet[customizedKey] = false;
             toSet[updateKey] = false;
         } else {
@@ -323,6 +355,8 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         PROMPT_VERSIONS,
         computePromptMigration,
+        promptHash,
+        LEGACY_PROMPT_HASHES,
         DEFAULT_EXTENSION_ORDER,
         DEFAULT_ANKI_PROMPT,
         DEFAULT_ANKI_PATH,

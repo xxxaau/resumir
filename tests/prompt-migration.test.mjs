@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { computePromptMigration } = require("../shared/defaults.js");
+const { computePromptMigration, promptHash, LEGACY_PROMPT_HASHES } = require("../shared/defaults.js");
 
 // Defs i versions de prova (independents del text real dels prompts).
 const DEFS = [
@@ -93,4 +93,21 @@ test("INVARIANT: mai posa un prompt personalitzat a toRemove", () => {
     const { toRemove } = computePromptMigration(stored, DEFS, VERS);
     assert.ok(!toRemove.includes("sciencePrompt"));
     assert.ok(!toRemove.includes("deepDivePrompt"));
+});
+
+test("default RETIRAT desat pel literal (saveOptions): cau al default nou, sense avís fals", () => {
+    const OLD = "text del default antic";
+    LEGACY_PROMPT_HASHES.fooPrompt = [promptHash(OLD)];
+    try {
+        const defs = [{ key: "fooPrompt", defaultVal: "NOU", customizedKey: "fooCust", updateKey: "fooUpd" }];
+        const stored = { promptVersions: { fooPrompt: 1 }, fooPrompt: OLD + "\r\n", fooCust: false };
+        const { toSet, toRemove } = computePromptMigration(stored, defs, { fooPrompt: 2 });
+        assert.deepEqual(toRemove, ["fooPrompt"]);
+        assert.equal(toSet.fooUpd, false);
+        assert.equal(toSet.fooCust, false);
+        // I un prompt realment editat continua protegit
+        const edited = computePromptMigration({ promptVersions: { fooPrompt: 1 }, fooPrompt: OLD + " editat" }, defs, { fooPrompt: 2 });
+        assert.deepEqual(edited.toRemove, []);
+        assert.equal(edited.toSet.fooUpd, true);
+    } finally { delete LEGACY_PROMPT_HASHES.fooPrompt; }
 });

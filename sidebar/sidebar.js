@@ -786,6 +786,10 @@ document.addEventListener("DOMContentLoaded", () => {
         //    canviat de versió I que l'usuari ha personalitzat.
         try {
             const promptDefs = [
+                // Resum i Anki: només s'hi adopta el default nou en silenci (no tenen avís propi);
+                // si l'usuari els ha editat, es respecten tal qual.
+                { key: "systemPrompt", defaultVal: DEFAULT_SYSTEM_PROMPT, customizedKey: "systemPromptCustomized", updateKey: "systemPromptUpdateAvailable" },
+                { key: "ankiPrompt", defaultVal: DEFAULT_ANKI_PROMPT, customizedKey: "ankiPromptCustomized", updateKey: "ankiPromptUpdateAvailable" },
                 { key: "sciencePrompt", defaultVal: DEFAULT_SCIENCE_PROMPT, customizedKey: "sciencePromptCustomized", updateKey: "sciencePromptUpdateAvailable" },
                 { key: "deepDivePrompt", defaultVal: DEFAULT_DEEP_DIVE_PROMPT, customizedKey: "deepDivePromptCustomized", updateKey: "deepDivePromptUpdateAvailable" },
                 { key: "conceptMapPrompt", defaultVal: DEFAULT_CONCEPTMAP_PROMPT, customizedKey: "conceptMapPromptCustomized", updateKey: "conceptMapPromptUpdateAvailable" },

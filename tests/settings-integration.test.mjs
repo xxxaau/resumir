@@ -600,3 +600,18 @@ test("prompts - la insígnia «Personalitzat» apareix només si el text diferei
         assert.equal(badge.hidden, true, "Restaurar la fa desaparèixer");
     } finally { h.close(); }
 });
+
+test("desar - un prompt igual al default no es desa (no es congela amb el text antic)", async () => {
+    const h = await loadSettings({ sync: { systemPrompt: "vell", sciencePrompt: "editat" } });
+    try {
+        // El camp de Resum es restaura al default; el de Ciència queda editat
+        h.document.querySelector("#resetSystemPrompt").click();
+        await h.flush(10);
+        h.document.querySelector("#sciencePrompt").value = "editat";
+        h.document.querySelector("#saveCustom").click();
+        await h.flush(20);
+        const stored = await h.storage.sync.get(["systemPrompt", "sciencePrompt"]);
+        assert.equal(stored.systemPrompt, undefined, "el default no es desa");
+        assert.equal(stored.sciencePrompt, "editat", "l'edició es conserva");
+    } finally { h.close(); }
+});
