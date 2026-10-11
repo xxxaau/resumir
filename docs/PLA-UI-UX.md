@@ -135,6 +135,13 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 - **Revelació progressiva:** plegar els prompts sota «Personalitzar instruccions
   (avançat)» (la insígnia «Personalitzat» i el bloqueig de prompt buit ja hi són;
   els prompts per defecte no tenen variables, no cal llegenda).
+- **Descripció detallada a la pàgina de cada plugin** (Resum, Aprofundir, Explica-ho
+  fàcil, Ciència, Mapa conceptual, Anki, Obsidian, Biònica, PDF…): què fa, per a què
+  és útil i com configurar-lo (camps, exemples, valors recomanats). Avui només hi ha
+  el títol i els camps. Redactar-ho en català clar, sense jargó, amb un exemple.
+- **Revisió de la interfície de configuració amb Opus:** auditoria completa de
+  `options/` (jerarquia, densitat, textos, a11y, mòbil/estret, coherència amb la
+  barra lateral); les troballes es afegeixen aquí a sota.
 - **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
   sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
 
