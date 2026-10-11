@@ -160,3 +160,17 @@ test("typeIconSvg - cada tipus de contingut té la seva icona SVG", async () => 
     }
     assert.ok(TYPE_ICON_PATHS.cache && TYPE_ICON_PATHS.history);
 });
+
+// Cada pàgina de plugin explica què fa, per què serveix i com configurar-lo
+test("settings: cada pàgina de plugin té la seva descripció detallada", () => {
+    const doc = load("options/settings.html");
+    const panes = ["obsidian", "markdown", "deepdive", "science", "bionic", "conceptmap", "simple", "selectpdf", "anki"];
+    for (const id of panes) {
+        const about = doc.querySelector(`#tab-${id} .plugin-about`);
+        assert.ok(about, `#tab-${id} sense .plugin-about`);
+        const text = about.textContent.replace(/\s+/g, " ");
+        assert.match(text, /Què fa/, `#tab-${id}: falta «Què fa»`);
+        assert.match(text, /Com configurar-lo|Com usar-lo/, `#tab-${id}: falta «Com configurar-lo»`);
+        assert.ok(text.length > 200, `#tab-${id}: descripció massa curta`);
+    }
+});

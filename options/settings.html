@@ -865,6 +865,19 @@
       <!-- Tab: Obsidian Config -->
       <div id="tab-obsidian" class="tab-pane">
         <h1 class="page-title">Configuració d'Obsidian</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Afegeix un botó a la barra d'eines que desa el resum com a nota dins del teu vault d'Obsidian, amb títol, enllaç a la pàgina original i el resum ja formatat.</p>
+          <p><strong>Per què és útil.</strong> Els resums passen directament al teu quadern de notes, sense copiar i enganxar, i queden ordenats per data.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Nom del Vault:</b> escriu-lo exactament com apareix a Obsidian (majúscules incloses). Si no coincideix, Obsidian no trobarà el vault.</li>
+            <li><b>Ruta de la nota:</b> carpeta i nom del fitxer. Pots usar camps de data com <code>YYYY-MM-DD</code>; el text entre claudàtors es copia tal qual. La vista prèvia mostra el resultat real.</li>
+            <li><b>Plantilla:</b> defineix el contingut de la nota amb <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code> i <code>{{summary}}</code>. Si dubtes, deixa la de per defecte.</li>
+            <li>Obsidian ha d'estar instal·lat i el navegador ha de poder obrir enllaços <code>obsidian://</code>.</li>
+          </ul>
+        </details>
+
 
         <div class="section">
           <div class="form-group">
@@ -927,6 +940,18 @@
       <!-- Tab: Markdown Config -->
       <div id="tab-markdown" class="tab-pane">
         <h1 class="page-title">Configuració de Markdown</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Afegeix un botó <em>Copiar</em> que posa el resum al porta-retalls en format Markdown, amb la plantilla que triïs.</p>
+          <p><strong>Per què és útil.</strong> Pots enganxar el resum a qualsevol eina (Notion, correu, documents, editors de codi) mantenint títols, llistes i l'enllaç a la font.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Plantilla d'exportació:</b> combina text lliure amb <code>{{title}}</code>, <code>{{url}}</code>, <code>{{summary_executive}}</code> i <code>{{summary}}</code>.</li>
+            <li>Prova-ho: genera un resum, prem Copiar i enganxa'l; ajusta la plantilla fins que quedi com vols.</li>
+            <li>Amb <em>Restaurar</em> tornes a la plantilla original.</li>
+          </ul>
+        </details>
+
         <div class="section">
           <div class="form-group">
             <label for="markdownTemplate">Plantilla d'exportació</label>
@@ -955,6 +980,18 @@
       <!-- Tab: Deep Dive Config -->
       <div id="tab-deepdive" class="tab-pane">
         <h1 class="page-title">Configuració de l'aprofundiment</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Genera una anàlisi més profunda de la pàgina: context, arguments, matisos i implicacions, més enllà del resum curt.</p>
+          <p><strong>Per què és útil.</strong> Quan un text importa de debò (un article d'opinió, un informe, una notícia polèmica), el resum curt no n'hi ha prou per decidir què en penses.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Prompt:</b> són les instruccions que rep el model. El de per defecte ja funciona bé; edita'l només si vols un altre estil o estructura.</li>
+            <li>Si el canvies, apareix la insígnia <em>Personalitzat</em>; <em>Restaurar</em> recupera el de per defecte.</li>
+            <li>Activa o desactiva el plugin des de la llista de Plugins: el botó apareix a la barra d'eines.</li>
+          </ul>
+        </details>
+
         <div id="deepdiveUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt d'aprofundiment per defecte.</p>
           <div class="update-banner-actions">
@@ -987,6 +1024,18 @@
       <!-- Tab: Scientific Validation Config -->
       <div id="tab-science" class="tab-pane">
         <h1 class="page-title">Configuració de validació científica</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Avalua el rigor científic del contingut: tipus d'estudi, mostra, possibles biaixos, conflictes d'interès i si les conclusions se sostenen.</p>
+          <p><strong>Per què és útil.</strong> Ajuda a distingir un resultat sòlid d'un titular exagerat quan llegeixes notícies de salut, nutrició o ciència.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Prompt:</b> les instruccions d'avaluació. El de per defecte segueix una llista de criteris habituals; edita'l si vols afegir-ne o treure'n.</li>
+            <li>Funciona millor amb articles que citen estudis o amb la pàgina de l'estudi mateix.</li>
+            <li>Recorda que és una ajuda: el model pot equivocar-se, contrasta sempre les fonts importants.</li>
+          </ul>
+        </details>
+
         <div id="scienceUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt de validació científica per defecte.</p>
           <div class="update-banner-actions">
@@ -1019,6 +1068,18 @@
       <!-- Tab: Bionic Reader Config -->
       <div id="tab-bionic" class="tab-pane">
         <h1 class="page-title">Configuració de lectura biònica</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Marca amb negreta l'inici de cada paraula del resum perquè l'ull les reconegui més de pressa.</p>
+          <p><strong>Per què és útil.</strong> Per a alguns lectors (inclosos molts amb dislèxia o TDAH) fa la lectura de textos llargs més fluida. Si no t'ajuda, deixa-ho desactivat.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li>Activa'l amb el botó de la barra d'eines; aquí només ajustes l'aspecte.</li>
+            <li><b>Fixació:</b> quin percentatge de cada paraula es ressalta. Prova valors baixos (20–30 %); no a tothom li va millor.</li>
+            <li><b>Tipus de lletra, gruix, mida i interlineat:</b> ajusta fins que llegir et sigui còmode. Els canvis es veuen en el resum següent.</li>
+          </ul>
+        </details>
+
         <div class="section">
           <div class="form-group">
             <label for="bionicFixation"
@@ -1101,6 +1162,18 @@
       <!-- Tab: Concept Map Config -->
       <div id="tab-conceptmap" class="tab-pane">
         <h1 class="page-title">Configuració del mapa conceptual</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Converteix la pàgina en un mapa conceptual interactiu: tema central, branques i subbranques que pots plegar, ampliar i exportar com a imatge.</p>
+          <p><strong>Per què és útil.</strong> Serveix per veure l'estructura d'un tema d'un cop d'ull, estudiar-lo o preparar un esquema.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Prompt:</b> instruccions per generar l'arbre. Edita'l només si vols un altre nivell de detall.</li>
+            <li>Al mapa pots plegar i desplegar branques, fer zoom i exportar-lo com a PNG.</li>
+            <li>Funciona millor amb textos ben estructurats.</li>
+          </ul>
+        </details>
+
         <div id="conceptmapUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt de mapa conceptual per defecte.</p>
           <div class="update-banner-actions">
@@ -1133,6 +1206,17 @@
       <!-- Tab: Explain Simple Config -->
       <div id="tab-simple" class="tab-pane">
         <h1 class="page-title">Configuració d'Explica-ho fàcil</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Reescriu el contingut amb llenguatge senzill, frases curtes i exemples quotidians, sense perdre les idees principals.</p>
+          <p><strong>Per què és útil.</strong> Quan un text és tècnic o dens, aquesta versió ajuda a entendre'l ràpid o a explicar-lo a algú altre.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Prompt:</b> pots demanar un altre nivell (per a nens, per a un públic expert…) o un to diferent.</li>
+            <li>Si el canvies, apareix <em>Personalitzat</em>; <em>Restaurar</em> recupera el de per defecte.</li>
+          </ul>
+        </details>
+
         <div id="simpleUpdateBanner" class="update-banner" style="display:none">
           <p>Hi ha una nova versió del prompt d'Explica-ho fàcil per defecte.</p>
           <div class="update-banner-actions">
@@ -1165,6 +1249,16 @@
       <!-- Tab: PDF local -->
       <div id="tab-selectpdf" class="tab-pane">
         <h1 class="page-title">PDF local</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Et deixa triar un PDF del teu ordinador i el resumeix, amb el visor propi al costat per consultar-lo.</p>
+          <p><strong>Per què és útil.</strong> Els PDF locals (articles, informes, apunts) no s'obren com una pàgina web i d'altra manera no es podrien resumir.</p>
+          <p><strong>Com usar-lo.</strong></p>
+          <ul>
+            <li>No té opcions: tria el fitxer des del botó de la barra d'eines.</li>
+            <li>Límits: fins a 500 pàgines, i el PDF ha de tenir text seleccionable (els escanejats no es poden llegir, no hi ha OCR).</li>
+          </ul>
+        </details>
         <div class="section">
           <p>
             Aquest plugin afegeix un botó a la barra d'eines per triar un fitxer
@@ -1181,6 +1275,20 @@
       <!-- Tab: Anki Config -->
       <div id="tab-anki" class="tab-pane">
         <h1 class="page-title">Configuració de targetes Anki</h1>
+        <details class="plugin-about" open>
+          <summary>Què fa i com configurar-lo</summary>
+          <p><strong>Què fa.</strong> Genera targetes de memorització (pregunta i resposta) a partir del contingut i les desa al teu vault d'Obsidian, per al plugin d'Anki.</p>
+          <p><strong>Per què és útil.</strong> Passes de llegir a recordar: l'espaiat de les repeticions fa que això es quedi a la memòria.</p>
+          <p><strong>Com configurar-lo.</strong></p>
+          <ul>
+            <li><b>Requisits:</b> cal tenir l'app d'Obsidian amb el connector «Obsidian_to_Anki» (i AnkiConnect) perquè les targetes arribin a Anki; Resumir només escriu la nota al vault.</li>
+            <li><b>Nom del Vault i ruta:</b> on es desaran les targetes; admet els mateixos camps de data que Obsidian.</li>
+            <li><b>Targetes per petició:</b> entre poques i molt exhaustives. Amb 5–10 sol anar bé.</li>
+            <li><b>Idioma:</b> en què es redacten preguntes i respostes.</li>
+            <li><b>Prompt:</b> instruccions per generar-les; el de per defecte ja segueix bones pràctiques.</li>
+          </ul>
+        </details>
+
         <div class="section">
           <div class="form-group">
             <label for="ankiVault">Nom del Vault</label>

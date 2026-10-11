@@ -1016,3 +1016,18 @@ input:checked + .slider:before {
 .prompt-badge[hidden] {
     display: none;
 }
+
+/* Descripció detallada de cada plugin */
+.plugin-about {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-bg, transparent);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.plugin-about summary { cursor: pointer; font-weight: 600; }
+.plugin-about p { margin: 8px 0 4px; }
+.plugin-about ul { margin: 4px 0 0; padding-left: 20px; }
+.plugin-about li { margin: 3px 0; }
