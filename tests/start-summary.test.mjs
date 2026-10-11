@@ -797,3 +797,31 @@ test("startSummary - un model amb 429 recent se salta a la petició següent", a
     assert.deepEqual(tried, ["gemini-2.5-flash"],
         "No ha de tornar a provar el model que acaba d'esgotar la quota");
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.6): clicar Resumir sense clau no ha d'esborrar la targeta
+// d'onboarding ni afegir-hi un error [001] vermell redundant.
+// ---------------------------------------------------------------------------
+test("startSummary - sense clau, amb la targeta d'onboarding visible: no l'esborra ni mostra error", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    // localMock buit → sense apiKey
+    const ctx = makeCtx();
+    let cleared = false;
+    ctx.contentDiv.querySelector = (sel) => sel === ".api-key-warning-container" ? {} : null;
+    ctx.contentDiv.replaceChildren = () => { cleared = true; };
+
+    await startSummary(ctx, null, false, false, true);
+
+    assert.equal(cleared, false, "No s'ha d'esborrar el contingut (targeta d'onboarding)");
+    assert.ok(!ctx.contentDiv.classList.contains("hidden"), "El contingut ha de seguir visible");
+    assert.ok(ctx.errorDiv.classList.contains("hidden"), "No ha de mostrar error redundant");
+});
+
+test("startSummary - sense clau i SENSE targeta d'onboarding: continua mostrant [001]", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true);
+    assert.ok(ctx.errorDiv.textContent.includes("[001]"));
+});

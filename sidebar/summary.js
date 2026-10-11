@@ -82,8 +82,15 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
     const { contentDiv, errorDiv, modelSelect, currentMetadata } = ctx;
 
-    contentDiv.replaceChildren();
-    contentDiv.classList.add("hidden");
+    // Si ara mateix hi ha la targeta d'onboarding (falta la clau), no l'esborrem:
+    // un clic a Resumir la substituïa per un error [001] i l'usuari nou perdia
+    // la guia fins a recarregar. (Sense await abans: l'abort ha de quedar
+    // enganxat de manera síncrona, vegeu setAbortController.)
+    const onboardingShown = !!(contentDiv.querySelector && contentDiv.querySelector(".api-key-warning-container"));
+    if (!onboardingShown) {
+        contentDiv.replaceChildren();
+        contentDiv.classList.add("hidden");
+    }
     errorDiv.textContent = "";
     errorDiv.classList.add("hidden");
     
@@ -516,6 +523,11 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             errorDiv.classList.remove("hidden");
         } else {
             stopGenerationTimer();
+            // Falta la clau i la targeta d'onboarding ja ho diu (amb el botó
+            // per configurar-la): no hi afegim un error vermell redundant.
+            if (onboardingShown && /^\[001\]/.test(err?.message || "")) {
+                return abortController;
+            }
             const errorInfo = classifyError(err);
             errorDiv.textContent = errorInfo.message;
             errorDiv.classList.remove("hidden");
