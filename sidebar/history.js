@@ -125,7 +125,8 @@ async function loadHistoryEntry(entry) {
     const titleLink  = document.getElementById("page-title-link");
     if (titleStrip && titleLink) {
         titleLink.textContent = entry.title || entry.url || "";
-        try { titleLink.href = ["http:", "https:"].includes(new URL(entry.url).protocol) ? entry.url : "#"; } catch { titleLink.href = "#"; }
+        const href = getSourceHttpUrl(entry.url);
+        if (href) titleLink.href = href; else titleLink.removeAttribute("href");
         titleStrip.classList.remove("hidden");
     }
 

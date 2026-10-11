@@ -48,7 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const link  = document.getElementById("page-title-link");
         if (!strip || !link) return;
         link.textContent = title || url;
-        try { link.href = ["http:", "https:"].includes(new URL(url).protocol) ? url : "#"; } catch { link.href = "#"; }
+        // Sense URL http(s) real (PDF local, selecció antiga): text pla, no
+        // un href="#" que obria una còpia de la barra lateral en una pestanya.
+        const href = getSourceHttpUrl(url);
+        if (href) link.href = href; else link.removeAttribute("href");
         strip.classList.remove("hidden");
     }
 

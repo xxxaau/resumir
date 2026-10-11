@@ -15,6 +15,7 @@ const extensionGlobals = {
     // Readability.js (Mozilla, carregat com a script global via manifest)
     Readability: "readonly",
     // sidebar/utils.js
+    getSourceHttpUrl: "readonly",
     getISOWeekDate: "readonly",
     formatObsidianPath: "readonly",
     parseObsidianPath: "readonly",

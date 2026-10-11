@@ -70,22 +70,46 @@ function extractExecutiveSummary(summary) {
     return headerMatch ? summary.substring(0, headerMatch.index).trim() : summary;
 }
 
+// La URL guardada a `metadata.url`/historial és també la CLAU de memòria cau i
+// pot dur prefixos interns ("seleccio:https://…", "pdf-local:nom.pdf"). Per a
+// enllaços visibles o exportats només serveix l'URL http(s) real; si no n'hi ha
+// (PDF local), retorna "" i el cridant ha de mostrar text pla, no un enllaç mort.
+function getSourceHttpUrl(url) {
+    if (typeof url !== "string") return "";
+    const raw = url.startsWith("seleccio:") ? url.slice("seleccio:".length) : url;
+    try {
+        const parsed = new URL(raw);
+        return (parsed.protocol === "http:" || parsed.protocol === "https:") ? raw : "";
+    } catch {
+        return "";
+    }
+}
+
+// Sense URL, `[{{title}}]({{url}})` quedaria com `[títol]()`: es degrada a text pla.
+function applyUrlToTemplate(template, rawUrl) {
+    const url = getSourceHttpUrl(rawUrl);
+    const base = url ? template : template.replace(/\[([^\]]*)\]\(\{\{url\}\}\)/g, "$1");
+    return { template: base, url };
+}
+
 function formatObsidianContent(template, metadata) {
     const execSummary = extractExecutiveSummary(metadata.summary);
-    
-    return template
+    const { template: tpl, url } = applyUrlToTemplate(template, metadata.url);
+
+    return tpl
         .replace(/{{title}}/g, metadata.title || "")
-        .replace(/{{url}}/g, metadata.url || "")
+        .replace(/{{url}}/g, url)
         .replace(/{{summary}}/g, metadata.summary || "")
         .replace(/{{summary_executive}}/g, execSummary).trim();
 }
 
 function formatMarkdownContent(template, metadata) {
     const execSummary = extractExecutiveSummary(metadata.summary);
+    const { template: tpl, url } = applyUrlToTemplate(template, metadata.url);
 
-    return template
+    return tpl
         .replace(/{{title}}/g, metadata.title || "")
-        .replace(/{{url}}/g, metadata.url || "")
+        .replace(/{{url}}/g, url)
         .replace(/{{summary}}/g, metadata.summary || "")
         .replace(/{{summary_executive}}/g, execSummary);
 }
@@ -104,6 +128,7 @@ if (typeof module !== 'undefined' && module.exports) {
         parseObsidianPath,
         formatObsidianContent,
         formatMarkdownContent,
+        getSourceHttpUrl,
         extractExecutiveSummary,
         estimateTokens
     };

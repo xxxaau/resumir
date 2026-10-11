@@ -14,6 +14,7 @@ const {
     formatObsidianPath,
     formatObsidianContent,
     formatMarkdownContent,
+    getSourceHttpUrl,
     estimateTokens,
 } = require("../sidebar/utils.js");
 
@@ -163,4 +164,49 @@ test("estimateTokens - cadena buida retorna 0", () => {
 
 test("estimateTokens - text llarg (4000 caràcters = 1000 tokens)", () => {
     assert.equal(estimateTokens("a".repeat(4000)), 1000);
+});
+
+// ---------------------------------------------------------------------------
+// Regressió (0.8): la URL de la clau de memòria cau ("seleccio:…", "pdf-local:…")
+// no pot arribar com a enllaç a les exportacions ni al títol.
+// ---------------------------------------------------------------------------
+
+test("getSourceHttpUrl - http(s) tal qual; «seleccio:» se'n treu el prefix", () => {
+    assert.equal(getSourceHttpUrl("https://example.com/a?b=1"), "https://example.com/a?b=1");
+    assert.equal(getSourceHttpUrl("http://example.com"), "http://example.com");
+    assert.equal(getSourceHttpUrl("seleccio:https://example.com/a"), "https://example.com/a");
+});
+
+test("getSourceHttpUrl - pdf-local, esquemes no web i entrades invàlides donen buit", () => {
+    for (const bad of ["pdf-local:informe.pdf", "javascript:alert(1)", "file:///etc/passwd",
+        "seleccio:pdf-local:x.pdf", "", "no és una url", undefined, null, 42]) {
+        assert.equal(getSourceHttpUrl(bad), "", String(bad));
+    }
+});
+
+test("formatMarkdownContent - un enllaç «seleccio:» s'exporta amb l'URL real", () => {
+    const md = formatMarkdownContent("# [{{title}}]({{url}})\n\n{{summary}}", {
+        title: "Selecció", url: "seleccio:https://example.com/p", summary: "Text.",
+    });
+    assert.equal(md, "# [Selecció](https://example.com/p)\n\nText.");
+    assert.ok(!md.includes("seleccio:"));
+});
+
+test("formatMarkdownContent - un PDF local no genera un enllaç mort: el títol queda en text pla", () => {
+    const md = formatMarkdownContent("# [{{title}}]({{url}})\n\n{{summary}}", {
+        title: "Informe", url: "pdf-local:informe.pdf", summary: "Text.",
+    });
+    assert.equal(md, "# Informe\n\nText.");
+});
+
+test("formatObsidianContent - un PDF local no genera un enllaç mort", () => {
+    const out = formatObsidianContent("- [{{title}}]({{url}})\n\t- {{summary_executive}}", {
+        title: "Informe", url: "pdf-local:informe.pdf", summary: "Resum curt.",
+    });
+    assert.equal(out, "- Informe\n\t- Resum curt.");
+});
+
+test("formatMarkdownContent - amb URL http(s) l'enllaç no canvia", () => {
+    const md = formatMarkdownContent("[{{title}}]({{url}})", { title: "T", url: "https://x.org", summary: "" });
+    assert.equal(md, "[T](https://x.org)");
 });

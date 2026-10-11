@@ -39,7 +39,7 @@ function makeEl(id = "") {
         _attrs: {},
         setAttribute(k, v)        { this._attrs[k] = String(v); },
         getAttribute(k)           { return this._attrs[k] ?? null; },
-        removeAttribute(k)        { delete this._attrs[k]; },
+        removeAttribute(k)        { delete this._attrs[k]; if (k === "href") this.href = null; },
         _children: [],
         replaceChildren(...nodes) { this._children = [...nodes]; },
         appendChild(n)            { this._children.push(n); return n; },
@@ -114,6 +114,7 @@ function setupGlobals(dom) {
     ];
     global.listCachedSummaries = async () => [];
     global.getSummaryCache = async () => null;
+    global.getSourceHttpUrl = require("../sidebar/utils.js").getSourceHttpUrl;
     global.DEFAULT_BIONIC = { fixation: 20, font: "system-ui, sans-serif", weight: "600", fontSize: "1.2em", lineHeight: "1.5" };
     global.applyBionicStyles = () => {}; // definit a summary.js; mock com la resta de globals
     global.formatTextToFragment = (text) => {
@@ -293,7 +294,7 @@ test("loadHistoryEntry - mostra el títol de l'entrada al page-title-link", asyn
     assert.equal(titleLink.href, "https://example.com/article");
 });
 
-test("loadHistoryEntry - URL no-http usa href='#'", async () => {
+test("loadHistoryEntry - entrada antiga «seleccio:» enllaça a l'URL real (sense el prefix intern)", async () => {
     resetDOM();
     await storageMock.set({ isBionicActive: false });
 
@@ -305,8 +306,23 @@ test("loadHistoryEntry - URL no-http usa href='#'", async () => {
         timestamp: new Date().toISOString(),
     });
 
-    assert.equal(dom.els["page-title-link"].href, "#",
-        "URLs no-http han de tenir href='#'");
+    assert.equal(dom.els["page-title-link"].href, "https://example.com");
+});
+
+test("loadHistoryEntry - PDF local: el títol queda sense href (no un href='#' que obria la sidebar)", async () => {
+    resetDOM();
+    await storageMock.set({ isBionicActive: false });
+
+    await loadHistoryEntry({
+        title:   "Informe",
+        url:     "pdf-local:informe.pdf",
+        summary: "Text",
+        model:   "m",
+        timestamp: new Date().toISOString(),
+    });
+
+    assert.equal(dom.els["page-title-link"].href, null,
+        "Sense URL http(s) s'ha de treure l'href");
 });
 
 // ---------------------------------------------------------------------------
