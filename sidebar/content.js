@@ -401,33 +401,38 @@ async function getPageContent() {
                             if (!resp.ok) continue;
                             const raw = await resp.text();
                             if (!raw || raw.length < 20) continue;
-                            let lines = [];
+                            let timed = [];
                             if (url.includes('fmt=json3')) {
                                 try {
                                     const data = JSON.parse(raw);
-                                    lines = (data.events || [])
+                                    timed = (data.events || [])
                                         .filter(e => e.segs)
-                                        .map(e => e.segs.map(s => s.utf8 ?? '').join('').replace(/\n/g, ' ').trim())
-                                        .filter(Boolean);
+                                        .map(e => ({ startMs: e.tStartMs, text: e.segs.map(s => s.utf8 ?? '').join('').replace(/\n/g, ' ').trim() }))
+                                        .filter(x => x.text);
                                 } catch { /* malformed JSON — try next variant */ }
                             } else {
                                 // XML (srv3 o per defecte): <text start="..." dur="...">contingut</text>
                                 try {
                                     const doc = new DOMParser().parseFromString(raw, 'text/xml');
                                     const nodes = doc.querySelectorAll('text, p');
-                                    lines = Array.from(nodes)
-                                        .map(n => (n.textContent || '')
-                                            .replace(/&amp;/g, '&')
-                                            .replace(/&lt;/g, '<')
-                                            .replace(/&gt;/g, '>')
-                                            .replace(/&quot;/g, '"')
-                                            .replace(/&#39;/g, "'")
-                                            .replace(/\n/g, ' ')
-                                            .trim())
-                                        .filter(Boolean);
+                                    // <text start="segons"> (clàssic) o <p t="ms"> (srv3)
+                                    timed = Array.from(nodes)
+                                        .map(n => ({
+                                            startMs: n.hasAttribute('t') ? Number(n.getAttribute('t'))
+                                                : Number(n.getAttribute('start')) * 1000,
+                                            text: (n.textContent || '')
+                                                .replace(/&amp;/g, '&')
+                                                .replace(/&lt;/g, '<')
+                                                .replace(/&gt;/g, '>')
+                                                .replace(/&quot;/g, '"')
+                                                .replace(/&#39;/g, "'")
+                                                .replace(/\n/g, ' ')
+                                                .trim(),
+                                        }))
+                                        .filter(x => x.text);
                                 } catch { /* malformed XML — try next variant */ }
                             }
-                            const fetched = lines.join(' ');
+                            const fetched = formatTimedTranscript(timed);
                             if (fetched.length > 50) {
                                 if (resolvedTrack) {
                                     const lang = resolvedTrack.lang || '';
@@ -497,11 +502,22 @@ async function getPageContent() {
                                         ?.content?.transcriptRenderer?.content
                                         ?.transcriptSearchPanelRenderer?.body
                                         ?.transcriptSegmentListRenderer?.initialSegments || [];
-                                    const lines = segs
-                                        .map(s => s?.transcriptSegmentRenderer?.snippet?.runs
-                                            ?.map(r => r.text)?.join('') || '')
-                                        .filter(Boolean);
-                                    return { text: lines.join(' ') };
+                                    // Marques [m:ss] cada ~30 s (còpia autocontinguda de formatTimedTranscript)
+                                    const fmt = (ms) => {
+                                        const t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+                                        return (h > 0 ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(sec).padStart(2, '0');
+                                    };
+                                    const pieces = [];
+                                    let lastMark = -Infinity;
+                                    for (const s of segs) {
+                                        const r = s?.transcriptSegmentRenderer;
+                                        const text = r?.snippet?.runs?.map(x => x.text)?.join('') || '';
+                                        if (!text) continue;
+                                        const ms = Number(r.startMs);
+                                        if (Number.isFinite(ms) && ms - lastMark >= 30000) { pieces.push('[' + fmt(ms) + ']'); lastMark = ms; }
+                                        pieces.push(text);
+                                    }
+                                    return { text: pieces.join(' ') };
                                 } catch (e) { return { error: String(e) }; }
                             }
                         });

@@ -1015,3 +1015,31 @@ test("pàgines de PDF - una pàgina web normal no porta enllaços ni instrucció
         assert.doesNotMatch(h.calls.fetches[0].body, /\(p\. N\)/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Segells de temps a YouTube (Fase E): [m:ss] al resum porta el vídeo a l'instant
+// ---------------------------------------------------------------------------
+test("YouTube - les marques [m:ss] són enllaços, el prompt les demana i el clic fa seek", async () => {
+    const url = "https://www.youtube.com/watch?v=abc123XYZ_0";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url, title: "Vídeo", active: true }],
+        pageText: "[TRANSCRIPT: ca]\n\n[0:00] " + "hola ".repeat(80) + "[1:05] " + "adéu ".repeat(80),
+        modelReply: "Primera idea [1:05]. Segona [1:02:03].",
+    });
+    try {
+        const execs = [];
+        h.window.chrome.scripting.executeScript = async (inj) => { execs.push(inj); return []; };
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const links = [...h.document.querySelectorAll("#content a[data-yt-time]")];
+        assert.deepEqual(links.map(a => a.dataset.ytTime), ["65", "3723"]);
+        assert.equal(links[0].getAttribute("href"), "https://www.youtube.com/watch?v=abc123XYZ_0&t=65s");
+        assert.match(h.calls.fetches[0].body, /\[m:ss\]/);
+
+        links[0].click();
+        await h.flush(10);
+        assert.equal(execs.length, 1);
+        assert.equal(JSON.stringify(execs[0].args), "[65]");
+    } finally { h.close(); }
+});

@@ -569,6 +569,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 150);
     }
 
+    // Marques de temps d'un resum de vídeo: porten el vídeo d'aquesta pestanya a
+    // l'instant (sense recarregar-lo); si la pestanya activa és una altra, obren el vídeo.
+    contentDiv.addEventListener("click", async (e) => {
+        const link = e.target.closest && e.target.closest("a[data-yt-time]");
+        if (!link) return;
+        e.preventDefault();
+        try {
+            const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
+            const same = tab && youtubeVideoId(tab.url) && youtubeVideoId(tab.url) === youtubeVideoId(link.href);
+            if (same) {
+                await ext.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    world: "MAIN",
+                    func: (secs) => { const v = document.querySelector("video"); if (v) { v.currentTime = secs; v.play && v.play(); } },
+                    args: [Number(link.dataset.ytTime)],
+                });
+            } else {
+                await ext.tabs.create({ url: link.href });
+            }
+        } catch (err) {
+            console.warn("[YouTube] seek failed:", err);
+            ext.tabs.create({ url: link.href }).catch(() => {});
+        }
+    });
+
     // Refinadors ràpids: tornen a generar el mateix tipus amb una instrucció afegida.
     for (const [id, mode] of [["refine-shorter", "shorter"], ["refine-detailed", "detailed"]]) {
         const btn = document.getElementById(id);

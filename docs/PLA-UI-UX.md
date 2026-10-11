@@ -146,7 +146,7 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 > **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la procedència (amb text enviat),
 > les pestanyes per tipus i l'avís de resum d'una altra pàgina (vegeu `git log`).
-> Les cites «(p. N)» dels PDF web ja enllacen amb `#page=N` (als PDF locals encara no, el visor propi no té enllaç per pàgina). Següent: segells de temps de YouTube, format/llargada.
+> Les cites «(p. N)» dels PDF web ja enllacen amb `#page=N` (als PDF locals encara no, el visor propi no té enllaç per pàgina). Els segells de temps de YouTube també hi són (camins B, C i text pre-renderitzat; el rascat del DOM encara no en porta). Següent: format/llargada.
 > Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
 > `npm run dev:chromium` abans de commitejar, i treure del pla el que es completi.
 
@@ -158,7 +158,6 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 | --- | --- | --- | --- | --- |
 | Format i llargada com a controls (esforç més a prop de L: multiplica variants de prompt contra el versionat per plugin i se solapa amb Aprofundir i Explica-ho fàcil) | Resumir + selector compacte: Punts clau / TL;DR / Prosa × Curt / Mitjà / Llarg; els plugins rics, secundaris | Redueix la paràlisi d'elecció de la fila d'icones | Chrome Summarizer API, Kagi | M |
 | Vinyetes amb cita verificada | Cada punt porta un ↗ que fa scroll i ressalta el passatge a la pestanya (`#:~:text=`); la cita es comprova literalment contra el text extret | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
-| Segells de temps a YouTube | Enllaços que porten el vídeo a l'instant (`&t=`); requereix conservar els temps als 4 camins d'extracció de la transcripció i demanar-los al prompt | Mínim en tots els competidors de vídeo; fan també de font | Eightify, Merlin, Glasp | M |
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |
 | Importar/exportar configuració | JSON amb prompts i plantilles; la clau exclosa per defecte | Els prompts personalitzats són la inversió de l'usuari i només viuen a `storage.sync` (quota per element) | — | M |
 

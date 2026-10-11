@@ -77,3 +77,31 @@ test("Readability: extractWithReadability extreu >100 caràcters d'un article", 
     const text = extractors.extractWithReadability();
     assert.ok(text && text.length > 100, "ha d'extreure el cos de l'article");
 });
+
+test("YouTube: formatTimedTranscript posa una marca [m:ss] al principi i cada ~30 s", () => {
+    const out = extractors.formatTimedTranscript([
+        { startMs: 0, text: "Hola" },
+        { startMs: 10_000, text: "món" },
+        { startMs: 35_000, text: "segon bloc" },
+        { startMs: 3_725_000, text: "molt més tard" },
+    ]);
+    assert.equal(out, "[0:00] Hola món [0:35] segon bloc [1:02:05] molt més tard");
+});
+
+test("YouTube: el text pre-renderitzat conserva els temps dels segments", () => {
+    global.window = {
+        ytInitialPlayerResponse: {},
+        ytInitialData: { engagementPanels: [{ engagementPanelSectionListRenderer: {
+            targetId: "engagement-panel-searchable-transcript",
+            content: { transcriptRenderer: { content: { transcriptSearchPanelRenderer: { body: { transcriptSegmentListRenderer: {
+                initialSegments: [
+                    { transcriptSegmentRenderer: { startMs: "0", snippet: { runs: [{ text: "Primer" }] } } },
+                    { transcriptSegmentRenderer: { startMs: "40000", snippet: { runs: [{ text: "Segon" }] } } },
+                ],
+            } } } } } },
+        } }] },
+    };
+    global.document = { querySelector: () => null };
+    const meta = extractors.readYoutubeCaptionMeta();
+    assert.equal(meta.prerenderedText, "[0:00] Primer [0:40] Segon");
+});

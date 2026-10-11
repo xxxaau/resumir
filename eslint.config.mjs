@@ -95,6 +95,8 @@ const extensionGlobals = {
     hideProvenance: "readonly",
     showRefiners: "readonly",
     linkPdfPages: "readonly",
+    linkYoutubeTimes: "readonly",
+    youtubeVideoId: "readonly",
     hideRefiners: "readonly",
     REFINE_INSTRUCTIONS: "readonly",
     looksLikeCookieBanner: "readonly",
@@ -132,6 +134,7 @@ const extensionGlobals = {
     scrapeTwitterTweets: "readonly",
     extractTwitterOG: "readonly",
     extractWithReadability: "readonly",
+    formatTimedTranscript: "readonly",
     // sidebar/anki.js
     parseAnkiCards: "readonly",
     formatCardForAnki: "readonly",

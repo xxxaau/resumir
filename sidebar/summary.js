@@ -341,6 +341,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const safeContent = String(pageData.text || "").replace(/<\s*\/?\s*UNTRUSTED[_\s-]*CONTENT\s*>/gi, "[FILTERED]");
         let pageText = `<UNTRUSTED_CONTENT>\n${safeContent}\n</UNTRUSTED_CONTENT>`;
         ctx.setSourceText(pageData.text);
+        // Vídeo amb marques de temps: el resum cita [m:ss] i enllaça amb el moment.
+        if (isProseType(requestedType) && /\[\d+:\d{2}(?::\d{2})?\] /.test(String(pageData.text || ""))) {
+            systemPrompt += "\n\nEl text conté marques de temps [m:ss]. Quan una idea provingui d'un moment concret del vídeo, afegeix al final del punt la marca de temps corresponent, amb el mateix format [m:ss].";
+        }
         // PDF amb marques de pàgina: demanem citar-les perquè el resum enllaci amb el document.
         if (isProseType(requestedType) && /^\[Pàgina 1\]/.test(String(pageData.text || ""))) {
             systemPrompt += "\n\nEl text conté marques [Pàgina N]. Quan una idea provingui d'una pàgina concreta, afegeix al final del punt la cita (p. N), amb el número de pàgina.";
@@ -557,6 +561,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         applyBionicStyles(contentDiv, bionicEnabled, config);
+        if (typeof linkYoutubeTimes === "function" && isProseType(requestedType)) linkYoutubeTimes(contentDiv, currentMetadata.url);
         if (typeof linkPdfPages === "function" && isProseType(requestedType)) linkPdfPages(contentDiv, currentMetadata.url);
 
         setGeneratingState(false, true);

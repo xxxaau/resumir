@@ -155,6 +155,29 @@ function extractLinkedInPost() {
     return null;
 }
 
+// Transcripció amb marques de temps: [{startMs, text}] → «[0:00] text … [0:35] text».
+// La marca es posa al principi i cada ~30 s (no a cada línia, per estalviar tokens).
+// Les funcions MAIN-world de sota són autocontingudes i n'incrusten una còpia.
+function formatTimedTranscript(segments) {
+    const fmt = (ms) => {
+        const t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+        const mm = h > 0 ? String(m).padStart(2, "0") : String(m);
+        return (h > 0 ? h + ":" : "") + mm + ":" + String(sec).padStart(2, "0");
+    };
+    const out = [];
+    let lastMark = -Infinity;
+    for (const seg of segments) {
+        if (!seg || !seg.text) continue;
+        const ms = Number(seg.startMs);
+        if (Number.isFinite(ms) && ms - lastMark >= 30000) {
+            out.push("[" + fmt(ms) + "]");
+            lastMark = ms;
+        }
+        out.push(seg.text);
+    }
+    return out.join(" ");
+}
+
 // Llegeix les metadades de subtítols de YouTube des dels globals del MAIN world.
 // Retorna { hasTracks, tracks, activeVssId, prerenderedText, captionBaseUrl }
 // o { error } si falla. Autocontinguda: només usa globals window i document.
@@ -186,10 +209,22 @@ function readYoutubeCaptionMeta() {
                 ?.content?.transcriptSearchPanelRenderer
                 ?.body?.transcriptSegmentListRenderer
                 ?.initialSegments || [];
-            const lines = segments
-                .map(s => s?.transcriptSegmentRenderer?.snippet?.runs?.map(r => r.text)?.join('') || '')
-                .filter(Boolean);
-            if (lines.length > 0) prerenderedText = lines.join(' ');
+            // Marques [m:ss] cada ~30 s (còpia autocontinguda de formatTimedTranscript)
+            const fmt = (ms) => {
+                const t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+                return (h > 0 ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(sec).padStart(2, '0');
+            };
+            const pieces = [];
+            let lastMark = -Infinity;
+            for (const s of segments) {
+                const r = s?.transcriptSegmentRenderer;
+                const text = r?.snippet?.runs?.map(x => x.text)?.join('') || '';
+                if (!text) continue;
+                const ms = Number(r.startMs);
+                if (Number.isFinite(ms) && ms - lastMark >= 30000) { pieces.push('[' + fmt(ms) + ']'); lastMark = ms; }
+                pieces.push(text);
+            }
+            if (pieces.length > 0) prerenderedText = pieces.join(' ');
         } catch { /* ytInitialData absent o estructura canviada */ }
 
         // URL base de la millor pista si no hi ha text pre-renderitzat
@@ -225,5 +260,6 @@ if (typeof module !== "undefined" && module.exports) {
         extractWithReadability,
         extractLinkedInPost,
         readYoutubeCaptionMeta,
+        formatTimedTranscript,
     };
 }

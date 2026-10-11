@@ -744,6 +744,51 @@ function linkPdfPages(container, url) {
     }
 }
 
+/** ID del vídeo d'una URL de YouTube (watch?v=), o null. */
+function youtubeVideoId(url) {
+    try {
+        const u = new URL(url);
+        if (!/(^|\.)youtube\.com$/.test(u.hostname) || u.pathname !== "/watch") return null;
+        return u.searchParams.get("v");
+    } catch { return null; }
+}
+
+/**
+ * Converteix les marques «[m:ss]» / «[h:mm:ss]» d'un resum de vídeo en enllaços
+ * `watch?v=ID&t=Ns`. No fa res si la URL no és un vídeo de YouTube.
+ */
+function linkYoutubeTimes(container, url) {
+    const id = youtubeVideoId(url);
+    if (!container || !id) return;
+    const re = /\[(?:(\d+):)?(\d{1,2}):(\d{2})\]/g;
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+        const n = walker.currentNode;
+        re.lastIndex = 0;
+        if (re.test(n.nodeValue) && !n.parentElement.closest("a")) nodes.push(n);
+    }
+    for (const node of nodes) {
+        const frag = document.createDocumentFragment();
+        let last = 0;
+        re.lastIndex = 0;
+        node.nodeValue.replace(re, (m, h, mi, se, idx) => {
+            const secs = (Number(h || 0) * 3600) + Number(mi) * 60 + Number(se);
+            frag.append(node.nodeValue.slice(last, idx));
+            const a = document.createElement("a");
+            a.href = `https://www.youtube.com/watch?v=${encodeURIComponent(id)}&t=${secs}s`;
+            a.dataset.ytTime = String(secs);
+            a.title = "Anar a aquest moment del vídeo";
+            a.textContent = m;
+            frag.append(a);
+            last = idx + m.length;
+            return m;
+        });
+        frag.append(node.nodeValue.slice(last));
+        node.replaceWith(frag);
+    }
+}
+
 function hideProvenance() {
     const el = document.getElementById("provenance");
     if (el) el.classList.add("hidden");
@@ -886,5 +931,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }
