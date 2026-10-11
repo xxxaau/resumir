@@ -741,3 +741,47 @@ test("PDF local - dos fitxers amb el mateix nom però mida diferent no es trepit
         assert.equal(keys.length, 2, `Claus: ${keys.join(", ")}`);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Estat en repòs (2.2): amb la clau configurada, el panell s'obria en blanc.
+// Ara mostra la pàgina activa, un botó per resumir-la i els resums ja desats.
+// ---------------------------------------------------------------------------
+test("estat en repòs - mostra el títol de la pestanya, el botó de resumir i els resums desats", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...seedEntries([
+            { url: "https://example.com/article", title: "Article", type: "summary" },
+            { url: "https://example.com/article", title: "Article", type: "conceptmap" },
+        ]) },
+        tabs: [{ id: 1, url: "https://example.com/article", title: "El meu article", active: true }],
+    });
+    try {
+        await h.flush(10);
+        const idle = h.document.getElementById("idle-state");
+        assert.ok(idle, "Ha d'existir #idle-state");
+        assert.equal(idle.hidden, false);
+        assert.match(h.document.getElementById("idle-title").textContent, /El meu article/);
+        const saved = [...idle.querySelectorAll("#idle-saved button")];
+        assert.equal(saved.length, 2, "Un botó per cada resum desat");
+        saved[0].click();
+        await h.flush(10);
+        assert.match(h.document.getElementById("content").textContent, /Resum de Article/);
+    } finally { h.close(); }
+});
+
+test("estat en repòs - el botó «Resumir aquesta pàgina» llança el resum", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, pageText: "Un article llarg sobre ciència. ".repeat(20), modelReply: "Resum nou." });
+    try {
+        await h.flush(10);
+        h.document.getElementById("idle-summarize").click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("content").textContent, /Resum nou/);
+    } finally { h.close(); }
+});
+
+test("estat en repòs - sense pàgina web (chrome://…) s'amaga", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, tabs: [{ id: 1, url: "chrome://extensions", title: "Extensions", active: true }] });
+    try {
+        await h.flush(10);
+        assert.equal(h.document.getElementById("idle-state").hidden, true);
+    } finally { h.close(); }
+});

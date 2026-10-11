@@ -563,6 +563,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 150);
     }
 
+    // Estat en repòs: títol de la pestanya activa, botó de resumir i els resums
+    // ja desats d'aquesta URL. La visibilitat real (només si el panell és buit)
+    // la decideix el CSS; aquí només s'omple.
+    async function updateIdleState(tab) {
+        const idle = document.getElementById("idle-state");
+        if (!idle) return;
+        const url = tab && tab.url;
+        if (!url || !/^https?:/i.test(url)) { idle.hidden = true; return; }
+        document.getElementById("idle-title").textContent = tab.title || url;
+        const savedBox = document.getElementById("idle-saved");
+        savedBox.replaceChildren();
+        let types = [];
+        try { types = await getAvailableTypes(url); } catch {}
+        if (types.length > 0) {
+            const label = document.createElement("p");
+            label.className = "idle-saved-label";
+            label.textContent = "Ja tens aquí:";
+            savedBox.appendChild(label);
+            for (const ct of CONTENT_TYPES.filter(c => types.includes(c.id))) {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "idle-saved-btn";
+                b.textContent = ct.label;
+                b.addEventListener("click", async () => {
+                    const entry = await getSummaryCache(url, ct.id);
+                    if (entry) loadHistoryEntry(entry);
+                });
+                savedBox.appendChild(b);
+            }
+        }
+        idle.hidden = false;
+    }
+    const idleSummarize = document.getElementById("idle-summarize");
+    if (idleSummarize) idleSummarize.addEventListener("click", () => summarizeBtn.click());
+
     const cacheBadge = document.getElementById("cache-badge");
     if (cacheBadge) {
         cacheBadge.addEventListener("click", async (e) => {
@@ -587,11 +622,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const tab = await ext.tabs.get(activeInfo.tabId);
             updateCacheBadge(tab.url);
+            updateIdleState(tab);
         } catch (e) {}
     });
 
     ext.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-        if (changeInfo.url && tab.active) updateCacheBadge(tab.url);
+        if ((changeInfo.url || changeInfo.title) && tab.active) {
+            if (changeInfo.url) updateCacheBadge(tab.url);
+            updateIdleState(tab);
+        }
     });
 
     settingsBtn.addEventListener("click", () => {
@@ -726,6 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Inicialitzar badge de caché per a la URL del tab actiu
         ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
             if (tabs[0]?.url) updateCacheBadge(tabs[0].url);
+            updateIdleState(tabs[0]);
         }).catch(() => {});
         try {
             const [syncData, localData] = await Promise.all([

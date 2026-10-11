@@ -132,11 +132,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
   estadístiques i els botons): amagar separadors i cronòmetre per sota d'una
   amplada, o moure les icones de tipus (vegeu «Pestanyes per tipus», Nivell 3).
 
-### 2.2 Estat en repòs amb clau
-
-- En lloc del panell en blanc: títol de la pestanya activa + botó «Resumir aquesta
-  pàgina» + els resums ja desats per a aquesta URL.
-
 ### 2.4 Configuració
 
 - **Revelació progressiva:** plegar els prompts sota «Personalitzar instruccions

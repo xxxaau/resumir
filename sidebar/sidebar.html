@@ -282,6 +282,12 @@
         <span id="loading-text"></span>
         <span class="loading-dots" aria-hidden="true"><span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span></span>
       </div>
+      <!-- Estat en repòs: només es veu quan res més ocupa el panell (vegeu CSS) -->
+      <div id="idle-state" hidden>
+        <p id="idle-title" class="idle-title"></p>
+        <button id="idle-summarize" type="button" class="btn-primary">Resumir aquesta pàgina</button>
+        <div id="idle-saved" class="idle-saved"></div>
+      </div>
       <div id="history-panel" class="hidden"></div>
       <div id="source-panel" class="hidden"></div>
     </div>
