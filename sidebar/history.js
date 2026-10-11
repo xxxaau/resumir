@@ -27,6 +27,8 @@ async function openHistoryPanel() {
     const entries = await listCachedSummaries();
     _renderHistoryPanel(historyPanel, entries);
     historyPanel.classList.remove("hidden");
+    const heading = document.getElementById("history-heading");
+    if (heading && typeof heading.focus === "function") heading.focus();
 }
 
 function _closePanel(panelEl) {
@@ -51,6 +53,11 @@ function _closePanel(panelEl) {
     }
     if (titleStrip) titleStrip.classList.toggle("hidden", !_previousTitleStripVisible);
     _previousTitleStripVisible = false;
+
+    // El focus era a un element que ara s'ha amagat/destruït: retorna'l al
+    // botó que obre l'historial (la barra d'eines torna a ser visible).
+    const historyBtn = document.getElementById("historyBtn");
+    if (historyBtn && typeof historyBtn.focus === "function") historyBtn.focus();
 }
 
 function closeHistoryPanel() {
@@ -136,6 +143,11 @@ async function loadHistoryEntry(entry) {
         container.insertBefore(titleStrip, contentDiv);
     }
 
+    // L'entrada s'ha carregat al contingut: el focus no pot quedar al control de
+    // la llista (que s'ha destruït). Va al botó «Tornar a l'historial».
+    const backToHistory = document.getElementById("historyBackBtn");
+    if (backToHistory && typeof backToHistory.focus === "function") backToHistory.focus();
+
     // Avisa sidebar.js que ara es veu AQUESTA entrada: Copiar/Obsidian/Biònica
     // treballen sobre currentMetadata, i sense això exportaven el resum anterior
     // (el que es veia abans d'obrir l'Historial) en tornar a la barra d'eines.
@@ -160,6 +172,14 @@ function _renderHistoryPanel(panel, entries) {
     backBtn.textContent = "\u2190 Tornar";
     backBtn.addEventListener("click", closeHistoryPanel);
     header.appendChild(backBtn);
+    // Encapçalament enfocable: en obrir el panell s'hi mou el focus (la barra
+    // d'eines s'amaga i el focus caldria que no quedés a <body>).
+    const heading = document.createElement("h2");
+    heading.className = "history-title";
+    heading.id = "history-heading";
+    heading.tabIndex = -1;
+    heading.textContent = "Historial";
+    header.appendChild(heading);
     panel.appendChild(header);
 
     if (entries.length === 0) {
@@ -177,16 +197,17 @@ function _renderHistoryPanel(panel, entries) {
     for (const group of groups) {
         const li = document.createElement("li");
         li.className = "history-item";
-        // Operable amb teclat: és un element clicable, no un botó natiu.
-        li.setAttribute("role", "button");
-        li.setAttribute("tabindex", "0");
+        // L'<li> és un contenidor; els controls interactius (títol i icones de
+        // tipus) són <button> germans. Abans l'<li> era role=button amb
+        // role=button a dins (interactius niats: els interns quedaven inaccessibles).
 
         const topRow = document.createElement("div");
         topRow.className = "history-item-top";
 
-        const titleEl = document.createElement("span");
-        titleEl.className = "history-item-title";
         const rawTitle = group.title || group.url || "Sense t\xedtol";
+        const titleEl = document.createElement("button");
+        titleEl.type = "button";
+        titleEl.className = "history-item-title";
         titleEl.textContent = rawTitle.length > 120 ? rawTitle.slice(0, 120) + "\u2026" : rawTitle;
 
         topRow.appendChild(titleEl);
@@ -196,25 +217,17 @@ function _renderHistoryPanel(panel, entries) {
             const typesRow = document.createElement("span");
             typesRow.className = "history-entry-types";
             for (const ct of sortedTypes) {
-                const typeIcon = document.createElement("span");
+                const typeIcon = document.createElement("button");
+                typeIcon.type = "button";
                 typeIcon.className = "type-icon";
                 typeIcon.textContent = ct.icon;
                 typeIcon.title = ct.label;
-                typeIcon.setAttribute("role", "button");
-                typeIcon.setAttribute("tabindex", "0");
-                typeIcon.setAttribute("aria-label", ct.label);
+                typeIcon.setAttribute("aria-label", `${ct.label}: ${rawTitle}`);
                 typeIcon.dataset.type = ct.id;
                 typeIcon.dataset.url = group.url;
-                const openType = (e) => {
-                    if (e) e.stopPropagation();
+                typeIcon.addEventListener("click", (e) => {
+                    e.stopPropagation();
                     _loadTypeFromCache(group.url, ct.id);
-                };
-                typeIcon.addEventListener("click", openType);
-                typeIcon.addEventListener("keydown", (e) => {
-                    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-                        e.preventDefault();
-                        openType(e);
-                    }
                 });
                 typesRow.appendChild(typeIcon);
             }
@@ -232,13 +245,10 @@ function _renderHistoryPanel(panel, entries) {
             const preferredType = group.types.includes("summary") ? "summary" : group.types[0];
             _loadTypeFromCache(group.url, preferredType);
         };
+        // El teclat (Enter/Espai) el cobreix el <button> del títol; el clic a
+        // qualsevol part de l'element (amb ratolí) també obre l'entrada.
+        titleEl.addEventListener("click", (e) => { e.stopPropagation(); openEntry(); });
         li.addEventListener("click", openEntry);
-        li.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-                e.preventDefault();
-                openEntry();
-            }
-        });
 
         list.appendChild(li);
     }

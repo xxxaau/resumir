@@ -208,3 +208,62 @@ test("avís de prompt nou - «de» s'apostrofa davant de vocal («d'aprofundimen
         assert.doesNotMatch(text, /de aprofundiment/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Historial (H5/H6): era un <li role=button> amb <span role=button> a dins
+// (interactius niats: els interns quedaven inaccessibles) i el focus es perdia
+// en obrir/tancar el panell o una entrada.
+// ---------------------------------------------------------------------------
+function seedTwoTypes() {
+    const url = "https://altra.example/b";
+    const mk = (type, summary) => ({
+        url, title: "Pàgina B", summary, model: "m",
+        timestamp: new Date().toISOString(), version: "1.0", stats: { input: 1, output: 1 }, type,
+    });
+    const k1 = `summary_cache:${url}:summary`, k2 = `summary_cache:${url}:deepdive`;
+    return { [k1]: mk("summary", "Resum B"), [k2]: mk("deepdive", "Aprofundiment B"), summary_cache_index: [k1, k2] };
+}
+
+test("historial - sense interactius niats: botons reals germans dins d'un <li> no interactiu", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedTwoTypes() } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        const li = h.document.querySelector("#history-panel .history-item");
+        assert.ok(li);
+        assert.notEqual(li.getAttribute("role"), "button", "L'<li> no ha de ser role=button");
+        assert.equal(li.querySelectorAll('[role="button"]').length, 0, "Cap role=button niat");
+        assert.equal(li.querySelector(".history-item-title").tagName, "BUTTON");
+        const icons = [...li.querySelectorAll(".type-icon")];
+        assert.equal(icons.length, 2);
+        for (const i of icons) {
+            assert.equal(i.tagName, "BUTTON");
+            assert.match(i.getAttribute("aria-label"), /Pàgina B/, "El nom accessible diu de quina entrada és");
+            assert.equal(i.closest("button.history-item-title"), null, "No pot ser dins d'un altre botó");
+        }
+    } finally { h.close(); }
+});
+
+test("historial - el focus va a l'encapçalament en obrir el panell i torna al botó en tancar-lo", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedTwoTypes() } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        assert.equal(h.document.activeElement, h.document.getElementById("history-heading"));
+        h.document.querySelector("#history-panel .history-back-btn").click();
+        await h.flush();
+        assert.equal(h.document.activeElement, h.document.getElementById("historyBtn"));
+    } finally { h.close(); }
+});
+
+test("historial - triar una icona de tipus obre aquell tipus i deixa el focus a «Tornar a l'historial»", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedTwoTypes() } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        h.document.querySelector('#history-panel .type-icon[data-type="deepdive"]').click();
+        await h.flush();
+        assert.match(h.document.getElementById("content").textContent, /Aprofundiment B/);
+        assert.equal(h.document.activeElement, h.document.getElementById("historyBackBtn"));
+    } finally { h.close(); }
+});

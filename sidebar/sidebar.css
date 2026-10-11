@@ -732,8 +732,31 @@ body {
   background: var(--button-hover);
 }
 
+.history-item-title,
+.type-icon {
+  /* Són <button>: es neteja l'aparença nativa */
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+}
+
+.history-item-title:focus-visible,
+.type-icon:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}
+
+.history-title {
+  font-size: 1em;
+  margin: 0 0 0 8px;
+  outline: none;
+}
+
 .history-item-title {
   font-size: 0.9em;
+  cursor: pointer;
+  padding: 0;
   color: var(--text-color);
   flex: 1;
   min-width: 0;
@@ -761,6 +784,8 @@ body {
   cursor: pointer;
   font-size: 0.85em;
   line-height: 1;
+  min-width: 24px; /* objectiu tàctil mínim (WCAG 2.5.8) */
+  min-height: 24px;
   padding: 1px;
   border-radius: 3px;
 }
