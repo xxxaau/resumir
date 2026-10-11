@@ -590,56 +590,122 @@ function renderApiKeyWarning(contentDiv) {
     warningContainer.className = "api-key-warning-container";
 
     const iconWrapper = document.createElement("div");
-    iconWrapper.style.marginBottom = "25px";
-    const lockSvg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="api-key-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>', 'image/svg+xml').documentElement;
+    iconWrapper.style.marginBottom = "12px";
+    const lockSvg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="api-key-icon" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>', 'image/svg+xml').documentElement;
     iconWrapper.appendChild(lockSvg);
 
-    const title = document.createElement("p");
+    const title = document.createElement("h2");
     title.className = "api-key-title";
-    title.textContent = "Falta la clau d'API de Gemini";
-
-    const desc = document.createElement("p");
-    desc.className = "api-key-desc";
-    desc.textContent = "Necessària per connectar-se a Google Gemini.";
-
+    title.textContent = "Connecta Resumir amb Gemini";
     iconWrapper.appendChild(title);
-    iconWrapper.appendChild(desc);
 
-    const configBtn = document.createElement("button");
-    configBtn.id = "configApiKeyBtn";
-    configBtn.className = "btn-primary api-key-btn-primary";
-    configBtn.textContent = "Configurar ara";
+    // Tres passos, tot dins del panell (sense enviar l'usuari a una pestanya nova)
+    const steps = document.createElement("ol");
+    steps.className = "api-key-steps";
 
-    const ctaFooter = document.createElement("div");
-    ctaFooter.className = "api-key-cta-footer";
-
-    const ctaText = document.createElement("span");
-    ctaText.className = "api-key-cta-text";
-    ctaText.textContent = "Encara no en tens?";
-
+    const step1 = document.createElement("li");
+    step1.append("Obté una clau gratuïta a ");
     const ctaLink = document.createElement("a");
     ctaLink.id = "getApiKeyLink";
     ctaLink.href = "#";
     ctaLink.className = "api-key-cta-link";
-    ctaLink.textContent = "Obtenir una clau d'API gratuïta →";
+    ctaLink.textContent = "Google AI Studio";
+    step1.appendChild(ctaLink);
+    step1.append(".");
 
-    ctaFooter.appendChild(ctaText);
-    ctaFooter.appendChild(ctaLink);
+    const step2 = document.createElement("li");
+    step2.append("Enganxa-la aquí:");
+    const keyRow = document.createElement("div");
+    keyRow.className = "api-key-row";
+    const keyInput = document.createElement("input");
+    keyInput.type = "password";
+    keyInput.id = "apiKeyInput";
+    keyInput.className = "api-key-input";
+    keyInput.autocomplete = "off";
+    keyInput.spellcheck = false;
+    keyInput.placeholder = "AIza…";
+    keyInput.setAttribute("aria-label", "Clau d'API de Gemini");
+    keyInput.setAttribute("aria-describedby", "apiKeyStatus apiKeyPrivacy");
+    const showBtn = document.createElement("button");
+    showBtn.type = "button";
+    showBtn.className = "api-key-show";
+    showBtn.textContent = "Mostrar";
+    showBtn.setAttribute("aria-pressed", "false");
+    showBtn.setAttribute("aria-label", "Mostrar la clau");
+    showBtn.addEventListener("click", () => {
+        const show = keyInput.type === "password";
+        keyInput.type = show ? "text" : "password";
+        showBtn.textContent = show ? "Amagar" : "Mostrar";
+        showBtn.setAttribute("aria-pressed", String(show));
+        showBtn.setAttribute("aria-label", show ? "Amagar la clau" : "Mostrar la clau");
+    });
+    keyRow.append(keyInput, showBtn);
+    step2.appendChild(keyRow);
 
-    warningContainer.appendChild(iconWrapper);
-    warningContainer.appendChild(configBtn);
-    warningContainer.appendChild(ctaFooter);
+    const step3 = document.createElement("li");
+    step3.append("Comprova-la i comença a resumir.");
+
+    steps.append(step1, step2, step3);
+
+    const status = document.createElement("p");
+    status.id = "apiKeyStatus";
+    status.className = "api-key-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+
+    const verifyBtn = document.createElement("button");
+    verifyBtn.type = "button";
+    verifyBtn.id = "verifyApiKeyBtn";
+    verifyBtn.className = "btn-primary api-key-btn-primary";
+    verifyBtn.textContent = "Comprovar i desar";
+
+    const privacy = document.createElement("p");
+    privacy.id = "apiKeyPrivacy";
+    privacy.className = "api-key-privacy";
+    privacy.textContent = "La clau es desa només en aquest navegador. El text de les pàgines que resumeixes s'envia a Google Gemini; amb la clau gratuïta, Google pot fer servir el contingut per millorar els seus models.";
+
+    const advanced = document.createElement("button");
+    advanced.type = "button";
+    advanced.id = "configApiKeyBtn";
+    advanced.className = "api-key-advanced";
+    advanced.textContent = "Obrir la configuració";
+
+    warningContainer.append(iconWrapper, steps, status, verifyBtn, privacy, advanced);
 
     contentDiv.replaceChildren(warningContainer);
     contentDiv.classList.remove("hidden");
-    
-    document.getElementById("configApiKeyBtn").addEventListener("click", () => {
-        ext.runtime.openOptionsPage();
-    });
 
-    document.getElementById("getApiKeyLink").addEventListener("click", (e) => {
+    ctaLink.addEventListener("click", (e) => {
         e.preventDefault();
         ext.tabs.create({ url: "https://aistudio.google.com/app/apikey" });
+    });
+    advanced.addEventListener("click", () => ext.runtime.openOptionsPage());
+
+    async function submit() {
+        const raw = keyInput.value;
+        if (!normalizeApiKey(raw)) {
+            status.textContent = "Enganxa primer la clau.";
+            keyInput.focus();
+            return;
+        }
+        verifyBtn.disabled = true;
+        status.textContent = "Comprovant…";
+        const result = await verifyApiKey(raw);
+        if (!result.ok) {
+            status.textContent = result.message;
+            verifyBtn.disabled = false;
+            keyInput.focus();
+            return;
+        }
+        status.textContent = looksLikeGeminiKey(result.key)
+            ? "Clau vàlida. Desant…"
+            : "Clau acceptada. Desant…";
+        // Desar-la dispara la recàrrega de la barra (storage.onChanged) i ja es pot resumir
+        await ext.storage.local.set({ apiKey: result.key });
+    }
+    verifyBtn.addEventListener("click", submit);
+    keyInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); submit(); }
     });
 }
 

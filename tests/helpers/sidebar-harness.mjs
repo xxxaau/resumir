@@ -59,13 +59,14 @@ export function makeStorageArea(area, onChanged, initial) {
  *   tabs           → resultat de tabs.query
  *   pageText       → si es dona, getPageContent() retorna aquesta pàgina (evita
  *                    la injecció de scripts real)
+ *   fetchHandler   → (url, opts) => resposta simulada (per a comprovacions de clau)
  *   modelReply     → si es dona, fetch() respon amb un stream SSE de Gemini amb
  *                    aquest text (un sol chunk), i s'hi registra a calls.fetches
  */
 export async function loadSidebar({
     sync = {}, local = {},
     tabs = [{ id: 1, url: "https://example.com/article", title: "Article", active: true }],
-    pageText = null, modelReply = null,
+    pageText = null, modelReply = null, fetchHandler = null,
 } = {}) {
     const html = readFileSync(resolve(SIDEBAR_DIR, "sidebar.html"), "utf8");
     const dom = new JSDOM(html, { runScripts: "outside-only", pretendToBeVisual: true, url: "chrome-extension://test/sidebar/sidebar.html" });
@@ -104,7 +105,9 @@ export async function loadSidebar({
     window.TextDecoder = TextDecoder;
     window.TextEncoder = TextEncoder;
     window.ReadableStream = ReadableStream;
-    if (modelReply !== null) {
+    if (fetchHandler) {
+        window.fetch = async (url, opts) => { calls.fetches.push({ url, headers: opts && opts.headers }); return fetchHandler(url, opts); };
+    } else if (modelReply !== null) {
         window.fetch = async (url, opts) => {
             calls.fetches.push({ url, body: opts && opts.body });
             const frame = `data: ${JSON.stringify({

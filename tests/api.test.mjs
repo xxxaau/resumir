@@ -104,3 +104,56 @@ test("EUR_RATE és exportada des de shared/models.js i és un número entre 0.5 
     assert.ok(typeof EUR_RATE === "number", "EUR_RATE ha de ser número");
     assert.ok(EUR_RATE > 0.5 && EUR_RATE < 1.5, `EUR_RATE fora de rang: ${EUR_RATE}`);
 });
+
+// ---------------------------------------------------------------------------
+// Comprovació de la clau d'API (onboarding dins del panell)
+// ---------------------------------------------------------------------------
+import { createRequire as _createRequire } from "node:module";
+const _api = _createRequire(import.meta.url)("../sidebar/api.js");
+
+test("normalizeApiKey - treu espais, cometes i el prefix «Bearer»", () => {
+    assert.equal(_api.normalizeApiKey("  AIzaABC  \n"), "AIzaABC");
+    assert.equal(_api.normalizeApiKey('"AIzaABC"'), "AIzaABC");
+    assert.equal(_api.normalizeApiKey("Bearer AIzaABC"), "AIzaABC");
+    assert.equal(_api.normalizeApiKey(undefined), "");
+});
+
+test("looksLikeGeminiKey - reconeix el format AIza… sense bloquejar la resta", () => {
+    assert.equal(_api.looksLikeGeminiKey("AIza" + "x".repeat(35)), true);
+    assert.equal(_api.looksLikeGeminiKey("sk-1234"), false);
+});
+
+test("describeKeyCheck - cada codi dona un missatge accionable en català", () => {
+    assert.equal(_api.describeKeyCheck(200).ok, true);
+    assert.match(_api.describeKeyCheck(400).message, /no és vàlida/);
+    assert.match(_api.describeKeyCheck(403).message, /rebutjat/);
+    assert.match(_api.describeKeyCheck(429).message, /límit gratuït/);
+    assert.match(_api.describeKeyCheck(503).message, /no està disponible/);
+    assert.match(_api.describeKeyCheck(null).message, /connexió/);
+    for (const code of [400, 403, 429, 503, null, 418]) assert.equal(_api.describeKeyCheck(code).ok, false);
+});
+
+test("verifyApiKey - una clau buida no fa cap petició", async () => {
+    let called = false;
+    global.fetch = async () => { called = true; return { status: 200 }; };
+    const r = await _api.verifyApiKey("   ");
+    assert.equal(r.ok, false);
+    assert.equal(called, false);
+});
+
+test("verifyApiKey - envia la clau neta per capçalera i retorna ok amb un 200", async () => {
+    let seen = null;
+    global.fetch = async (url, opts) => { seen = { url, opts }; return { status: 200 }; };
+    const r = await _api.verifyApiKey(" Bearer AIzaABC ");
+    assert.equal(r.ok, true);
+    assert.equal(r.key, "AIzaABC");
+    assert.equal(seen.opts.headers["x-goog-api-key"], "AIzaABC");
+    assert.ok(!seen.url.includes("AIzaABC"), "La clau no ha d'anar a la URL");
+});
+
+test("verifyApiKey - un error de xarxa dona el missatge de connexió", async () => {
+    global.fetch = async () => { throw new TypeError("Failed to fetch"); };
+    const r = await _api.verifyApiKey("AIzaABC");
+    assert.equal(r.ok, false);
+    assert.match(r.message, /connexió/);
+});

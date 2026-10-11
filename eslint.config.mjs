@@ -29,6 +29,9 @@ const extensionGlobals = {
     EUR_RATE: "readonly",
     ensureFavoriteModels: "readonly",
     getCuratedModelInfo: "readonly",
+    normalizeApiKey: "readonly",
+    looksLikeGeminiKey: "readonly",
+    verifyApiKey: "readonly",
     callGeminiStream: "readonly",
     loadModels: "readonly",
     // shared/defaults.js

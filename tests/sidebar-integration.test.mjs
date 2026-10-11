@@ -346,3 +346,101 @@ test("mapa - plegar/desplegar un node manté el focus al seu botó (l'SVG es rec
         assert.notEqual(active.getAttribute("aria-expanded"), before, "L'estat ha canviat");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Onboarding dins del panell (2.2): 3 passos, camp per enganxar la clau,
+// comprovació real abans de desar i missatges accionables per codi d'error.
+// ---------------------------------------------------------------------------
+async function typeKeyAndVerify(h, key) {
+    const input = h.document.getElementById("apiKeyInput");
+    input.value = key;
+    h.document.getElementById("verifyApiKeyBtn").click();
+    await h.flush(15);
+}
+
+test("onboarding - mostra els 3 passos, el camp de la clau i la nota de privacitat", async () => {
+    const h = await loadSidebar();
+    try {
+        const card = h.document.querySelector(".api-key-warning-container");
+        assert.ok(card);
+        assert.equal(card.querySelectorAll("ol.api-key-steps li").length, 3);
+        const input = h.document.getElementById("apiKeyInput");
+        assert.equal(input.type, "password", "La clau s'amaga per defecte");
+        assert.ok(input.getAttribute("aria-label"));
+        assert.match(card.textContent, /només en aquest navegador/);
+        assert.match(card.textContent, /s'envia a Google Gemini/);
+        assert.equal(h.document.getElementById("apiKeyStatus").getAttribute("role"), "status");
+    } finally { h.close(); }
+});
+
+test("onboarding - mostrar/amagar la clau commuta el tipus i l'estat", async () => {
+    const h = await loadSidebar();
+    try {
+        const input = h.document.getElementById("apiKeyInput");
+        const btn = h.document.querySelector(".api-key-show");
+        btn.click();
+        assert.equal(input.type, "text");
+        assert.equal(btn.getAttribute("aria-pressed"), "true");
+        btn.click();
+        assert.equal(input.type, "password");
+    } finally { h.close(); }
+});
+
+test("onboarding - una clau vàlida es comprova (per capçalera) i es desa", async () => {
+    const h = await loadSidebar({ fetchHandler: async () => ({ status: 200 }) });
+    try {
+        await typeKeyAndVerify(h, '  "AIza' + "x".repeat(35) + '"  ');
+        const { apiKey } = await h.storage.local.get("apiKey");
+        assert.equal(apiKey, "AIza" + "x".repeat(35), "Es desa neta (sense espais ni cometes)");
+        const call = h.calls.fetches.find(f => String(f.url).includes("generativelanguage"));
+        assert.ok(call, "S'ha de comprovar contra Google");
+        assert.equal(call.headers["x-goog-api-key"], "AIza" + "x".repeat(35));
+        assert.ok(!String(call.url).includes("AIza"), "La clau no va a la URL");
+    } finally { h.close(); }
+});
+
+test("onboarding - una clau incorrecta (400) NO es desa i diu què fer", async () => {
+    const h = await loadSidebar({ fetchHandler: async () => ({ status: 400 }) });
+    try {
+        await typeKeyAndVerify(h, "AIzaMALA");
+        const { apiKey } = await h.storage.local.get("apiKey");
+        assert.equal(apiKey, undefined, "No es pot desar una clau que no funciona");
+        assert.match(h.document.getElementById("apiKeyStatus").textContent, /no és vàlida/);
+        assert.equal(h.document.getElementById("verifyApiKeyBtn").disabled, false, "Es pot tornar a provar");
+        assert.equal(h.document.activeElement, h.document.getElementById("apiKeyInput"), "El focus torna al camp");
+    } finally { h.close(); }
+});
+
+test("onboarding - límit gratuït (429) i error de xarxa donen missatges diferents i accionables", async () => {
+    let h = await loadSidebar({ fetchHandler: async () => ({ status: 429 }) });
+    try {
+        await typeKeyAndVerify(h, "AIzaX");
+        assert.match(h.document.getElementById("apiKeyStatus").textContent, /límit gratuït/);
+    } finally { h.close(); }
+    h = await loadSidebar({ fetchHandler: async () => { throw new TypeError("offline"); } });
+    try {
+        await typeKeyAndVerify(h, "AIzaX");
+        assert.match(h.document.getElementById("apiKeyStatus").textContent, /connexió/);
+        assert.equal((await h.storage.local.get("apiKey")).apiKey, undefined);
+    } finally { h.close(); }
+});
+
+test("onboarding - un camp buit no fa cap petició", async () => {
+    const h = await loadSidebar({ fetchHandler: async () => ({ status: 200 }) });
+    try {
+        await typeKeyAndVerify(h, "   ");
+        assert.equal(h.calls.fetches.filter(f => String(f.url).includes("generativelanguage")).length, 0);
+        assert.match(h.document.getElementById("apiKeyStatus").textContent, /Enganxa primer la clau/);
+    } finally { h.close(); }
+});
+
+test("onboarding - Enter al camp comprova la clau", async () => {
+    const h = await loadSidebar({ fetchHandler: async () => ({ status: 200 }) });
+    try {
+        const input = h.document.getElementById("apiKeyInput");
+        input.value = "AIza" + "y".repeat(35);
+        input.dispatchEvent(new h.window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        await h.flush(15);
+        assert.equal((await h.storage.local.get("apiKey")).apiKey, "AIza" + "y".repeat(35));
+    } finally { h.close(); }
+});
