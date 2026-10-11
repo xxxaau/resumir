@@ -63,109 +63,49 @@ referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** 
 en obrir l'URL `obsidian://`; reformular com «Enviat a Obsidian», perquè
 l'extensió no pot saber si ha funcionat.
 
-## Nivell 1 — Guanys ràpids
+## Nivell 1 — Guanys ràpids (resta)
 
-Esforç majoritàriament S (el fitxer de tokens compartit és M): tokens de color,
-ARIA i textos. Es pot fer en commits temàtics, però cada fix d'accessibilitat
-porta el seu test (jsdom ja és a `package.json`).
+La Fase C (contrast i accessibilitat de base) està feta; vegeu `git log` i el
+test `quality-contrast`, que vigila AA amb la llista de fallades buida. Queda:
 
-### Tokens i contrast (WCAG AA)
+**Decisió sobre `shared/tokens.css`:** no es fa. Els dos fitxers de tema (barra
+lateral i configuració) no divergeixen per descuit sinó pel disseny (fons i
+primari diferents), i el que importava —que cap parell de colors falli AA— ja ho
+garanteixen els tests. Un fitxer compartit només valdria la pena si es vol
+unificar el disseny dels dos.
 
-- **Un sol fitxer de tokens** (`shared/tokens.css`) per a la barra lateral, la
-  configuració i el visor PDF. Cal un mapa semàntic: `--primary-color` vol dir
-  text a la configuració i blau a la barra lateral, i el visor PDF té una paleta
-  fixa. No és automàtic.
-- **Crema (solarized):** el primari `#ad8301` falla per a tot text. Enfosquir-lo a
-  `#806000` (5,12:1 sobre el fons de la barra lateral, 4,58:1 sobre el secundari).
-  A la configuració, el text atenuat falla sobre els fons de menú i inputs i el
-  text base també.
-- **Fosc:** botó primari blanc sobre `#4385BE` (3,93:1; usar text fosc com la barra
-  lateral); `--error-text` (3,97:1); el hover dels enllaços els fa *menys*
-  llegibles (2,93:1).
-- **Peu de la barra lateral:** `--footer-text` falla a clar, Crema i gris suau amb
-  lletra d'11 px.
-- **Colors fixos fora de tokens:** verd d'èxit `#28a745` (2,98:1 en clar; en fosc
-  passa), `#666` del cronòmetre (només falla en fosc), interruptors
-  `#ccc`/`#0060df`, estrelles, l'historial de canvis amb `style="color:#444"`
-  (1,96:1 en fosc). Afegir `--success`, `--danger`, `--focus`, `--plugin-*` per
-  tema.
-- **Superposicions `rgba(0,0,0,…)`** desapareixen en fosc: l'estat actiu de
-  Biònica només es distingeix pel color (1.4.1). Usar `color-mix()` o un token
-  `--active-bg` i un indicador no cromàtic.
-- Declarar `color-scheme` per tema perquè selects, barres de desplaçament i
-  caselles natives segueixin el mode fosc.
+### Pendent d'accessibilitat
 
-### Accessibilitat de base
+- **Focus a la resta de panells:** el panell de text enviat, els subpanells de
+  configuració (`navigateToTab`) i el visor PDF encara no mouen el focus a
+  l'encapçalament ni el retornen al disparador.
+- **`scroll-padding`** perquè la barra fixa i el peu no tapin l'element enfocat
+  (WCAG 2.4.11), quan la barra sigui enganxosa (Fase D, 2.1).
+- **Visor PDF:** paleta fixa que ignora el tema (ara no passa pel mateix control
+  de contrast) i sense `:focus-visible`.
+- **Mapa:** els interruptors de nodes (r=8) i les vores per sota de 3:1; la roda
+  sempre fa zoom (cal `ctrl` per al zoom i desplaçar amb la roda); només ratolí
+  (sense pointer/touch).
 
-- **Mides tàctils (2.5.8):** botons del peu, selector de model, estrella de
-  favorit i interruptors del mapa per sota de 24×24 px.
-- **Regió d'estat per al streaming:** el contingut sense `aria-live`; una regió
-  `role="status"` persistent i buida des de la càrrega (l'actual `#loading` té
-  `role=status` però s'amaga amb `hidden`) que anunciï «Generant resum…», «Resum
-  complet», «Aturat». L'avís «aturat» no ha d'anar al quadre vermell `role=alert`.
-- **Focus:** en obrir/tancar l'historial, el text font, els panells de
-  configuració i el mapa, el focus cau a `<body>`. Moure'l a l'encapçalament del
-  panell i retornar-lo al disparador.
-- **Selector de models de la configuració:** files i estrelles són `<span>` només
-  clicables. Convertir en `<button>` (estrella amb `aria-pressed`), tancar amb
-  Esc, `aria-expanded` al botó.
-- **Formularis:** cap `aria-describedby` a tota la pàgina; toast `#status` sense
-  `role=status` i amb bug de temporitzador; `:focus-visible` unificat (l'anell
-  dels inputs és un 5 % d'alfa, invisible).
-- **Historial:** `li role=button` amb `span role=button` a dins (interactius
-  niats). Botons reals germans.
-- **Mapa conceptual:** el renderitzador accessible en `<details>` ja existeix
-  (`parseConceptTree`) però només com a fallback. Afegir un botó «Vista de
-  llista», `role=img` + etiqueta a l'SVG i `aria-expanded` als nodes.
-- **Anki:** totes les caselles es diuen igual («Incloure a l'exportació»).
-  Etiquetar-les amb la pregunta.
+### Pendent de microcopy
 
-### Microcopy (català)
-
-El projecte ja va triar l'**infinitiu** per als botons (CHANGELOG v2.4.1, també
-`LEARNINGS.md`). No cal canviar la convenció, sinó corregir els que no la segueixen:
-
-| Avui | Proposta | On |
-| --- | --- | --- |
-| Configurar Ara | Configurar ara | onboarding de la barra lateral |
-| Falta configurar l'API Key / Google Gemini API Key | Falta la clau d'API de Gemini / Clau d'API de Google Gemini | barra lateral, configuració |
-| Obre configuració | Obrir la configuració | avís de prompt nou |
-| Nova versió del prompt de aprofundiment | …del prompt d'aprofundiment (apostrofació) | `sidebar.js:342-381` |
-| Genera més / Afinar | Generar més / Afinar | panell Anki |
-| Desplega tot / Replega tot vs Desplegar/plegar tot | Desplegar-ho tot / Plegar-ho tot | mapa conceptual |
-| Apropar/Allunyar (PDF) vs Ampliar/Reduir (mapa) | Ampliar / Reduir a tot arreu | visor PDF, mapa |
-| Estimacio | Estimació | `ui.js:511,516` |
-| Proveu-ho, afegiu, canvieu (vosaltres) | tracte de tu a tot arreu | missatges d'error de `summary.js` |
-| «Resumidor» (títol de la pàgina) | Resumir | `sidebar.html:6` |
-| «Validar» / «Validació» / «Validació científica» | Validació científica | barra, historial, web |
-| «Buidar memòria cau» | Esborrar l'historial de resums | configuració |
-| Recarrega la pestanya (F5) | Recarrega la pestanya | error [006] (F5 no val a macOS) |
-
-A més: codis interns (`[007]`, `[PDF-013]`) al final del missatge i en gris, no al
-davant; `[003]` està duplicat; els errors 400 de Google arriben en anglès sense
-traduir (afegir branca i «Detalls» plegable).
-
-Imperatius que s'havien escapat: a Anki, «Descarta» → «Descartar», «Descarta-ho
-tot» → «Descartar-ho tot», «Afegeix (N)» → «Afegir a Obsidian (N)»,
-«Selecciona-ho tot / Deselecciona-ho tot» → «Seleccionar-ho tot /
-Desseleccionar-ho tot»; l'`aria-label` «Selecciona model» → «Seleccionar el
-model». «API Key» que queden: `ui.js:527` («Falta la clau d'API»), `ui.js:568`
-(«Obtenir una clau d'API gratuïta →») i `summary.js:155` («la clau d'API»); a
-`ui.js:547`, «per connectar-se amb Google Gemini».
-
-**Decisió pendent:** «Validació científica» i «Explica-ho fàcil» són noms de
-funcionalitat i no verbs de botó; cal dir explícitament si la regla de
-l'infinitiu s'hi aplica.
+- Errors 400 de Google arriben en anglès: afegir branca i «Detalls» plegable.
+- Codis interns (`[007]`, `[PDF-013]`) al final del missatge i en gris; `[003]`
+  duplicat.
+- Mapa conceptual i visor PDF: «Desplega tot / Replega tot» →
+  «Desplegar-ho tot / Plegar-ho tot»; «Apropar/Allunyar» vs «Ampliar/Reduir»
+  unificat; «Tancar», «Tornar», «Configurar» ja en infinitiu.
+- **Decisió pendent:** «Validació científica» i «Explica-ho fàcil» són noms de
+  funcionalitat, no verbs de botó; dir explícitament si la regla de l'infinitiu
+  s'hi aplica.
+- Normalitzar «Validar / Validació / Validació científica» a un sol nom.
 
 ### Altres correccions petites
 
 - Activar **Copiar** per defecte: l'usuari nou rep un resum sense cap acció
   visible per endur-se'l.
-- Estils `.btn-primary` per als CTA «Configurar» (avui botons nadius grisos, fins
-  i tot en fosc).
-- Peu: ↑ enviats abans de ↓ rebuts, inicialitzar a «–», cronòmetre vermell en
-  error i «De la memòria cau» en un encert; `title` amb el nom complet del model
-  truncat.
+- Peu: ↑ enviats abans de ↓ rebuts, inicialitzar a «–», «De la memòria cau» en un
+  encert; `title` amb el nom complet del model truncat.
 - Visor PDF: nom del fitxer al títol, Esc no ha de tancar la pestanya, fletxes
   ignorades dins del camp de pàgina, ‹ › en lloc de ⏮ ⏭, no esborrar el PDF en
   recarregar.
@@ -301,9 +241,7 @@ excepte on s'indica.
 1. **Fase A — Integritat del resultat: feta** (queden només els tres ítems
    enllaçats a la secció del Nivell 0, que van amb les fases B i D).
 2. **Fase B — Configuració que no perd canvis: feta** (desat automàtic d'interruptors, ordre i tema; avisos de prompt per pestanya; historial de canvis; avís en buidar la memòria cau). Del 2.4 queda el desat automàtic dels camps de text i sliders, amb indicador de canvis pendents.
-3. **Fase C — Tokens compartits i accessibilitat** (Nivell 1).
-   `shared/tokens.css` primer, amb mapa semàntic. Revisió amb lector de pantalla
-   durant el streaming, no només al final.
+3. **Fase C — Contrast i accessibilitat: feta** (la resta, a la secció del Nivell 1). Falta una revisió amb lector de pantalla real durant el streaming.
 4. **Fase D — Estructura** (2.1 barra d'eines, 2.2 onboarding, 2.3 estats, la resta
    de 2.4 (ordre, selector de models, revelació progressiva, enllaços profunds,
    rutes neutres), 2.5 responsiva, 2.6 historial). 2.1 i 2.2 primer: són el que
