@@ -6,12 +6,24 @@
 // --- Cache Management ---
 
 async function clearCache() {
-    if (!confirm("Estàs segur que vols esborrar la memòria cau de resums?")) return;
-
+    // Les entrades `summary_cache:*` SÓN l'historial de la barra lateral: no són
+    // dues coses. El diàleg ha de dir-ho i quantes n'hi ha.
+    let cacheKeys = [];
     try {
         const allData = await ext.storage.local.get(null);
-        const cacheKeys = Object.keys(allData).filter(k => k.startsWith("summary_cache:"));
+        cacheKeys = Object.keys(allData).filter(k => k.startsWith("summary_cache:"));
+    } catch (e) {
+        console.error("Error reading cache:", e);
+    }
+    if (cacheKeys.length === 0) {
+        showStatus("No hi havia cap resum desat.");
+        return;
+    }
+    const n = cacheKeys.length;
+    const noun = n === 1 ? "1 resum" : `${n} resums`;
+    if (!confirm(`S'esborrarà tot l'historial (${noun}). No es pot desfer.`)) return;
 
+    try {
         if (cacheKeys.length > 0) {
             await ext.storage.local.remove(cacheKeys);
         }

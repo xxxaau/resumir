@@ -24,7 +24,7 @@ const SIDEBAR_DIR = resolve(ROOT, "sidebar");
 // Scripts que no es carreguen: llibreries grans que el harness substitueix per stubs.
 const STUBBED = new Set(["../vendor/pdf.min.js", "../Readability.js"]);
 
-function makeEvent() {
+export function makeEvent() {
     const listeners = [];
     return {
         addListener: (fn) => listeners.push(fn),
@@ -38,7 +38,7 @@ function makeEvent() {
  * Emula la propagació d'`storage.onChanged` com fa el navegador: cada `set`
  * dispara el listener amb { clau: { oldValue, newValue } }.
  */
-function makeStorageArea(area, onChanged, initial) {
+export function makeStorageArea(area, onChanged, initial) {
     const base = createStorageMock();
     base._set(initial || {});
     return {
