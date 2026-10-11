@@ -180,7 +180,7 @@ function _renderHistoryPanel(panel, entries) {
     header.className = "history-header";
     const backBtn = document.createElement("button");
     backBtn.className = "history-back-btn";
-    backBtn.textContent = "\u2190 Tornar";
+    backBtn.textContent = "\u2190 Tancar l'historial";
     backBtn.addEventListener("click", closeHistoryPanel);
     header.appendChild(backBtn);
     // Encapçalament enfocable: en obrir el panell s'hi mou el focus (la barra
@@ -472,7 +472,7 @@ function openSourcePanel(text) {
 
     const backBtn = document.createElement("button");
     backBtn.className = "history-back-btn";
-    backBtn.textContent = "\u2190 Tornar";
+    backBtn.textContent = "\u2190 Tornar al resum";
     backBtn.addEventListener("click", closeSourcePanel);
 
     const label = document.createElement("span");

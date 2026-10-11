@@ -955,3 +955,28 @@ test("refinadors - amagats en un mapa conceptual", async () => {
         assert.ok(h.document.getElementById("refiners").classList.contains("hidden"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Botó de tornar (historial/text enviat): visible i fix, no un text gris que
+// surt de pantalla en un resum llarg. (jsdom no calcula layout: es comprova el CSS.)
+// ---------------------------------------------------------------------------
+test("botó de tornar - barra fixa a dalt i botó amb vora i contrast", async () => {
+    const { readFileSync } = await import("node:fs");
+    const css = readFileSync(new URL("../sidebar/sidebar.css", import.meta.url), "utf8");
+    const rule = (sel) => css.match(new RegExp(sel.replace(/[.#]/g, "\\$&") + "\\s*\\{([^}]*)\\}"))?.[1] || "";
+    assert.match(rule("#history-back-bar"), /position:\s*sticky/);
+    const btn = rule(".history-back-btn");
+    assert.match(btn, /border:\s*1px/);
+    assert.match(btn, /color:\s*var\(--text-color\)/, "no en gris atenuat");
+    assert.match(btn, /min-height:\s*32px/);
+    assert.match(rule(".history-header"), /position:\s*sticky/);
+});
+
+test("botó de tornar - etiquetes que diuen on tornes", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedHistoryEntry() } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush(30);
+        assert.match(h.document.querySelector("#history-panel .history-back-btn").textContent, /Tancar l'historial/);
+    } finally { h.close(); }
+});

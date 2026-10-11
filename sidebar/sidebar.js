@@ -73,6 +73,15 @@ document.addEventListener("DOMContentLoaded", () => {
         updateStaleBanner();
     };
 
+    // El mode historial amaga la barra d'eines i ancora la barra de tornar a dalt;
+    // el títol de la pàgina s'ancora just a sota amb l'alçada real d'ambdues.
+    const backBarEl = document.getElementById("history-back-bar");
+    if (backBarEl && typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(() => {
+            document.documentElement.style.setProperty("--backbar-height", backBarEl.offsetHeight + "px");
+        }).observe(backBarEl);
+    }
+
     // La barra d'eines és fixa i pot baixar de línia: el títol de la pàgina,
     // també fix, s'ancora just a sota amb la seva alçada real.
     const toolbarEl = document.querySelector(".toolbar");

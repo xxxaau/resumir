@@ -732,7 +732,8 @@ body {
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-color);
   position: sticky;
-  top: var(--toolbar-height, 0px); /* just sota la barra, que també és fixa */
+  /* just sota la barra d'eines i, en mode historial, sota la barra de tornar */
+  top: calc(var(--toolbar-height, 0px) + var(--backbar-height, 0px));
   z-index: 10;
 }
 
@@ -757,9 +758,14 @@ body {
   align-items: center;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   background-color: var(--toolbar-bg) !important;
   border-radius: 4px;
+  /* Fix a dalt: en un resum llarg el botó de tornar no pot sortir de pantalla.
+     La barra d'eines (amagada en mode historial) fa --toolbar-height = 0. */
+  position: sticky;
+  top: var(--toolbar-height, 0px);
+  z-index: 25;
 }
 
 #history-panel, #source-panel {
@@ -789,22 +795,33 @@ body {
 }
 
 .history-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg-color);
   padding: 4px 0 8px;
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 4px;
 }
 
 .history-back-btn {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--text-color);
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   cursor: pointer;
-  color: var(--text-muted);
-  font-size: 0.85em;
-  padding: 4px 0;
 }
 
 .history-back-btn:hover {
-  color: var(--text-color);
+  background: var(--secondary-hover);
 }
 
 .history-list {
