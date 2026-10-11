@@ -825,3 +825,93 @@ test("startSummary - sense clau i SENSE targeta d'onboarding: continua mostrant 
     await startSummary(ctx, null, false, false, true);
     assert.ok(ctx.errorDiv.textContent.includes("[001]"));
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.14): els botons de mode (Aprofundir, Validar, Explica-ho fàcil…)
+// ignoraven la memòria cau i gastaven tokens cada vegada. Ara la consulten per
+// tipus; tornar a clicar el MATEIX mode mentre es veu la versió desada la
+// regenera (refresc).
+// ---------------------------------------------------------------------------
+function setupModeCache(cacheByType, calls) {
+    setupGlobals({
+        getSummaryCache: async (_url, type) => {
+            calls.cacheLookups.push(type);
+            return cacheByType[type] || null;
+        },
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk, onUsage) => {
+            calls.api++;
+            onChunk("Generat de nou.");
+            onUsage({ promptTokenCount: 10, candidatesTokenCount: 5 });
+            return { inputTokens: 10, outputTokens: 5, cacheTokens: 0 };
+        },
+    });
+}
+const deepEntry = () => ({
+    title: "T", url: "https://example.com", summary: "Aprofundiment desat",
+    model: "gemini-2.0-flash", timestamp: new Date().toISOString(),
+});
+
+test("startSummary - deep dive amb entrada desada: la reusa sense cridar l'API", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    const calls = { api: 0, cacheLookups: [] };
+    setupModeCache({ deepdive: deepEntry() }, calls);
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, true, false, true); // isDeepDive
+
+    assert.equal(calls.api, 0, "No s'ha de gastar l'API si ja hi ha un aprofundiment desat");
+    assert.deepEqual(calls.cacheLookups, ["deepdive"], "S'ha de consultar la memòria cau del seu tipus");
+    assert.equal(ctx.currentMetadata.summary, "Aprofundiment desat");
+    assert.equal(ctx.currentMetadata.type, "deepdive");
+    assert.equal(ctx.currentMetadata.fromCache, true);
+});
+
+test("startSummary - tornar a clicar el mateix mode regenera (refresc), no reusa la caché", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    const calls = { api: 0, cacheLookups: [] };
+    setupModeCache({ deepdive: deepEntry() }, calls);
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, true, false, true);   // 1r clic: usa la caché
+    await startSummary(ctx, null, true, false, true);   // 2n clic: refresca
+
+    assert.equal(calls.api, 1, "El segon clic al mateix mode ha de regenerar");
+    assert.ok(ctx.currentMetadata.summary.includes("Generat de nou."));
+});
+
+test("startSummary - un mode diferent no reusa l'entrada d'un altre tipus", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    const calls = { api: 0, cacheLookups: [] };
+    setupModeCache({ deepdive: deepEntry() }, calls);
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, true, false, true);   // aprofundiment (caché)
+    await startSummary(ctx, null, false, true, true);   // validació: no n'hi ha → genera
+
+    assert.deepEqual(calls.cacheLookups, ["deepdive", "science"]);
+    assert.equal(calls.api, 1);
+    assert.equal(ctx.currentMetadata.type, "science");
+});
+
+test("startSummary - una entrada de mapa conceptual desada s'exporta sense el marcador intern", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    const calls = { api: 0, cacheLookups: [] };
+    setupModeCache({ conceptmap: { ...deepEntry(), summary: "<!--conceptmap-->\n- Arrel\n  - Fill" } }, calls);
+    global.renderMarkmapInteractive = () => ({});
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true, true); // isConceptMap
+
+    assert.equal(calls.api, 0);
+    assert.equal(ctx.currentMetadata.summary, "- Arrel\n  - Fill");
+});

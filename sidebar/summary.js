@@ -81,6 +81,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     }
 
     const { contentDiv, errorDiv, modelSelect, currentMetadata } = ctx;
+    const requestedType = isConceptMap ? "conceptmap" : isAnki ? "anki" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
 
     // Si ara mateix hi ha la targeta d'onboarding (falta la clau), no l'esborrem:
     // un clic a Resumir la substituïa per un error [001] i l'usuari nou perdia
@@ -198,16 +199,19 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             }
         }
 
-        const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache);
-        
-        if (!isRefresh && !pageData && !overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isAnki) {
-            const cachedEntry = await getSummaryCache(currentUrl);
+        // Tornar a clicar el mateix mode quan ja es veu la versió de memòria cau
+        // la regenera (refresca); un mode DIFERENT (o el primer clic) la reusa si
+        // existeix, en lloc de gastar tokens per a res.
+        const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache && currentMetadata.type === requestedType);
+
+        if (!isRefresh && !pageData && !overrideText) {
+            const cachedEntry = await getSummaryCache(currentUrl, requestedType);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
                 currentMetadata.url = currentUrl;
                 currentMetadata.summary = cachedEntry.summary;
                 currentMetadata.fromCache = true;
-                currentMetadata.type = "summary";
+                currentMetadata.type = requestedType;
 
                 if (ctx.onPageIdentified) {
                     ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
@@ -221,6 +225,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     : isCachedAnki
                         ? cachedSummary.substring("<!--anki-->\n".length)
                         : cachedSummary;
+                // El resum «net» (sense el marcador intern) és el que s'exporta.
+                currentMetadata.summary = displayText;
 
                 if (isCachedConceptMap) {
                     contentDiv.replaceChildren(renderMarkmapInteractive(displayText, currentMetadata.title, currentMetadata.url));
@@ -280,7 +286,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         currentMetadata.url = overrideText ? "seleccio:" + pageData.url : pageData.url;
         currentMetadata.summary = "";
         currentMetadata.fromCache = false;
-        currentMetadata.type = isConceptMap ? "conceptmap" : isAnki ? "anki" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
+        currentMetadata.type = requestedType;
 
         if (ctx.onPageIdentified) {
             ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
