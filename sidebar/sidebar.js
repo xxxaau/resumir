@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let isGenerating = false;
     let abortController = null;
-    let currentMetadata = { title: "", url: "", summary: "", fromCache: false };
+    let currentMetadata = { title: "", url: "", summary: "", fromCache: false, type: "summary" };
     let currentSourceText = "";
     let contentPreload = null;
     let isBionicEnabled = false;
@@ -137,14 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         applyExtensionOrder(config.extensionOrder);
                     }
                     if (changes.bionicFont || changes.bionicWeight || changes.bionicFontSize || changes.bionicLineHeight || changes.bionicFixation) {
-                        if (!isBionicEnabled) {
-                            isBionicEnabled = true;
-                            if (bionicBtn) {
-                                bionicBtn.classList.add("active");
-                                bionicBtn.setAttribute("aria-pressed", "true");
-                            }
-                        }
-                        applyBionicToContent(config);
+                        // Només reaplica si l'usuari ja té la biònica activa: tocar
+                        // els paràmetres a Configuració no l'ha d'activar ni
+                        // reescriure el contingut en pantalla.
+                        if (isBionicEnabled) applyBionicToContent(config);
                     }
                 });
             }
@@ -308,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // mode biònic — hi ancora la mida en px sobre --content-base-size.
         applyBionicStyles(contentDiv, true, cfg);
         const fixation = (cfg.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
-        if (currentMetadata.summary) {
+        if (currentMetadata.summary && isProseType(currentMetadata.type)) {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
         }
     }
@@ -324,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
             bionicBtn.classList.remove("active");
             bionicBtn.setAttribute("aria-pressed", "false");
             applyBionicStyles(contentDiv, false);
-            if (currentMetadata.summary) {
+            if (currentMetadata.summary && isProseType(currentMetadata.type)) {
                contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
             }
         }

@@ -586,3 +586,41 @@ test("startSummary - overrideText: usa el text de selecció en lloc del contingu
     assert.ok(textSentToApi?.includes("Text seleccionat per l'usuari."),
         "El text de selecció ha d'arribar a l'API");
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.1): sidebar.js re-renderitza currentMetadata.summary com a text
+// en activar/desactivar la lectura biònica. Per al mapa conceptual i Anki el
+// `summary` és un esquema/JSON: sense el tipus, l'extensió el pintava com a
+// text i destruïa el panell. startSummary ha d'anotar currentMetadata.type.
+// ---------------------------------------------------------------------------
+for (const [label, args, expected] of [
+    ["resum",       [false, false, true, false, false, false], "summary"],
+    ["deepdive",    [true,  false, true, false, false, false], "deepdive"],
+    ["science",     [false, true,  true, false, false, false], "science"],
+    ["mapa",        [false, false, true, true,  false, false], "conceptmap"],
+    ["explica-ho",  [false, false, true, false, true,  false], "simple"],
+]) {
+    test(`startSummary - anota currentMetadata.type = ${expected} (${label})`, async () => {
+        resetStorage();
+        await syncMock.set({ modelName: "gemini-2.0-flash" });
+        await localMock.set({ apiKey: "AIza_test_key" });
+        setupGlobals({
+            getSummaryCache: async () => null,
+            saveSummaryCache: async () => true,
+            saveUsageStats: async () => ({}),
+            callGeminiStream: async (_k, _m, _p, _t, _s, onChunk, onUsage) => {
+                onChunk("- Node arrel\n  - Fill");
+                onUsage({ promptTokenCount: 10, candidatesTokenCount: 5 });
+                return { inputTokens: 10, outputTokens: 5, cacheTokens: 0 };
+            },
+        });
+        // Globals que el harness base no defineix i només usen aquests modes
+        global.DEFAULT_SIMPLE_PROMPT = "Explica-ho fàcil.";
+        global.DEFAULT_CONCEPTMAP_PROMPT = "Mapa conceptual.";
+        global.renderMarkmapInteractive = () => ({});
+        const ctx = makeCtx();
+        const [isDeepDive, isScience, isUser, isConceptMap, isSimple, isAnki] = args;
+        await startSummary(ctx, null, isDeepDive, isScience, isUser, isConceptMap, isSimple, isAnki);
+        assert.equal(ctx.currentMetadata.type, expected);
+    });
+}

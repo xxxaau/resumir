@@ -78,6 +78,7 @@ const extensionGlobals = {
     sortModelsByPriority: "readonly",
     // shared/content-types.js
     CONTENT_TYPES: "readonly",
+    isProseType: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",
     // sidebar/content.js

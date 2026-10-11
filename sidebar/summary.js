@@ -195,6 +195,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 currentMetadata.url = currentUrl;
                 currentMetadata.summary = cachedEntry.summary;
                 currentMetadata.fromCache = true;
+                currentMetadata.type = "summary";
 
                 if (ctx.onPageIdentified) {
                     ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);
@@ -267,6 +268,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         currentMetadata.url = overrideText ? "seleccio:" + pageData.url : pageData.url;
         currentMetadata.summary = "";
         currentMetadata.fromCache = false;
+        currentMetadata.type = isConceptMap ? "conceptmap" : isAnki ? "anki" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
 
         if (ctx.onPageIdentified) {
             ctx.onPageIdentified(currentMetadata.title, currentMetadata.url);

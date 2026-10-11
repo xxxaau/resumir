@@ -29,6 +29,14 @@ function getTypeLabel(typeId) {
     return t ? t.label : "Resum";
 }
 
+// Només els tipus de text pla/Markdown es poden re-renderitzar amb lectura
+// biònica; el mapa conceptual i les targetes d'Anki tenen el seu propi panell
+// i el seu `summary` és un esquema/JSON, no text per llegir.
+function isProseType(typeId) {
+    const t = _resolveType(typeId);
+    return t !== "conceptmap" && t !== "anki";
+}
+
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { CONTENT_TYPES, TYPE_ICON_MAP, getTypeIcon, getTypeLabel };
+    module.exports = { CONTENT_TYPES, TYPE_ICON_MAP, getTypeIcon, getTypeLabel, isProseType };
 }
