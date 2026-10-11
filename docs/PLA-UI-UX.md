@@ -118,91 +118,46 @@ unificar el disseny dels dos.
   honest: «Sense servidor propi: el contingut va directament del teu navegador a
   Gemini, amb la teva clau.»
 
-## Nivell 2 — Canvis estructurals
+## Nivell 2 — Canvis estructurals (resta)
 
-Canvis d'esforç M que redefineixen com es veu i s'usa cada superfície. Cadascun
-mereix una entrada pròpia al backlog.
+La Fase D està feta en bona part (barra d'eines agrupada i fixa, onboarding amb
+comprovació de la clau, estats de càrrega, renderitzador Markdown, configuració
+responsiva, historial amb cerca/esborrar/desfer, pantalla General reordenada,
+enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
-### 2.1 Barra d'eines agrupada i enganxosa
+### 2.1 Barra d'eines
 
-Avui: una fila plana, ordre lliure, sense salt de línia, que es desplaça amb el
-text (el botó d'aturar desapareix en un resum llarg).
-
-- Tres grups fixos amb separador: **Generar** (Resumir com a botó primari amb
-  etiqueta + menú «Més modes ▾») · **Exportar** (Copiar, Obsidian, Anki) ·
-  **Vista** (Biònica) · ⚙. L'usuari reordena dins de cada grup.
-- Desbordament «⋯» quan no hi cap, o `flex-wrap` com a mínim; reduir el `gap`.
-- Barra + títol de la pàgina com una sola capçalera `position: sticky`, amb
-  `scroll-padding` perquè no tapi el focus (2.4.11).
 - Un sol joc d'icones SVG per tipus (barra, peu i historial); fora els emoji
-  🔬📊🧠🃏🕐⚡. «Aprofundir» deixa de ser un «+».
+  🔬📊🧠🃏🕐⚡. «Aprofundir» deixa de ser un «+». El peu a 320 px es solapa (les
+  estadístiques i els botons): amagar separadors i cronòmetre per sota d'una
+  amplada, o moure les icones de tipus (vegeu «Pestanyes per tipus», Nivell 3).
 
-### 2.2 Onboarding dins del panell amb verificació de la clau
+### 2.2 Estat en repòs amb clau
 
-- Estat buit amb 3 passos numerats: 1) obtenir la clau a AI Studio (enllaç
-  directe), 2) enganxar-la aquí mateix, 3) «Resumir aquesta pàgina». Sense enviar
-  l'usuari a una pestanya nova.
-- Botó «Comprovar» que fa `GET /v1beta/models`: valida la clau i omple la llista
-  de models disponibles. `trim()`, comprovació del prefix `AIza`, mostrar/amagar,
-  emmascarar amb els 4 últims caràcters.
-- Missatges per codi: 400 → clau incorrecta; 403 → API no habilitada; 429 → límit
-  gratuït, provar Flash-Lite; 503 → servei saturat, reintentant.
-- Nota de privacitat honesta d'una línia: el text de la pàgina s'envia a Google;
-  amb la clau gratuïta Google pot usar-lo per millorar els models. El text ha de
-  coincidir amb el consentiment de dades que declara el manifest de Firefox. No
-  fixar límits de quota a la UI (canvien; enllaçar el tauler d'AI Studio).
-- Estat en repòs amb clau: en lloc del blanc actual, títol de la pestanya activa +
-  botó «Resumir aquesta pàgina» + els resums ja desats per a aquesta URL.
+- En lloc del panell en blanc: títol de la pestanya activa + botó «Resumir aquesta
+  pàgina» + els resums ja desats per a aquesta URL.
 
-### 2.3 Estats de càrrega i streaming
+### 2.4 Configuració
 
-- Etapes visibles: «Llegint la pàgina…» → «Enviant a {model}…» → «Provant
-  {model2} (quota esgotada)…». Els tres punts, decoratius.
-- Renderitzar Markdown de forma incremental (cada ~250 ms; re-analitzar tot el
-  text és quadràtic en resums llargs: renderitzar només el tram nou o augmentar
-  l'interval) en lloc de text cru amb `**` i `#` i després un salt de maquetació.
-  Per a Anki i mapa: línia de progrés, no JSON cru.
-- El renderitzador no admet subvinyetes sagnades, llistes numerades, cursiva ni
-  `---`, que Gemini fa servir sovint (`ui.js:374-389`). Ampliar-lo o vendoritzar un
-  renderitzador petit i segur.
-- Error a sobre del contingut (avui queda al final d'un text llarg, fora de
-  pantalla).
-- Extracció de PDF local amb estat de càrrega i botons desactivats; obrir el visor
-  amb `active:false`.
-
-### 2.4 Configuració: desat automàtic i arquitectura d'informació
-
-- **Desat automàtic** d'interruptors, ordre, tema i selects amb toast «Desat»;
-  desat explícit només per a les àrees de text llargues, amb indicador de canvis
-  pendents i guarda `beforeunload`. Elimina els botons «Desar» per pestanya (el de
-  Plugins surt a dalt de tot per un bug d'ordre).
-- **Ordre:** clau d'API abans del model; el prompt principal de resum fora del
-  submenú de plugins; «Sobre» al final de la navegació.
-- **Selector de models comprensible:** nom llegible al camp (no l'ID), insígnies
-  «Ràpid i econòmic / Equilibrat / Màxima qualitat» i «Recomanat». Les dades ja són
-  a `CURATED_MODELS`; avui no es mostren.
+- **Selector de models comprensible:** nom llegible al camp (no l'ID),
+  insígnies «Ràpid i econòmic / Equilibrat / Màxima qualitat» i «Recomanat». Les
+  dades ja són a `CURATED_MODELS`; avui no es mostren.
+- **Ordre de la navegació:** el prompt principal de resum fora del submenú de
+  plugins (avui només s'hi arriba des de l'engranatge del plugin Resum) i
+  «Sobre» al final.
 - **Revelació progressiva:** prompts plegats sota «Personalitzar instruccions
   (avançat)» amb insígnia «Personalitzat», llegenda de variables (`{{COUNT}}`,
   `{{LANG}}`) i bloqueig de prompt buit.
-- **Enllaços profunds** `#tab=…&focus=apiKey` perquè la barra lateral obri la
-  pestanya i el camp correctes.
-- **Rutes d'Obsidian i Anki per defecte neutres:** avui són l'estructura personal
-  de l'autor (`[4 Arxiu/Notes/]YYYY/gggg-[W]ww`). Afegir vista prèvia «Exemple:
-  Resumir/2026-10-11.md».
+- **Desat automàtic dels camps de text i sliders** (els interruptors, l'ordre i el
+  tema ja es desen sols), amb indicador de canvis pendents i guarda
+  `beforeunload` per a les àrees de text llargues; «Restaurar» amb confirmació o
+  «Desfer».
+- Un prompt massa gran (quota per element de `storage.sync`) fa fallar tot el
+  desat amb un error genèric: mostrar la mida i el camp.
 
-### 2.5 Configuració responsiva
+### 2.6 Historial
 
-Cap media query avui. A `max-width: 720px`: navegació en pestanyes horitzontals o
-select, padding 24/16 px, controls dels plugins sota el text, `.sidebar` amb
-`overflow-y:auto`. El fons del menú lateral s'acaba a l'alçada de la finestra.
-
-### 2.6 Historial útil
-
-- Cerca per títol/URL i filtre per tipus.
-- Esborrar per entrada (`deleteSummaryCache` existeix però ningú no la crida) amb
-  toast «Desfer» de 5 s.
-- Estat buit que expliqui la retenció (dies i que és només en aquest navegador).
-- Dates absolutes a partir d'una setmana; «ara mateix» en lloc de «fa 1 min».
+- Filtre per tipus (amb les icones).
 - Clau de memòria cau dels PDF locals amb mida i data, no només el nom (dos
   `document.pdf` es trepitgen).
 
@@ -242,7 +197,7 @@ excepte on s'indica.
    enllaçats a la secció del Nivell 0, que van amb les fases B i D).
 2. **Fase B — Configuració que no perd canvis: feta** (desat automàtic d'interruptors, ordre i tema; avisos de prompt per pestanya; historial de canvis; avís en buidar la memòria cau). Del 2.4 queda el desat automàtic dels camps de text i sliders, amb indicador de canvis pendents.
 3. **Fase C — Contrast i accessibilitat: feta** (la resta, a la secció del Nivell 1). Falta una revisió amb lector de pantalla real durant el streaming.
-4. **Fase D — Estructura** (2.1 barra d'eines, 2.2 onboarding, 2.3 estats, la resta
+4. **Fase D — Estructura (en bona part feta; vegeu el Nivell 2)** (2.1 barra d'eines, 2.2 onboarding, 2.3 estats, la resta
    de 2.4 (ordre, selector de models, revelació progressiva, enllaços profunds,
    rutes neutres), 2.5 responsiva, 2.6 historial). 2.1 i 2.2 primer: són el que
    veu un usuari nou. Captures noves per a les botigues després d'aquesta fase
@@ -284,7 +239,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Barra lateral | Sense `max-width` del text en panells amples; enllaços amb `word-break: break-all` | `sidebar.css:159,167` | Baixa | S |
 | Barra lateral | CSS mort i regles duplicades (`#water-indicator`, `#timelineCleanerBtn`, `__rgba_primary_weak__`) | `sidebar.css:258-283,424,798` | Baixa | S |
 | Configuració | Els valors per defecte de `systemPrompt`, `ankiPrompt` i plantilles es congelen en el primer desat | `settings-options.js:16-58` | Mitjana | M |
-| Configuració | La plantilla Markdown per defecte és diferent a la configuració i a la barra lateral | `settings-defaults.js:4`, `sidebar.js:259` | Mitjana | S |
 | Configuració | «Restaurar» sobreescriu un prompt llarg sense confirmació i, des de l'avís, desa tota la pàgina | `settings-options.js:168-212`, `settings.js:69-71` | Mitjana | S |
 | Configuració | Botons Amunt/Avall amb el mateix nom per a tots els plugins; en pujar es perd el focus (es mou l'element enfocat), en baixar no, i en desactivar-se als extrems també | `settings-order.js:61-95` | Mitjana | M |
 | Configuració | Un prompt massa gran fa fallar tot el desat amb un error genèric (quota per element de `storage.sync`) | `settings-options.js:72-81` | Baixa | S |
@@ -293,11 +247,10 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Historial de canvis | Entrades de desenvolupador (CI, npm, Defuddle), totes les versions desplegades, avís de seguretat enterrat | `settings.html:1252-1310` | Mitjana | S |
 | Mapa conceptual | L'export PNG només captura els nodes desplegats (per defecte, nivells 0–1) sense dir-ho | `markmap-native.js:666-720` | Mitjana | M |
 | Mapa conceptual | La roda sempre fa zoom: al trackpad no es pot desplaçar ni fer scroll del panell | `markmap-native.js:581-595` | Mitjana | S |
-| Mapa conceptual | Expandir/plegar destrueix el node amb focus; a l'overlay trenca la trampa de focus | `markmap-native.js:400-406` | Alta | S |
 | Mapa conceptual | No hi ha botó d'ajustar a la vista; només mouse (sense pointer/touch) | `conceptmap.js:266-282` | Mitjana | S–M |
 | Mapa conceptual | Pantalla completa impossible des d'un PDF local, amb un consell enganyador | `conceptmap.js:349-391` | Mitjana | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial | `conceptmap.js:398-405` | Baixa | S |
-| Anki | «Afegeix (N)» no diu que va a una nota d'Obsidian; «✓ Afegit a Obsidian» sense confirmació (només s'ha obert l'URL `obsidian://`) | `anki.js:202-210,299-307` | Mitjana | S |
+| Anki | «✓ Afegit a Obsidian» sense confirmació real: només s'ha obert l'URL `obsidian://` (reformular com «Enviat a Obsidian») | `anki.js:202-210,299-307` | Mitjana | S |
 | Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |
 | Anki | Des de l'historial, «Genera més» i «Afinar» semblen actius però fallen | `history.js:101-106` | Baixa | S |
 | YouTube | L'etiqueta de llengua enviada al model pot no correspondre a la transcripció descarregada | `content.js:350-370`, `extractors.js:197-201` | Mitjana | S |
