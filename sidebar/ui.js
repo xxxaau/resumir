@@ -144,6 +144,21 @@ function applyExtensionOrder(order) {
     }
 }
 
+/**
+ * Anuncia un missatge d'estat als lectors de pantalla via la regió polida
+ * #sr-status (present i buida des de la càrrega: una regió creada i omplerta
+ * en el mateix render sovint no s'anuncia). El contingut en streaming NO és una
+ * regió activa (es llegiria a trossos); només s'anuncia el cicle de vida:
+ * generant, completat, aturat. Es buida i s'omple 100 ms després perquè un
+ * missatge idèntic consecutiu també s'anunciï.
+ */
+function announceStatus(message) {
+    const el = typeof document !== "undefined" ? document.getElementById("sr-status") : null;
+    if (!el) return;
+    el.textContent = "";
+    setTimeout(() => { el.textContent = message; }, 100);
+}
+
 let currentActiveBtnId = "summarizeBtn";
 let originalBtnContent = {};
 
@@ -186,6 +201,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         }
         
         loadingDiv.classList.remove("hidden");
+        announceStatus("Generant…");
     } else {
         const activeBtn = document.getElementById(currentActiveBtnId);
         if (activeBtn && originalBtnContent[currentActiveBtnId]) {
@@ -604,5 +620,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer };
+    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus };
 }

@@ -127,6 +127,8 @@ function setupE2EGlobals() {
     global.startGenerationTimer     = () => Date.now();
     global.stopGenerationTimer      = () => {};
     global.updateTokenStats         = () => {};
+    global.announceStatus = () => {};
+    global.isProseType = (t) => t !== "conceptmap" && t !== "anki";
     global.applyExtensionVisibility = () => {};
     global.applyExtensionOrder      = () => {};
 

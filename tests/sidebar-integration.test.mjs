@@ -156,3 +156,37 @@ test("historial - Copiar exporta l'entrada que es veu, no el resum anterior", as
         assert.ok(!h.calls.clipboard[0].includes("Resum A"), "No ha de copiar el resum anterior");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// L3: la regió d'estat per a lectors de pantalla. El contingut en streaming no
+// és una regió activa (es llegiria a trossos); #sr-status, present i buida des
+// de la càrrega, anuncia només el cicle de vida.
+// ---------------------------------------------------------------------------
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+test("regió d'estat - existeix, és polida i està buida en carregar", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        const el = h.document.getElementById("sr-status");
+        assert.ok(el, "Ha d'existir #sr-status des de la càrrega");
+        assert.equal(el.getAttribute("role"), "status");
+        assert.equal(el.getAttribute("aria-live"), "polite");
+        assert.equal(el.textContent, "");
+        assert.ok(!h.document.getElementById("content").hasAttribute("aria-live"),
+            "El contingut en streaming no pot ser una regió activa");
+    } finally { h.close(); }
+});
+
+test("regió d'estat - anuncia «Resum complet» en acabar una generació", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        await sleep(250); // l'anunci s'escriu 100 ms després de buidar la regió
+        assert.match(h.document.getElementById("sr-status").textContent, /Resum complet/);
+    } finally { h.close(); }
+});

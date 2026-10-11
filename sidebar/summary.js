@@ -21,6 +21,37 @@ function modelLabel(modelId) {
     return (m && m.label) || modelId;
 }
 
+/**
+ * L'usuari ha aturat la generació. NO és un error (abans anava al quadre
+ * vermell role=alert, anunciat de manera assertiva): és un avís informatiu.
+ * Si ja hi havia text en streaming, es mostra ben formatat i marcat com a
+ * incomplet; si no, es deixa net i es desactiva l'exportació (no s'ha de poder
+ * copiar/enviar a Obsidian el resum ANTERIOR ni un tros a mitges d'un mapa o
+ * d'unes targetes, que no són text).
+ */
+function showUserAbort(ctx, receivedChunks) {
+    const { contentDiv, errorDiv, currentMetadata } = ctx;
+    const partial = receivedChunks ? currentMetadata.summary : "";
+    let message;
+    if (partial && isProseType(currentMetadata.type)) {
+        contentDiv.replaceChildren(formatTextToFragment(partial, false));
+        contentDiv.classList.remove("hidden");
+        message = "Generació aturada: el resum és incomplet.";
+    } else {
+        contentDiv.replaceChildren();
+        contentDiv.classList.add("hidden");
+        currentMetadata.summary = "";
+        message = "Generació aturada.";
+    }
+    if (typeof ctx.showModelNotice === "function") {
+        ctx.showModelNotice(message);
+    } else {
+        errorDiv.textContent = message;
+        errorDiv.classList.remove("hidden");
+    }
+    announceStatus(message);
+}
+
 function buildFallbackList(preferredModel, favoriteIds) {
     const globalFallbacks = CURATED_MODELS
         .filter(m => m.fallback === true)
@@ -106,6 +137,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     
     const abortController = new AbortController();
     const signal = abortController.signal;
+    let receivedChunks = false; // ja ha arribat text d'aquesta generació?
     if (typeof ctx.setAbortController === "function") ctx.setAbortController(abortController);
 
     const generationStartMs = startGenerationTimer();
@@ -169,8 +201,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         if (signal.aborted) {
-            errorDiv.textContent = "Generació aturada per l'usuari.";
-            errorDiv.classList.remove("hidden");
+            showUserAbort(ctx, false);
             return abortController;
         }
 
@@ -383,6 +414,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     if (loadingDiv && !loadingDiv.classList.contains("hidden")) {
                         loadingDiv.classList.add("hidden");
                     }
+                    receivedChunks = true;
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
                     if (now - lastUpdate > 100) {
@@ -460,8 +492,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // per si un futur canvi introdueix un await entre iteracions del bucle
         // — sense això, cauria en un render+cache d'un resum buit en silenci.
         if (signal.aborted) {
-            errorDiv.textContent = "Generació aturada per l'usuari.";
-            errorDiv.classList.remove("hidden");
+            showUserAbort(ctx, receivedChunks);
             return abortController;
         }
 
@@ -507,6 +538,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const outputTokens = apiUsage?.outputTokens ?? currentMetadata.summary.length / 4;
         const cacheTokens  = apiUsage?.cacheTokens  ?? 0;
 
+        announceStatus("Resum complet.");
         const contentType = isConceptMap ? "conceptmap" : isAnki ? "anki" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
         const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary
             : isAnki ? "<!--anki-->\n" + currentMetadata.summary
@@ -525,8 +557,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // Només és una aturada de l'usuari si el SEU signal s'ha avortat: un
         // AbortError sense això ve del timeout d'inactivitat (o de la xarxa).
         if (signal.aborted) {
-            errorDiv.textContent = "Generació aturada per l'usuari.";
-            errorDiv.classList.remove("hidden");
+            showUserAbort(ctx, receivedChunks);
         } else {
             stopGenerationTimer("error");
             // Falta la clau i la targeta d'onboarding ja ho diu (amb el botó

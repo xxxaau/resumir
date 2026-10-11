@@ -113,6 +113,8 @@ function setupGlobals(overrides = {}) {
     global.startGenerationTimer   = () => Date.now();
     global.stopGenerationTimer    = () => {};
     global.updateTokenStats       = () => {};
+    global.announceStatus         = () => {};
+    global.isProseType            = require("../shared/content-types.js").isProseType;
     global.applyExtensionVisibility = () => {};
     global.applyExtensionOrder    = () => {};
 
@@ -914,4 +916,80 @@ test("startSummary - una entrada de mapa conceptual desada s'exporta sense el ma
 
     assert.equal(calls.api, 0);
     assert.equal(ctx.currentMetadata.summary, "- Arrel\n  - Fill");
+});
+
+// ---------------------------------------------------------------------------
+// B10 / L3: aturar NO és un error. S'avisa de manera informativa (no al quadre
+// vermell role=alert), el text parcial es mostra formatat i marcat com a
+// incomplet, i no es pot exportar el resum anterior.
+// ---------------------------------------------------------------------------
+test("aturar amb text parcial: avís informatiu, no error, i el parcial es veu formatat", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    let ctrl = null;
+    setupGlobals({
+        getSummaryCache: async () => null,
+        callGeminiStream: async (_k, _m, _p, _t, signal, onChunk) => {
+            onChunk("Resum a mitges");
+            // Simula el clic d'aturar a mig stream
+            ctrl.abort();
+            const err = new Error("aborted"); err.name = "AbortError"; throw err;
+        },
+    });
+    const notices = [];
+    const ctx = makeCtx({
+        showModelNotice: (m) => notices.push(m),
+        setAbortController: (c) => { ctrl = c; },
+    });
+    const rendered = [];
+    ctx.contentDiv.replaceChildren = (...nodes) => { rendered.push(...nodes); };
+    await startSummary(ctx, null, false, false, true);
+
+    assert.ok(ctx.errorDiv.classList.contains("hidden") || ctx.errorDiv.textContent === "",
+        "No ha d'anar al quadre d'error");
+    assert.match(notices[notices.length - 1], /aturada.*incomplet/i);
+    assert.equal(rendered[rendered.length - 1], "Resum a mitges", "El text parcial s'ha de renderitzar (formatat)");
+    assert.ok(!ctx.contentDiv.classList.contains("hidden"));
+    assert.equal(ctx.currentMetadata.summary, "Resum a mitges");
+});
+
+test("aturar abans que arribi text: net, sense resum i sense exportar l'anterior", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    let ctrl = null;
+    setupGlobals({
+        getSummaryCache: async () => null,
+        callGeminiStream: async () => {
+            ctrl.abort();
+            const err = new Error("aborted"); err.name = "AbortError"; throw err;
+        },
+    });
+    const notices = [];
+    const ctx = makeCtx({ showModelNotice: (m) => notices.push(m), setAbortController: (c) => { ctrl = c; } });
+    ctx.currentMetadata.summary = "RESUM ANTERIOR";
+    await startSummary(ctx, null, false, false, true);
+
+    assert.equal(ctx.currentMetadata.summary, "", "No ha de quedar el resum anterior exportable");
+    assert.equal(notices[notices.length - 1], "Generació aturada.");
+});
+
+test("aturar un mapa conceptual a mig stream: no es mostra l'esquema a mitges ni queda exportable", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    let ctrl = null;
+    setupGlobals({
+        getSummaryCache: async () => null,
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk) => {
+            onChunk("- Arrel\n  - Fi");
+            ctrl.abort();
+            const err = new Error("aborted"); err.name = "AbortError"; throw err;
+        },
+    });
+    global.DEFAULT_CONCEPTMAP_PROMPT = "Mapa.";
+    const ctx = makeCtx({ showModelNotice() {}, setAbortController: (c) => { ctrl = c; } });
+    await startSummary(ctx, null, false, false, true, true); // isConceptMap
+    assert.equal(ctx.currentMetadata.summary, "");
 });

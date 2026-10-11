@@ -80,6 +80,8 @@ const extensionGlobals = {
     // shared/content-types.js
     CONTENT_TYPES: "readonly",
     isProseType: "readonly",
+    // sidebar/ui.js
+    announceStatus: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",
     // sidebar/content.js
