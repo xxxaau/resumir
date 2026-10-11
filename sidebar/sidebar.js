@@ -213,8 +213,33 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.value = "";
             if (!file) return;
             if (isGenerating) return;
+            // L'extracció pot trigar segons: es mostra l'estat de càrrega i es
+            // bloquegen els botons (abans semblava penjat i es podia triar un altre
+            // fitxer mentrestant; el títol ja canviava abans d'haver llegit res).
+            const pdfBusyIds = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "conceptMapBtn", "explainSimpleBtn", "selectPdfBtn", "ankiBtn"];
+            const wasDisabled = new Map();
+            const setPdfReading = (reading) => {
+                const loading = document.getElementById("loading");
+                if (reading) {
+                    for (const id of pdfBusyIds) {
+                        const b = document.getElementById(id);
+                        if (b) { wasDisabled.set(id, b.disabled); b.disabled = true; }
+                    }
+                    if (loading) loading.classList.remove("hidden");
+                    setLoadingStage("Llegint el PDF…");
+                    announceStatus("Llegint el PDF…");
+                } else {
+                    for (const [id, was] of wasDisabled) {
+                        const b = document.getElementById(id);
+                        if (b) b.disabled = was;
+                    }
+                    wasDisabled.clear();
+                    if (loading) loading.classList.add("hidden");
+                    setLoadingStage("");
+                }
+            };
+            setPdfReading(true);
             try {
-                showPageTitleStrip(file.name, `pdf-local:${file.name}`);
                 const buffer = await file.arrayBuffer();
                 // Clonar el buffer abans de passar-lo a extractPdfText: pdf.js el pot
                 // transferir al worker (via postMessage) i detachar l'original.
@@ -223,6 +248,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("pdf-extract no carregat (vendor/pdf.min.js)");
                 }
                 const pdfResult = await extractPdfText(buffer);
+                // Només ara (extracció feta) canvia el títol: abans mostrava el
+                // fitxer nou sobre el resum antic, i si fallava s'hi quedava.
+                showPageTitleStrip(file.name, `pdf-local:${file.name}`);
                 // Obre el PDF en una pestanya per consultar-lo via visor personalitzat.
                 // Usem storage.session (compartit entre pàgines d'extensió) per passar
                 // el buffer, ja que blob: URLs no funcionen al visor nadiu de Firefox.
@@ -239,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (viewerKey) {
                     ext.tabs.create({
                         url: ext.runtime.getURL(`sidebar/pdf-viewer.html?key=${encodeURIComponent(viewerKey)}`),
-                        active: true
+                        active: false // no robar el focus de la barra lateral abans que acabi el resum
                     });
                 }
                 const tabUrl = `pdf-local:${file.name}`;
@@ -252,8 +280,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 // summary.js comprovara si el URL comenca per "pdf-local:" i usara
                 // el preload directament (sense necessitat que coincideixi amb la pestanya activa).
                 contentPreload = Promise.resolve(pageData);
+                setPdfReading(false);
                 doSummary(null, false, false, true);
             } catch (err) {
+                setPdfReading(false);
                 console.error("[PDF picker] error:", err);
                 const codeMap = {
                     PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",

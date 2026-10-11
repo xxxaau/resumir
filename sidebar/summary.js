@@ -408,6 +408,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 currentMetadata.summary = pageData.noTranscript ? "Vídeo sense transcripció.\n\n" : ""; // Reset output text
                 liveOutputTokens = 0;
                 const loadingDiv = document.getElementById("loading");
+                setLoadingStage(tryModel === preferredModel
+                    ? `Enviant a ${modelLabel(tryModel)}…`
+                    : `Provant ${modelLabel(tryModel)} (${modelLabel(preferredModel)} no ha respost)…`);
                 lastPromptText = truncateForModel(pageText, tryModel);
                 apiUsage = await callGeminiStream(apiKey, tryModel, systemPrompt, lastPromptText, signal, (chunkText) => {
                     // Amagar els puntets en el primer chunk rebut

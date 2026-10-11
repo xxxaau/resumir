@@ -219,6 +219,14 @@ body {
   letter-spacing: 2px;
 }
 
+/* Etapa actual («Llegint la pàgina…», «Enviant a …»): text real, sense l'espaiat
+   de lletres dels puntets decoratius. */
+#loading-text {
+  font-size: 0.75em;
+  letter-spacing: normal;
+  margin-right: 6px;
+}
+
 .loading-dot {
   animation: dot-pulse 1.4s infinite;
   display: inline-block;

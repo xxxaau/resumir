@@ -272,13 +272,16 @@
         <a id="prompt-update-link" href="#">Obrir la configuració</a>
         <button id="prompt-update-dismiss" class="prompt-update-dismiss" aria-label="Tancar">&times;</button>
       </div>
-      <div id="content" class="hidden"></div>
-      <div id="loading" class="hidden" role="status" aria-live="polite">
-        <span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span>
-      </div>
       <div id="sr-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+      <!-- Avisos i errors ABANS del contingut: en un resum llarg, un error a mig
+           stream sortia al final del text, fora de pantalla. -->
       <div id="model-notice" class="hidden" role="status" aria-live="polite"></div>
       <div id="error" class="hidden" role="alert" aria-live="assertive"></div>
+      <div id="content" class="hidden"></div>
+      <div id="loading" class="hidden" role="status" aria-live="polite">
+        <span id="loading-text"></span>
+        <span class="loading-dots" aria-hidden="true"><span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span></span>
+      </div>
       <div id="history-panel" class="hidden"></div>
       <div id="source-panel" class="hidden"></div>
     </div>

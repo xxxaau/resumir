@@ -184,6 +184,17 @@ function announceStatus(message) {
     setTimeout(() => { el.textContent = message; }, 100);
 }
 
+/**
+ * Etapa actual de la càrrega, com a text («Llegint la pàgina…», «Enviant a…»,
+ * «Provant … (quota esgotada)…»). Abans només hi havia tres puntets: l'espera
+ * inclou l'extracció de la pàgina (que pot trigar) i els fallbacks de model, i
+ * no es veia en quin pas era.
+ */
+function setLoadingStage(message) {
+    const el = typeof document !== "undefined" ? document.getElementById("loading-text") : null;
+    if (el) el.textContent = message || "";
+}
+
 let currentActiveBtnId = "summarizeBtn";
 let originalBtnContent = {};
 
@@ -226,6 +237,7 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         }
         
         loadingDiv.classList.remove("hidden");
+        setLoadingStage("Llegint la pàgina…");
         announceStatus("Generant…");
     } else {
         const activeBtn = document.getElementById(currentActiveBtnId);
@@ -711,5 +723,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

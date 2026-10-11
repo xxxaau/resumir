@@ -114,6 +114,8 @@ function setupGlobals(overrides = {}) {
     global.stopGenerationTimer    = () => {};
     global.updateTokenStats       = () => {};
     global.announceStatus         = () => {};
+    global.__stages = [];
+    global.setLoadingStage        = (m) => { global.__stages.push(m); };
     global.isProseType            = require("../shared/content-types.js").isProseType;
     global.applyExtensionVisibility = () => {};
     global.applyExtensionOrder    = () => {};
@@ -992,4 +994,31 @@ test("aturar un mapa conceptual a mig stream: no es mostra l'esquema a mitges ni
     const ctx = makeCtx({ showModelNotice() {}, setAbortController: (c) => { ctrl = c; } });
     await startSummary(ctx, null, false, false, true, true); // isConceptMap
     assert.equal(ctx.currentMetadata.summary, "");
+});
+
+// ---------------------------------------------------------------------------
+// 2.3 Estats de càrrega: l'espera es mostra amb l'etapa actual en text.
+// ---------------------------------------------------------------------------
+test("etapes de càrrega - «Enviant a {model}…» amb el model preferit", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    setupGlobals({
+        getSummaryCache: async () => null,
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        CURATED_MODELS: [{ id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", fallback: true, contextWindow: 100_000 }],
+    });
+    await startSummary(makeCtx(), null, false, false, true);
+    assert.ok(global.__stages.includes("Enviant a Gemini 2.0 Flash…"), `etapes: ${global.__stages.join(" | ")}`);
+});
+
+test("etapes de càrrega - en un fallback es diu quin model es prova i per què", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    setupQuotaThenOk([]);
+    await startSummary(makeCtx(), null, false, false, true);
+    assert.ok(global.__stages.some(s => /Provant Gemini 2\.5 Flash \(Gemini 2\.0 Flash no ha respost\)…/.test(s)),
+        `etapes: ${global.__stages.join(" | ")}`);
 });

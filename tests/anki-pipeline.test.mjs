@@ -117,6 +117,7 @@ function setupGlobals(overrides = {}) {
     global.startGenerationTimer    = () => Date.now();
     global.stopGenerationTimer     = () => {};
     global.updateTokenStats        = () => {};
+    global.setLoadingStage = (m) => { (global.__stages = global.__stages || []).push(m); };
     global.announceStatus = () => {};
     global.isProseType = (t) => t !== "conceptmap" && t !== "anki";
     global.applyExtensionVisibility = () => {};

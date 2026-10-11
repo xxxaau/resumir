@@ -85,6 +85,7 @@ const extensionGlobals = {
     isProseType: "readonly",
     // sidebar/ui.js
     announceStatus: "readonly",
+    setLoadingStage: "readonly",
     // shared/icons.js
     MARKMAP_ICONS: "readonly",
     // sidebar/content.js

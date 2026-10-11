@@ -444,3 +444,59 @@ test("onboarding - Enter al camp comprova la clau", async () => {
         assert.equal((await h.storage.local.get("apiKey")).apiKey, "AIza" + "y".repeat(35));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// 2.3: l'extracció d'un PDF local pot trigar; ha de mostrar l'estat de càrrega,
+// bloquejar els botons i NO canviar el títol fins que s'ha llegit el fitxer.
+// ---------------------------------------------------------------------------
+async function pickPdf(h, name = "informe.pdf") {
+    const input = h.document.getElementById("pdfFileInput");
+    const file = new h.window.File([new Uint8Array([37, 80, 68, 70])], name, { type: "application/pdf" });
+    if (!file.arrayBuffer) file.arrayBuffer = async () => new Uint8Array([37, 80, 68, 70]).buffer;
+    Object.defineProperty(input, "files", { value: [file], configurable: true });
+    input.dispatchEvent(new h.window.Event("change", { bubbles: true }));
+    await h.flush(3);
+}
+
+test("PDF local - mentre s'extreu: càrrega visible, botons bloquejats i títol sense canviar", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true }, modelReply: "Resum del PDF." });
+    try {
+        let release;
+        h.window.extractPdfText = () => new Promise(res => { release = () => res({ title: "Informe", text: "Text. ".repeat(40) }); });
+        await pickPdf(h);
+
+        assert.ok(!h.document.getElementById("loading").classList.contains("hidden"));
+        assert.match(h.document.getElementById("loading-text").textContent, /Llegint el PDF/);
+        assert.equal(h.document.getElementById("summarizeBtn").disabled, true);
+        assert.equal(h.document.getElementById("selectPdfBtn").disabled, true, "No es pot triar un altre fitxer mentrestant");
+        assert.ok(h.document.getElementById("page-title-strip").classList.contains("hidden"),
+            "El títol no ha de canviar abans d'haver llegit el fitxer");
+
+        release();
+        await h.flush(30);
+        assert.equal(h.document.getElementById("summarizeBtn").disabled, false, "Es desbloquegen en acabar");
+        assert.equal(h.document.getElementById("page-title-link").textContent, "Informe");
+    } finally { h.close(); }
+});
+
+test("PDF local - si l'extracció falla: error visible, botons desbloquejats i títol intacte", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true } });
+    try {
+        h.window.extractPdfText = async () => { throw Object.assign(new Error("x"), { code: "PASSWORD" }); };
+        await pickPdf(h);
+        await h.flush(10);
+        assert.match(h.document.getElementById("error").textContent, /contrasenya/);
+        assert.equal(h.document.getElementById("summarizeBtn").disabled, false);
+        assert.ok(h.document.getElementById("page-title-strip").classList.contains("hidden"));
+        assert.ok(h.document.getElementById("loading").classList.contains("hidden"));
+    } finally { h.close(); }
+});
+
+test("l'avís i l'error surten ABANS del contingut al DOM (no al final d'un text llarg)", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        const order = [...h.document.getElementById("container").children].map(el => el.id);
+        assert.ok(order.indexOf("error") < order.indexOf("content"), `ordre: ${order.join(" > ")}`);
+        assert.ok(order.indexOf("model-notice") < order.indexOf("content"));
+    } finally { h.close(); }
+});
