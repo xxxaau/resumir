@@ -267,3 +267,82 @@ test("historial - triar una icona de tipus obre aquell tipus i deixa el focus a 
         assert.equal(h.document.activeElement, h.document.getElementById("historyBackBtn"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Mapa conceptual (M1/M2): l'SVG no tenia semàntica (buit per a un lector),
+// els nodes plegables no deien si estaven oberts, i en plegar/desplegar es
+// reconstruïa tot l'SVG i el focus del teclat es perdia.
+// ---------------------------------------------------------------------------
+async function generateMap(h) {
+    h.document.getElementById("conceptMapBtn").click();
+    await h.flush(30);
+    return h.document.querySelector("#content .markmap-container");
+}
+const mapOptions = () => ({
+    sync: { enableConceptMap: true },
+    local: { apiKey: "AIza_test" },
+    pageText: "Un article. ".repeat(30),
+    modelReply: "- Ciència\n  - Mètode\n    - Hipòtesi\n  - Dades",
+});
+
+test("mapa - l'SVG té rol d'imatge amb nom, i hi ha una vista de llista equivalent", async () => {
+    const h = await loadSidebar(mapOptions());
+    try {
+        const container = await generateMap(h);
+        assert.ok(container);
+        const svg = container.querySelector("svg[role='img']");
+        assert.ok(svg, "L'SVG principal ha de ser role=img");
+        assert.match(svg.getAttribute("aria-label"), /Mapa conceptual/);
+        assert.match(svg.getAttribute("aria-label"), /llista/);
+
+        const listBtn = h.document.querySelector("#content .markmap-list-btn");
+        assert.ok(listBtn, "Ha d'haver-hi un botó de vista de llista");
+        const listView = h.document.querySelector("#content .markmap-list");
+        assert.ok(listView.classList.contains("hidden"), "Comença en vista de mapa");
+
+        listBtn.click();
+        assert.ok(!listView.classList.contains("hidden"));
+        assert.ok(container.classList.contains("hidden"), "El mapa s'amaga en veure la llista");
+        assert.equal(listBtn.getAttribute("aria-pressed"), "true");
+        assert.match(listView.textContent, /Ciència/);
+        assert.match(listView.textContent, /Mètode/);
+        assert.ok(listView.querySelector("details, li"), "La llista ha de ser estructura real (details/li)");
+
+        listBtn.click();
+        assert.ok(listView.classList.contains("hidden"));
+        assert.ok(!container.classList.contains("hidden"));
+    } finally { h.close(); }
+});
+
+test("mapa - els botons de plegar diuen si el node és obert (aria-expanded)", async () => {
+    const h = await loadSidebar(mapOptions());
+    try {
+        await generateMap(h);
+        await h.flush(10);
+        const toggles = [...h.document.querySelectorAll("#content .markmap-toggle")];
+        assert.ok(toggles.length > 0, "Hi ha d'haver nodes amb fills");
+        for (const t of toggles) {
+            assert.ok(["true", "false"].includes(t.getAttribute("aria-expanded")));
+            assert.match(t.getAttribute("aria-label"), /^(Desplegar|Plegar)/);
+        }
+    } finally { h.close(); }
+});
+
+test("mapa - plegar/desplegar un node manté el focus al seu botó (l'SVG es reconstrueix)", async () => {
+    const h = await loadSidebar(mapOptions());
+    try {
+        await generateMap(h);
+        await h.flush(10);
+        const first = h.document.querySelector("#content .markmap-toggle");
+        const label = first.getAttribute("aria-label").replace(/^(Desplegar|Plegar)/, "");
+        const before = first.getAttribute("aria-expanded");
+        first.focus();
+        first.dispatchEvent(new h.window.Event("click", { bubbles: true }));
+        await h.flush(5);
+        const active = h.document.activeElement;
+        assert.ok(active && active.classList && active.classList.contains("markmap-toggle"),
+            "El focus ha de quedar en un botó de plegar, no a <body>");
+        assert.ok(active.getAttribute("aria-label").endsWith(label), "…i és el del mateix node");
+        assert.notEqual(active.getAttribute("aria-expanded"), before, "L'estat ha canviat");
+    } finally { h.close(); }
+});

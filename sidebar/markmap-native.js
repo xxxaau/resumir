@@ -281,7 +281,13 @@
             return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
         }
 
+        // node → <g> del seu botó de plegar: render() reconstrueix tot el SVG i
+        // destruïa l'element amb focus (el teclat tornava a <body>, i a
+        // l'overlay el focus s'escapava de la trampa).
+        const toggleEls = new Map();
+
         function render() {
+            toggleEls.clear();
             state.bounds = computeLayout(state.root, options);
             // Clear viewport
             while (viewport.firstChild) viewport.removeChild(viewport.firstChild);
@@ -369,7 +375,9 @@
                     tg.setAttribute("tabindex", "0");
                     tg.setAttribute("role", "button");
                     const lbl = (node.label || node.text || "").slice(0, 60);
-                    tg.setAttribute("aria-label", (node.fold ? "Desplega" : "Plega") + (lbl ? ": " + lbl : ""));
+                    tg.setAttribute("aria-label", (node.fold ? "Desplegar" : "Plegar") + (lbl ? ": " + lbl : ""));
+                    tg.setAttribute("aria-expanded", node.fold ? "false" : "true");
+                    toggleEls.set(node, tg);
 
                     const cx = node._width + 10;
                     const cy = node._height / 2;
@@ -402,6 +410,9 @@
                         if (e) e.stopPropagation();
                         node.fold = !node.fold;
                         render();
+                        // El SVG s'ha reconstruït: retorna el focus al botó del mateix node.
+                        const again = toggleEls.get(node);
+                        if (again && typeof again.focus === "function") again.focus();
                         if (!node.fold) requestAnimationFrame(() => fit());  // autofit en desplegar
                     };
                     tg.addEventListener("click", toggleNode);

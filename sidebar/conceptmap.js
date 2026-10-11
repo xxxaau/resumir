@@ -235,6 +235,11 @@ function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
 
     // SVG
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    // Un SVG sense semàntica és buit per a un lector de pantalla: es nomena i
+    // s'apunta a la vista de llista, que és l'equivalent textual complet.
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label",
+        `Mapa conceptual${pageTitle ? ": " + pageTitle : ""}. Hi ha una vista de llista equivalent.`);
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", "100%");
     svg.style.border = "1px solid var(--border-color)";
@@ -281,7 +286,27 @@ function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
     fullPageBtn.classList.add("markmap-fullscreen-btn");
     container.appendChild(fullPageBtn);
 
+    // Vista de llista: el mateix contingut com a arbre de <details> (accessible
+    // amb teclat i lector de pantalla); alterna amb el mapa SVG.
+    const listBtn = document.createElement("button");
+    listBtn.type = "button";
+    listBtn.className = "markmap-list-btn";
+    listBtn.textContent = "Vista de llista";
+    listBtn.setAttribute("aria-pressed", "false");
+    const listView = document.createElement("div");
+    listView.className = "markmap-list hidden";
+    listView.appendChild(parseConceptTree(text, { autoExpand: true }));
+    listBtn.addEventListener("click", () => {
+        const showList = listView.classList.contains("hidden");
+        listView.classList.toggle("hidden", !showList);
+        container.classList.toggle("hidden", showList);
+        listBtn.setAttribute("aria-pressed", String(showList));
+        listBtn.textContent = showList ? "Vista de mapa" : "Vista de llista";
+    });
+
+    fragment.appendChild(listBtn);
     fragment.appendChild(container);
+    fragment.appendChild(listView);
 
     // Initialize renderer after element is in DOM
     setTimeout(() => {
