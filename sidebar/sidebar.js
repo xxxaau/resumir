@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentMetadata.fromCache = true;
         currentMetadata.type = entry.type;
         setGeneratingState(false, true);
+        updateTypeTabs(currentMetadata.url);
     };
 
     // La barra d'eines és fixa i pot baixar de línia: el títol de la pàgina,
@@ -121,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }).finally(() => {
             isGenerating = false;
             abortController = null;
-            if (currentMetadata.url) updateCacheBadge(currentMetadata.url);
+            if (currentMetadata.url) updateTypeTabs(currentMetadata.url);
         });
     };
 
@@ -515,52 +516,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const historyBackBtn = document.getElementById("historyBackBtn");
     if (historyBackBtn) historyBackBtn.addEventListener("click", openHistoryPanel);
 
-    let cacheBadgeTimer = null;
-    function updateCacheBadge(url) {
-        clearTimeout(cacheBadgeTimer);
-        cacheBadgeTimer = setTimeout(async () => {
-            const badge = document.getElementById("cache-badge");
-            if (!badge) return;
-            if (!url || url.startsWith("seleccio:")) {
-                badge.style.visibility = "hidden";
-                badge.replaceChildren();
-                badge.removeAttribute("data-clickable");
-                badge.removeAttribute("data-types");
-                return;
-            }
-            const types = await getAvailableTypes(url);
-            if (types.length > 0) {
-                badge.replaceChildren();
-                for (const ct of CONTENT_TYPES) {
-                    if (types.includes(ct.id)) {
-                        const icon = document.createElement("span");
-                        icon.className = "cache-badge-type";
-                        if (typeof typeIconSvg === "function") icon.appendChild(typeIconSvg(ct.id));
-                        else icon.textContent = ct.icon;
-                        icon.title = ct.label;
-                        icon.dataset.type = ct.id;
-                        // Operable amb teclat: el clic el gestiona el handler delegat
-                        // del badge, així que Enter/Espai només ha de re-disparar el clic.
-                        icon.setAttribute("role", "button");
-                        icon.setAttribute("tabindex", "0");
-                        icon.setAttribute("aria-label", ct.label + " (memòria cau)");
-                        icon.addEventListener("keydown", (e) => {
-                            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-                                e.preventDefault();
-                                icon.click();
-                            }
-                        });
-                        badge.appendChild(icon);
-                    }
-                }
-                badge.style.visibility = "visible";
-                badge.dataset.clickable = "true";
-                badge.dataset.types = types.join(",");
-            } else {
-                badge.replaceChildren();
-                badge.style.visibility = "hidden";
-                badge.removeAttribute("data-clickable");
-                badge.removeAttribute("data-types");
+    // Pestanyes per tipus: els resums desats d'aquesta pàgina, sota el títol.
+    // La pestanya activa és la que es veu ara; clicar-ne una altra la carrega.
+    let typeTabsTimer = null;
+    function updateTypeTabs(url) {
+        clearTimeout(typeTabsTimer);
+        typeTabsTimer = setTimeout(async () => {
+            const bar = document.getElementById("type-tabs");
+            if (!bar) return;
+            const types = (!url || url.startsWith("seleccio:")) ? [] : await getAvailableTypes(url);
+            bar.replaceChildren();
+            bar.classList.toggle("hidden", types.length === 0);
+            if (types.length === 0) return;
+            const active = currentMetadata.url === url && currentMetadata.summary ? currentMetadata.type : null;
+            const shown = CONTENT_TYPES.filter(ct => types.includes(ct.id));
+            const focusable = shown.some(ct => ct.id === active) ? active : shown[0].id;
+            for (const ct of shown) {
+                const tab = document.createElement("button");
+                tab.type = "button";
+                tab.className = "type-tab";
+                tab.dataset.type = ct.id;
+                tab.setAttribute("role", "tab");
+                tab.setAttribute("aria-selected", String(ct.id === active));
+                tab.tabIndex = ct.id === focusable ? 0 : -1;
+                if (typeof typeIconSvg === "function") tab.appendChild(typeIconSvg(ct.id));
+                tab.append(ct.label);
+                tab.addEventListener("click", async () => {
+                    const entry = await getSummaryCache(url, ct.id);
+                    if (entry) await loadHistoryEntry(entry);
+                    updateTypeTabs(url);
+                });
+                tab.addEventListener("keydown", (e) => {
+                    const items = [...bar.querySelectorAll('[role="tab"]')];
+                    const i = items.indexOf(tab);
+                    const next = e.key === "ArrowRight" ? items[(i + 1) % items.length]
+                        : e.key === "ArrowLeft" ? items[(i - 1 + items.length) % items.length] : null;
+                    if (next) { e.preventDefault(); next.focus(); }
+                });
+                bar.appendChild(tab);
             }
         }, 150);
     }
@@ -600,37 +593,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const idleSummarize = document.getElementById("idle-summarize");
     if (idleSummarize) idleSummarize.addEventListener("click", () => summarizeBtn.click());
 
-    const cacheBadge = document.getElementById("cache-badge");
-    if (cacheBadge) {
-        cacheBadge.addEventListener("click", async (e) => {
-            if (cacheBadge.dataset.clickable !== "true") return;
-            const tabs = await ext.tabs.query({ active: true, currentWindow: true });
-            if (!tabs[0]?.url) return;
-            const url = tabs[0].url;
-            const typeIcon = e.target.closest(".cache-badge-type");
-            if (typeIcon) {
-                const entry = await getSummaryCache(url, typeIcon.dataset.type);
-                if (entry) loadHistoryEntry(entry);
-            } else {
-                const types = (cacheBadge.dataset.types || "").split(",").filter(Boolean);
-                const preferred = types.includes("summary") ? "summary" : types[0];
-                const entry = await getSummaryCache(url, preferred);
-                if (entry) loadHistoryEntry(entry);
-            }
-        });
-    }
-
     ext.tabs.onActivated.addListener(async (activeInfo) => {
         try {
             const tab = await ext.tabs.get(activeInfo.tabId);
-            updateCacheBadge(tab.url);
+            updateTypeTabs(tab.url);
             updateIdleState(tab);
         } catch (e) {}
     });
 
     ext.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         if ((changeInfo.url || changeInfo.title) && tab.active) {
-            if (changeInfo.url) updateCacheBadge(tab.url);
+            if (changeInfo.url) updateTypeTabs(tab.url);
             updateIdleState(tab);
         }
     });
@@ -766,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
         purgeStaleCacheEntries().catch(err => { console.warn("Purge cache failed:", err); });
         // Inicialitzar badge de caché per a la URL del tab actiu
         ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-            if (tabs[0]?.url) updateCacheBadge(tabs[0].url);
+            if (tabs[0]?.url) updateTypeTabs(tabs[0].url);
             updateIdleState(tabs[0]);
         }).catch(() => {});
         try {

@@ -822,3 +822,52 @@ test("procedència - avisa quan el text s'ha tallat (PDF llarg)", async () => {
         assert.ok(el.classList.contains("is-warning"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Pestanyes per tipus (Fase E): els resums desats de la pàgina, sota el títol
+// ---------------------------------------------------------------------------
+function seedTypes(url, types) {
+    const local = { summary_cache_index: [] };
+    for (const type of types) {
+        const key = `summary_cache:${url}:${type}`;
+        local[key] = {
+            url, title: "Article", summary: `Text de ${type}`, model: "gemini-2.5-flash",
+            timestamp: new Date().toISOString(), version: "1.0", stats: { input: 1, output: 1 }, type,
+        };
+        local.summary_cache_index.push(key);
+    }
+    return local;
+}
+
+test("pestanyes per tipus - llisten els resums desats i en canvien el contingut", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...seedTypes("https://example.com/article", ["summary", "deepdive"]) },
+    });
+    try {
+        await h.flush(30);
+        await sleep(250);
+        const bar = h.document.getElementById("type-tabs");
+        assert.equal(bar.getAttribute("role"), "tablist");
+        const tabs = [...bar.querySelectorAll('[role="tab"]')];
+        assert.equal(tabs.length, 2);
+        assert.ok(tabs.every(t => t.hasAttribute("aria-selected")));
+
+        const deep = tabs.find(t => t.dataset.type === "deepdive");
+        deep.click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("content").textContent, /Text de deepdive/);
+        await sleep(250);
+        const after = [...bar.querySelectorAll('[role="tab"]')];
+        assert.equal(after.find(t => t.dataset.type === "deepdive").getAttribute("aria-selected"), "true");
+        assert.equal(after.find(t => t.dataset.type === "summary").getAttribute("aria-selected"), "false");
+    } finally { h.close(); }
+});
+
+test("pestanyes per tipus - amagades si la pàgina no té res desat", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        await h.flush(30);
+        await sleep(250);
+        assert.ok(h.document.getElementById("type-tabs").classList.contains("hidden"));
+    } finally { h.close(); }
+});

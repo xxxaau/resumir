@@ -901,17 +901,34 @@ body {
   padding: 24px 0;
 }
 
-/* ── Cache badge (footer) ─────────────────────────────────── */
-#cache-badge {
-  font-size: 11px;
-  color: var(--footer-text);
-  white-space: nowrap;
-  visibility: hidden;
+/* ── Pestanyes per tipus ──────────────────────────────────── */
+#type-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 6px 0;
 }
-
-#cache-badge[data-clickable="true"] {
+#type-tabs.hidden { display: none; }
+.type-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
   cursor: pointer;
 }
+.type-tab:hover { background: var(--button-hover); }
+.type-tab[aria-selected="true"] {
+  color: var(--primary-text);
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.type-tab svg { width: 14px; height: 14px; }
 
 /* ── Toolbar button colors & initial visibility ───────────── */
 #obsidianBtn {

@@ -140,13 +140,11 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ## Nivell 3 — Estratègia de producte
 
-> **Estat (2026-10-11):** Fases A–D fetes (vegeu `git log`). Següent pas: **Fase E**,
-> començant per la *línia de procedència* (S–M): sota cada resum, paraules de la
-> font, model, tokens i avís de truncament (`metadata.truncated` del PDF no es
-> mostra mai). Després, *pestanyes per tipus* (reutilitza `typeIconSvg` i
-> `getAvailableTypes`; l'estat en repòs ja llista els resums desats). Mètode: test de
-> regressió primer, commit atòmic, `npm test` + `npm run lint` + `npm run dev:chromium`
-> abans de commitejar, i treure del pla el que es completi.
+> **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la línia de procedència i
+> les pestanyes per tipus (vegeu `git log`). Següent: format/llargada com a controls,
+> segells de temps/pàgines, calaix «Text enviat», avís de resum d'una altra pàgina.
+> Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
+> `npm run dev:chromium` abans de commitejar, i treure del pla el que es completi.
 
 La direcció és fer de Resumir el resumidor més **verificable**: el mercat ja ha
 convertit en mínim el xat de seguiment i els segells de temps, i la diferència ara
@@ -154,8 +152,6 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 
 | Idea | Què veu l'usuari | Per què | Referència | Esforç |
 | --- | --- | --- | --- | --- |
-| Línia de procedència | «Basat en 3.200 paraules de [títol] · transcripció auto (en) · Gemini 3.1 Flash-Lite · 12.400 tokens» sota cada resum, amb avís explícit si s'ha truncat | El senyal de confiança més barat; fa visibles els talls silenciosos (avui `metadata.truncated` del PDF no es mostra mai). Millor tokens que cost en €: els usuaris de la clau gratuïta no paguen res i els preus envelleixen | Firefox Link Previews, PAIR Guidebook | S–M |
-| Pestanyes per tipus | Sota el títol: Resum · Aprofundiment · Mapa…; les que ja estan en memòria cau, actives; la resta, «Generar» | Substitueix els emoji diminuts del peu i el «mode historial» confús | Kagi, Gemini en Chrome | M |
 | Format i llargada com a controls (esforç més a prop de L: multiplica variants de prompt contra el versionat per plugin i se solapa amb Aprofundir i Explica-ho fàcil) | Resumir + selector compacte: Punts clau / TL;DR / Prosa × Curt / Mitjà / Llarg; els plugins rics, secundaris | Redueix la paràlisi d'elecció de la fila d'icones | Chrome Summarizer API, Kagi | M |
 | Vinyetes amb cita verificada | Cada punt porta un ↗ que fa scroll i ressalta el passatge a la pestanya (`#:~:text=`); la cita es comprova literalment contra el text extret | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
 | Segells de temps a YouTube i pàgines als PDF | Enllaços que porten el vídeo a l'instant o el visor a `#page=N` | Mínim en tots els competidors de vídeo; fan també de font | Eightify, Merlin, Glasp | M |
