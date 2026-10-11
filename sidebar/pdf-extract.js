@@ -234,7 +234,10 @@ async function extractPdfText(urlOrBuffer, options = {}) {
     }
 
     // Marques de pàgina: permeten que el resum citi «(p. N)» i enllaçar-hi.
-    const text = pageTexts.map((t, i) => `[Pàgina ${i + 1}]\n${t}`).join("\n\n");
+    let text = pageTexts.map((t, i) => `[Pàgina ${i + 1}]\n${t}`).join("\n\n");
+    if (truncated) {
+        text += `\n\n[... Text truncated: només s'han extret les primeres ${pageTexts.length} de ${totalPages} pàgines ...]`;
+    }
 
     return {
         title,

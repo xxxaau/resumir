@@ -1043,3 +1043,32 @@ test("YouTube - les marques [m:ss] són enllaços, el prompt les demana i el cli
         assert.equal(JSON.stringify(execs[0].args), "[65]");
     } finally { h.close(); }
 });
+
+test("Anki - un array buit del model diu que no hi ha prou contingut (no «torna a generar»)", async () => {
+    const h = await loadSidebar({
+        sync: { enableAnki: true },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "[]",
+    });
+    try {
+        h.document.getElementById("ankiBtn").click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("error").textContent, /No hi ha prou contingut per fer targetes/);
+    } finally { h.close(); }
+});
+
+test("instruccions de cites - indiquen el número de la marca, una cita per pàgina i res d'intervals", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url: "https://example.com/doc.pdf", title: "Doc", active: true }],
+        pageText: "[Pàgina 1]\n" + "text ".repeat(80),
+        modelReply: "Idea.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.match(h.calls.fetches[0].body, /no el número imprès/);
+        assert.match(h.calls.fetches[0].body, /mai intervals/);
+    } finally { h.close(); }
+});

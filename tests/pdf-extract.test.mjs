@@ -326,6 +326,8 @@ test("extractPdfText: respecta maxChars i marca truncated", async () => {
     const result = await extractPdfText(new ArrayBuffer(8), { maxChars: 600 });
     assert.equal(result.metadata.truncated, true);
     assert.ok(result.metadata.extractedPages < 3, "no hauria d'haver processat les 3 pàgines");
+    assert.match(result.text, /\[\.\.\. Text truncated: només s'han extret les primeres 2 de 3 pàgines \.\.\.\]$/,
+        "el model ha de saber que el PDF és parcial");
     cleanupMocks();
 });
 

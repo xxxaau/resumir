@@ -351,11 +351,11 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         ctx.setSourceText(pageData.text);
         // Vídeo amb marques de temps: el resum cita [m:ss] i enllaça amb el moment.
         if (isProseType(requestedType) && /\[\d+:\d{2}(?::\d{2})?\] /.test(String(pageData.text || ""))) {
-            systemPrompt += "\n\nEl text conté marques de temps [m:ss]. Quan una idea provingui d'un moment concret del vídeo, afegeix al final del punt la marca de temps corresponent, amb el mateix format [m:ss].";
+            systemPrompt += "\n\nEl text conté marques de temps [m:ss]. Quan una idea provingui d'un moment concret del vídeo, afegeix al final del punt la marca on comença, copiada tal com surt al text. Una sola marca per punt, sense intervals; no n'inventis cap.";
         }
         // PDF amb marques de pàgina: demanem citar-les perquè el resum enllaci amb el document.
         if (isProseType(requestedType) && /^\[Pàgina 1\]/.test(String(pageData.text || ""))) {
-            systemPrompt += "\n\nEl text conté marques [Pàgina N]. Quan una idea provingui d'una pàgina concreta, afegeix al final del punt la cita (p. N), amb el número de pàgina.";
+            systemPrompt += "\n\nEl text conté marques [Pàgina N]. Quan una idea provingui d'una pàgina concreta, afegeix al final del punt la cita (p. N), amb el número de la marca [Pàgina N] i no el número imprès al document. Si ve de diverses pàgines, posa una cita per pàgina, p. ex. (p. 3) (p. 5), mai intervals.";
         }
         // Desa el text brut per a la regeneració Anki (Task 6). Guard per a tests Node.
         if (typeof window !== "undefined") window.__ankiPageText = pageData.text;
@@ -557,7 +557,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             contentDiv.replaceChildren(renderMarkmapInteractive(currentMetadata.summary, currentMetadata.title, currentMetadata.url));
         } else if (isAnki) {
             if (ankiHasNoCards) {
-                errorDiv.textContent = "El model no ha retornat cap targeta vàlida. Prova de tornar a generar.";
+                // «[]» és la resposta que el prompt demana quan no hi ha prou contingut.
+                errorDiv.textContent = /^\s*\[\s*\]\s*$/.test(currentMetadata.summary)
+                    ? "No hi ha prou contingut per fer targetes."
+                    : "El model no ha retornat cap targeta vàlida. Prova de tornar a generar.";
                 errorDiv.classList.remove("hidden");
             } else {
                 // Desvia el render al panell Anki interactiu
