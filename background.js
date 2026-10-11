@@ -90,22 +90,35 @@ ext.menus.onClicked.addListener(async (info, tab) => {
       }
 
   } else if (info.menuItemId === "summarize-page") {
-      // 2. Store action
-      await ext.storage.local.set({ pendingSummary: { type: 'page', url: tab.url } });
-
       await openPromise;
-
-      // 3. Send Message
-      try {
-          await ext.runtime.sendMessage({
-              action: "trigger_summary",
-              data: { type: 'page', url: tab.url }
-          });
-      } catch (e) {
-          // Sidebar likely closed
-      }
+      await requestPageSummary(tab);
   }
 });
+
+// Demana a la sidebar (oberta o per obrir) que resumeixi la pàgina d'una pestanya.
+async function requestPageSummary(tab) {
+  await ext.storage.local.set({ pendingSummary: { type: 'page', url: tab.url } });
+  try {
+      await ext.runtime.sendMessage({
+          action: "trigger_summary",
+          data: { type: 'page', url: tab.url }
+      });
+  } catch (e) {
+      // Sidebar likely closed: el pickup per storage ho gestionarà en obrir-se
+  }
+}
+
+// Drecera de teclat (manifest `commands`): obre la sidebar i resumeix la pàgina.
+// open() va PRIMER (sense cap await abans) per conservar el gest d'usuari a Chrome.
+if (ext.commands && ext.commands.onCommand) {
+  ext.commands.onCommand.addListener(async (command, tab) => {
+    if (command !== "summarize-page" || !tab) return;
+    const openPromise = ext.sidebar.open(tab.windowId)
+        .catch(err => console.error("[sidebar] open error:", err));
+    await openPromise;
+    await requestPageSummary(tab);
+  });
+}
 
 // Obrir la sidebar quan la pàgina de stats demana carregar un resum en caché.
 // pendingCacheLoad is set from a user-initiated click on the settings page,

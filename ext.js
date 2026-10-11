@@ -34,6 +34,9 @@ const ext = {
     // Alias for Context Menus (Firefox: menus, Chromium: contextMenus)
     menus: baseApi.menus || baseApi.contextMenus,
 
+    // Dreceres de teclat declarades al manifest (commands)
+    commands: baseApi.commands,
+
     // Unified Sidebar/SidePanel API
     sidebar: {
         /**

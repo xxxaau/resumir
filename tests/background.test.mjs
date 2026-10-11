@@ -22,6 +22,7 @@ const listeners = {
     onInstalled:      null,
     menusClicked:     null,
     storageChanged:   null,
+    command:          null,
 };
 
 const sidebarCalls = { toggle: [], open: [], setPanelBehavior: [] };
@@ -41,6 +42,9 @@ global.ext = {
         onInstalled: { addListener: (fn) => { listeners.onInstalled = fn; } },
         sendMessage:  async (msg) => { messageSent.push(msg); },
         getBrowserInfo: null, // Firefox-only — null simula Chromium
+    },
+    commands: {
+        onCommand: { addListener: (fn) => { listeners.command = fn; } },
     },
     menus: {
         onClicked:  { addListener: (fn) => { listeners.menusClicked = fn; } },
@@ -63,6 +67,7 @@ function loadBackground({ firefox } = { firefox: false }) {
     listeners.onInstalled    = null;
     listeners.menusClicked   = null;
     listeners.storageChanged = null;
+    listeners.command = null;
     global.ext.isFirefox = firefox;
     delete require.cache[require.resolve("../background.js")];
     require("../background.js");
@@ -270,4 +275,26 @@ test("background: storage.onChanged ignora area sync", async () => {
     );
     await new Promise(r => setTimeout(r, 10));
     assert.equal(sidebarCalls.open.length, 0, "sidebar.open NO s'ha de cridar per area sync");
+});
+
+// ---------------------------------------------------------------------------
+// commands.onCommand: la drecera obre la sidebar i demana resumir la pàgina
+// ---------------------------------------------------------------------------
+
+test("background: la drecera summarize-page obre la sidebar i demana el resum", async () => {
+    loadBackground({ firefox: false });
+    resetCalls();
+    assert.ok(listeners.command, "ha de registrar commands.onCommand");
+    await listeners.command("summarize-page", { windowId: 7, url: "https://example.com/a" });
+    assert.deepEqual(sidebarCalls.open, [7]);
+    assert.deepEqual(messageSent.at(-1), { action: "trigger_summary", data: { type: "page", url: "https://example.com/a" } });
+    const stored = await storageMock.get("pendingSummary");
+    assert.equal(stored.pendingSummary.url, "https://example.com/a");
+});
+
+test("background: una altra drecera no fa res", async () => {
+    loadBackground({ firefox: false });
+    resetCalls();
+    await listeners.command("altra", { windowId: 7, url: "https://example.com/a" });
+    assert.equal(sidebarCalls.open.length, 0);
 });
