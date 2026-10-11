@@ -528,7 +528,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             errorDiv.textContent = "Generació aturada per l'usuari.";
             errorDiv.classList.remove("hidden");
         } else {
-            stopGenerationTimer();
+            stopGenerationTimer("error");
             // Falta la clau i la targeta d'onboarding ja ho diu (amb el botó
             // per configurar-la): no hi afegim un error vermell redundant.
             if (onboardingShown && /^\[001\]/.test(err?.message || "")) {

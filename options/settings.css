@@ -19,6 +19,10 @@
   --table-border: #e0e0e6;
   --toast-bg: #100F0F;
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --success: #5c7309;
+  --danger: #af3029;
+  --toggle-off: #878580;
+  --star-on: #a16207;
 }
 
 [data-actual-theme="dark"] {
@@ -41,6 +45,10 @@
   --table-header-bg: #1C1B1A;
   --table-border: #282726;
   --toast-bg: #343331; /* Flexoki Base-35 */
+  --success: #879a39;
+  --danger: #e0675c;
+  --toggle-off: #878580;
+  --star-on: #f0c040;
 }
  
 [data-actual-theme="solarized"] {
@@ -63,6 +71,10 @@
   --table-header-bg: #F2F0E5;
   --table-border: #E6E4D9;
   --toast-bg: #6F6E69;
+  --success: #5c7309;
+  --danger: #af3029;
+  --toggle-off: #878580;
+  --star-on: #a16207;
 }
  
 [data-actual-theme="soft-gray"] {
@@ -85,6 +97,10 @@
   --table-header-bg: #e8e8e8;
   --table-border: #e0e0e0;
   --toast-bg: #100F0F;
+  --success: #5c7309;
+  --danger: #af3029;
+  --toggle-off: #878580;
+  --star-on: #a16207;
 }
 
 body {
@@ -340,7 +356,7 @@ label {
 .model-star {
     cursor: pointer;
     font-size: 1em;
-    color: #ccc;
+    color: var(--toggle-off);
     transition: color 0.15s, transform 0.15s;
     -webkit-user-select: none;
     user-select: none;
@@ -350,11 +366,11 @@ label {
 
 .model-star:hover {
     transform: scale(1.2);
-    color: #f0c040;
+    color: var(--star-on);
 }
 
 .model-star.active {
-    color: #f0c040;
+    color: var(--star-on);
 }
 
 .model-name-btn {
@@ -467,7 +483,7 @@ a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--toggle-off);
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -485,13 +501,13 @@ a:hover {
 }
 
 input:checked + .slider {
-  background-color: #0060df;
+  background-color: var(--button-color);
 }
 
 /* Focus visible real: l'input és opacity:0, així que el ring va al slider.
    El box-shadow d'1px anterior era pràcticament invisible. */
 input:focus-visible + .slider {
-  outline: 2px solid #0060df;
+  outline: 2px solid var(--button-color);
   outline-offset: 2px;
 }
 

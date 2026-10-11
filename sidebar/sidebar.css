@@ -18,6 +18,8 @@
   --footer-border: #e0e0e0;
   --footer-text: #6b6a65;
   --icon-color: currentColor;
+  --success: #5c7309;
+  --active-bg: rgba(16, 15, 15, 0.08);
 }
 
 [data-actual-theme="dark"] {
@@ -39,6 +41,8 @@
   --footer-bg: #100f0f;
   --footer-border: #282726;
   --footer-text: #878580;
+  --success: #879a39;
+  --active-bg: rgba(206, 205, 195, 0.14);
 }
 
 [data-actual-theme="solarized"] {
@@ -61,6 +65,8 @@
   --footer-bg: #f2f0e5;
   --footer-border: #e6e4d9;
   --footer-text: #66655f;
+  --success: #5c7309;
+  --active-bg: rgba(16, 15, 15, 0.08);
 }
 
 [data-actual-theme="soft-gray"] {
@@ -82,6 +88,8 @@
   --footer-bg: #e8e8e8;
   --footer-border: #cccccc;
   --footer-text: #5f5e59;
+  --success: #5c7309;
+  --active-bg: rgba(16, 15, 15, 0.08);
 }
 
 body {
@@ -133,8 +141,10 @@ body {
 
 .toolbar button.active {
   color: var(--primary-color);
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--active-bg);
 }
+
+.check-icon { color: var(--success); }
 
 .toolbar button:disabled {
   opacity: 0.5;
@@ -330,7 +340,7 @@ body {
 }
 
 .section-divider {
-  color: rgba(0, 0, 0, 0.2);
+  color: var(--border-color);
   font-weight: 300;
   margin: 0 1px;
 }
@@ -394,7 +404,7 @@ body {
 }
 
 .footer-btn:hover:not(:disabled) {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--active-bg);
 }
 
 .footer-btn:disabled {
@@ -593,7 +603,7 @@ body {
 
 /* Cache hit indicators */
 .cache-hit {
-  color: #28a745;
+  color: var(--success);
 }
 
 .cache-timestamp {

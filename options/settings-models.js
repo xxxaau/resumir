@@ -201,7 +201,7 @@ async function refreshModels(e) {
         const removedCount = currentFavorites.length - cleanedFavorites.length;
 
         statusDiv.classList.remove("hidden");
-        statusDiv.style.color = "var(--success-color, #28a745)";
+        statusDiv.style.color = "var(--success)";
         statusDiv.textContent = `✓ ${mergedModels.length} models disponibles (${CURATED_MODELS.length} recomanats + ${apiModels.length} addicionals)`
             + (removedCount > 0 ? ` · ${removedCount} favorit${removedCount > 1 ? "s" : ""} eliminat${removedCount > 1 ? "s" : ""} per obsolets` : "");
 
@@ -222,7 +222,7 @@ async function refreshModels(e) {
 
     } catch (err) {
         statusDiv.classList.remove("hidden");
-        statusDiv.style.color = "var(--error-color, #dc3545)";
+        statusDiv.style.color = "var(--danger)";
         statusDiv.textContent = `✗ Error: ${err.message}`;
     } finally {
         btn.textContent = "Actualitzar";

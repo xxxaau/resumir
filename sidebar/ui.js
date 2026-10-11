@@ -7,7 +7,7 @@
 const PLAY_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
 // Quadrat d'aturar (no «pausa»: una generació aturada no es pot represa).
 const STOP_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
-const CHECK_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" color="#28a745"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+const CHECK_ICON_STR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
 
 const htmlParser = new DOMParser();
 const getIcon = (str) => htmlParser.parseFromString(str, 'image/svg+xml').documentElement;
@@ -436,7 +436,7 @@ function startGenerationTimer() {
     
     const timerEl = document.getElementById("generation-timer");
     timerEl.textContent = "0.0s";
-    timerEl.style.color = "#666";
+    timerEl.style.color = "var(--text-muted)";
     
     generationStartTime = Date.now();
     
@@ -448,13 +448,18 @@ function startGenerationTimer() {
     return generationStartTime;
 }
 
-function stopGenerationTimer() {
+// outcome: "ok" (verd) o "error" (vermell). Un segon stop sense cap generació
+// en marxa (p. ex. el de setGeneratingState(false) després d'un error) no
+// repinta el cronòmetre: abans sempre acabava verd, també després d'un error.
+function stopGenerationTimer(outcome = "ok") {
+    const wasRunning = generationInterval !== null;
     if (generationInterval) clearInterval(generationInterval);
     generationInterval = null;
+    if (!wasRunning) return;
 
     const timerEl = document.getElementById("generation-timer");
     if (timerEl) {
-        timerEl.style.color = "#28a745";
+        timerEl.style.color = outcome === "error" ? "var(--error-text)" : "var(--success)";
     }
 }
 
@@ -599,5 +604,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI };
+    module.exports = { formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer };
 }

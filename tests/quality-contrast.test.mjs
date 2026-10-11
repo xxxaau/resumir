@@ -25,6 +25,7 @@ const SIDEBAR_PAIRS = [
     ["--error-text",   "--error-bg",     4.5],
     ["--primary-hover","--bg-color",     4.5], // color dels enllaços en hover
     ["--button-text",  "--bg-color",     3],   // icones de la barra d'eines (UI)
+    ["--success",      "--bg-color",     4.5], // cronòmetre i icones d'èxit
 ];
 const SETTINGS_PAIRS = [
     ["--text-color", "--bg-color",     4.5],
@@ -35,6 +36,10 @@ const SETTINGS_PAIRS = [
     ["--primary-color", "--bg-color",  4.5], // enllaços i element actiu
     ["--button-color",  "--bg-color",  3],   // interruptors (UI)
     ["#ffffff",         "--button-color", 4.5], // text blanc dels botons primaris
+    ["--success",       "--bg-color",  4.5],
+    ["--danger",        "--bg-color",  4.5],
+    ["--toggle-off",    "--bg-color",  3],   // interruptor apagat i estrella (UI)
+    ["--star-on",       "--bg-color",  3],
 ];
 
 const SURFACES = [

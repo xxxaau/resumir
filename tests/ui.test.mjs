@@ -25,7 +25,7 @@ global.CURATED_MODELS = CURATED_MODELS;
 // getCuratedModelInfo és un global de browser definit a api.js — mock mínim
 global.getCuratedModelInfo = () => ({ rpd: 1500 });
 
-const { formatTextToFragment, formatBionicText, setGeneratingState } = require("../sidebar/ui.js");
+const { formatTextToFragment, formatBionicText, setGeneratingState, startGenerationTimer, stopGenerationTimer } = require("../sidebar/ui.js");
 
 // ---------------------------------------------------------------------------
 // formatBionicText
@@ -212,4 +212,37 @@ test("setGeneratingState - la icona d'aturar és un quadrat (un sol <rect>), no 
     const rects = document.getElementById("summarizeBtn").querySelectorAll("rect");
     assert.equal(rects.length, 1, "Una pausa en tindria 2");
     setGeneratingState(false, false, "summarizeBtn");
+});
+
+// ---------------------------------------------------------------------------
+// Regressió (B11): el cronòmetre acabava SEMPRE en verd d'èxit, també després
+// d'un error o aturada; i els colors eren fixos (#666/#28a745) en lloc de tokens.
+// ---------------------------------------------------------------------------
+function setupTimerDom() {
+    document.body.innerHTML = `<span id="generation-timer"></span>`;
+    return document.getElementById("generation-timer");
+}
+
+test("cronòmetre - una generació correcta acaba amb el token d'èxit", () => {
+    const el = setupTimerDom();
+    startGenerationTimer();
+    assert.equal(el.style.color, "var(--text-muted)", "Mentre corre, color atenuat del tema");
+    stopGenerationTimer();
+    assert.equal(el.style.color, "var(--success)");
+});
+
+test("cronòmetre - un error acaba en vermell i un segon stop no el repinta en verd", () => {
+    const el = setupTimerDom();
+    startGenerationTimer();
+    stopGenerationTimer("error");
+    assert.equal(el.style.color, "var(--error-text)");
+    stopGenerationTimer(); // el que fa setGeneratingState(false) al finally
+    assert.equal(el.style.color, "var(--error-text)", "No ha de tornar a verd");
+});
+
+test("cronòmetre - sense colors fixos hexadecimals", () => {
+    const el = setupTimerDom();
+    startGenerationTimer();
+    stopGenerationTimer();
+    assert.doesNotMatch(el.style.color, /#/);
 });
