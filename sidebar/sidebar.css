@@ -217,6 +217,16 @@ body {
   }
 }
 
+/* Avís informatiu (no és un error): p. ex. s'ha usat un model de recanvi */
+#model-notice {
+  color: var(--text-muted);
+  background-color: var(--secondary-bg);
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
 #error {
   color: var(--error-text);
   background-color: var(--error-bg);

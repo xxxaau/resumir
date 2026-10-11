@@ -16,6 +16,11 @@
  * @param {string[]} favoriteIds - IDs dels models favorits de l'usuari
  * @returns {string[]} Llista ordenada de models a provar
  */
+function modelLabel(modelId) {
+    const m = CURATED_MODELS.find(c => c.id === modelId);
+    return (m && m.label) || modelId;
+}
+
 function buildFallbackList(preferredModel, favoriteIds) {
     const globalFallbacks = CURATED_MODELS
         .filter(m => m.fallback === true)
@@ -321,6 +326,16 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         let success = false;
         let lastError = null;
         let sawQuotaError = false;
+        const preferredModel = modelName;
+        let preferredFailedByQuota = false;
+        const EXHAUSTED_TTL_MS = 5 * 60 * 1000;
+        // Models que han donat 429 fa poc (memòria de la sessió, la posa el
+        // cridant): se salten de primeres perquè cada petició no hagi de
+        // fallar primer amb el mateix. Si cap és vàlid, es proven tots.
+        const exhausted = ctx.exhaustedModels instanceof Map ? ctx.exhaustedModels : null;
+        const freshModels = modelsToTry.filter(m => !(exhausted && exhausted.get(m) > Date.now()));
+        const candidates = freshModels.length > 0 ? freshModels : modelsToTry;
+        if (typeof ctx.showModelNotice === "function") ctx.showModelNotice("");
         const bionicEnabled = ctx.isBionicEnabled();
         const bionicFixation = (config.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
         // Apliquem els estils de contenidor (font/mida/interlineat) ABANS de
@@ -343,7 +358,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             outputEstimated: true
         });
 
-        for (const tryModel of modelsToTry) {
+        for (const tryModel of candidates) {
             if (signal.aborted) break;
             try {
                 currentMetadata.summary = pageData.noTranscript ? "Vídeo sense transcripció.\n\n" : ""; // Reset output text
@@ -380,14 +395,14 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     });
                 });
                 success = true;
-                // Update model name to the successful one 
-                modelName = tryModel; 
-                
-                // Automatically update settings UI so it's transparently synced for the user next time
-                ext.storage.sync.set({ modelName: tryModel });
-                const dropdown = document.getElementById("model-select");
-                if (dropdown && dropdown.value !== tryModel) {
-                    dropdown.value = tryModel;
+                // El model que ha respost (per a caché i estadístiques). NO es
+                // desa com a preferit: un 429 passatger no ha de canviar
+                // l'elecció de l'usuari; només se l'avisa.
+                modelName = tryModel;
+                if (exhausted) exhausted.delete(tryModel);
+                if (tryModel !== preferredModel && typeof ctx.showModelNotice === "function") {
+                    const reason = preferredFailedByQuota ? "ha esgotat la quota" : "no ha respost";
+                    ctx.showModelNotice(`S'ha usat ${modelLabel(tryModel)} perquè ${modelLabel(preferredModel)} ${reason}.`);
                 }
 
                 break; // Request successful
@@ -414,7 +429,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     const attempt = modelsToTry.indexOf(tryModel) + 1;
                     console.warn(`[${attempt}/${modelsToTry.length}] Model ${tryModel} unavailable. Trying next...`, e.message);
                     lastError = e;
-                    if (status === 429 || msg.includes("quota") || msg.includes("exhausted")) sawQuotaError = true;
+                    const isQuota = status === 429 || msg.includes("quota") || msg.includes("exhausted");
+                    if (isQuota) {
+                        sawQuotaError = true;
+                        if (exhausted) exhausted.set(tryModel, Date.now() + EXHAUSTED_TTL_MS);
+                        if (tryModel === preferredModel) preferredFailedByQuota = true;
+                    }
                     continue;
                 }
                 throw e; // Other unexpected errors (auth, network, etc.)

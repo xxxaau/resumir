@@ -737,3 +737,63 @@ test("startSummary - barreja de 429 i 503: si algun model ha topat amb quota, es
     assert.ok(ctx.errorDiv.textContent.includes("quota"),
         `Ha de dir quota, té: "${ctx.errorDiv.textContent}"`);
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.3): el model de recanvi no es desa com a preferit, i s'avisa
+// l'usuari; els models amb 429 recent se salten de primeres.
+// ---------------------------------------------------------------------------
+function setupQuotaThenOk(modelsTried) {
+    setupGlobals({
+        getSummaryCache: async () => null,
+        saveSummaryCache: async () => true,
+        saveUsageStats: async () => ({}),
+        CURATED_MODELS: [
+            { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", fallback: true, contextWindow: 100_000 },
+            { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", fallback: true, contextWindow: 100_000 },
+        ],
+        callGeminiStream: async (_k, model, _p, _t, _s, onChunk, onUsage) => {
+            modelsTried.push(model);
+            if (model === "gemini-2.0-flash") {
+                throw Object.assign(new Error("Quota exceeded"), { status: 429 });
+            }
+            onChunk("Resum.");
+            onUsage({ promptTokenCount: 10, candidatesTokenCount: 5 });
+            return { inputTokens: 10, outputTokens: 5, cacheTokens: 0 };
+        },
+    });
+}
+
+test("startSummary - el fallback no sobreescriu el model preferit i avisa l'usuari", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    setupQuotaThenOk([]);
+
+    const notices = [];
+    const ctx = makeCtx({ showModelNotice: (m) => notices.push(m) });
+    await startSummary(ctx, null, false, false, true);
+
+    const stored = await syncMock.get(["modelName"]);
+    assert.equal(stored.modelName, "gemini-2.0-flash", "No s'ha de desar el model de recanvi");
+    const last = notices[notices.length - 1];
+    assert.match(last, /Gemini 2\.5 Flash/);
+    assert.match(last, /Gemini 2\.0 Flash/);
+    assert.match(last, /quota/);
+});
+
+test("startSummary - un model amb 429 recent se salta a la petició següent", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    const tried = [];
+    setupQuotaThenOk(tried);
+
+    const exhaustedModels = new Map();
+    await startSummary(makeCtx({ exhaustedModels }), null, false, false, true);
+    assert.deepEqual(tried, ["gemini-2.0-flash", "gemini-2.5-flash"]);
+
+    tried.length = 0;
+    await startSummary(makeCtx({ exhaustedModels }), null, false, false, true);
+    assert.deepEqual(tried, ["gemini-2.5-flash"],
+        "No ha de tornar a provar el model que acaba d'esgotar la quota");
+});

@@ -34,6 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let contentPreload = null;
     let isBionicEnabled = false;
     let globalConfigCache = {};
+    // Models que acaben de donar 429 (es salten de primeres durant uns minuts)
+    const exhaustedModels = new Map();
+    const modelNotice = document.getElementById("model-notice");
+    function showModelNotice(message) {
+        if (!modelNotice) return;
+        modelNotice.textContent = message || "";
+        modelNotice.classList.toggle("hidden", !message);
+    }
 
     function showPageTitleStrip(title, url) {
         const strip = document.getElementById("page-title-strip");
@@ -54,6 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
         errorDiv,
         modelSelect,
         currentMetadata,
+        exhaustedModels,
+        showModelNotice,
         getSourceText: () => currentSourceText,
         setSourceText: (t) => { currentSourceText = t; updateSourceBtn(); },
         getContentPreload: () => contentPreload,
