@@ -100,3 +100,59 @@ test("biònica - amb un resum de text SÍ es re-renderitza (no és un no-op)", a
             "Amb la biònica activa el text ha de dur negretes");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.2): en obrir una entrada de l'Historial, currentMetadata no
+// s'actualitzava; en tornar a la barra d'eines, Copiar exportava el resum
+// anterior (el generat abans d'obrir l'Historial), no el que es veia.
+// ---------------------------------------------------------------------------
+function seedHistoryEntry() {
+    const url = "https://altra.example/b";
+    const key = `summary_cache:${url}:summary`;
+    return {
+        [key]: {
+            url, title: "Pàgina B", summary: "Resum de l'altra pàgina B",
+            model: "gemini-2.5-flash", timestamp: new Date().toISOString(),
+            version: "1.0", stats: { input: 1, output: 1 }, type: "summary",
+        },
+        summary_cache_index: [key],
+    };
+}
+
+test("historial - Copiar exporta l'entrada que es veu, no el resum anterior", async () => {
+    const h = await loadSidebar({
+        sync: { enableMarkdown: true },
+        local: { apiKey: "AIza_test", ...seedHistoryEntry() },
+        pageText: "Un article llarg. ".repeat(20),
+        modelReply: "Resum A (el que es va generar abans)",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.getElementById("content").textContent.includes("Resum A"));
+
+        // Obre l'Historial i carrega l'entrada B
+        h.document.getElementById("historyBtn").click();
+        await h.flush(10);
+        const item = [...h.document.querySelectorAll("#history-panel .history-item")]
+            .find(li => li.textContent.includes("Pàgina B"));
+        assert.ok(item, "L'entrada B ha de sortir a l'Historial");
+        item.click();
+        await h.flush(10);
+        assert.ok(h.document.getElementById("content").textContent.includes("altra pàgina B"));
+
+        // Torna a la barra d'eines passant per l'Historial (camí del bug)
+        h.document.getElementById("historyBackBtn").click();
+        await h.flush(10);
+        h.document.querySelector("#history-panel .history-back-btn").click();
+        await h.flush(10);
+
+        h.document.getElementById("copyBtn").click();
+        await h.flush(10);
+
+        assert.equal(h.calls.clipboard.length, 1, "Ha de copiar alguna cosa");
+        assert.ok(h.calls.clipboard[0].includes("altra pàgina B"),
+            `Ha de copiar l'entrada visible, ha copiat: ${h.calls.clipboard[0]}`);
+        assert.ok(!h.calls.clipboard[0].includes("Resum A"), "No ha de copiar el resum anterior");
+    } finally { h.close(); }
+});

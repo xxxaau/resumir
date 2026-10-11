@@ -135,6 +135,19 @@ async function loadHistoryEntry(entry) {
         container.insertBefore(backBar, toolbar.nextSibling);
         container.insertBefore(titleStrip, contentDiv);
     }
+
+    // Avisa sidebar.js que ara es veu AQUESTA entrada: Copiar/Obsidian/Biònica
+    // treballen sobre currentMetadata, i sense això exportaven el resum anterior
+    // (el que es veia abans d'obrir l'Historial) en tornar a la barra d'eines.
+    if (typeof window !== "undefined" && typeof window.onHistoryEntryLoaded === "function") {
+        const marker = isConceptMap ? CONCEPT_MAP_MARKER : isAnki ? ANKI_MARKER : "";
+        window.onHistoryEntryLoaded({
+            title: entry.title,
+            url: entry.url,
+            summary: entry.summary.substring(marker.length),
+            type: isConceptMap ? "conceptmap" : isAnki ? "anki" : (entry.type || "summary"),
+        });
+    }
 }
 
 function _renderHistoryPanel(panel, entries) {

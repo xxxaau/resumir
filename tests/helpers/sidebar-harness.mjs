@@ -136,7 +136,14 @@ export async function loadSidebar({
         window.getPageContent = async () => ({ ...page });
     }
 
-    window.document.dispatchEvent(new window.Event("DOMContentLoaded"));
+    // jsdom dispara el seu propi DOMContentLoaded en acabar d'analitzar el
+    // document: si el despatxéssim també nosaltres, sidebar.js s'inicialitzaria
+    // dues vegades (listeners duplicats). Només el despatxem si ja ha passat.
+    if (window.document.readyState === "complete") {
+        window.document.dispatchEvent(new window.Event("DOMContentLoaded"));
+    } else {
+        await new Promise(r => window.addEventListener("load", r, { once: true }));
+    }
     const flush = async (n = 5) => { for (let i = 0; i < n; i++) await new Promise(r => setTimeout(r, 0)); };
     await flush();
 

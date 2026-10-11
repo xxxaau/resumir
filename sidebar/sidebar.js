@@ -59,6 +59,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (sourceTextBtn) sourceTextBtn.disabled = !currentSourceText;
     }
 
+    // L'Historial (history.js) mostra entrades de memòria cau directament al
+    // #content. Han de passar a ser el «resum actual» perquè Copiar, Obsidian i
+    // Biònica exportin/re-renderitzin EL QUE ES VEU, no el resum anterior.
+    window.onHistoryEntryLoaded = (entry) => {
+        currentMetadata.title = entry.title || "";
+        currentMetadata.url = entry.url || "";
+        currentMetadata.summary = entry.summary;
+        currentMetadata.fromCache = true;
+        currentMetadata.type = entry.type;
+        setGeneratingState(false, true);
+    };
+
     // --- Context object for summary.js ---
     const ctx = {
         contentDiv,
