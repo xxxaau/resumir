@@ -206,6 +206,33 @@ function _renderHistoryPanel(panel, entries) {
         searchInput.addEventListener("input", () => fill());
         panel.appendChild(searchInput);
     }
+    // Filtre per tipus (només si hi ha més d'un tipus a l'historial)
+    let typeFilter = null;
+    const presentTypes = CONTENT_TYPES.filter(ct => entries.some(e => (e.type || "summary") === ct.id)).sort((a, b) => a.order - b.order);
+    if (presentTypes.length > 1) {
+        const bar = document.createElement("div");
+        bar.className = "history-filters";
+        bar.setAttribute("role", "group");
+        bar.setAttribute("aria-label", "Filtra per tipus");
+        const mk = (type, text, title) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "history-filter";
+            if (type) b.dataset.type = type;
+            b.textContent = text;
+            if (title) b.setAttribute("aria-label", title);
+            b.addEventListener("click", () => {
+                typeFilter = type;
+                bar.querySelectorAll(".history-filter").forEach(x => x.setAttribute("aria-pressed", String((x.dataset.type || null) === type)));
+                fill();
+            });
+            b.setAttribute("aria-pressed", String(type === null));
+            bar.appendChild(b);
+        };
+        mk(null, "Tots");
+        for (const ct of presentTypes) mk(ct.id, `${ct.icon} ${ct.label}`, ct.label);
+        panel.appendChild(bar);
+    }
     const resultCount = document.createElement("p");
     resultCount.className = "sr-only";
     resultCount.setAttribute("role", "status");
@@ -232,7 +259,8 @@ function _renderHistoryPanel(panel, entries) {
             return;
         }
         const query = searchInput ? searchInput.value : "";
-        const groups = _groupEntriesByUrl(_historyEntries).filter(g => _matchesFilter(g, query));
+        const groups = _groupEntriesByUrl(_historyEntries).filter(g => _matchesFilter(g, query))
+            .filter(g => !typeFilter || g.types.includes(typeFilter));
         if (groups.length === 0) {
             const none = document.createElement("p");
             none.className = "history-empty";

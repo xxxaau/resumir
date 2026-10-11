@@ -688,3 +688,41 @@ test("copiar Markdown - sense plantilla desada usa la plantilla per defecte comp
         assert.match(h.calls.clipboard[0], /^# \[Article\]\(https:\/\/example\.com\/article\)\n\nEl resum complet\./);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Historial (2.6): filtre per tipus. Amb molts resums, els mapes i les targetes
+// s'amagaven darrere d'icones diminutes.
+// ---------------------------------------------------------------------------
+test("historial - el filtre per tipus mostra només les entrades d'aquell tipus", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedEntries([
+        { url: "https://a.example/1", title: "Només resum", type: "summary" },
+        { url: "https://b.example/2", title: "Amb mapa", type: "summary" },
+        { url: "https://b.example/2", title: "Amb mapa", type: "conceptmap" },
+    ]) } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        const filters = [...h.document.querySelectorAll("#history-panel .history-filter")];
+        assert.ok(filters.length >= 3, "«Tots» + un botó per cada tipus present");
+        assert.ok(filters.every(b => b.tagName === "BUTTON" && b.hasAttribute("aria-pressed")));
+        assert.equal(filters[0].getAttribute("aria-pressed"), "true", "«Tots» actiu al principi");
+        const map = filters.find(b => b.dataset.type === "conceptmap");
+        map.click();
+        assert.equal(items(h).length, 1);
+        assert.match(items(h)[0].textContent, /Amb mapa/);
+        assert.equal(h.document.querySelector('#history-panel .history-filter[data-type="conceptmap"]').getAttribute("aria-pressed"), "true");
+        h.document.querySelector("#history-panel .history-filter").click(); // Tots
+        assert.equal(items(h).length, 2);
+    } finally { h.close(); }
+});
+
+test("historial - sense varietat de tipus no es mostra el filtre", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedEntries([
+        { url: "https://a.example/1", title: "Un", type: "summary" },
+    ]) } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush();
+        assert.equal(h.document.querySelector("#history-panel .history-filter"), null);
+    } finally { h.close(); }
+});
