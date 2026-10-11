@@ -9,6 +9,13 @@
  * Renderitza la llista de models amb estrelles de favortit.
  * No fa cap crida a l'API — només llegeix la cache local.
  */
+function setModelsListOpen(open) {
+    const modelsList = document.querySelector("#modelsList");
+    const trigger = document.querySelector("#checkModels");
+    if (modelsList) modelsList.style.display = open ? "block" : "none";
+    if (trigger) trigger.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
 // Tancar el selector si es clica fora
 document.addEventListener("click", (e) => {
     const modelsList = document.querySelector("#modelsList");
@@ -17,8 +24,19 @@ document.addEventListener("click", (e) => {
         const isSelectBtn = e.target.closest("#checkModels");
         const isRefreshBtn = e.target.closest("#refreshModels");
         if (!isInsideList && !isSelectBtn && !isRefreshBtn) {
-            modelsList.style.display = "none";
+            setModelsListOpen(false);
         }
+    }
+});
+
+// Esc tanca el selector i retorna el focus al botó que l'ha obert
+document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const modelsList = document.querySelector("#modelsList");
+    if (modelsList && modelsList.style.display === "block") {
+        setModelsListOpen(false);
+        const trigger = document.querySelector("#checkModels");
+        if (trigger) trigger.focus();
     }
 });
 
@@ -28,11 +46,11 @@ async function listModels(e) {
 
     // Toggle: si ja està visible, amaga'l
     if (modelsList.style.display === "block") {
-        modelsList.style.display = "none";
+        setModelsListOpen(false);
         return;
     }
 
-    modelsList.style.display = "block";
+    setModelsListOpen(true);
     modelsList.replaceChildren();
 
     // Carregar la cache de models i els favorits de l'usuari
@@ -108,10 +126,18 @@ function createModelRow(model, isFavorite, currentModel, favoriteIds, allModels,
     const row = document.createElement("div");
     row.className = "model-item-row";
 
-    // Estrella
-    const star = document.createElement("span");
+    // Estrella: botó real (focusable, operable amb teclat) amb estat aria-pressed
+    // i nom propi per model. Abans era un <span> només clicable.
+    const label = model.label || model.id;
+    const star = document.createElement("button");
+    star.type = "button";
     star.className = "model-star" + (isFavorite ? " active" : "");
+    star.dataset.modelId = model.id;
     star.textContent = "★";
+    star.setAttribute("aria-pressed", isFavorite ? "true" : "false");
+    star.setAttribute("aria-label", isFavorite
+        ? `Treure ${label} dels favorits`
+        : `Afegir ${label} als favorits`);
     star.title = isFavorite ? "Treure dels favorits" : "Afegir als favorits";
     star.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -120,16 +146,26 @@ function createModelRow(model, isFavorite, currentModel, favoriteIds, allModels,
         else favoriteIds.push(model.id);
         await ext.storage.sync.set({ favoriteModels: [...favoriteIds] });
         renderModelList(allModels, favoriteIds, currentModel, container);
+        // La fila es re-crea (canvia de secció): es retorna el focus a la
+        // mateixa estrella perquè l'usuari de teclat no el perdi.
+        const again = [...container.querySelectorAll(".model-star")].find(b => b.dataset.modelId === model.id);
+        if (again) again.focus();
     });
 
-    // Nom
-    const nameBtn = document.createElement("span");
+    // Nom: botó real; seleccionar tanca la llista i retorna el focus al botó
+    const nameBtn = document.createElement("button");
+    nameBtn.type = "button";
     nameBtn.className = "model-name-btn";
-    nameBtn.textContent = model.label || model.id;
-    if (model.id === currentModel) nameBtn.classList.add("selected");
+    nameBtn.textContent = label;
+    if (model.id === currentModel) {
+        nameBtn.classList.add("selected");
+        nameBtn.setAttribute("aria-current", "true");
+    }
     nameBtn.addEventListener("click", () => {
         document.querySelector("#modelName").value = model.id;
-        container.style.display = "none";
+        setModelsListOpen(false);
+        const trigger = document.querySelector("#checkModels");
+        if (trigger) trigger.focus();
     });
 
     row.appendChild(star);

@@ -153,3 +153,72 @@ test("moure un plugin amunt/avall desa l'ordre a l'instant", async () => {
         assert.notDeepEqual(after, before, "L'ordre desat ha de canviar");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Selector de models (3.1): files i estrelles eren <span> només clicables: un
+// usuari de teclat o de lector de pantalla no hi podia triar ni gestionar
+// favorits; Esc no el tancava.
+// ---------------------------------------------------------------------------
+async function openModelPicker(h) {
+    h.document.getElementById("checkModels").click();
+    await h.flush();
+    return h.document.getElementById("modelsList");
+}
+
+test("selector de models - estrelles i noms són botons reals, amb nom i estat", async () => {
+    const h = await loadSettings({ sync: { favoriteModels: [] } });
+    try {
+        const list = await openModelPicker(h);
+        const stars = [...list.querySelectorAll(".model-star")];
+        assert.ok(stars.length > 0);
+        for (const s of stars) {
+            assert.equal(s.tagName, "BUTTON", "L'estrella ha de ser un <button>");
+            assert.ok(s.hasAttribute("aria-pressed"), "Ha de dir si és favorit (aria-pressed)");
+            assert.match(s.getAttribute("aria-label"), /favorits/, "Nom accessible amb el model");
+        }
+        assert.ok([...list.querySelectorAll(".model-name-btn")].every(b => b.tagName === "BUTTON"));
+        assert.equal(h.document.getElementById("checkModels").getAttribute("aria-expanded"), "true");
+    } finally { h.close(); }
+});
+
+test("selector de models - Esc el tanca i retorna el focus al botó", async () => {
+    const h = await loadSettings({});
+    try {
+        const list = await openModelPicker(h);
+        assert.equal(list.style.display, "block");
+        h.document.dispatchEvent(new h.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+        assert.equal(list.style.display, "none");
+        const trigger = h.document.getElementById("checkModels");
+        assert.equal(trigger.getAttribute("aria-expanded"), "false");
+        assert.equal(h.document.activeElement, trigger);
+    } finally { h.close(); }
+});
+
+test("selector de models - marcar una estrella desa el favorit i manté el focus a la mateixa estrella", async () => {
+    const h = await loadSettings({ sync: { favoriteModels: [] } });
+    try {
+        const list = await openModelPicker(h);
+        const first = list.querySelector(".model-star");
+        const id = first.dataset.modelId;
+        first.focus();
+        first.click();
+        await h.flush();
+        const { favoriteModels } = await h.storage.sync.get("favoriteModels");
+        assert.ok(favoriteModels.includes(id), "El favorit s'ha de desar");
+        const again = [...h.document.querySelectorAll(".model-star")].find(b => b.dataset.modelId === id);
+        assert.equal(again.getAttribute("aria-pressed"), "true");
+        assert.equal(h.document.activeElement, again, "El focus no s'ha de perdre en re-renderitzar");
+    } finally { h.close(); }
+});
+
+test("selector de models - triar un model omple el camp, tanca la llista i retorna el focus", async () => {
+    const h = await loadSettings({});
+    try {
+        const list = await openModelPicker(h);
+        const btn = list.querySelector(".model-name-btn");
+        btn.click();
+        assert.ok(h.document.getElementById("modelName").value.length > 0);
+        assert.equal(list.style.display, "none");
+        assert.equal(h.document.activeElement, h.document.getElementById("checkModels"));
+    } finally { h.close(); }
+});

@@ -357,6 +357,21 @@ label {
     background-color: var(--sidebar-bg);
 }
 
+.model-star,
+.model-name-btn {
+    /* Són <button>: es neteja l'aparença nativa */
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+}
+
+.model-star:focus-visible,
+.model-name-btn:focus-visible {
+    outline: 2px solid var(--button-color);
+    outline-offset: 1px;
+}
+
 .model-star {
     /* Objectiu tàctil mínim de 24×24 px (WCAG 2.5.8) */
     min-width: 24px;
@@ -386,6 +401,7 @@ label {
 
 .model-name-btn {
     flex-grow: 1;
+    color: var(--text-color);
     cursor: pointer;
     padding: 2px 4px;
     border-radius: 3px;
