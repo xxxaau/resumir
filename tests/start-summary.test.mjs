@@ -681,3 +681,59 @@ test("startSummary - AbortError sense aturada de l'usuari no diu 'aturada per l'
         `No s'ha de culpar l'usuari, té: "${ctx.errorDiv.textContent}"`);
     assert.ok(ctx.errorDiv.textContent.length > 0, "Ha de mostrar algun error");
 });
+
+// ---------------------------------------------------------------------------
+// Regressió (0.4): si tots els models fallen per 503 no es pot dir «quota».
+// ---------------------------------------------------------------------------
+function setupAllFail(makeErr) {
+    setupGlobals({
+        getSummaryCache: async () => null,
+        CURATED_MODELS: [
+            { id: "gemini-2.0-flash", fallback: true, contextWindow: 100_000 },
+            { id: "gemini-2.5-flash", fallback: true, contextWindow: 100_000 },
+        ],
+        callGeminiStream: async (_k, model) => { throw makeErr(model); },
+    });
+}
+
+test("startSummary - tots els models fallen per 503: missatge de servei, no de quota", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    setupAllFail(() => Object.assign(new Error("overloaded"), { status: 503 }));
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true);
+
+    assert.ok(ctx.errorDiv.textContent.includes("no està disponible"),
+        `Ha de dir que el servei no està disponible, té: "${ctx.errorDiv.textContent}"`);
+    assert.ok(!ctx.errorDiv.textContent.includes("quota"));
+});
+
+test("startSummary - tots els models amb timeout: missatge de connexió", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    setupAllFail(() => new DOMException("Idle timeout", "TimeoutError"));
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true);
+
+    assert.ok(ctx.errorDiv.textContent.includes("ha expirat"),
+        `Ha de parlar d'expiració, té: "${ctx.errorDiv.textContent}"`);
+});
+
+test("startSummary - barreja de 429 i 503: si algun model ha topat amb quota, es diu quota", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    setupAllFail((model) => Object.assign(new Error("x"), {
+        status: model === "gemini-2.0-flash" ? 429 : 503,
+    }));
+
+    const ctx = makeCtx();
+    await startSummary(ctx, null, false, false, true);
+
+    assert.ok(ctx.errorDiv.textContent.includes("quota"),
+        `Ha de dir quota, té: "${ctx.errorDiv.textContent}"`);
+});

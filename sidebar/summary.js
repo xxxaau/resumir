@@ -320,6 +320,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
         let success = false;
         let lastError = null;
+        let sawQuotaError = false;
         const bionicEnabled = ctx.isBionicEnabled();
         const bionicFixation = (config.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
         // Apliquem els estils de contenidor (font/mida/interlineat) ABANS de
@@ -413,6 +414,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     const attempt = modelsToTry.indexOf(tryModel) + 1;
                     console.warn(`[${attempt}/${modelsToTry.length}] Model ${tryModel} unavailable. Trying next...`, e.message);
                     lastError = e;
+                    if (status === 429 || msg.includes("quota") || msg.includes("exhausted")) sawQuotaError = true;
                     continue;
                 }
                 throw e; // Other unexpected errors (auth, network, etc.)
@@ -431,7 +433,13 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         if (!success && lastError) {
-            throw new Error("[003] Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
+            // Només diem «quota» si algun intent ha topat amb quota; si no, el
+            // missatge ha de reflectir l'error real (503, timeout, 404…), no
+            // dir «torna demà» davant d'una caiguda passatgera del servei.
+            if (sawQuotaError) {
+                throw new Error("[003] Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
+            }
+            throw lastError;
         }
 
         // Sense targetes vàlides, no hi ha res útil a mostrar ni a cachejar
