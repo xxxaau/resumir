@@ -7,6 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
+- Fases B–E del pla UI/UX, revisió de prompts i prova de fum en navegador real — Sessió 2026-10-12
 - Fase A del pla UI/UX + harness d'integració i tests de qualitat — Sessió 2026-10-11
 - Auditoria funcional + catàleg de models — Sessió 2026-08-09
 - Release v2.6.2 — Sessió 2026-07-27
@@ -19,6 +20,55 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 - Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
 - Aprenentatges — Sessió v2.3.1+ (2026-06-05)
 - Aprenentatges — Sessió v2.2.10 (2026-05-22)
+
+---
+
+# Fases B–E del pla UI/UX, revisió de prompts i prova de fum en navegador real — Sessió 2026-10-12
+
+## Una prova de fum en un Chromium real troba el que jsdom no veu
+
+`npm run smoke:e2e` (`scripts/smoke-e2e.mjs`) carrega `build_chromium_dev` com a
+extensió (`--headless=new` + `launchPersistentContext`), simula Gemini amb
+`page.route` i obre la barra lateral com a pàgina normal (sobreescrivint
+`chrome.tabs.query` perquè vegi una pestanya d'article). Dues trampes:
+- `route.fulfill({contentType: "text/html"})` **sense `charset=utf-8`** fa que la
+  pàgina es descodifiqui com a latin1: el text d'origen sortia amb mojibake i la
+  verificació de cites donava ⚠ — no era un bug del producte sinó de la prova.
+- Playwright pot esperar una versió de Chromium que no és descarregada; el
+  script cau al Chromium més nou de `~/Library/Caches/ms-playwright`.
+
+## El preload de la pàgina impedia reutilitzar la memòria cau (bug real)
+
+`startSummary` només consultava la memòria cau si `!pageData`, però la barra
+lateral precarrega la pàgina activa en obrir-se: el primer clic **sempre**
+regenerava i gastava tokens. El test que ho va destapar buscava una altra cosa
+(el títol «Regenerar»): escriure el test pel comportament esperat, no pel cas
+que ja funciona.
+
+## `saveOptions` congelava els prompts per defecte
+
+Desava el literal de tots els prompts a `storage.sync`, així que qui havia premut
+«Desar» un cop quedava amb el text antic per sempre, o rebia un avís fals de
+«personalitzat». Ara un prompt igual al default no es desa i els defaults retirats
+es reconeixen per hash (`LEGACY_PROMPT_HASHES`, FNV-1a de `promptHash`): **en
+canviar un default, afegeix-hi el hash del text que retires** (no substituir-lo).
+
+## Els prompts tenen ancoratges que el codi cerca
+
+El mapa conceptual es retalla amb tres regex sobre el text del prompt (`Màxim N
+nivells…`, `Segon nivell: a-b…`, regla «9. Opcionalment…»). Una d'elles feia anys
+que no coincidia (la regla era la 10). S'ha extret `buildConceptMapPrompt` i
+`tests/default-prompts.test.mjs` aplica les regex al prompt REAL.
+
+## Procés
+
+- No encadenis `commit && push` darrere d'un `npm test | grep`: un grep que no
+  falla (o una suposició d'ordre) va deixar passar dos tests en vermell a `main`.
+  Comprova `# fail 0` abans de commitejar.
+- Els DOM de prova de `tests/*.test.mjs` no tenen `focus()`: guarda'l amb
+  `typeof x.focus === "function"` com fa la resta del codi.
+- Els fitxers de tema (`:root` / `[data-actual-theme]`) poden tenir hex; fora
+  d'ells, el ratchet de `quality-colors` obliga a usar tokens.
 
 ---
 
