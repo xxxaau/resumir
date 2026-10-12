@@ -1435,3 +1435,73 @@ test("refinadors - si la pestanya activa ja és una altra pàgina, no regeneren 
         assert.equal(h.calls.fetches.length, 1, "«Més curt» no ha de regenerar la pàgina equivocada");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Revisió: drecera/menú no alternen la generació; aturar + tornar a generar no es trepitja
+// ---------------------------------------------------------------------------
+function slowReplyHandler(text, ms) {
+    return async (_url, opts) => {
+        await sleep(ms);
+        if (opts && opts.signal && opts.signal.aborted) throw new DOMException("Aborted", "AbortError");
+        const frame = `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 } })}\n\n`;
+        return {
+            ok: true, status: 200, statusText: "OK",
+            headers: { get: (hd) => hd.toLowerCase() === "content-type" ? "text/event-stream" : null },
+            body: new ReadableStream({ start(c) { c.enqueue(new TextEncoder().encode(frame)); c.close(); } }),
+        };
+    };
+}
+
+test("drecera - una segona pulsació durant la generació no l'atura", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: slowReplyHandler("El resum.", 300),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await sleep(60);           // la generació és en curs (el model triga 300 ms)
+        h.window.chrome.runtime.onMessage._fire({ action: "trigger_summary", data: { type: "page", url: "x" } }, { id: h.window.chrome.runtime.id });
+        await sleep(700);
+        assert.match(h.document.getElementById("content").textContent, /El resum\./, "la generació ha acabat, no s'ha aturat");
+        assert.doesNotMatch(h.document.getElementById("error").textContent, /aturada/i);
+    } finally { h.close(); }
+});
+
+test("drecera - amb el resum de la pàgina ja a la vista no el torna a generar", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1);
+        h.window.chrome.runtime.onMessage._fire({ action: "trigger_summary", data: { type: "page", url: "x" } }, { id: h.window.chrome.runtime.id });
+        await sleep(400);
+        assert.equal(h.calls.fetches.length, 1, "no gasta tokens per a la pàgina que ja es veu");
+    } finally { h.close(); }
+});
+
+test("aturar i tornar a generar - la generació antiga, en acabar tard, no deixa el botó sense poder aturar la nova", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: slowReplyHandler("Segona.", 600),
+    });
+    try {
+        // La 1a generació queda esperant la pestanya activa (no es pot avortar) i resol tard
+        const tab = { id: 1, url: "https://example.com/article", title: "Article", active: true };
+        let calls = 0;
+        h.window.chrome.tabs.query = async () => { if (calls++ === 0) await sleep(250); return [tab]; };
+        const btn = h.document.getElementById("summarizeBtn");
+        btn.click(); await sleep(20);        // 1a generació (espera el contingut)
+        btn.click(); await sleep(20);        // atura
+        btn.click(); await sleep(60);        // 2a generació (en curs, el model triga 600 ms)
+        await sleep(350);                    // ara la 1a ja ha resolt tard
+        btn.click(); await sleep(150);       // ha d'aturar la 2a, no llançar-ne una de concurrent
+        assert.equal(h.calls.fetches.length, 1, "només la 2a ha cridat el model; el 4t clic l'atura");
+        await sleep(700);                    // deixa que s'acabi tota l'activitat abans de tancar la finestra
+    } finally { h.close(); }
+});

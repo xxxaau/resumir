@@ -119,18 +119,28 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Bound summary starter (partially applied with ctx)
+    // genSeq: cada generació té el seu número; un .then/.finally d'una generació ja
+    // aturada (que resol tard, p. ex. esperant getPageContent) no pot trepitjar l'estat
+    // de la nova (abortController, isGenerating).
+    let genSeq = 0;
+    function abortCurrentGeneration() {
+        if (abortController) abortController.abort();
+        abortController = null;
+        isGenerating = false;
+        genSeq++;
+        setGeneratingState(false, !!currentMetadata.summary);
+    }
     const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki, refine = null) => {
         if (isGenerating && abortController) {
-            abortController.abort();
-            abortController = null;
-            isGenerating = false;
-            setGeneratingState(false, !!currentMetadata.summary);
+            abortCurrentGeneration();
             return;
         }
+        const gen = ++genSeq;
         isGenerating = true;
         startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki, refine).then(ctrl => {
-            abortController = ctrl;
+            if (gen === genSeq) abortController = ctrl;
         }).finally(() => {
+            if (gen !== genSeq) return;
             isGenerating = false;
             abortController = null;
             if (currentMetadata.url) updateTypeTabs(currentMetadata.url);
@@ -770,7 +780,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = Date.now();
         if (now - lastTriggerTime < 500) return;
         lastTriggerTime = now;
-        
+
+        // La drecera i el menú contextual NO alternen (a diferència del botó, que atura):
+        // una pulsació repetida de la drecera no ha d'aturar la generació en curs, i
+        // la pàgina que ja es veu no es torna a generar (gastaria tokens per al mateix).
+        if (data && data.type === "page") {
+            if (isGenerating) return;
+            const shown = currentMetadata.summary && currentMetadata.type === "summary"
+                && lastActiveTab && currentMetadata.url === lastActiveTab.url;
+            if (shown) return;
+        } else if (isGenerating) {
+            // Una selecció nova substitueix la generació en curs en lloc d'aturar-la i perdre's.
+            abortCurrentGeneration();
+        }
+
         handleTrigger((text, dd, sc, ui) => doSummary(text, dd, sc, ui), data);
     };
 
