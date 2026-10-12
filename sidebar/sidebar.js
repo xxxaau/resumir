@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setGeneratingState(false, true);
         updateTypeTabs(currentMetadata.url);
         updateStaleBanner();
+        updateRegenerateHints();
     };
 
     // El mode historial amaga la barra d'eines i ancora la barra de tornar a dalt;
@@ -134,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
             abortController = null;
             if (currentMetadata.url) updateTypeTabs(currentMetadata.url);
             updateStaleBanner();
+            updateRegenerateHints();
         });
     };
 
@@ -602,6 +604,22 @@ document.addEventListener("DOMContentLoaded", () => {
             const t = currentMetadata.type;
             doSummary(null, t === "deepdive", t === "science", true, false, t === "simple", false, mode);
         });
+    }
+
+    // 0.14: amb la còpia desada a la vista, tornar a clicar el mateix botó regenera.
+    // Ho diu el títol del botó d'aquell tipus (la resta recuperen el seu).
+    const TYPE_BUTTON = { summary: "summarizeBtn", deepdive: "deepDiveBtn", science: "scienceBtn",
+        conceptmap: "conceptMapBtn", simple: "explainSimpleBtn", anki: "ankiBtn" };
+    function updateRegenerateHints() {
+        for (const [type, id] of Object.entries(TYPE_BUTTON)) {
+            const b = document.getElementById(id);
+            if (!b) continue;
+            if (!b.dataset.defaultLabel) b.dataset.defaultLabel = b.getAttribute("title") || b.getAttribute("aria-label") || "";
+            const regen = !!currentMetadata.summary && currentMetadata.fromCache && currentMetadata.type === type;
+            const label = regen ? `Regenerar (ara es mostra la còpia desada) — ${b.dataset.defaultLabel}` : b.dataset.defaultLabel;
+            b.title = label;
+            b.setAttribute("aria-label", label);
+        }
     }
 
     // La barra lateral és global per finestra: en canviar de pestanya el resum

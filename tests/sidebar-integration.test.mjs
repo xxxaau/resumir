@@ -1140,3 +1140,43 @@ test("Anki - exportar diu «Enviat a Obsidian» (només s'ha obert l'URL, no se 
         assert.doesNotMatch(btn.textContent, /Afegit/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// 0.14: quan es veu la versió desada, el botó del tipus avisa que torna a generar
+// ---------------------------------------------------------------------------
+test("regenerar - amb la còpia desada a la vista, el botó diu que regenera; en generar-ne una de nova torna el títol", async () => {
+    const url = "https://example.com/article";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...seedTypes(url, ["summary"]) },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "Resum nou.",
+    });
+    try {
+        const btn = h.document.getElementById("summarizeBtn");
+        assert.equal(btn.title, "Resumir");
+        btn.click();                       // 1r clic: mostra la còpia desada
+        await h.flush(30);
+        assert.match(h.document.getElementById("content").textContent, /Text de summary/);
+        assert.match(btn.title, /Regenerar/);
+        assert.match(btn.getAttribute("aria-label"), /Regenerar/);
+        btn.click();                       // 2n clic: regenera (crida al model)
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1);
+        assert.equal(btn.title, "Resumir", "amb el resum nou, torna el títol original");
+    } finally { h.close(); }
+});
+
+test("memòria cau - el primer clic reutilitza el resum desat (el preload de la pàgina no ho impedeix)", async () => {
+    const url = "https://example.com/article";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...seedTypes(url, ["summary"]) },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "Resum nou.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 0, "no ha de cridar el model: ja hi ha una còpia desada");
+        assert.match(h.document.getElementById("content").textContent, /Text de summary/);
+    } finally { h.close(); }
+});
