@@ -103,10 +103,18 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ### 2.4 Configuració
 
-- **Descripció detallada de cada plugin:** feta a totes les pàgines de plugin (bloc «Què fa i com configurar-lo»); queda la targeta **Resum** i els plugins que cap pàgina cobreix.
-- **Revisió de la interfície de configuració amb Opus:** auditoria completa de
-  `options/` (jerarquia, densitat, textos, a11y, mòbil/estret, coherència amb la
-  barra lateral); les troballes es afegeixen aquí a sota.
+- **Pendent de l'auditoria de la configuració (Opus, 2026-10-11)**; la resta ja és feta:
+  - Unificar els noms entre configuració i barra lateral (Aprofundiment/Aprofundir,
+    «Integració amb Obsidian»/«Desar a Obsidian», «Exportació a Markdown»/«Copiar»);
+    decidir-ho amb la decisió de nomenclatura del Nivell 1.
+  - Agrupar la llista de plugins (Generar / Exportar / Llegir / Fonts) amb etiqueta
+    «Cal configurar» a Obsidian i Anki si no tenen vault.
+  - La insígnia «Personalitzat» queda en una línia a part: posar-la a la fila de l'etiqueta.
+  - Targetes de plugins massa estretes entre 720 i 1000 px (controls sota la
+    descripció a 960 px, marge de 32 px, ombra de desplaçament al menú horitzontal).
+  - Obsidian: textos repetits sobre els claudàtors, «Vault» en anglès, text d'exemple
+    que sembla un valor, explicar `{{summary_executive}}`.
+  - Anki: «Fer servir el vault d'Obsidian» per defecte (camp propi només si es desmarca).
 - **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
   sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
 
