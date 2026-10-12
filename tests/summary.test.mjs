@@ -107,3 +107,12 @@ test("classifyError - [001] amb «clau d'API» ofereix configurar", () => {
     const result = classifyError(new Error("[001] No s'ha configurat la clau d'API. Ves a la pàgina d'opcions."));
     assert.equal(result.showConfig, true);
 });
+
+test("classifyError - 400 de Google: missatge en català i el text original a «details»", () => {
+    const err = Object.assign(new Error("[007] Error API (400): Request contains an invalid argument."), { status: 400 });
+    const r = classifyError(err);
+    assert.match(r.message, /no ha pogut processar/i);
+    assert.doesNotMatch(r.message, /invalid argument/i, "no ha d'arribar en anglès");
+    assert.match(r.details, /Request contains an invalid argument/);
+    assert.equal(r.showConfig, false);
+});

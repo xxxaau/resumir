@@ -1227,3 +1227,24 @@ test("amb clau - els generadors no porten aria-disabled", async () => {
         assert.equal(h.document.getElementById("summarizeBtn").title, "Resumir");
     } finally { h.close(); }
 });
+
+test("error 400 - missatge en català amb un «Detalls» plegable amb el text original", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: async () => ({
+            ok: false, status: 400, statusText: "Bad Request",
+            headers: { get: () => "application/json" },
+            json: async () => ({ error: { message: "Request contains an invalid argument." } }),
+        }),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(40);
+        const err = h.document.getElementById("error");
+        assert.match(err.textContent, /no ha pogut processar/i);
+        const details = err.querySelector("details");
+        assert.ok(details, "ha de portar un <details>");
+        assert.match(details.textContent, /invalid argument/);
+    } finally { h.close(); }
+});

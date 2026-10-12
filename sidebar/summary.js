@@ -648,6 +648,16 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             const errorInfo = classifyError(err);
             errorDiv.textContent = errorInfo.message;
             errorDiv.classList.remove("hidden");
+            if (errorInfo.details) {
+                const det = document.createElement("details");
+                det.className = "error-details";
+                const sum = document.createElement("summary");
+                sum.textContent = "Detalls";
+                const pre = document.createElement("pre");
+                pre.textContent = errorInfo.details;
+                det.append(sum, pre);
+                errorDiv.appendChild(det);
+            }
 
             if (errorInfo.showConfig) {
                const btn = document.createElement("button");
@@ -696,6 +706,16 @@ function classifyError(err) {
         return {
             message: "Tots els models alternatius han excedit la quota diària. Prova-ho demà o afegeix més models favorits a la configuració.",
             showConfig: false
+        };
+    }
+
+    // Petició rebutjada (400): el text de Google és tècnic i en anglès; es tradueix i
+    // el literal queda a «Detalls» per a qui el vulgui (o per adjuntar-lo a un informe).
+    if (status === 400) {
+        return {
+            message: "Google no ha pogut processar aquesta petició. El contingut pot ser massa llarg o d'un tipus que el model no admet. Prova amb un altre model o amb un fragment més curt.",
+            showConfig: false,
+            details: msg
         };
     }
 

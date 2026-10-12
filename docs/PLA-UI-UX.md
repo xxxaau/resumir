@@ -82,7 +82,6 @@ unificar el disseny dels dos.
 
 ### Pendent de microcopy
 
-- Errors 400 de Google arriben en anglès: afegir branca i «Detalls» plegable.
 - Codis interns (`[007]`, `[PDF-013]`) al final del missatge i en gris; `[003]`
   duplicat.
 - Mapa conceptual i visor PDF: «Desplega tot / Replega tot» →

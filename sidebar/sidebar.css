@@ -1556,3 +1556,8 @@ body {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Detalls tècnics d'un error (plegats per defecte) */
+.error-details { margin-top: 8px; font-size: 0.85em; }
+.error-details summary { cursor: pointer; }
+.error-details pre { white-space: pre-wrap; word-break: break-word; margin: 6px 0 0; }
