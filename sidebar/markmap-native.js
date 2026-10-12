@@ -383,6 +383,15 @@
                     const cy = node._height / 2;
                     const toggleStroke = fillColor;
 
+                    // Zona de clic/toc àmplia (r=12 → 24 px, WCAG 2.5.8) invisible sota la pastilla de r=8
+                    const hit = document.createElementNS(SVG_NS, "circle");
+                    hit.setAttribute("cx", String(cx));
+                    hit.setAttribute("cy", String(cy));
+                    hit.setAttribute("r", "12");
+                    hit.setAttribute("fill", "transparent");
+                    hit.setAttribute("class", "markmap-toggle-hit");
+                    tg.appendChild(hit);
+
                     const toggle = document.createElementNS(SVG_NS, "circle");
                     toggle.setAttribute("cx", String(cx));
                     toggle.setAttribute("cy", String(cy));
@@ -559,7 +568,7 @@
         let didPan = false;  // true si el ratolí s'ha mogut prou → no és un clic de pastilla
         let panStart = { x: 0, y: 0, tx: 0, ty: 0 };
 
-        svgElement.addEventListener("mousedown", (e) => {
+        svgElement.addEventListener("pointerdown", (e) => {
             // Don't start pan on toggle clicks
             if (e.target.tagName === "circle") return;
             cancelAnim();  // el pan és instantani: atura qualsevol tween en curs
@@ -584,14 +593,24 @@
                 svgElement.style.cursor = "grab";
             }
         }
-        window.addEventListener("mousemove", onWindowMouseMove);
-        window.addEventListener("mouseup", onWindowMouseUp);
+        window.addEventListener("pointermove", onWindowMouseMove);
+        window.addEventListener("pointerup", onWindowMouseUp);
+        window.addEventListener("pointercancel", onWindowMouseUp);
 
         svgElement.style.cursor = "grab";
+        // Tàctil: arrossegar fa pan del mapa (no desplaça la pàgina)
+        svgElement.style.touchAction = "none";
 
         svgElement.addEventListener("wheel", (e) => {
             e.preventDefault();
             cancelAnim();  // zoom amb roda instantani: atura qualsevol tween
+            // Roda sola = desplaçar el mapa; Ctrl/⌘ + roda (o pinça del trackpad) = zoom.
+            if (!e.ctrlKey && !e.metaKey) {
+                state.transform.x -= e.deltaX;
+                state.transform.y -= e.deltaY;
+                applyTransform();
+                return;
+            }
             const rect = svgElement.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
@@ -617,8 +636,9 @@
             getRoot: () => state.root,
             rerender: render,
             destroy: () => {
-                window.removeEventListener("mousemove", onWindowMouseMove);
-                window.removeEventListener("mouseup", onWindowMouseUp);
+                window.removeEventListener("pointermove", onWindowMouseMove);
+                window.removeEventListener("pointerup", onWindowMouseUp);
+                window.removeEventListener("pointercancel", onWindowMouseUp);
             },
         };
     }

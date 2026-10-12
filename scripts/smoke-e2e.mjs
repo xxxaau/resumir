@@ -22,6 +22,7 @@ const failures = [];
 const check = (ok, msg) => { console.log(`${ok ? "OK  " : "FAIL"} ${msg}`); if (!ok) failures.push(msg); };
 
 const ARTICLE = `<!doctype html><html><head><title>Article de prova</title></head><body><article><h1>Article de prova</h1>${"<p>La fusió nuclear imita el procés que alimenta les estrelles. Els investigadors han obtingut resultats prometedors amb el confinament magnètic del plasma a temperatures extremes.</p>".repeat(12)}</article></body></html>`;
+const MAP_REPLY = "- Fusió nuclear\n  - Confinament\n    - Tokamak\n  - Resultats\n    - Plasma";
 const REPLY = "La fusió nuclear imita les estrelles.\n\n### Punts clau\n- Confinament magnètic del plasma\n- Resultats prometedors\n\n### Cites\n- «La fusió nuclear imita el procés que alimenta les estrelles.»\n- «Aquesta frase no surt a l'article original enlloc.»";
 
 // Chromium: CHROMIUM_PATH, el de la versió de Playwright o, si no s'ha descarregat,
@@ -52,7 +53,8 @@ try {
 
     await ctx.route("https://generativelanguage.googleapis.com/**", route => {
         if (route.request().url().includes("streamGenerateContent")) {
-            const frame = `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: REPLY }] } }], usageMetadata: { promptTokenCount: 900, candidatesTokenCount: 60 } })}\n\n`;
+            const isMap = (route.request().postData() || "").includes("MAPA CONCEPTUAL");
+            const frame = `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: isMap ? MAP_REPLY : REPLY }] } }], usageMetadata: { promptTokenCount: 900, candidatesTokenCount: 60 } })}\n\n`;
             return route.fulfill({ status: 200, contentType: "text/event-stream", body: frame });
         }
         return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ models: [] }) });
@@ -62,6 +64,7 @@ try {
     const tabA = await ctx.newPage();
     await tabA.goto("https://example.com/article");
     const tabInfo = await sw.evaluate(async () => (await chrome.tabs.query({ url: "https://example.com/*" }))[0]);
+    await sw.evaluate(() => chrome.storage.sync.set({ enableConceptMap: true }));
     await sw.evaluate(() => chrome.storage.local.set({ apiKey: "AIzaTEST_KEY_1234567890123456789012345" }));
 
     // La barra lateral veu la pestanya de l'article com a activa (en una pestanya normal seria ella mateixa)
@@ -92,6 +95,32 @@ try {
     await page.waitForTimeout(500);
     const tabs = await page.$$eval("#type-tabs [role=tab]", els => els.map(e => e.getAttribute("aria-selected")));
     check(tabs.length === 1 && tabs[0] === "true", "pestanya «Resum» activa");
+
+    // Mapa conceptual en un navegador real: la roda desplaça, Ctrl+roda amplia, el punter arrossega
+    await page.click("#conceptMapBtn");
+    await page.waitForSelector("#content svg g.markmap-viewport", { timeout: 15000 });
+    await page.waitForTimeout(800);
+    const tf = () => page.$eval("#content svg g.markmap-viewport", g => g.getAttribute("transform"));
+    const parse = (t) => { const m = /translate\(([-\d.]+),\s*([-\d.]+)\)\s*scale\(([-\d.]+)\)/.exec(t); return { x: +m[1], y: +m[2], k: +m[3] }; };
+    const box = await page.locator("#content svg").first().boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    const t0 = parse(await tf());
+    await page.mouse.wheel(0, 60);
+    await page.waitForTimeout(150);
+    const t1 = parse(await tf());
+    check(t1.k === t0.k && Math.abs((t0.y - t1.y) - 60) < 1, `mapa: la roda desplaça (sense zoom) ${JSON.stringify([t0, t1])}`);
+    await page.keyboard.down("Control");
+    await page.mouse.wheel(0, -120);
+    await page.keyboard.up("Control");
+    await page.waitForTimeout(150);
+    check(parse(await tf()).k > t1.k, "mapa: Ctrl+roda amplia");
+    const t2 = parse(await tf());
+    await page.mouse.move(box.x + 40, box.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 80, box.y + 70, { steps: 4 });
+    await page.mouse.up();
+    const t3 = parse(await tf());
+    check(Math.abs(t3.x - t2.x - 40) < 1 && Math.abs(t3.y - t2.y - 30) < 1, "mapa: arrossegar fa pan");
 
     await page.click("#historyBtn");
     await page.waitForSelector(".history-item");

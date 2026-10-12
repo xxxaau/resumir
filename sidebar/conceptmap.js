@@ -837,6 +837,15 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                     const cx = node._width + 10;
                     const cy = node._height / 2;
 
+                    // Zona de clic/toc àmplia (r=12 → 24 px, WCAG 2.5.8) invisible sota la pastilla de r=8
+                    const hit = document.createElementNS(SVG_NS, 'circle');
+                    hit.setAttribute('cx', String(cx));
+                    hit.setAttribute('cy', String(cy));
+                    hit.setAttribute('r', '12');
+                    hit.setAttribute('fill', 'transparent');
+                    hit.setAttribute('class', 'markmap-toggle-hit');
+                    tg.appendChild(hit);
+
                     const toggle = document.createElementNS(SVG_NS, 'circle');
                     toggle.setAttribute('cx', String(cx));
                     toggle.setAttribute('cy', String(cy));
@@ -986,7 +995,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         let isPanning = false;
         let didPan = false;  // true si el ratolí s'ha mogut prou → no és un clic de pastilla
         const pan = { x: 0, y: 0, tx: 0, ty: 0 };
-        svg.addEventListener('mousedown', (e) => {
+        svg.addEventListener('pointerdown', (e) => {
             if (e.target.tagName === 'circle') return;
             cancelAnim();  // el pan és instantani: atura qualsevol tween en curs
             isPanning = true;
@@ -1005,12 +1014,21 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         const upHandler = () => {
             if (isPanning) { isPanning = false; svg.style.cursor = 'grab'; }
         };
-        window.addEventListener('mousemove', moveHandler);
-        window.addEventListener('mouseup', upHandler);
+        window.addEventListener('pointermove', moveHandler);
+        window.addEventListener('pointerup', upHandler);
+        window.addEventListener('pointercancel', upHandler);
+        svg.style.touchAction = 'none';  // tàctil: arrossegar fa pan del mapa
 
         svg.addEventListener('wheel', (e) => {
             e.preventDefault();
             cancelAnim();  // zoom amb roda instantani: atura qualsevol tween
+            // Roda sola = desplaçar el mapa; Ctrl/⌘ + roda (o pinça del trackpad) = zoom.
+            if (!e.ctrlKey && !e.metaKey) {
+                state.transform.x -= e.deltaX;
+                state.transform.y -= e.deltaY;
+                applyTransform();
+                return;
+            }
             const rect = svg.getBoundingClientRect();
             const mx = e.clientX - rect.left;
             const my = e.clientY - rect.top;
@@ -1118,8 +1136,9 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         // ─── Close handlers ────────────────────────────────────────────────
         function close() {
             cancelAnim();
-            window.removeEventListener('mousemove', moveHandler);
-            window.removeEventListener('mouseup', upHandler);
+            window.removeEventListener('pointermove', moveHandler);
+            window.removeEventListener('pointerup', upHandler);
+            window.removeEventListener('pointercancel', upHandler);
             document.removeEventListener('keydown', escHandler);
             window.removeEventListener('pagehide', close);
             overlay.removeEventListener('keydown', trapTab);

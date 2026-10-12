@@ -74,9 +74,7 @@ unificar el disseny dels dos.
   el retornen al disparador (el panell de text enviat ja ho fa).
 - **Visor PDF:** paleta fixa que ignora el tema (ara no passa pel mateix control
   de contrast) i sense `:focus-visible`.
-- **Mapa:** els interruptors de nodes (r=8) i les vores per sota de 3:1; la roda
-  sempre fa zoom (cal `ctrl` per al zoom i desplaçar amb la roda); només ratolí
-  (sense pointer/touch).
+- **Mapa:** les vores de les pastilles per sota de 3:1 (la roda, el punter/tàctil i la zona de toc de 24 px ja són fets).
 
 ### Pendent de microcopy
 
