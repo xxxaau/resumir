@@ -285,6 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 let viewerKey = `pdfViewer:${Date.now()}`;
                 const b64 = arrayBufferToBase64(viewerBuffer);
                 try {
+                    // El visor ja no neteja en tancar-se per Ctrl+W/la X (recarregar ha de poder
+                    // reobrir-lo): els PDF de visors anteriors s'esborren aquí perquè no
+                    // s'acumulin i esgotin la quota de storage.session (~10 MB a Chrome).
+                    try {
+                        const all = await ext.storage.session.get(null);
+                        const stale = Object.keys(all || {}).filter(k => k.startsWith("pdfViewer:"));
+                        if (stale.length) await ext.storage.session.remove(stale);
+                    } catch { /* sense neteja: es desa igualment */ }
                     await ext.storage.session.set({ [viewerKey]: b64 });
                 } catch (sessionErr) {
                     console.warn("[PDF picker] storage.session.set failed, skipping viewer:", sessionErr);

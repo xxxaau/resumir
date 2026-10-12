@@ -1518,3 +1518,18 @@ test("cites verificades - una cita que travessa una marca [m:ss] o [Pàgina N] e
         assert.ok(h.document.querySelector("#content .quote-ok"), "no ha de ser ⚠ per una marca enmig");
     } finally { h.close(); }
 });
+
+test("PDF local - en obrir un segon PDF, el del visor anterior s'esborra de storage.session (no s'acumulen)", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true }, modelReply: "Resum." });
+    try {
+        h.window.extractPdfText = async () => ({ title: "Informe", text: "Text. ".repeat(40) });
+        await pickPdf(h, "a.pdf", 0);
+        await h.flush(20);
+        await sleep(5);               // la clau porta Date.now(): que no coincideixin
+        await pickPdf(h, "b.pdf", 7);
+        await h.flush(20);
+        const all = await h.storage.session.get(null);
+        const keys = Object.keys(all).filter(k => k.startsWith("pdfViewer:"));
+        assert.equal(keys.length, 1, `només ha de quedar el PDF del visor actual: ${keys}`);
+    } finally { h.close(); }
+});
