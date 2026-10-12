@@ -211,3 +211,10 @@ test("settings: les plantilles expliquen cada camp ({{summary_executive}} inclò
         assert.ok(legend);
     }
 });
+
+test("barra lateral: scroll-padding perquè la barra i el peu fixos no tapin el focus (WCAG 2.4.11)", () => {
+    const css = readFileSync(resolve(ROOT, "sidebar/sidebar.css"), "utf8");
+    const rule = css.match(/\bhtml\s*\{([^}]*)\}/)?.[1] || "";
+    assert.match(rule, /scroll-padding-top:[^;]*--toolbar-height/);
+    assert.match(rule, /scroll-padding-bottom:/);
+});
