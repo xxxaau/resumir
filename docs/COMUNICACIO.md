@@ -42,7 +42,7 @@ La jerarquia narrativa és sempre: **què fa** (pipeline) → **per què confiar
 
 **Capa transversal — Confiança radical** (el «per què tu»):
 
-- **Local de veritat**: la clau API i les dades no surten del navegador; cap servidor propi.
+- **Sense servidor propi**: el contingut va directament del navegador a Gemini, amb la clau de l'usuari; no passa per cap servidor nostre.
 - **Zero telemetria**: cap analítica, cap compte, cap seguiment.
 - **Codi obert** (MPL-2.0) i gratuït.
 - **Accessible**: WCAG (focus visible, contrast, temes), lectura biònica.

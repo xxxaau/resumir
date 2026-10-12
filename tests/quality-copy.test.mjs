@@ -75,3 +75,13 @@ for (const [fragment, ceiling, why] of CEILINGS) {
             `«${fragment}» ha baixat a ${n}: abaixa el màxim a ${n} a tests/quality-copy.test.mjs`);
     });
 }
+
+// Veracitat de la privadesa: el contingut SÍ que surt del navegador (va a Google
+// Gemini); el que no hi ha és un servidor propi. La frase antiga ho amagava.
+test("web i comunicació: no diuen que «les dades no surten del navegador»", () => {
+    for (const rel of ["web/src/index.njk", "docs/COMUNICACIO.md"]) {
+        const text = readFileSync(join(ROOT, rel), "utf8");
+        assert.doesNotMatch(text, /no surten del navegador/, `${rel}: el contingut va a Gemini`);
+    }
+    assert.match(readFileSync(join(ROOT, "web/src/index.njk"), "utf8"), /Sense servidor propi/);
+});

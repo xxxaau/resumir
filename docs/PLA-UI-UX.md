@@ -95,14 +95,6 @@ unificar el disseny dels dos.
 - Visor PDF: nom del fitxer al títol, Esc no ha de tancar la pestanya, fletxes
   ignorades dins del camp de pàgina, ‹ › en lloc de ⏮ ⏭, no esborrar el PDF en
   recarregar.
-- Context menu: `contexts: ["page","all"]` duplica entrades quan hi ha selecció;
-  passar a `["page","frame"]` i «Resumir aquesta pàgina» / «Resumir la selecció»
-  (l'entrada deixa de sortir en clic dret sobre enllaços i imatges).
-- Web: «La clau i les dades no surten del navegador» no és exacte (el contingut va
-  a Google); la mateixa frase és a `docs/COMUNICACIO.md:45`, font del to: canviar-les
-  al mateix commit i revisar `PRIVACY_POLICY.md` i els textos de les botigues. Text
-  honest: «Sense servidor propi: el contingut va directament del teu navegador a
-  Gemini, amb la teva clau.»
 
 ## Nivell 2 — Canvis estructurals (resta)
 
