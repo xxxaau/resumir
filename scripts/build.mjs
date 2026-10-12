@@ -214,7 +214,11 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
     
     // Remove individual sidebar JS files (now in bundle)
     const sidebarFiles = ["utils.js", "api.js", "youtube-track-select.js", "pdf-extract.js", "extractors.js", "content.js", "cache.js", "stats.js", "ui.js", "markmap-native.js", "conceptmap-filename.js", "conceptmap.js", "summary.js", "history.js", "anki.js", "sidebar.js"];
+    // utils.js es conserva: la pàgina de configuració el carrega (../sidebar/utils.js)
+    // per a les rutes de nota; la còpia dins del bundle de la barra lateral és independent.
+    const KEEP_IN_ZIP = new Set(["utils.js"]);
     for (const f of sidebarFiles) {
+      if (KEEP_IN_ZIP.has(f)) continue;
       const filePath = resolve(buildPath, "sidebar", f);
       if (existsSync(filePath)) {
         rmSync(filePath, { force: true });
