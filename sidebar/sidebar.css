@@ -1566,3 +1566,8 @@ body {
 
 /* Codi intern d'un error, al final i atenuat */
 .error-code { opacity: 0.7; font-size: 0.85em; white-space: nowrap; }
+
+/* Cites verificades */
+.quote-ok { color: var(--success); font-size: 0.85em; white-space: nowrap; }
+.quote-warn { color: var(--error-text); font-size: 0.85em; white-space: nowrap; }
+a.quote-link { text-decoration: none; }

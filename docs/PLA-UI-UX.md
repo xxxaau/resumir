@@ -121,7 +121,7 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 > **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la procedència (amb text enviat),
 > les pestanyes per tipus i l'avís de resum d'una altra pàgina (vegeu `git log`).
-> Les cites «(p. N)» dels PDF web ja enllacen amb `#page=N` (als PDF locals encara no, el visor propi no té enllaç per pàgina). Els segells de temps de YouTube també hi són (camins B, C i text pre-renderitzat; el rascat del DOM encara no en porta). Format i llargada ja són preferències de la configuració de Resum (no hi ha selector a la barra lateral: els refinadors «Més curt/Més detall» cobreixen l'ajust puntual). Següent: cites verificades (L).
+> Les cites «(p. N)» dels PDF web ja enllacen amb `#page=N` (als PDF locals encara no, el visor propi no té enllaç per pàgina). Els segells de temps de YouTube també hi són (camins B, C i text pre-renderitzat; el rascat del DOM encara no en porta). Format i llargada ja són preferències de la configuració de Resum (no hi ha selector a la barra lateral: els refinadors «Més curt/Més detall» cobreixen l'ajust puntual). Les cites de la secció «Cites» ja es verifiquen literalment contra el text (✓/⚠ i enllaç al passatge). Queda estendre-ho als punts clau.
 > Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
 > `npm run dev:chromium` abans de commitejar, i treure del pla el que es completi.
 
@@ -131,7 +131,7 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 
 | Idea | Què veu l'usuari | Per què | Referència | Esforç |
 | --- | --- | --- | --- | --- |
-| Vinyetes amb cita verificada | Cada punt porta un ↗ que fa scroll i ressalta el passatge a la pestanya (`#:~:text=`); la cita es comprova literalment contra el text extret | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
+| Cites verificades als punts clau | Fet per a la secció «Cites» (✓/⚠ + ↗ amb `#:~:text=`). Queda estendre-ho a cada punt clau (cal que el model hi citi un fragment literal per punt) | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |
 | Importar/exportar configuració | JSON amb prompts i plantilles; la clau exclosa per defecte | Els prompts personalitzats són la inversió de l'usuari i només viuen a `storage.sync` (quota per element) | — | M |
 

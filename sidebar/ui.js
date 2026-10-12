@@ -789,6 +789,62 @@ function linkYoutubeTimes(container, url) {
     }
 }
 
+/** Minúscules, espais i cometes unificats: perquè una cita copiada «literalment» compari bé. */
+function normalizeForQuote(t) {
+    return String(t).normalize("NFC").toLowerCase()
+        .replace(/[\u2018\u2019\u201a\u201b]/g, "'").replace(/[\u201c\u201d\u201e\u00ab\u00bb]/g, '"')
+        .replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " ").trim();
+}
+
+/** Fragment de text (#:~:text=) per a una cita: inici,final si és llarga. */
+function textFragmentFor(quote) {
+    const enc = (t) => encodeURIComponent(t).replace(/-/g, "%2D");
+    const words = quote.trim().split(/\s+/);
+    if (quote.length <= 90 || words.length < 12) return enc(quote.trim());
+    return enc(words.slice(0, 5).join(" ")) + "," + enc(words.slice(-5).join(" "));
+}
+
+/**
+ * Comprova les cites «…» de la secció «Cites» contra el text enviat: ✓ i enllaç
+ * al passatge (només en pàgines http/https que no siguin PDF) si hi consten
+ * literalment; ⚠ si no (el model l'ha parafrasejat o inventat).
+ */
+function verifyQuotes(container, sourceText, url) {
+    if (!container || !sourceText) return;
+    const haystack = normalizeForQuote(sourceText);
+    const canLink = /^https?:/i.test(url || "") && !(typeof isPdfUrl === "function" && isPdfUrl(url));
+    const base = canLink ? url.split("#")[0] : null;
+    // Elements de la secció: des del títol «Cites» fins al següent títol
+    const section = [];
+    let inCites = false;
+    for (const el of container.children) {
+        if (/^H[1-6]$/.test(el.tagName)) { inCites = /^cites$/i.test(el.textContent.trim()); continue; }
+        if (inCites) section.push(el);
+    }
+    for (const block of section) {
+        for (const li of block.matches("li") ? [block] : block.querySelectorAll("li")) {
+            const m = /«([^»]{8,})»/.exec(li.textContent);
+            if (!m) continue;
+            const quote = m[1].trim();
+            const found = haystack.includes(normalizeForQuote(quote));
+            const badge = document.createElement("span");
+            badge.className = found ? "quote-ok" : "quote-warn";
+            badge.textContent = found ? " ✓ verificada" : " ⚠ no consta al text";
+            li.appendChild(badge);
+            if (found && base) {
+                const a = document.createElement("a");
+                a.className = "quote-link";
+                a.href = `${base}#:~:text=${textFragmentFor(quote)}`;
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+                a.title = "Anar al passatge a la pàgina";
+                a.textContent = " ↗";
+                li.appendChild(a);
+            }
+        }
+    }
+}
+
 function hideProvenance() {
     const el = document.getElementById("provenance");
     if (el) el.classList.add("hidden");
@@ -931,5 +987,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { verifyQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

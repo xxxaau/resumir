@@ -95,6 +95,7 @@ const extensionGlobals = {
     hideProvenance: "readonly",
     showRefiners: "readonly",
     linkPdfPages: "readonly",
+    verifyQuotes: "readonly",
     linkYoutubeTimes: "readonly",
     youtubeVideoId: "readonly",
     hideRefiners: "readonly",

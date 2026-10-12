@@ -1302,3 +1302,41 @@ test("text enviat - el focus entra al panell i, en tancar-lo, torna al botó del
         assert.equal(h.document.activeElement.id, "sourceTextBtn");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Cites verificades (Fase E): cada cita de la secció «Cites» es comprova
+// literalment contra el text enviat; si hi és, enllaç al passatge (#:~:text=)
+// ---------------------------------------------------------------------------
+test("cites verificades - ✓ i enllaç al passatge si és al text; ⚠ si no hi és", async () => {
+    const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
+        modelReply: `Resum.\n\n### Cites\n- «${real}»\n- «Aquesta frase no apareix enlloc de la pàgina original.»`,
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const items = [...h.document.querySelectorAll("#content li")];
+        assert.equal(items.length, 2);
+        assert.ok(items[0].querySelector(".quote-ok"), "la primera es verifica");
+        const link = items[0].querySelector("a.quote-link");
+        assert.ok(link, "enllaç al passatge");
+        assert.match(link.getAttribute("href"), /^https:\/\/example\.com\/article#:~:text=/);
+        assert.ok(items[1].querySelector(".quote-warn"), "la segona no consta");
+        assert.equal(items[1].querySelector("a.quote-link"), null);
+    } finally { h.close(); }
+});
+
+test("cites verificades - només a la secció «Cites», no a altres cometes del resum", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "L'autor parla de «una expressió llarga entre cometes del resum» al llarg del text.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.document.querySelector("#content .quote-ok, #content .quote-warn"), null);
+    } finally { h.close(); }
+});

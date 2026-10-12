@@ -595,6 +595,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         applyBionicStyles(contentDiv, bionicEnabled, config);
+        if (typeof verifyQuotes === "function" && isProseType(requestedType)) verifyQuotes(contentDiv, pageData.text, currentMetadata.url);
         if (typeof linkYoutubeTimes === "function" && isProseType(requestedType)) linkYoutubeTimes(contentDiv, currentMetadata.url);
         if (typeof linkPdfPages === "function" && isProseType(requestedType)) linkPdfPages(contentDiv, currentMetadata.url);
 
