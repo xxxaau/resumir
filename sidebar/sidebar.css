@@ -780,8 +780,10 @@ body {
 }
 
 .source-panel-label {
-  margin-left: 8px;
+  display: inline;
+  margin: 0 0 0 8px;
   font-size: 0.85em;
+  font-weight: 400;
   color: var(--text-muted);
 }
 

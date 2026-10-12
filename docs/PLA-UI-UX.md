@@ -69,9 +69,9 @@ unificar el disseny dels dos.
 
 ### Pendent d'accessibilitat
 
-- **Focus a la resta de panells:** el panell de text enviat, els subpanells de
-  configuració (`navigateToTab`) i el visor PDF encara no mouen el focus a
-  l'encapçalament ni el retornen al disparador.
+- **Focus a la resta de panells:** els subpanells de configuració
+  (`navigateToTab`) i el visor PDF encara no mouen el focus a l'encapçalament ni
+  el retornen al disparador (el panell de text enviat ja ho fa).
 - **`scroll-padding`** perquè la barra fixa i el peu no tapin l'element enfocat
   (WCAG 2.4.11), quan la barra sigui enganxosa (Fase D, 2.1).
 - **Visor PDF:** paleta fixa que ignora el tema (ara no passa pel mateix control

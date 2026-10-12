@@ -1283,3 +1283,22 @@ test("Copiar - activat per defecte (undefined) i s'amaga només si l'usuari l'ha
         assert.equal(h2.document.getElementById("copyBtn").style.display, "none");
     } finally { h2.close(); }
 });
+
+// Focus del panell de text enviat: entra a l'encapçalament i torna al botó que l'obre
+test("text enviat - el focus entra al panell i, en tancar-lo, torna al botó del peu", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        h.document.getElementById("sourceTextBtn").click();
+        await h.flush(5);
+        assert.equal(h.document.activeElement.id, "source-heading", "el focus entra a l'encapçalament del panell");
+        h.document.querySelector("#source-panel .history-back-btn").click();
+        await h.flush(5);
+        assert.equal(h.document.activeElement.id, "sourceTextBtn");
+    } finally { h.close(); }
+});

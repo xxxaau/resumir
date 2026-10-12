@@ -31,7 +31,7 @@ async function openHistoryPanel() {
     if (heading && typeof heading.focus === "function") heading.focus();
 }
 
-function _closePanel(panelEl) {
+function _closePanel(panelEl, returnFocusId = "historyBtn") {
     panelEl.classList.add("hidden");
     panelEl.replaceChildren();
     const toolbar = document.querySelector(".toolbar");
@@ -56,8 +56,8 @@ function _closePanel(panelEl) {
 
     // El focus era a un element que ara s'ha amagat/destruït: retorna'l al
     // botó que obre l'historial (la barra d'eines torna a ser visible).
-    const historyBtn = document.getElementById("historyBtn");
-    if (historyBtn && typeof historyBtn.focus === "function") historyBtn.focus();
+    const opener = document.getElementById(returnFocusId);
+    if (opener && typeof opener.focus === "function") opener.focus();
 }
 
 function closeHistoryPanel() {
@@ -477,8 +477,12 @@ function openSourcePanel(text) {
     backBtn.textContent = "\u2190 Tornar al resum";
     backBtn.addEventListener("click", closeSourcePanel);
 
-    const label = document.createElement("span");
+    // Encapçalament enfocable: en obrir el panell s'hi mou el focus (la barra
+    // d'eines s'amaga i el focus no pot quedar a <body>).
+    const label = document.createElement("h2");
     label.className = "source-panel-label";
+    label.id = "source-heading";
+    label.tabIndex = -1;
     label.textContent = "Text enviat a resumir";
 
     header.appendChild(backBtn);
@@ -490,10 +494,11 @@ function openSourcePanel(text) {
     sourcePanel.appendChild(pre);
 
     sourcePanel.classList.remove("hidden");
+    label.focus();
 }
 
 function closeSourcePanel() {
-    _closePanel(document.getElementById("source-panel"));
+    _closePanel(document.getElementById("source-panel"), "sourceTextBtn");
 }
 
 if (typeof module !== "undefined" && module.exports) {
