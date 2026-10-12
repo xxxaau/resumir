@@ -127,7 +127,7 @@ function saveOptions(e) {
       ext.storage.local.set({ apiKey: apiKeyValue })
   ]).then(() => defaultPromptKeys.length ? ext.storage.sync.remove(defaultPromptKeys) : null).then(() => {
      setDirty(false);
-     showStatus("Configuració desada correctament!");
+     showStatus("Desat.");
      updateSidebar(); 
   }).catch(err => {
      console.error("Error saving options:", err);
@@ -142,7 +142,7 @@ const SYNC_ITEM_QUOTA_BYTES = 8192;
 // l'etiqueta visible. Les claus que no hi són coincideixen amb l'id.
 function describeSaveError(err, settings) {
   const quota = /quota/i.test(String((err && err.message) || err));
-  if (!quota) return "Error guardant configuració.";
+  if (!quota) return "No s'ha pogut desar.";
   const enc = new TextEncoder();
   let worst = null;
   for (const [key, value] of Object.entries(settings)) {

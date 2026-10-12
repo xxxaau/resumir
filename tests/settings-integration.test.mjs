@@ -632,3 +632,24 @@ test("estil del resum - els selectors es desen, es restauren i marquen canvis se
         assert.equal(stored.summaryFormat, "prose");
     } finally { h.close(); }
 });
+
+test("actualitzar models sense clau - missatge al costat del camp, sense alert()", async () => {
+    const h = await loadSettings({});
+    try {
+        let alerted = false;
+        h.window.alert = () => { alerted = true; };
+        h.document.querySelector("#refreshModels").click();
+        await h.flush(10);
+        assert.equal(alerted, false);
+        assert.match(h.document.getElementById("refreshModelsStatus").textContent, /Primer introdueix la clau/);
+    } finally { h.close(); }
+});
+
+test("desar - el missatge és «Desat.»", async () => {
+    const h = await loadSettings({});
+    try {
+        h.document.querySelector("#saveCustom").click();
+        await h.flush(20);
+        assert.match(h.document.getElementById("status").textContent, /^Desat\./);
+    } finally { h.close(); }
+});

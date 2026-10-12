@@ -219,11 +219,14 @@ async function refreshModels(e) {
     const statusDiv = document.getElementById("refreshModelsStatus");
 
     if (!apiKey) {
-        alert("Primer introdueix la clau d'API per actualitzar els models.");
+        statusDiv.classList.remove("hidden");
+        statusDiv.style.color = "var(--danger)";
+        statusDiv.textContent = "Primer introdueix la clau d'API per actualitzar els models.";
+        document.querySelector("#apiKey").focus();
         return;
     }
 
-    btn.textContent = "Actualitzant...";
+    btn.textContent = "Actualitzant…";
     btn.disabled = true;
     statusDiv.classList.add("hidden");
 
