@@ -793,7 +793,11 @@ function linkYoutubeTimes(container, url) {
 function normalizeForQuote(t) {
     return String(t).normalize("NFC").toLowerCase()
         .replace(/[\u2018\u2019\u201a\u201b]/g, "'").replace(/[\u201c\u201d\u201e\u00ab\u00bb]/g, '"')
-        .replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " ").trim();
+        .replace(/[\u2013\u2014]/g, "-")
+        // Marques que l'extensió posa dins del text enviat ([0:30], [Pàgina 3]): una cita
+        // literal que les travessa no pot sortir com a «no consta».
+        .replace(/\[\d+(?::\d{2}){1,2}\]|\[pàgina \d+\]/g, " ")
+        .replace(/\s+/g, " ").trim();
 }
 
 /** Fragment de text (#:~:text=) per a una cita: inici,final si és llarga. */

@@ -1505,3 +1505,16 @@ test("aturar i tornar a generar - la generació antiga, en acabar tard, no deixa
         await sleep(700);                    // deixa que s'acabi tota l'activitat abans de tancar la finestra
     } finally { h.close(); }
 });
+
+test("cites verificades - una cita que travessa una marca [m:ss] o [Pàgina N] es verifica igualment", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Abans de tot. La fusió nuclear imita [0:30] el procés que alimenta les estrelles. " + "Més text. ".repeat(20),
+        modelReply: "Resum.\n\n### Cites\n- «La fusió nuclear imita el procés que alimenta les estrelles.»",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.querySelector("#content .quote-ok"), "no ha de ser ⚠ per una marca enmig");
+    } finally { h.close(); }
+});
