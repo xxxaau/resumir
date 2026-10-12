@@ -41,7 +41,7 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 | `storage` | Guardar la teva API Key, preferències, memòria cau i historial d'ús localment |
 | `scripting` | Injectar el parser de contingut (Readability.js) per extreure text net |
 | `tabs` | Consultar la pestanya activa, obrir links en noves pestanyes i gestionar integracions |
-| `menus` / `contextMenus` | Crear entrades al menú contextual ("Resumir text seleccionat" i "Resumir") |
+| `menus` / `contextMenus` | Crear entrades al menú contextual ("Resumir la selecció" i "Resumir aquesta pàgina") |
 | `sidePanel` | Obrir el panell lateral natiu a navegadors basats en Chromium |
 | `<all_urls>` (requerit) | Permís host requerit, concedit a la instal·lació, per executar scripts de lectura en qualsevol pàgina |
 

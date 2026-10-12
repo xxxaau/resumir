@@ -59,10 +59,6 @@ referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** 
   l'onboarding de 2.2.
 - **0.14:** etiqueta/tooltip «Regenerar» quan es veu la versió de memòria cau.
 
-**Confirmat també:** el «✓ Afegit a Obsidian» (`sidebar/anki.js:299-305`) surt només
-en obrir l'URL `obsidian://`; reformular com «Enviat a Obsidian», perquè
-l'extensió no pot saber si ha funcionat.
-
 ## Nivell 1 — Guanys ràpids (resta)
 
 La Fase C (contrast i accessibilitat de base) està feta; vegeu `git log` i el
@@ -229,7 +225,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Mapa conceptual | No hi ha botó d'ajustar a la vista; només mouse (sense pointer/touch) | `conceptmap.js:266-282` | Mitjana | S–M |
 | Mapa conceptual | Pantalla completa impossible des d'un PDF local, amb un consell enganyador | `conceptmap.js:349-391` | Mitjana | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial | `conceptmap.js:398-405` | Baixa | S |
-| Anki | «✓ Afegit a Obsidian» sense confirmació real: només s'ha obert l'URL `obsidian://` (reformular com «Enviat a Obsidian») | `anki.js:202-210,299-307` | Mitjana | S |
 | Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |
 | Anki | Des de l'historial, «Genera més» i «Afinar» semblen actius però fallen | `history.js:101-106` | Baixa | S |
 | YouTube | L'etiqueta de llengua enviada al model pot no correspondre a la transcripció descarregada | `content.js:350-370`, `extractors.js:197-201` | Mitjana | S |

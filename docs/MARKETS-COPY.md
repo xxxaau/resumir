@@ -157,7 +157,7 @@ Resumir necessita aquests permisos per funcionar:
    Per obtenir la URL i el títol de la pàgina (claus de la memòria cau)
 
 🔹 menus
-   Per afegir «Resumir» i «Resumir text seleccionat» al menú contextual
+   Per afegir «Resumir aquesta pàgina» i «Resumir la selecció» al menú contextual
 
 🔹 sidebar_action
    Per mostrar els resums al panell lateral

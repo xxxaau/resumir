@@ -315,7 +315,7 @@ async function exportAnkiToObsidian(ctx) {
         const exportBtn = document.getElementById("ankiExportBtn");
         if (exportBtn) {
             const original = exportBtn.textContent;
-            exportBtn.textContent = "✓ Afegit a Obsidian";
+            exportBtn.textContent = "✓ Enviat a Obsidian";
             setTimeout(() => { exportBtn.textContent = original; }, 2000);
         }
     } catch (err) {

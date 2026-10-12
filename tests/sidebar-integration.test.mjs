@@ -1118,3 +1118,25 @@ test("estil del resum - no afecta Aprofundir", async () => {
         assert.doesNotMatch(h.calls.fetches[0].body, /molt breu|TL;DR/i);
     } finally { h.close(); }
 });
+
+test("Anki - exportar diu «Enviat a Obsidian» (només s'ha obert l'URL, no se sap si ha funcionat)", async () => {
+    const h = await loadSidebar({
+        sync: { enableAnki: true, ankiVault: "Notes" },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: '[{"q":"Què és X?","a":"Una cosa."},{"q":"Per què Y?","a":"Perquè sí."}]',
+    });
+    try {
+        h.document.getElementById("ankiBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.getElementById("ankiExportBtn"), "el panell Anki té el botó d'exportar");
+        h.document.querySelector(".anki-select-all").click();
+        await h.flush(5);
+        const btn = h.document.getElementById("ankiExportBtn");
+        assert.match(btn.textContent, /\(2\)/);
+        btn.click();
+        await h.flush(10);
+        assert.match(btn.textContent, /Enviat a Obsidian/);
+        assert.doesNotMatch(btn.textContent, /Afegit/);
+    } finally { h.close(); }
+});
