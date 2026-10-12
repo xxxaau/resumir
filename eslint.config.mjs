@@ -205,6 +205,8 @@ const settingsGlobals = {
     toggleApiKeyVisibility: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
+    initializePluginHeaders: "readonly",
+    PLUGIN_PANES: "readonly",
     applySettingsHash: "readonly",
     parseSettingsHash: "readonly",
     navigateToTab: "readonly",

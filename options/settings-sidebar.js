@@ -8,6 +8,7 @@
 
 // Initialize sidebar navigation and event delegation
 function initializeSidebarNavigation() {
+    initializePluginHeaders();
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar) {
         console.error('Sidebar element not found');
@@ -49,6 +50,57 @@ function initializeSidebarNavigation() {
     });
 }
 
+// Pàgina de cada plugin → interruptor que governa la seva targeta
+const PLUGIN_PANES = {
+    resum: "enableResum", selectpdf: "enablePdf", obsidian: "enableObsidian", markdown: "enableMarkdown",
+    deepdive: "enableDeepdive", science: "enableScience", bionic: "enableBionic",
+    conceptmap: "enableConceptMap", simple: "enableSimple", anki: "enableAnki",
+};
+
+// Capçalera comuna de les pàgines de plugin: «← Plugins», estat i interruptor
+// (lligat al de la targeta, que és el que es desa). Així un plugin desactivat
+// no deixa l'usuari sense camí de tornada ni sense manera d'activar-lo.
+function initializePluginHeaders() {
+    for (const [pane, enableId] of Object.entries(PLUGIN_PANES)) {
+        const tab = document.getElementById(`tab-${pane}`);
+        const source = document.getElementById(enableId);
+        if (!tab || !source || tab.querySelector('.plugin-head')) continue;
+
+        const head = document.createElement('div');
+        head.className = 'plugin-head';
+        const back = document.createElement('button');
+        back.type = 'button';
+        back.className = 'plugin-back';
+        back.textContent = '← Plugins';
+        back.addEventListener('click', () => navigateToTab('extensions'));
+
+        const switchLabel = document.createElement('label');
+        switchLabel.className = 'switch';
+        const toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.setAttribute('aria-label', 'Activa aquest plugin');
+        const slider = document.createElement('span');
+        slider.className = 'slider round';
+        switchLabel.append(toggle, slider);
+        const state = document.createElement('span');
+        state.className = 'plugin-state';
+
+        const sync = () => {
+            toggle.checked = source.checked;
+            state.textContent = source.checked ? 'Actiu' : 'Inactiu';
+        };
+        sync();
+        source.addEventListener('change', sync);
+        toggle.addEventListener('change', () => {
+            source.checked = toggle.checked;
+            source.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        head.append(back, state, switchLabel);
+        tab.insertBefore(head, tab.firstChild);
+    }
+}
+
 // Enllaç profund: `#tab=<pestanya>&focus=<id del camp>`. La pàgina s'obria
 // sempre a «General»; ara el sidebar pot portar l'usuari directament al camp que
 // cal (p. ex. la clau d'API) i recarregar no perd la pestanya.
@@ -82,12 +134,17 @@ function navigateToTab(tabId) {
         navItem.click();
     } else {
         // Fallback per a sub-pestanyes sense nav-item (p.ex. plugin desactivat):
-        // mostra la pestanya i NETEJA el highlight de la barra lateral perquè no
-        // quedi un nav-item ressaltat que ja no correspon.
+        // mostra la pestanya i marca «Plugins» al menú (la pàgina n'és una sub-pàgina),
+        // perquè no quedi cap element ressaltat que ja no correspon ni cap sense marcar.
         document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); n.removeAttribute('aria-current'); });
         document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
         const tab = document.getElementById(`tab-${tabId}`);
         if (tab) tab.classList.add('active');
+        const parent = document.querySelector('.nav-item[data-tab="extensions"]');
+        if (parent && tab && tab.querySelector('.plugin-head')) {
+            parent.classList.add('active');
+            parent.setAttribute('aria-current', 'page');
+        }
     }
 }
 

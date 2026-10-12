@@ -1052,3 +1052,22 @@ input:checked + .slider:before {
   color: var(--text-color);
 }
 .bionic-preview b { font-weight: var(--bionic-weight, 600); }
+
+/* Capçalera comuna de les pàgines de plugin */
+.plugin-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+.plugin-head .plugin-state { margin-left: auto; font-size: 0.85em; color: var(--text-muted); }
+.plugin-back {
+  font: inherit;
+  font-size: 0.9em;
+  color: var(--primary-color);
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.plugin-back:hover { text-decoration: underline; }

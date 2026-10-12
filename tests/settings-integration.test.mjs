@@ -686,3 +686,37 @@ test("biònica - Restaurar es pot desfer", async () => {
         assert.equal(h.document.getElementById("bionicWeight").value, "800");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Pestanyes de plugin: capçalera comuna («← Plugins», interruptor, estat) i camí
+// de tornada també per als plugins desactivats
+// ---------------------------------------------------------------------------
+test("pestanya de plugin - capçalera amb enllaç a Plugins i interruptor lligat al de la targeta", async () => {
+    const h = await loadSettings({ sync: { enableDeepdive: false } });
+    try {
+        // Un plugin desactivat no té enllaç al menú: s'hi arriba amb l'engranatge
+        h.document.querySelector('[data-target="deepdive"]').click();
+        await h.flush(5);
+        const pane = h.document.getElementById("tab-deepdive");
+        assert.ok(pane.classList.contains("active"));
+        const head = pane.querySelector(".plugin-head");
+        assert.ok(head, "capçalera de plugin");
+        const state = head.querySelector(".plugin-state");
+        assert.match(state.textContent, /Inactiu/);
+        // El menú no es queda sense cap element actiu: marca «Plugins»
+        assert.equal(h.document.querySelector('.nav-item[data-tab="extensions"]').getAttribute("aria-current"), "page");
+
+        const toggle = head.querySelector('input[type="checkbox"]');
+        toggle.checked = true;
+        toggle.dispatchEvent(new h.window.Event("change", { bubbles: true }));
+        await h.flush(10);
+        assert.equal(h.document.getElementById("enableDeepdive").checked, true, "mou l'interruptor de la targeta");
+        assert.match(state.textContent, /^Actiu/);
+        const stored = await h.storage.sync.get("enableDeepdive");
+        assert.equal(stored.enableDeepdive, true, "es desa com l'interruptor de la targeta");
+
+        head.querySelector(".plugin-back").click();
+        await h.flush(5);
+        assert.ok(h.document.getElementById("tab-extensions").classList.contains("active"));
+    } finally { h.close(); }
+});
