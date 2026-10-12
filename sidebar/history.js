@@ -494,7 +494,7 @@ function openSourcePanel(text) {
     sourcePanel.appendChild(pre);
 
     sourcePanel.classList.remove("hidden");
-    label.focus();
+    if (typeof label.focus === "function") label.focus();
 }
 
 function closeSourcePanel() {
