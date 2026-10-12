@@ -181,3 +181,14 @@ test("settings: la pestanya Plugins no té botó Desar (els interruptors es dese
     assert.match(doc.querySelector("#tab-extensions .section-desc").textContent, /desen automàticament/);
     assert.doesNotMatch(doc.querySelector("#tab-extensions").textContent, /Deep Dive/);
 });
+
+test("settings: landmarks (<nav>, <main>) i botons de les targetes amb nom propi", () => {
+    const doc = load("options/settings.html");
+    assert.ok(doc.querySelector("nav.sidebar[aria-label]"), "menú com a <nav> etiquetat");
+    assert.ok(doc.querySelector("main.main-content"), "contingut dins de <main>");
+    const names = [...doc.querySelectorAll(".extension-actions button")].map(b => b.getAttribute("aria-label"));
+    assert.ok(names.length >= 24, "tots els botons de targeta tenen aria-label");
+    assert.ok(names.every(Boolean), "cap botó de targeta sense nom");
+    assert.equal(new Set(names).size, names.length, "els noms accessibles no es repeteixen entre targetes");
+    assert.equal(doc.querySelectorAll("h3").length, 2, "els títols de secció del General passen de h3 a h2");
+});

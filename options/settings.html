@@ -8,7 +8,7 @@
     <script src="../theme.js"></script>
   </head>
   <body>
-    <div class="sidebar">
+    <nav class="sidebar" aria-label="Seccions de la configuració">
       <div class="sidebar-header">Configuració</div>
       <button class="nav-item active" data-tab="general" aria-current="page">General</button>
       <button class="nav-item" data-tab="resum">Resum</button>
@@ -26,9 +26,9 @@
 
       <div class="sidebar-spacer"></div>
       <button class="nav-item" data-tab="about">Sobre l'extensió</button>
-    </div>
+    </nav>
 
-    <div class="main-content">
+    <main class="main-content">
       <div id="dirtyNote" class="dirty-note" role="status" hidden>
         Hi ha canvis sense desar. Prem «Desar» abans de sortir.
       </div>
@@ -37,7 +37,7 @@
         <h1 class="page-title">Configuració general</h1>
 
         <div class="section">
-          <h3>Claus i models</h3>
+          <h2>Claus i models</h2>
 
           <!-- La clau va PRIMER: sense ella no es poden actualitzar els models. -->
           <div class="form-group">
@@ -96,7 +96,7 @@
         </div>
 
         <div class="section">
-          <h3>Aparença</h3>
+          <h2>Aparença</h2>
           <div class="form-group">
             <label for="themeSelect">Tema</label>
             <select id="themeSelect" class="form-control">
@@ -112,7 +112,7 @@
 
 
         <div class="section">
-          <h3>Emmagatzematge i privadesa</h3>
+          <h2>Emmagatzematge i privadesa</h2>
           <div class="form-group">
             <p class="field-label">Historial de resums</p>
             <div class="help-text">
@@ -237,12 +237,12 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="resum">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Resum amunt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Resum avall">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
@@ -251,11 +251,10 @@
                 <input type="checkbox" id="enableResum" aria-label="Activa el plugin Resum" checked />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">Resum</span>
               <button
                 class="btn-icon"
                 data-target="resum"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Resum"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="3"></circle>
@@ -280,12 +279,12 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="selectpdf">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure PDF amunt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure PDF avall">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
@@ -294,8 +293,7 @@
                 <input type="checkbox" id="enablePdf" aria-label="Activa el plugin PDF" checked />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">PDF</span>
-              <button class="btn-icon" data-target="selectpdf" title="Configuració">
+              <button class="btn-icon" data-target="selectpdf" title="Configuració" aria-label="Configurar PDF">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="3"></circle>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -333,7 +331,7 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="science">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Validació científica amunt">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -348,7 +346,7 @@
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Validació científica avall">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -367,11 +365,10 @@
                 <input type="checkbox" id="enableScience" aria-label="Activa el plugin Validació científica" />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">Validació científica</span>
               <button
                 class="btn-icon"
                 data-target="science"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Validació científica"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -417,7 +414,7 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="deepdive">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Aprofundiment amunt">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -432,7 +429,7 @@
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Aprofundiment avall">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -451,11 +448,10 @@
                 <input type="checkbox" id="enableDeepdive" aria-label="Activa el plugin Aprofundiment" />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">Aprofundiment</span>
               <button
                 class="btn-icon"
                 data-target="deepdive"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Aprofundiment"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -507,12 +503,12 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="conceptmap">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Mapa conceptual amunt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Mapa conceptual avall">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
@@ -521,11 +517,10 @@
                 <input type="checkbox" id="enableConceptMap" aria-label="Activa el plugin Mapa conceptual" />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">Mapa conceptual</span>
               <button
                 class="btn-icon"
                 data-target="conceptmap"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Mapa conceptual"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="3"></circle>
@@ -561,12 +556,12 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="simple">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Explica-ho fàcil amunt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Explica-ho fàcil avall">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
@@ -575,8 +570,7 @@
                 <input type="checkbox" id="enableSimple" aria-label="Activa el plugin Explica-ho fàcil" />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">Explica-ho fàcil</span>
-              <button class="btn-icon" data-target="simple" title="Configuració">
+              <button class="btn-icon" data-target="simple" title="Configuració" aria-label="Configurar Explica-ho fàcil">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="3"></circle>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -611,7 +605,7 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="obsidian">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Integració amb Obsidian amunt">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -626,7 +620,7 @@
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Integració amb Obsidian avall">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -648,7 +642,7 @@
               <button
                 class="btn-icon"
                 data-target="obsidian"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Integració amb Obsidian"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -695,7 +689,7 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="markdown">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Exportació a Markdown amunt">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -710,7 +704,7 @@
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Exportació a Markdown avall">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -732,7 +726,7 @@
               <button
                 class="btn-icon"
                 data-target="markdown"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Exportació a Markdown"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -778,12 +772,12 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="anki">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Targetes Anki amunt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Targetes Anki avall">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
@@ -792,8 +786,7 @@
                 <input type="checkbox" id="enableAnki" aria-label="Activa el plugin Targetes Anki" />
                 <span class="slider round"></span>
               </label>
-              <span class="sr-only">Targetes Anki</span>
-              <button class="btn-icon" data-target="anki" title="Configuració">
+              <button class="btn-icon" data-target="anki" title="Configuració" aria-label="Configurar Targetes Anki">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="3"></circle>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -829,7 +822,7 @@
               </div>
             </div>
             <div class="extension-actions" data-extension-id="bionic">
-              <button class="btn-icon btn-move-up" title="Moure amunt">
+              <button class="btn-icon btn-move-up" title="Moure amunt" aria-label="Moure Lectura biònica amunt">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -844,7 +837,7 @@
                   <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
               </button>
-              <button class="btn-icon btn-move-down" title="Moure avall">
+              <button class="btn-icon btn-move-down" title="Moure avall" aria-label="Moure Lectura biònica avall">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -867,7 +860,7 @@
               <button
                 class="btn-icon"
                 data-target="bionic"
-                title="Configuració"
+                title="Configuració" aria-label="Configurar Lectura biònica"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -1594,7 +1587,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
     <!-- End Main Content -->
 
     <div id="status" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
