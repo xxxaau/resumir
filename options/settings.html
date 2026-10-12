@@ -157,7 +157,14 @@
           </ul>
         </details>
 
-        <div class="section">
+                <div id="systemUpdateBanner" class="update-banner" style="display:none">
+          <p>Hi ha una nova versió del prompt de resum per defecte.</p>
+          <div class="update-banner-actions">
+            <button class="btn btn-secondary btn-sm" data-banner-action="reset" data-banner-type="system">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" data-banner-action="dismiss" data-banner-type="system">Mantenir el meu prompt</button>
+          </div>
+        </div>
+<div class="section">
           <div class="form-group">
             <label for="summaryFormat">Format del resum</label>
             <select id="summaryFormat" class="form-control">
@@ -1331,7 +1338,14 @@
           </ul>
         </details>
 
-        <div class="section">
+                <div id="ankiUpdateBanner" class="update-banner" style="display:none">
+          <p>Hi ha una nova versió del prompt d'Anki per defecte.</p>
+          <div class="update-banner-actions">
+            <button class="btn btn-secondary btn-sm" data-banner-action="reset" data-banner-type="anki">Restaurar prompt per defecte</button>
+            <button class="btn btn-ghost" data-banner-action="dismiss" data-banner-type="anki">Mantenir el meu prompt</button>
+          </div>
+        </div>
+<div class="section">
           <div class="form-group">
             <label for="ankiVault">Nom del Vault</label>
             <input

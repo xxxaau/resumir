@@ -752,3 +752,35 @@ test("prompts plegats per defecte; s'obren si estan personalitzats o en arribar-
         assert.equal(h.document.activeElement.id, "deepDivePrompt");
     } finally { h.close(); }
 });
+
+test("avís de prompt nou - Resum i Anki mostren el seu bàner i «Mantenir» el descarta", async () => {
+    const h = await loadSettings({ sync: {
+        systemPrompt: "propi", systemPromptUpdateAvailable: true, systemPromptCustomized: true,
+        ankiPrompt: "propi anki", ankiPromptUpdateAvailable: true, ankiPromptCustomized: true,
+    } });
+    try {
+        const resum = h.document.getElementById("systemUpdateBanner");
+        const anki = h.document.getElementById("ankiUpdateBanner");
+        assert.ok(resum && resum.style.display !== "none", "bàner de Resum");
+        assert.ok(anki && anki.style.display !== "none", "bàner d'Anki");
+        resum.querySelector('[data-banner-action="dismiss"]').click();
+        await h.flush(10);
+        assert.equal(resum.style.display, "none");
+        const stored = await h.storage.sync.get(["systemPromptUpdateAvailable", "ankiPromptUpdateAvailable"]);
+        assert.equal(stored.systemPromptUpdateAvailable, false);
+        assert.equal(stored.ankiPromptUpdateAvailable, true, "no toca el d'Anki");
+    } finally { h.close(); }
+});
+
+test("avís de prompt nou - desar Resum només neteja SEU avís i marca el flag de personalitzat", async () => {
+    const h = await loadSettings({ sync: { systemPromptUpdateAvailable: true, ankiPromptUpdateAvailable: true } });
+    try {
+        h.document.getElementById("systemPrompt").value = "una versió meva";
+        h.document.querySelector("#saveCustom").click();
+        await h.flush(20);
+        const stored = await h.storage.sync.get(["systemPromptUpdateAvailable", "ankiPromptUpdateAvailable", "systemPromptCustomized"]);
+        assert.equal(stored.systemPromptUpdateAvailable, false);
+        assert.equal(stored.ankiPromptUpdateAvailable, true);
+        assert.equal(stored.systemPromptCustomized, true);
+    } finally { h.close(); }
+});

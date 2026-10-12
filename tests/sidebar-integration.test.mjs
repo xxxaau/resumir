@@ -1340,3 +1340,38 @@ test("cites verificades - només a la secció «Cites», no a altres cometes del
         assert.equal(h.document.querySelector("#content .quote-ok, #content .quote-warn"), null);
     } finally { h.close(); }
 });
+
+// Resum i Anki entren al sistema d'avís de «nova versió del prompt» (els personalitzats)
+test("avís de prompt nou - Resum personalitzat avisa abans de generar; el × continua", async () => {
+    const h = await loadSidebar({
+        sync: { systemPrompt: "El meu prompt de resum", promptVersions: { systemPrompt: 0 } },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        await h.flush(30);
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(10);
+        assert.match(h.document.getElementById("prompt-update-text").textContent, /prompt de resum/);
+        assert.equal(h.calls.fetches.length, 0, "no genera fins que l'usuari continua");
+        h.document.getElementById("prompt-update-dismiss").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1);
+    } finally { h.close(); }
+});
+
+test("avís de prompt nou - Resum NO personalitzat adopta el default en silenci (sense avís)", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        await h.flush(30);
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1);
+        assert.ok(h.document.getElementById("prompt-update-notification").classList.contains("hidden"));
+    } finally { h.close(); }
+});

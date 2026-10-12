@@ -198,7 +198,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Button Event Listeners ---
 
     summarizeBtn.addEventListener("click", () => {
-        doSummary(null, false, false, true);
+        checkPromptUpdate("resum", "systemPromptUpdateAvailable", () => {
+            doSummary(null, false, false, true);
+        });
     });
 
     // --- Selector de PDF local ---
@@ -414,6 +416,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Flag d'avís de prompt → pestanya de configuració d'aquell prompt
     const PROMPT_UPDATE_TABS = {
+        systemPromptUpdateAvailable: "resum",
+        ankiPromptUpdateAvailable: "anki",
         deepDivePromptUpdateAvailable: "deepdive",
         sciencePromptUpdateAvailable: "science",
         conceptMapPromptUpdateAvailable: "conceptmap",
@@ -501,7 +505,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const ankiBtn = document.getElementById("ankiBtn");
     if (ankiBtn) {
         ankiBtn.addEventListener("click", () => {
-            doSummary(null, false, false, true, false, false, true);
+            checkPromptUpdate("targetes Anki", "ankiPromptUpdateAvailable", () => {
+                doSummary(null, false, false, true, false, false, true);
+            });
         });
     }
 

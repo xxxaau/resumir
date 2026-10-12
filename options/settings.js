@@ -9,7 +9,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // Single batch — read all settings once (elimina 3 lectures storage redundants)
     const ALL_CONFIG_KEYS = [
-        "modelName", "theme", "systemPrompt", "summaryFormat", "summaryLength",
+        "modelName", "theme", "systemPrompt", "systemPromptCustomized", "systemPromptUpdateAvailable", "ankiPromptCustomized", "ankiPromptUpdateAvailable", "summaryFormat", "summaryLength",
         "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
         "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
         "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight",
@@ -59,6 +59,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Banners d'actualització de prompts: els handlers van per data-attributes
     // perquè la CSP de MV3 (script-src 'self') bloqueja els onclick inline.
     const bannerResets = {
+        system: { reset: resetSystemPrompt, saveId: "saveCustom" },
+        anki: { reset: resetAnkiPrompt, saveId: "saveAnki" },
         deepdive: { reset: resetDeepDivePrompt, saveId: "saveDeepDive" },
         science: { reset: resetSciencePrompt, saveId: "saveScience" },
         conceptmap: { reset: resetConceptMapPrompt, saveId: "saveConceptMap" },

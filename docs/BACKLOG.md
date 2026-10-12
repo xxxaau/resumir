@@ -194,9 +194,5 @@ casos especials, estructura fixa, sense referències inventades; vegeu `git log`
   comprovar: format respectat, llargada adequada, sense inventar, en català, que el
   missatge «No hi ha prou contingut…» no salta en textos curts però vàlids i que
   Ciència no sembla «menys completa». Ajustar només si és mesurablement millor.
-- **Avís de «nova versió» per a Resum i Anki:** entren al versionat i adopten el
-  default nou en silenci si no s'han editat, però si l'usuari els ha personalitzat no
-  té cap bàner (els altres quatre prompts sí). Cablejar `systemPromptCustomized` /
-  `ankiPromptCustomized` i el seu bàner (vegeu la llista de passos a `shared/defaults.js`).
 - Quan es torni a canviar un default, afegir el hash del text retirat a
   `LEGACY_PROMPT_HASHES` (no substituir-lo).

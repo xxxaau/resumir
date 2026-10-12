@@ -9,6 +9,8 @@
 // Botó «Desar» de cada pestanya de prompt → flag de l'avís de prompt nou que
 // aquella pestanya mostra. Els altres botons no toquen cap flag.
 const SAVE_BUTTON_UPDATE_KEYS = {
+  saveCustom:     "systemPromptUpdateAvailable",
+  saveAnki:       "ankiPromptUpdateAvailable",
   saveDeepDive:   "deepDivePromptUpdateAvailable",
   saveScience:    "sciencePromptUpdateAvailable",
   saveConceptMap: "conceptMapPromptUpdateAvailable",
@@ -58,6 +60,7 @@ function saveOptions(e) {
     modelName: document.querySelector("#modelName").value,
     theme: document.querySelector("#themeSelect").value,
     systemPrompt: document.querySelector("#systemPrompt").value,
+    systemPromptCustomized: document.querySelector("#systemPrompt").value !== DEFAULT_SYSTEM_PROMPT,
     summaryFormat: document.querySelector("#summaryFormat").value,
     summaryLength: document.querySelector("#summaryLength").value,
 
@@ -102,6 +105,7 @@ function saveOptions(e) {
     ankiPacket: parseInt(document.querySelector("#ankiPacket").value, 10) || DEFAULT_ANKI_PACKET,
     ankiLang: document.querySelector("#ankiLang").value || DEFAULT_ANKI_LANG,
     ankiPrompt: document.querySelector("#ankiPrompt").value,
+    ankiPromptCustomized: document.querySelector("#ankiPrompt").value !== DEFAULT_ANKI_PROMPT,
 
     // Configura l'ordre de les extensions
     extensionOrder: getCurrentExtensionOrder(),
@@ -295,6 +299,8 @@ function restoreOptions(syncData, localData) {
 
     // Mostrar banners d'actualització de prompts si n'hi ha
     if (syncData) {
+        showPromptUpdateBanner("system", syncData.systemPromptUpdateAvailable);
+        showPromptUpdateBanner("anki", syncData.ankiPromptUpdateAvailable);
         showPromptUpdateBanner("deepdive", syncData.deepDivePromptUpdateAvailable);
         showPromptUpdateBanner("science", syncData.sciencePromptUpdateAvailable);
         showPromptUpdateBanner("conceptmap", syncData.conceptMapPromptUpdateAvailable);
@@ -372,6 +378,7 @@ function resetObsidianTemplate() {
 
 function resetSystemPrompt() {
     restoreField("systemPrompt", DEFAULT_SYSTEM_PROMPT, "El prompt");
+    dismissPromptUpdate("system");
 }
 
 function resetDeepDivePrompt() {
@@ -387,7 +394,9 @@ function resetSciencePrompt() {
 function dismissPromptUpdate(type) {
     const banner = document.getElementById(type + "UpdateBanner");
     if (banner) banner.style.display = "none";
-    const updateKey = type === "deepdive" ? "deepDivePromptUpdateAvailable"
+    const updateKey = type === "system" ? "systemPromptUpdateAvailable"
+        : type === "anki" ? "ankiPromptUpdateAvailable"
+        : type === "deepdive" ? "deepDivePromptUpdateAvailable"
         : type === "science" ? "sciencePromptUpdateAvailable"
         : type === "simple" ? "simplePromptUpdateAvailable"
         : "conceptMapPromptUpdateAvailable";
@@ -406,6 +415,7 @@ function resetSimplePrompt() {
 
 function resetAnkiPrompt() {
     restoreField("ankiPrompt", DEFAULT_ANKI_PROMPT, "El prompt");
+    dismissPromptUpdate("anki");
 }
 
 const BIONIC_PREVIEW_TEXT = "La lectura biònica ressalta l'inici de cada paraula perquè els ulls avancin amb més fluïdesa pel text.";
