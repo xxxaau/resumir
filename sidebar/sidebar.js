@@ -606,6 +606,35 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 0.6: sense clau d'API els generadors són «no disponibles» (aria-disabled, no
+    // disabled: altres camins n'activen/desactiven l'estat) i el clic porta al camp
+    // de la clau de l'onboarding en lloc de fallar amb un error.
+    const GENERATOR_BUTTONS = ["summarizeBtn", "deepDiveBtn", "scienceBtn", "conceptMapBtn", "explainSimpleBtn", "ankiBtn", "selectPdfBtn"];
+    let keyGateActive = false;
+    function applyKeyGate(noKey) {
+        keyGateActive = noKey;
+        for (const id of GENERATOR_BUTTONS) {
+            const b = document.getElementById(id);
+            if (!b) continue;
+            if (!b.dataset.keyGateLabel) b.dataset.keyGateLabel = b.getAttribute("title") || "";
+            if (noKey) {
+                b.setAttribute("aria-disabled", "true");
+                b.title = `${b.dataset.keyGateLabel} — falta la clau d'API`;
+            } else {
+                b.removeAttribute("aria-disabled");
+                b.title = b.dataset.keyGateLabel;
+            }
+        }
+    }
+    document.querySelector(".toolbar").addEventListener("click", (e) => {
+        const b = e.target.closest && e.target.closest("button");
+        if (!keyGateActive || !b || !GENERATOR_BUTTONS.includes(b.id)) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const input = document.getElementById("apiKeyInput");
+        if (input) input.focus();
+    }, true);
+
     // El selector de model queda truncat al peu estret: el nom complet, a l'indicador.
     function syncModelTitle() {
         const o = modelSelect.selectedOptions && modelSelect.selectedOptions[0];
@@ -881,6 +910,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Neteja de la clau heretada `blockedUntil` (feature de bloqueig
             // temporal per quota, abandonada a favor del fallback de models).
             if (localData.blockedUntil) await ext.storage.local.remove("blockedUntil");
+
+            applyKeyGate(!apiKey);
 
             if (apiKey) {
                 await loadModels(apiKey, modelName);

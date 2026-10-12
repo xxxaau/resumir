@@ -55,8 +55,6 @@ referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** 
   (Copiar/Obsidian exporten l'entrada visible); queda redissenyar la navegació
   (barra d'eines visible en veure una entrada, «Tornar a l'historial» només si
   s'hi ha vingut). Es fa amb les pestanyes per tipus del Nivell 3.
-- **0.6:** desactivar els generadors mentre falta la clau, amb tooltip; es fa amb
-  l'onboarding de 2.2.
 
 ## Nivell 1 — Guanys ràpids (resta)
 

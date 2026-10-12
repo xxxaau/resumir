@@ -1197,3 +1197,33 @@ test("peu - ↑ enviats abans de ↓ rebuts, valors inicials «–» i title amb
         assert.ok(sel.title && sel.title.length > 3, "el selector porta el nom complet del model a title");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// 0.6: sense clau d'API, els generadors es veuen no disponibles (amb motiu) i
+// el clic porta al camp de la clau
+// ---------------------------------------------------------------------------
+test("sense clau - generadors amb aria-disabled i motiu; el clic enfoca el camp de la clau", async () => {
+    const h = await loadSidebar({ sync: { enableDeepdive: true }, local: {} });
+    try {
+        await h.flush(40);
+        const ids = ["summarizeBtn", "deepDiveBtn", "conceptMapBtn", "explainSimpleBtn", "scienceBtn", "ankiBtn", "selectPdfBtn"];
+        for (const id of ids) {
+            const b = h.document.getElementById(id);
+            assert.equal(b.getAttribute("aria-disabled"), "true", `${id} aria-disabled`);
+            assert.match(b.title, /clau d'API/, `${id} explica el motiu`);
+        }
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(10);
+        assert.equal(h.calls.fetches.length, 0);
+        assert.equal(h.document.activeElement.id, "apiKeyInput");
+    } finally { h.close(); }
+});
+
+test("amb clau - els generadors no porten aria-disabled", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        await h.flush(40);
+        assert.equal(h.document.getElementById("summarizeBtn").getAttribute("aria-disabled"), null);
+        assert.equal(h.document.getElementById("summarizeBtn").title, "Resumir");
+    } finally { h.close(); }
+});

@@ -1550,3 +1550,9 @@ body {
   cursor: pointer;
 }
 .refine-btn:hover { background: var(--button-hover); }
+
+/* Sense clau d'API: generadors visibles però no disponibles (vegeu applyKeyGate) */
+.toolbar button[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
