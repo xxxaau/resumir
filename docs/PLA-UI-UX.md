@@ -57,7 +57,6 @@ referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** 
   s'hi ha vingut). Es fa amb les pestanyes per tipus del Nivell 3.
 - **0.6:** desactivar els generadors mentre falta la clau, amb tooltip; es fa amb
   l'onboarding de 2.2.
-- **0.14:** etiqueta/tooltip «Regenerar» quan es veu la versió de memòria cau.
 
 ## Nivell 1 — Guanys ràpids (resta)
 
