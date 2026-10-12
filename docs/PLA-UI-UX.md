@@ -99,8 +99,7 @@ unificar el disseny dels dos.
 
 - Activar **Copiar** per defecte: l'usuari nou rep un resum sense cap acció
   visible per endur-se'l.
-- Peu: ↑ enviats abans de ↓ rebuts, inicialitzar a «–», «De la memòria cau» en un
-  encert; `title` amb el nom complet del model truncat.
+- Peu: «De la memòria cau» en un encert.
 - Visor PDF: nom del fitxer al títol, Esc no ha de tancar la pestanya, fletxes
   ignorades dins del camp de pàgina, ‹ › en lloc de ⏮ ⏭, no esborrar el PDF en
   recarregar.

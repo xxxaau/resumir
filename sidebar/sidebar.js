@@ -606,6 +606,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // El selector de model queda truncat al peu estret: el nom complet, a l'indicador.
+    function syncModelTitle() {
+        const o = modelSelect.selectedOptions && modelSelect.selectedOptions[0];
+        modelSelect.title = o ? o.textContent : "";
+    }
+    modelSelect.addEventListener("change", syncModelTitle);
+    if (typeof MutationObserver !== "undefined") {
+        new MutationObserver(syncModelTitle).observe(modelSelect, { childList: true });
+    }
+    syncModelTitle();
+
     // 0.14: amb la còpia desada a la vista, tornar a clicar el mateix botó regenera.
     // Ho diu el títol del botó d'aquell tipus (la resta recuperen el seu).
     const TYPE_BUTTON = { summary: "summarizeBtn", deepdive: "deepDiveBtn", science: "scienceBtn",

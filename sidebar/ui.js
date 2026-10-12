@@ -646,11 +646,11 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
     const outputEstimated = options.outputEstimated === true;
 
     if (tokensInCount) {
-        tokensInCount.textContent = inputTokens > 0 ? formatTokenCount(inputTokens) : "-";
+        tokensInCount.textContent = inputTokens > 0 ? formatTokenCount(inputTokens) : "–";
     }
 
     if (tokensOutCount) {
-        tokensOutCount.textContent = outputTokens > 0 ? formatTokenCount(outputTokens) : "-";
+        tokensOutCount.textContent = outputTokens > 0 ? formatTokenCount(outputTokens) : "–";
     }
 
     if (tokensIn) {

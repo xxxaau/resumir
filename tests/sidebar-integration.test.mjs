@@ -1180,3 +1180,20 @@ test("memòria cau - el primer clic reutilitza el resum desat (el preload de la 
         assert.match(h.document.getElementById("content").textContent, /Text de summary/);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Peu: ↑ enviats abans de ↓ rebuts, «–» inicial i el nom complet del model a l'indicador
+// ---------------------------------------------------------------------------
+test("peu - ↑ enviats abans de ↓ rebuts, valors inicials «–» i title amb el model", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        await h.flush(30);
+        const inEl = h.document.getElementById("tokens-in");
+        const outEl = h.document.getElementById("tokens-out");
+        assert.ok(inEl.compareDocumentPosition(outEl) & 4, "#tokens-in ha d'anar abans de #tokens-out"); // 4 = FOLLOWING
+        assert.equal(h.document.getElementById("tokens-in-count").textContent, "–");
+        assert.equal(h.document.getElementById("tokens-out-count").textContent, "–");
+        const sel = h.document.getElementById("model-select");
+        assert.ok(sel.title && sel.title.length > 3, "el selector porta el nom complet del model a title");
+    } finally { h.close(); }
+});
