@@ -111,11 +111,16 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ## Nivell 3 — Estratègia de producte
 
-> **Estat (2026-10-11):** Fases A–D fetes i, de la Fase E, la procedència (amb text enviat),
-> les pestanyes per tipus i l'avís de resum d'una altra pàgina (vegeu `git log`).
-> Les cites «(p. N)» dels PDF web ja enllacen amb `#page=N` (als PDF locals encara no, el visor propi no té enllaç per pàgina). Els segells de temps de YouTube també hi són (camins B, C i text pre-renderitzat; el rascat del DOM encara no en porta). Format i llargada ja són preferències de la configuració de Resum (no hi ha selector a la barra lateral: els refinadors «Més curt/Més detall» cobreixen l'ajust puntual). Les cites de la secció «Cites» ja es verifiquen literalment contra el text (✓/⚠ i enllaç al passatge). Queda estendre-ho als punts clau.
+> **Estat (2026-10-12):** les fases A–D són fetes i, de la Fase E, tot excepte el que
+> queda a la taula de sota (vegeu `git log`). Ja hi són: línia de procedència (amb
+> text enviat i avisos de text tallat / bàner de galetes), pestanyes per tipus, avís
+> de resum d'una altra pàgina, refinadors «Més curt / Més detall», drecera
+> Alt+Maj+S, cites `(p. N)` dels PDF web, marques `[m:ss]` de YouTube (camins B, C i
+> text pre-renderitzat; el rascat del DOM no en porta), format i llargada com a
+> preferències de Resum, i verificació literal de la secció «Cites».
 > Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
-> `npm run dev:chromium` abans de commitejar, i treure del pla el que es completi.
+> `npm run dev:chromium` + `npm run smoke:e2e` abans de commitejar, i treure del pla
+> el que es completi.
 
 La direcció és fer de Resumir el resumidor més **verificable**: el mercat ja ha
 convertit en mínim el xat de seguiment i els segells de temps, i la diferència ara
@@ -148,9 +153,7 @@ excepte on s'indica.
    rutes neutres), 2.5 responsiva, 2.6 historial). 2.1 i 2.2 primer: són el que
    veu un usuari nou. Captures noves per a les botigues després d'aquesta fase
    (`docs/SCREENSHOTS-GUIDE.md`).
-5. **Fase E — Confiança** (Nivell 3). Començar per la línia de procedència i les
-   pestanyes per tipus; les cites verificades només quan la procedència estigui
-   consolidada.
+5. **Fase E — Confiança** (Nivell 3): feta en bona part; queda el que consta a la taula.
 
 Si la i18n del backlog s'aborda, fer-la **després** de la passada de microcopy de
 la Fase C: traduir textos que encara s'han de reescriure duplica la feina.
