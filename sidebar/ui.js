@@ -22,7 +22,7 @@ function applyExtensionVisibility(config) {
 
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn) {
-        copyBtn.style.display = config.enableMarkdown ? "flex" : "none";
+        copyBtn.style.display = config.enableMarkdown !== false ? "flex" : "none";
     }
 
     const obsidianBtnEl = document.getElementById("obsidianBtn");

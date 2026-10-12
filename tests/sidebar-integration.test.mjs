@@ -1270,3 +1270,16 @@ test("errors - el codi intern va al final i atenuat, no al començament", async 
         assert.match(code.textContent, /codi 007/);
     } finally { h.close(); }
 });
+
+test("Copiar - activat per defecte (undefined) i s'amaga només si l'usuari l'ha desactivat", async () => {
+    const h1 = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        await h1.flush(30);
+        assert.notEqual(h1.document.getElementById("copyBtn").style.display, "none");
+    } finally { h1.close(); }
+    const h2 = await loadSidebar({ sync: { enableMarkdown: false }, local: { apiKey: "AIza_test" } });
+    try {
+        await h2.flush(30);
+        assert.equal(h2.document.getElementById("copyBtn").style.display, "none");
+    } finally { h2.close(); }
+});

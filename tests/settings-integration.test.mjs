@@ -117,12 +117,12 @@ test("interruptor de plugin - NO commiteja prompts ni la clau a mig editar", asy
         h.document.getElementById("systemPrompt").value = "edició a mig fer, sense desar";
         h.document.getElementById("apiKey").value = "AIza_a_mig_escriure";
 
-        h.document.getElementById("enableMarkdown").click();
+        h.document.getElementById("enableObsidian").click();
         await h.flush();
 
-        const sync = await h.storage.sync.get(["systemPrompt", "enableMarkdown"]);
+        const sync = await h.storage.sync.get(["systemPrompt", "enableObsidian"]);
         const local = await h.storage.local.get("apiKey");
-        assert.equal(sync.enableMarkdown, true, "L'interruptor sí que es desa");
+        assert.equal(sync.enableObsidian, true, "L'interruptor sí que es desa");
         assert.equal(sync.systemPrompt, "prompt desat", "El prompt a mig editar no s'ha de desar");
         assert.equal(local.apiKey, "AIza_desada", "La clau a mig escriure no s'ha de desar");
     } finally { h.close(); }
@@ -719,4 +719,11 @@ test("pestanya de plugin - capçalera amb enllaç a Plugins i interruptor lligat
         await h.flush(5);
         assert.ok(h.document.getElementById("tab-extensions").classList.contains("active"));
     } finally { h.close(); }
+});
+
+test("Markdown/Copiar - marcat per defecte; desmarcat només si l'usuari el va desactivar", async () => {
+    const h1 = await loadSettings({});
+    try { assert.equal(h1.document.getElementById("enableMarkdown").checked, true); } finally { h1.close(); }
+    const h2 = await loadSettings({ sync: { enableMarkdown: false } });
+    try { assert.equal(h2.document.getElementById("enableMarkdown").checked, false); } finally { h2.close(); }
 });

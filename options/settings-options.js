@@ -244,7 +244,7 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#summaryFormat").value = (syncData && syncData.summaryFormat) || "default";
     document.querySelector("#summaryLength").value = (syncData && syncData.summaryLength) || "medium";
 
-    document.querySelector("#enableMarkdown").checked = syncData && syncData.enableMarkdown === true;
+    document.querySelector("#enableMarkdown").checked = !(syncData && syncData.enableMarkdown === false);
     document.querySelector("#markdownTemplate").value = (syncData && syncData.markdownTemplate) || DEFAULT_MARKDOWN_TEMPLATE;
 
     document.querySelector("#enableObsidian").checked = syncData && syncData.enableObsidian === true;
