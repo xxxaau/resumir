@@ -275,11 +275,17 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // existeix, en lloc de gastar tokens per a res.
         const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache && currentMetadata.type === requestedType);
 
+        // Estil amb què es genera/reutilitza el resum (format|llargada de la configuració de Resum)
+        const styleKey = requestedType === "summary"
+            ? `${config.summaryFormat || "default"}|${config.summaryLength || "medium"}` : "";
+
         // El preload de la pàgina activa NO ha d'impedir reutilitzar la còpia desada (abans sí:
         // el primer clic regenerava sempre i gastava tokens); només els PDF locals en queden fora.
         if (!isRefresh && !refine && !hasLocalPdf && !overrideText) {
             const cachedEntry = await getSummaryCache(currentUrl, requestedType);
-            if (cachedEntry && cachedEntry.summary) {
+            // Una còpia generada amb un altre format/llargada (o sense estil = el per defecte) no val
+            const sameStyle = requestedType !== "summary" || (cachedEntry && (cachedEntry.style || "default|medium") === styleKey);
+            if (cachedEntry && cachedEntry.summary && sameStyle) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
                 currentMetadata.url = currentUrl;
                 currentMetadata.summary = cachedEntry.summary;
@@ -334,9 +340,26 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 }
 
 
+                // Mateix post-procés que en generar: enllaços (p. N)/[m:ss], procedència i refinadors
+                const proseCached = !isCachedConceptMap && !isCachedAnki && isProseType(requestedType);
+                if (proseCached) {
+                    if (typeof linkYoutubeTimes === "function") linkYoutubeTimes(contentDiv, currentMetadata.url);
+                    if (typeof linkPdfPages === "function") linkPdfPages(contentDiv, currentMetadata.url);
+                    if (typeof renderProvenance === "function") {
+                        renderProvenance({
+                            model: cachedEntry.model,
+                            inputTokens: cachedEntry.stats && cachedEntry.stats.input,
+                            outputTokens: cachedEntry.stats && cachedEntry.stats.output,
+                        });
+                    }
+                    if (typeof showRefiners === "function") showRefiners();
+                }
+
                 getPageContent().then(data => {
                     if (data && data.text) {
                         ctx.setSourceText(data.text);
+                        // Les cites es verifiquen quan arriba el text (la còpia desada no el porta)
+                        if (proseCached && typeof verifyQuotes === "function") verifyQuotes(contentDiv, data.text, currentMetadata.url);
                     }
                 }).catch(() => { /* background preload failed silently */ });
                 
@@ -613,8 +636,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary
             : isAnki ? "<!--anki-->\n" + currentMetadata.summary
             : currentMetadata.summary;
-        if (!ankiHasNoCards) {
-            await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens, contentType);
+        // Un refinat («Més curt»…) és una variant d'aquesta vegada: no trepitja el resum desat.
+        if (!ankiHasNoCards && !refine) {
+            await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens, contentType, styleKey || undefined);
         }
         await saveUsageStats(inputTokens, outputTokens, contentType, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
         

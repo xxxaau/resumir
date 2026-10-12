@@ -1533,3 +1533,72 @@ test("PDF local - en obrir un segon PDF, el del visor anterior s'esborra de stor
         assert.equal(keys.length, 1, `només ha de quedar el PDF del visor actual: ${keys}`);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Revisió: memòria cau i preferències d'estil, refinats, i post-procés del camí desat
+// ---------------------------------------------------------------------------
+test("memòria cau - una còpia generada amb un altre estil no es reutilitza", async () => {
+    const url = "https://example.com/article";
+    const h = await loadSidebar({
+        sync: { summaryFormat: "tldr" },
+        local: { apiKey: "AIza_test", ...seedTypes(url, ["summary"]) },     // sense estil = «default|medium»
+        pageText: "Un article. ".repeat(30),
+        modelReply: "TL;DR nou.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1, "ha de regenerar amb el format nou");
+        assert.match(h.document.getElementById("content").textContent, /TL;DR nou/);
+        const saved = (await h.storage.local.get(`summary_cache:${url}:summary`))[`summary_cache:${url}:summary`];
+        assert.equal(saved.style, "tldr|medium", "la còpia desada recorda l'estil");
+    } finally { h.close(); }
+});
+
+test("refinadors - el refinat no trepitja el resum desat", async () => {
+    let n = 0;
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: async (u, o) => slowReplyHandler(n++ === 0 ? "Resum normal." : "Resum curt.", 5)(u, o),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        await sleep(30);
+        h.document.getElementById("refine-shorter").click();
+        await h.flush(30);
+        await sleep(30);
+        assert.match(h.document.getElementById("content").textContent, /Resum curt/);
+        const key = "summary_cache:https://example.com/article:summary";
+        assert.match((await h.storage.local.get(key))[key].summary, /Resum normal/, "el desat continua sent el normal");
+    } finally { h.close(); }
+});
+
+test("camí desat - també enllaça [m:ss], mostra la procedència i els refinadors, i verifica les cites", async () => {
+    const yt = "https://www.youtube.com/watch?v=abc123XYZ_0";
+    const local = { summary_cache_index: [] };
+    const key = `summary_cache:${yt}:summary`;
+    local[key] = {
+        url: yt, title: "Vídeo", model: "gemini-2.5-flash", timestamp: new Date().toISOString(), version: "1.0",
+        stats: { input: 900, output: 60 }, type: "summary", style: "default|medium",
+        summary: "Idea [1:05].\n\n### Cites\n- «Frase literal del vídeo que consta.»\n- «Frase que no consta enlloc.»",
+    };
+    local.summary_cache_index.push(key);
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...local },
+        tabs: [{ id: 1, url: yt, title: "Vídeo", active: true }],
+        pageText: "[TRANSCRIPT]\n\n[0:00] Hola. Frase literal del vídeo que consta. " + "més ".repeat(40),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 0);
+        assert.ok(h.document.querySelector("#content a[data-yt-time]"), "enllaç de temps");
+        assert.ok(!h.document.getElementById("provenance").classList.contains("hidden"), "procedència");
+        assert.ok(!h.document.getElementById("refiners").classList.contains("hidden"), "refinadors");
+        await h.flush(10);
+        assert.equal(h.document.querySelectorAll("#content .quote-ok").length, 1, "una cita verificada");
+        assert.equal(h.document.querySelectorAll("#content .quote-warn").length, 1, "una que no consta");
+    } finally { h.close(); }
+});

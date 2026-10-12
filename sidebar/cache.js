@@ -81,7 +81,7 @@ async function getSummaryCache(url, type) {
     }
 }
 
-async function saveSummaryCache(url, title, summary, modelName, inputTokens, outputTokens, type) {
+async function saveSummaryCache(url, title, summary, modelName, inputTokens, outputTokens, type, style) {
     if (!type) type = "summary";
     try {
         const cacheKey = getCacheKey(url, type);
@@ -95,6 +95,9 @@ async function saveSummaryCache(url, title, summary, modelName, inputTokens, out
             stats: { input: inputTokens, output: outputTokens },
             type: type,
         };
+        // Preferències d'estil (format|llargada) amb què es va generar: una còpia generada amb
+        // unes altres no s'ha de reutilitzar com si fos la d'ara.
+        if (style) cacheEntry.style = style;
 
         const cacheIndex = await getSummaryCacheIndex();
         if (!cacheIndex.includes(cacheKey)) {
