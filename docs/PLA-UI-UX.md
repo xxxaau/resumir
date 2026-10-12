@@ -109,11 +109,10 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
     decidir-ho amb la decisió de nomenclatura del Nivell 1.
   - Agrupar la llista de plugins (Generar / Exportar / Llegir / Fonts) amb etiqueta
     «Cal configurar» a Obsidian i Anki si no tenen vault.
-  - La insígnia «Personalitzat» queda en una línia a part: posar-la a la fila de l'etiqueta.
   - Targetes de plugins massa estretes entre 720 i 1000 px (controls sota la
     descripció a 960 px, marge de 32 px, ombra de desplaçament al menú horitzontal).
   - Obsidian: textos repetits sobre els claudàtors, «Vault» en anglès, text d'exemple
-    que sembla un valor, explicar `{{summary_executive}}`.
+    que sembla un valor.
   - Anki: «Fer servir el vault d'Obsidian» per defecte (camp propi només si es desmarca).
 - **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
   sense desar + `beforeunload`, però no desat automàtic; decidir si cal.

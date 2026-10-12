@@ -1081,3 +1081,6 @@ input:checked + .slider:before {
 }
 .advanced-prompt > summary { cursor: pointer; font-weight: 600; }
 .advanced-prompt[open] > summary { margin-bottom: 12px; }
+
+/* La insígnia «Personalitzat» va a la fila de l'etiqueta, no en una línia a part */
+.form-group > label:has(+ .prompt-badge) { display: inline-block; margin-right: 8px; }

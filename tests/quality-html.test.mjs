@@ -200,3 +200,14 @@ test("Aprofundir: la icona és la lupa (la mateixa que les pestanyes), no un «+
         assert.doesNotMatch(svg.innerHTML, /M12 4v16m8-8H4/, `${file}: sense el «+»`);
     }
 });
+
+test("settings: les plantilles expliquen cada camp ({{summary_executive}} inclòs)", () => {
+    const doc = load("options/settings.html");
+    for (const id of ["tab-obsidian", "tab-markdown"]) {
+        const legend = doc.querySelector(`#${id} .field-legend`);
+        // el primer .field-legend d'Obsidian és el de dates; busquem el que parla de camps de plantilla
+        const all = [...doc.querySelectorAll(`#${id} .field-legend`)].map(e => e.textContent.replace(/\s+/g, " "));
+        assert.ok(all.some(t => /summary_executive.*paràgraf inicial/.test(t)), `${id}: explica {{summary_executive}}`);
+        assert.ok(legend);
+    }
+});
