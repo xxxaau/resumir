@@ -275,7 +275,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // existeix, en lloc de gastar tokens per a res.
         const isRefresh = (!hasLocalPdf && currentMetadata.url === currentUrl && currentMetadata.fromCache && currentMetadata.type === requestedType);
 
-        if (!isRefresh && !refine && !pageData && !overrideText) {
+        // El preload de la pàgina activa NO ha d'impedir reutilitzar la còpia desada (abans sí:
+        // el primer clic regenerava sempre i gastava tokens); només els PDF locals en queden fora.
+        if (!isRefresh && !refine && !hasLocalPdf && !overrideText) {
             const cachedEntry = await getSummaryCache(currentUrl, requestedType);
             if (cachedEntry && cachedEntry.summary) {
                 currentMetadata.title = cachedEntry.title || tabs[0].title;
