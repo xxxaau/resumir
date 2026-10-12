@@ -82,8 +82,6 @@ unificar el disseny dels dos.
 
 ### Pendent de microcopy
 
-- Codis interns (`[007]`, `[PDF-013]`) al final del missatge i en gris; `[003]`
-  duplicat.
 - **Decisió pendent:** «Validació científica» i «Explica-ho fàcil» són noms de
   funcionalitat, no verbs de botó; dir explícitament si la regla de l'infinitiu
   s'hi aplica.

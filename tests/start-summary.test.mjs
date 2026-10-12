@@ -167,8 +167,8 @@ test("startSummary - mostra error [001] si no hi ha API key", async () => {
     const ctx = makeCtx();
     await startSummary(ctx, null, false, false, true);
     assert.ok(
-        ctx.errorDiv.textContent.includes("[001]"),
-        `errorDiv ha de contenir [001], té: "${ctx.errorDiv.textContent}"`
+        ctx.errorDiv.textContent.includes("clau d'API"),
+        `errorDiv ha d'explicar que falta la clau (codi 001 al final), té: "${ctx.errorDiv.textContent}"`
     );
     assert.ok(!ctx.errorDiv.classList.contains("hidden"), "errorDiv ha de ser visible");
 });
@@ -193,8 +193,8 @@ test("startSummary - mostra error [002] si no hi ha pestanya activa", async () =
     });
     const ctx = makeCtx();
     await startSummary(ctx, null, false, false, true);
-    assert.ok(ctx.errorDiv.textContent.includes("[002]"),
-        `errorDiv ha de contenir [002], té: "${ctx.errorDiv.textContent}"`);
+    assert.ok(ctx.errorDiv.textContent.includes("pestanya activa"),
+        `errorDiv ha d'explicar que no hi ha pestanya activa (codi 002 al final), té: "${ctx.errorDiv.textContent}"`);
 });
 
 // ---------------------------------------------------------------------------
@@ -827,7 +827,7 @@ test("startSummary - sense clau i SENSE targeta d'onboarding: continua mostrant 
     await syncMock.set({ modelName: "gemini-2.0-flash" });
     const ctx = makeCtx();
     await startSummary(ctx, null, false, false, true);
-    assert.ok(ctx.errorDiv.textContent.includes("[001]"));
+    assert.ok(ctx.errorDiv.textContent.includes("clau d'API"));
 });
 
 // ---------------------------------------------------------------------------

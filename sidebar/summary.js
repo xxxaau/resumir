@@ -565,7 +565,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             // missatge ha de reflectir l'error real (503, timeout, 404…), no
             // dir «torna demà» davant d'una caiguda passatgera del servei.
             if (sawQuotaError) {
-                throw new Error("[003] Tots els models disponibles han fallat (manca de quota). Si us plau, proveu-ho més tard.");
+                throw new Error("[005] Tots els models disponibles han fallat (manca de quota). Prova-ho més tard.");
             }
             throw lastError;
         }
@@ -646,7 +646,16 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 return abortController;
             }
             const errorInfo = classifyError(err);
-            errorDiv.textContent = errorInfo.message;
+            // El codi intern ([007], [PDF-013]) va al final i atenuat: és per a qui ho vulgui
+            // citar en un informe, no el que l'usuari ha de llegir primer.
+            const codeMatch = /^\[([A-Z]*-?\d+)\]\s*/.exec(errorInfo.message);
+            errorDiv.textContent = codeMatch ? errorInfo.message.slice(codeMatch[0].length) : errorInfo.message;
+            if (codeMatch) {
+                const code = document.createElement("span");
+                code.className = "error-code";
+                code.textContent = ` (codi ${codeMatch[1]})`;
+                errorDiv.appendChild(code);
+            }
             errorDiv.classList.remove("hidden");
             if (errorInfo.details) {
                 const det = document.createElement("details");

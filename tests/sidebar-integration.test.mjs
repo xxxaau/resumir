@@ -1248,3 +1248,25 @@ test("error 400 - missatge en català amb un «Detalls» plegable amb el text or
         assert.match(details.textContent, /invalid argument/);
     } finally { h.close(); }
 });
+
+test("errors - el codi intern va al final i atenuat, no al començament", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: async () => ({
+            ok: false, status: 418, statusText: "Teapot",
+            headers: { get: () => "application/json" },
+            json: async () => ({ error: { message: "Sóc una tetera" } }),
+        }),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(40);
+        const err = h.document.getElementById("error");
+        assert.doesNotMatch(err.textContent.trim(), /^\[\d+\]/, "no ha de començar per [007]");
+        assert.match(err.textContent, /Sóc una tetera/);
+        const code = err.querySelector(".error-code");
+        assert.ok(code, "el codi surt en un span atenuat");
+        assert.match(code.textContent, /codi 007/);
+    } finally { h.close(); }
+});

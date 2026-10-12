@@ -1561,3 +1561,6 @@ body {
 .error-details { margin-top: 8px; font-size: 0.85em; }
 .error-details summary { cursor: pointer; }
 .error-details pre { white-space: pre-wrap; word-break: break-word; margin: 6px 0 0; }
+
+/* Codi intern d'un error, al final i atenuat */
+.error-code { opacity: 0.7; font-size: 0.85em; white-space: nowrap; }
