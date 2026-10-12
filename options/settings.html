@@ -159,25 +159,6 @@
 
         <div class="section">
           <div class="form-group">
-            <label for="systemPrompt"
-              >Instruccions de l'assistent</label
-            >
-            <span id="systemPromptBadge" class="prompt-badge" hidden>Personalitzat</span>
-            <textarea
-              id="systemPrompt"
-              class="form-control"
-              rows="20"
-              placeholder="Instruccions pel model..."
-            ></textarea>
-            <div class="help-text">
-              Defineix com vols que es comporti l'assistent (idioma, to,
-              longitud).
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="form-group">
             <label for="summaryFormat">Format del resum</label>
             <select id="summaryFormat" class="form-control">
               <option value="default">Per defecte (paràgraf i punts clau)</option>
@@ -195,6 +176,25 @@
             </select>
             <div class="help-text">
               S'afegeix com a instrucció extra al resum. Només afecta el plugin Resum; a la barra lateral, «Més curt» i «Més detall» ho ajusten resum a resum.
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="form-group">
+            <label for="systemPrompt"
+              >Instruccions de l'assistent</label
+            >
+            <span id="systemPromptBadge" class="prompt-badge" hidden>Personalitzat</span>
+            <textarea
+              id="systemPrompt"
+              class="form-control"
+              rows="20"
+              placeholder="Instruccions pel model..."
+            ></textarea>
+            <div class="help-text">
+              Defineix com vols que es comporti l'assistent (idioma, to,
+              longitud).
             </div>
           </div>
         </div>
