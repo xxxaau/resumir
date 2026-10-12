@@ -50,13 +50,13 @@ ext.runtime.onInstalled.addListener(async (_details) => {
   await ext.menus.removeAll();
   ext.menus.create({
     id: "summarize-selection",
-    title: "Resumir text seleccionat",
+    title: "Resumir la selecció",
     contexts: ["selection"]
   });
   ext.menus.create({
     id: "summarize-page",
-    title: "Resumir",
-    contexts: ["page", "all"]
+    title: "Resumir aquesta pàgina",
+    contexts: ["page", "frame"]
   });
 });
 

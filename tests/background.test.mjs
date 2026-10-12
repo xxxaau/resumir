@@ -298,3 +298,14 @@ test("background: una altra drecera no fa res", async () => {
     await listeners.command("altra", { windowId: 7, url: "https://example.com/a" });
     assert.equal(sidebarCalls.open.length, 0);
 });
+
+test("background: menú contextual - títols clars i la pàgina no es duplica amb la selecció ni surt sobre enllaços/imatges", async () => {
+    resetCalls();
+    await listeners.onInstalled({ reason: "install" });
+    const page = menusCalls.create.find(m => m.id === "summarize-page");
+    const sel = menusCalls.create.find(m => m.id === "summarize-selection");
+    assert.equal(page.title, "Resumir aquesta pàgina");
+    assert.equal(sel.title, "Resumir la selecció");
+    assert.ok(!page.contexts.includes("all"), "«all» el feia sortir sobre qualsevol element");
+    assert.deepEqual([...page.contexts].sort(), ["frame", "page"]);
+});
