@@ -7,6 +7,24 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+### Afegit
+- **Línia de procedència sota el resum:** quantes paraules s'han enviat, amb quin
+  model i quants tokens; avisa si el text s'ha tallat o sembla un bàner de galetes
+  i porta l'enllaç «Veure el text enviat».
+- **Pestanyes per tipus** amb els resums desats de la pàgina, i avís quan el
+  resum visible és d'una altra pestanya.
+- **Refinadors «Més curt» i «Més detall»** sota el resum.
+- **Drecera de teclat Alt+Maj+S** per obrir Resumir i resumir la pàgina.
+- **Enllaços als orígens:** `(p. N)` als PDF web i `[m:ss]` als vídeos de YouTube
+  (el vídeo salta a aquell moment); les cites de la secció «Cites» es verifiquen
+  literalment contra el text i enllacen amb el passatge.
+- **Format i llargada del resum** com a preferències a la configuració de Resum.
+- **Configuració:** descripció «Què fa i com configurar-lo» a cada plugin, prompts
+  plegats sota «avançat», capçalera comuna amb interruptor, vista prèvia en directe
+  a la lectura biònica i avís de «nova versió del prompt» també per a Resum i Anki.
+- **Estat en repòs** amb la pàgina activa i els resums ja desats; filtre per tipus
+  a l'historial.
+
 ### Arreglat
 - **El botó «Atura» ara atura de veritat.** L'`AbortController` no arribava
   a la sidebar fins que la generació ja havia acabat, de manera que clicar
@@ -53,6 +71,18 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Prompts per defecte revisats** (resum, aprofundiment, validació científica,
+  mapa conceptual, explica-ho fàcil i Anki): no inventen, diuen «no hi ha prou
+  contingut» en pàgines buides i la validació científica ja no demana referències
+  que el model no pot verificar. Si no els havies editat, reben els nous sols; si
+  els havies personalitzat, veuràs l'avís de «nova versió».
+- **Copiar apareix activat per als usuaris nous.** Qui ja havia desat la configuració
+  conserva la seva elecció.
+- **Menú contextual:** «Resumir aquesta pàgina» i «Resumir la selecció», i ja no
+  surt sobre enllaços ni imatges.
+- **Mapa conceptual:** la roda desplaça el mapa i Ctrl+roda l'amplia; també es pot
+  arrossegar amb el dit. Els errors 400 de Google es mostren en català amb un
+  «Detalls» plegable, i el codi intern va al final.
 - **Catàleg de models de Gemini actualitzat** (2026-08-09): preus i
   disponibilitat sincronitzats amb la documentació oficial de Google
   (ai.google.dev, actualitzada 2026-08-05). S'afegeixen `gemini-3.6-flash`,

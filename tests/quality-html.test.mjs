@@ -225,3 +225,19 @@ test("settings: amplades mitjanes (721–1000 px) amb controls sota la descripci
     const doc = load("options/settings.html");
     assert.doesNotMatch(doc.body.textContent, /Verifica afirmacions amb rigor acadèmic/, "la targeta de Ciència no promet més del que pot donar");
 });
+
+test("build: cap script que carreguen settings.html o pdf-viewer.html es pot esborrar del ZIP", () => {
+    // build.mjs elimina els JS de sidebar/ que van dins del bundle; si una altra pàgina
+    // en carrega un, la versió empaquetada el perd (va passar amb ../sidebar/utils.js).
+    const build = readFileSync(resolve(ROOT, "scripts/build.mjs"), "utf8");
+    const removable = new Set([...build.match(/const sidebarFiles = \[([^\]]+)\]/)[1].matchAll(/"([\w-]+\.js)"/g)].map(m => m[1]));
+    const keep = new Set([...(build.match(/KEEP_IN_ZIP = new Set\(\[([^\]]*)\]/)?.[1] || "").matchAll(/"([\w-]+\.js)"/g)].map(m => m[1]));
+    for (const [page, dir] of [["options/settings.html", "options"], ["sidebar/pdf-viewer.html", "sidebar"]]) {
+        const html = readFileSync(resolve(ROOT, page), "utf8");
+        for (const m of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
+            const resolved = resolve(ROOT, dir, m[1]).replace(ROOT + "/", "");
+            const m2 = /^sidebar\/([\w-]+\.js)$/.exec(resolved);
+            if (m2 && removable.has(m2[1])) assert.ok(keep.has(m2[1]), `${page} carrega ${resolved}, que la build esborra del ZIP (afegeix-lo a KEEP_IN_ZIP)`);
+        }
+    }
+});

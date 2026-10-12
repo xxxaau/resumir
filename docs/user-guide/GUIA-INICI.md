@@ -40,6 +40,12 @@ La clau es desa **només al teu ordinador**.
 2. Obre Resumir des de la icona de l'extensió.
 3. Clica **«Resum»**. En uns segons el tindràs.
 
+Drecera: **Alt+Maj+S** obre Resumir i resumeix la pàgina actual (la pots canviar
+des de la gestió de dreceres del navegador). Sota cada resum veuràs de quant text
+parteix, amb quin model, i els botons **«Més curt»** i **«Més detall»**; als
+vídeos i als PDF, les marques de temps i de pàgina són enllaços, i les cites de la
+secció «Cites» es comproven contra el text original (✓ / ⚠).
+
 ---
 
 ## Què pots fer

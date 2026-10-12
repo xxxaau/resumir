@@ -180,23 +180,19 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | --- | --- | --- | --- | --- |
 | Barra lateral | El selector de model mostra el model d'una entrada en memòria cau però la següent petició usa el desat | `summary.js:232-241` | Mitjana | S |
 | Barra lateral | L'avís de prompt nou bloqueja l'acció: només es genera en clicar × (Tancar) | `sidebar.js:342-381` | Mitjana | S |
-| Barra lateral | Aturar deixa el text parcial cru i permet exportar-lo sense marca «incomplet» | `summary.js:481-501` | Mitjana | S |
 | Barra lateral | Obrir l'historial durant la generació amaga el botó d'aturar; el stream continua invisible | `history.js:13,24` | Mitjana | S |
 | Barra lateral | Copiar i Obsidian exporten el JSON cru d'Anki i l'esquema del mapa | `sidebar.js:256-303` | Baixa | S |
 | Barra lateral | El cost ja es pot calcular (`getCuratedModelInfo`) però només l'usen els tests | `api.js:24-47` | Baixa | S |
 | Barra lateral | El mapa d'errors PDF està duplicat i ja ha divergit; no diu el límit de pàgines | `sidebar.js:228-234`, `content.js:259-267` | Baixa | S |
 | Barra lateral | Sense `max-width` del text en panells amples; enllaços amb `word-break: break-all` | `sidebar.css:159,167` | Baixa | S |
 | Barra lateral | CSS mort i regles duplicades (`#water-indicator`, `#timelineCleanerBtn`, `__rgba_primary_weak__`) | `sidebar.css:258-283,424,798` | Baixa | S |
-| Configuració | Els valors per defecte de `systemPrompt`, `ankiPrompt` i plantilles es congelen en el primer desat | `settings-options.js:16-58` | Mitjana | M |
 | Configuració | «Restaurar» sobreescriu un prompt llarg sense confirmació i, des de l'avís, desa tota la pàgina | `settings-options.js:168-212`, `settings.js:69-71` | Mitjana | S |
 | Configuració | Botons Amunt/Avall amb el mateix nom per a tots els plugins; en pujar es perd el focus (es mou l'element enfocat), en baixar no, i en desactivar-se als extrems també | `settings-order.js:61-95` | Mitjana | M |
-| Configuració | Un prompt massa gran fa fallar tot el desat amb un error genèric (quota per element de `storage.sync`) | `settings-options.js:72-81` | Baixa | S |
 | Configuració | Les estadístiques d'ús es desen però no es mostren ni es poden reiniciar | `storage.local` | Baixa | M |
 | Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
 | Historial de canvis | Entrades de desenvolupador (CI, npm, Defuddle), totes les versions desplegades, avís de seguretat enterrat | `settings.html:1252-1310` | Mitjana | S |
 | Mapa conceptual | L'export PNG només captura els nodes desplegats (per defecte, nivells 0–1) sense dir-ho | `markmap-native.js:666-720` | Mitjana | M |
-| Mapa conceptual | La roda sempre fa zoom: al trackpad no es pot desplaçar ni fer scroll del panell | `markmap-native.js:581-595` | Mitjana | S |
-| Mapa conceptual | No hi ha botó d'ajustar a la vista; només mouse (sense pointer/touch) | `conceptmap.js:266-282` | Mitjana | S–M |
+| Mapa conceptual | No hi ha botó d'ajustar a la vista | `conceptmap.js:266-282` | Mitjana | S–M |
 | Mapa conceptual | Pantalla completa impossible des d'un PDF local, amb un consell enganyador | `conceptmap.js:349-391` | Mitjana | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial | `conceptmap.js:398-405` | Baixa | S |
 | Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |
