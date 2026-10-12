@@ -22,11 +22,26 @@ const failures = [];
 const check = (ok, msg) => { console.log(`${ok ? "OK  " : "FAIL"} ${msg}`); if (!ok) failures.push(msg); };
 
 const ARTICLE = `<!doctype html><html><head><title>Article de prova</title></head><body><article><h1>Article de prova</h1>${"<p>La fusió nuclear imita el procés que alimenta les estrelles. Els investigadors han obtingut resultats prometedors amb el confinament magnètic del plasma a temperatures extremes.</p>".repeat(12)}</article></body></html>`;
-const REPLY = "La fusió nuclear imita les estrelles.\n\n### Punts clau\n- Confinament magnètic del plasma\n- Resultats prometedors";
+const REPLY = "La fusió nuclear imita les estrelles.\n\n### Punts clau\n- Confinament magnètic del plasma\n- Resultats prometedors\n\n### Cites\n- «La fusió nuclear imita el procés que alimenta les estrelles.»\n- «Aquesta frase no surt a l'article original enlloc.»";
+
+// Chromium: CHROMIUM_PATH, el de la versió de Playwright o, si no s'ha descarregat,
+// qualsevol altre de la memòria cau de Playwright (les extensions només van en Chromium).
+function findChromium() {
+    if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
+    if (fs.existsSync(chromium.executablePath())) return undefined;
+    const cache = path.join(os.homedir(), "Library", "Caches", "ms-playwright");
+    if (!fs.existsSync(cache)) return undefined;
+    for (const d of fs.readdirSync(cache).filter(n => /^chromium-\d+$/.test(n)).sort().reverse()) {
+        const exe = path.join(cache, d, "chrome-mac-arm64", "Google Chrome for Testing.app", "Contents", "MacOS", "Google Chrome for Testing");
+        if (fs.existsSync(exe)) return exe;
+    }
+    return undefined;
+}
+const exe = findChromium();
 
 const ctx = await chromium.launchPersistentContext(path.join(OUT, "profile"), {
     headless: false,
-    ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
+    ...(exe ? { executablePath: exe } : {}),
     args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, "--headless=new"],
 });
 try {
@@ -42,7 +57,7 @@ try {
         }
         return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ models: [] }) });
     });
-    await ctx.route("https://example.com/**", route => route.fulfill({ status: 200, contentType: "text/html", body: ARTICLE }));
+    await ctx.route("https://example.com/**", route => route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body: ARTICLE }));
 
     const tabA = await ctx.newPage();
     await tabA.goto("https://example.com/article");
@@ -67,6 +82,10 @@ try {
     const prov = await page.textContent("#provenance");
     check(/Basat en \d+ paraules/.test(prov) && /tokens/.test(prov), `línia de procedència («${prov.trim().slice(0, 60)}…»)`);
     check(await page.isVisible("#refiners"), "refinadors visibles");
+    check(await page.locator("#content .quote-ok").count() === 1 && await page.locator("#content .quote-warn").count() === 1, "cites verificades: 1 ✓ i 1 ⚠");
+    const quoteLink = page.locator("#content a.quote-link");
+    check(await quoteLink.count() === 1 && (await quoteLink.getAttribute("href")).includes("#:~:text="), "la cita verificada enllaça amb el passatge");
+    check(await page.isVisible("#copyBtn"), "Copiar visible per defecte");
     check((await page.textContent("#content")).includes("Confinament magnètic"), "el resum es mostra");
     await page.screenshot({ path: path.join(OUT, "1-summary.png") });
 
