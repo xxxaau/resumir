@@ -218,3 +218,10 @@ test("barra lateral: scroll-padding perquè la barra i el peu fixos no tapin el 
     assert.match(rule, /scroll-padding-top:[^;]*--toolbar-height/);
     assert.match(rule, /scroll-padding-bottom:/);
 });
+
+test("settings: amplades mitjanes (721–1000 px) amb controls sota la descripció dels plugins", () => {
+    const css = readFileSync(resolve(ROOT, "options/settings.css"), "utf8");
+    assert.match(css, /@media \(min-width: 721px\) and \(max-width: 1000px\)/);
+    const doc = load("options/settings.html");
+    assert.doesNotMatch(doc.body.textContent, /Verifica afirmacions amb rigor acadèmic/, "la targeta de Ciència no promet més del que pot donar");
+});

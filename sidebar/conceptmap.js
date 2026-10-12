@@ -833,7 +833,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                     tg.setAttribute('tabindex', '0');
                     tg.setAttribute('role', 'button');
                     const tgLbl = (node.label || node.text || '').slice(0, 60);
-                    tg.setAttribute('aria-label', (node.fold ? 'Desplega' : 'Plega') + (tgLbl ? ': ' + tgLbl : ''));
+                    tg.setAttribute('aria-label', (node.fold ? 'Desplegar' : 'Plegar') + (tgLbl ? ': ' + tgLbl : ''));
                     const cx = node._width + 10;
                     const cy = node._height / 2;
 

@@ -102,8 +102,7 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
     decidir-ho amb la decisió de nomenclatura del Nivell 1.
   - Agrupar la llista de plugins (Generar / Exportar / Llegir / Fonts) amb etiqueta
     «Cal configurar» a Obsidian i Anki si no tenen vault.
-  - Targetes de plugins massa estretes entre 720 i 1000 px (controls sota la
-    descripció a 960 px, marge de 32 px, ombra de desplaçament al menú horitzontal).
+  - Ombra de desplaçament al menú horitzontal (<720 px) perquè es vegi que es pot desplaçar.
   - Obsidian: textos repetits sobre els claudàtors, «Vault» en anglès, text d'exemple
     que sembla un valor.
   - Anki: «Fer servir el vault d'Obsidian» per defecte (camp propi només si es desmarca).

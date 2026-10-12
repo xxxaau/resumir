@@ -1084,3 +1084,27 @@ input:checked + .slider:before {
 
 /* La insígnia «Personalitzat» va a la fila de l'etiqueta, no en una línia a part */
 .form-group > label:has(+ .prompt-badge) { display: inline-block; margin-right: 8px; }
+
+/* ── Amplades mitjanes (721–1000 px): el menú de 240 px + 60 px de marge deixaven la
+   descripció de cada plugin en una columna de 2-3 paraules; els controls baixen sota
+   la descripció i el marge es redueix. ───────────────────────────────────────── */
+@media (min-width: 721px) and (max-width: 1000px) {
+  .main-content {
+    padding: 32px 32px;
+  }
+
+  .extension-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .extension-info {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  .extension-actions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
