@@ -120,7 +120,12 @@ function applySettingsHash() {
     if (focus) {
         const el = document.getElementById(focus);
         // Només s'enfoca si és visible (dins la pestanya activa)
-        if (el && el.closest(".tab-pane.active")) el.focus();
+        if (el && el.closest(".tab-pane.active")) {
+            // Si és dins d'un bloc plegat (prompts avançats), l'obre abans d'enfocar
+            const details = el.closest("details");
+            if (details) details.open = true;
+            el.focus();
+        }
     }
 }
 

@@ -31,6 +31,9 @@ function updatePromptBadges() {
     const el = document.querySelector("#" + id);
     const badge = document.querySelector(`#${id}Badge`);
     if (el && badge) badge.hidden = el.value === getDefault();
+    // Personalitzat = no es pot perdre de vista: el bloc plegat s'obre (mai es tanca sol)
+    const details = document.getElementById(id + "Details");
+    if (details && badge && !badge.hidden) details.open = true;
   }
 }
 

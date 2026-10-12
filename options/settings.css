@@ -1071,3 +1071,13 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 .plugin-back:hover { text-decoration: underline; }
+
+/* Prompts sota «Personalitzar les instruccions (avançat)» */
+.advanced-prompt {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+}
+.advanced-prompt > summary { cursor: pointer; font-weight: 600; }
+.advanced-prompt[open] > summary { margin-bottom: 12px; }

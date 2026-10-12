@@ -727,3 +727,28 @@ test("Markdown/Copiar - marcat per defecte; desmarcat només si l'usuari el va d
     const h2 = await loadSettings({ sync: { enableMarkdown: false } });
     try { assert.equal(h2.document.getElementById("enableMarkdown").checked, false); } finally { h2.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Revelació progressiva: els prompts, plegats sota «Personalitzar (avançat)»
+// ---------------------------------------------------------------------------
+test("prompts plegats per defecte; s'obren si estan personalitzats o en arribar-hi per enllaç", async () => {
+    const h = await loadSettings({ sync: { sciencePrompt: "el meu prompt" } });
+    try {
+        const d = (id) => h.document.getElementById(id + "Details");
+        assert.equal(d("systemPrompt").open, false, "per defecte, plegat");
+        assert.equal(d("sciencePrompt").open, true, "personalitzat: obert perquè es vegi la insígnia");
+
+        // Editar-lo a mà el deixa personalitzat → s'obre (no es pot perdre de vista)
+        const area = h.document.getElementById("simplePrompt");
+        area.value = "una altra cosa";
+        area.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        assert.equal(d("simplePrompt").open, true);
+
+        // Enllaç profund al camp: s'obre i s'hi enfoca
+        h.window.location.hash = "#tab=deepdive&focus=deepDivePrompt";
+        h.window.dispatchEvent(new h.window.Event("hashchange"));
+        await h.flush(5);
+        assert.equal(d("deepDivePrompt").open, true);
+        assert.equal(h.document.activeElement.id, "deepDivePrompt");
+    } finally { h.close(); }
+});

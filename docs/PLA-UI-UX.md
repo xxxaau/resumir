@@ -103,9 +103,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
 ### 2.4 Configuració
 
-- **Revelació progressiva:** plegar els prompts sota «Personalitzar instruccions
-  (avançat)» (la insígnia «Personalitzat» i el bloqueig de prompt buit ja hi són;
-  els prompts per defecte no tenen variables, no cal llegenda).
 - **Descripció detallada de cada plugin:** feta a totes les pàgines de plugin (bloc «Què fa i com configurar-lo»); queda la targeta **Resum** i els plugins que cap pàgina cobreix.
 - **Revisió de la interfície de configuració amb Opus:** auditoria completa de
   `options/` (jerarquia, densitat, textos, a11y, mòbil/estret, coherència amb la

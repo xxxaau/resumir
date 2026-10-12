@@ -181,7 +181,9 @@
         </div>
 
         <div class="section">
-          <div class="form-group">
+          <details class="advanced-prompt" id="systemPromptDetails">
+            <summary>Personalitzar les instruccions (avançat)</summary>
+            <div class="form-group">
             <label for="systemPrompt"
               >Instruccions de l'assistent</label
             >
@@ -197,6 +199,7 @@
               longitud).
             </div>
           </div>
+          </details>
         </div>
 
         <div class="section-actions">
@@ -1023,7 +1026,9 @@
           </div>
         </div>
         <div class="section">
-          <div class="form-group">
+          <details class="advanced-prompt" id="deepDivePromptDetails">
+            <summary>Personalitzar les instruccions (avançat)</summary>
+            <div class="form-group">
             <label for="deepDivePrompt">Prompt d'aprofundiment</label>
             <span id="deepDivePromptBadge" class="prompt-badge" hidden>Personalitzat</span>
             <textarea
@@ -1037,6 +1042,7 @@
               detallada.
             </div>
           </div>
+          </details>
           <div class="section-actions">
             <button id="saveDeepDive" class="btn btn-primary">Desar</button>
             <button id="resetDeepDive" class="btn btn-secondary">Restaurar</button>
@@ -1067,7 +1073,9 @@
           </div>
         </div>
         <div class="section">
-          <div class="form-group">
+          <details class="advanced-prompt" id="sciencePromptDetails">
+            <summary>Personalitzar les instruccions (avançat)</summary>
+            <div class="form-group">
             <label for="sciencePrompt">Prompt de validació científica</label>
             <span id="sciencePromptBadge" class="prompt-badge" hidden>Personalitzat</span>
             <textarea
@@ -1081,6 +1089,7 @@
               usant evidència científica enllaçada.
             </div>
           </div>
+          </details>
           <div class="section-actions">
             <button id="saveScience" class="btn btn-primary">Desar</button>
             <button id="resetScience" class="btn btn-secondary">Restaurar</button>
@@ -1207,7 +1216,9 @@
           </div>
         </div>
         <div class="section">
-          <div class="form-group">
+          <details class="advanced-prompt" id="conceptMapPromptDetails">
+            <summary>Personalitzar les instruccions (avançat)</summary>
+            <div class="form-group">
             <label for="conceptMapPrompt">Prompt del mapa conceptual</label>
             <span id="conceptMapPromptBadge" class="prompt-badge" hidden>Personalitzat</span>
             <textarea
@@ -1220,6 +1231,7 @@
               Instruccions que s'enviaran al model per generar el mapa conceptual jeràrquic.
             </div>
           </div>
+          </details>
 
           <div class="section-actions">
             <button id="saveConceptMap" class="btn btn-primary">Desar</button>
@@ -1250,7 +1262,9 @@
           </div>
         </div>
         <div class="section">
-          <div class="form-group">
+          <details class="advanced-prompt" id="simplePromptDetails">
+            <summary>Personalitzar les instruccions (avançat)</summary>
+            <div class="form-group">
             <label for="simplePrompt">Prompt d'Explica-ho fàcil</label>
             <span id="simplePromptBadge" class="prompt-badge" hidden>Personalitzat</span>
             <textarea
@@ -1263,6 +1277,7 @@
               Instruccions que s'enviaran al model per reescriure el contingut en llenguatge planer, per a algú sense coneixements previs.
             </div>
           </div>
+          </details>
 
           <div class="section-actions">
             <button id="saveSimple" class="btn btn-primary">Desar</button>
@@ -1359,7 +1374,9 @@
             <div class="help-text">Idioma en què es generaran les preguntes i respostes.</div>
           </div>
 
-          <div class="form-group">
+          <details class="advanced-prompt" id="ankiPromptDetails">
+            <summary>Personalitzar les instruccions (avançat)</summary>
+            <div class="form-group">
             <label for="ankiPrompt">Prompt de generació de targetes</label>
             <span id="ankiPromptBadge" class="prompt-badge" hidden>Personalitzat</span>
             <textarea
@@ -1372,6 +1389,7 @@
               Instruccions que s'enviaran al model per generar les targetes Anki.
             </div>
           </div>
+          </details>
 
           <div class="section-actions">
             <button id="saveAnki" class="btn btn-primary">Desar</button>
