@@ -11,6 +11,7 @@ async function openHistoryPanel() {
 
     if (backBar) backBar.classList.add("hidden");
     if (toolbar) toolbar.classList.add("hidden");
+    if (typeof resetResultChrome === "function") resetResultChrome();
 
     const titleStrip = document.getElementById("page-title-strip");
     _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
@@ -64,7 +65,13 @@ function closeHistoryPanel() {
     _closePanel(document.getElementById("history-panel"));
 }
 
-async function loadHistoryEntry(entry) {
+/**
+ * Mostra una entrada desada al #content.
+ * @param {{historyMode?: boolean}} opts - historyMode (per defecte true): ve de la llista
+ *   de l'Historial (amaga la barra d'eines i ofereix «Tornar a l'historial»). Amb false
+ *   (pestanyes per tipus, estat en repòs) només canvia el contingut i la barra continua.
+ */
+async function loadHistoryEntry(entry, { historyMode = true } = {}) {
     const contentDiv = document.getElementById("content");
     const errorDiv = document.getElementById("error");
     const localData = await ext.storage.local.get({ isBionicActive: false });
@@ -127,9 +134,9 @@ async function loadHistoryEntry(entry) {
     historyPanel.replaceChildren();
 
     const toolbar = document.querySelector(".toolbar");
-    if (toolbar) toolbar.classList.add("hidden");
+    if (toolbar) toolbar.classList.toggle("hidden", historyMode);
     const backBar = document.getElementById("history-back-bar");
-    if (backBar) backBar.classList.remove("hidden");
+    if (backBar) backBar.classList.toggle("hidden", !historyMode);
     const titleStrip = document.getElementById("page-title-strip");
     const titleLink  = document.getElementById("page-title-link");
     if (titleStrip && titleLink) {
@@ -144,11 +151,12 @@ async function loadHistoryEntry(entry) {
         container.insertBefore(backBar, toolbar.nextSibling);
         container.insertBefore(titleStrip, contentDiv);
     }
+    if (typeof resetResultChrome === "function") resetResultChrome();
 
     // L'entrada s'ha carregat al contingut: el focus no pot quedar al control de
     // la llista (que s'ha destruït). Va al botó «Tornar a l'historial».
     const backToHistory = document.getElementById("historyBackBtn");
-    if (backToHistory && typeof backToHistory.focus === "function") backToHistory.focus();
+    if (historyMode && backToHistory && typeof backToHistory.focus === "function") backToHistory.focus();
 
     // Avisa sidebar.js que ara es veu AQUESTA entrada: Copiar/Obsidian/Biònica
     // treballen sobre currentMetadata, i sense això exportaven el resum anterior
@@ -456,6 +464,7 @@ function openSourcePanel(text) {
 
     if (backBar) backBar.classList.add("hidden");
     if (toolbar) toolbar.classList.add("hidden");
+    if (typeof resetResultChrome === "function") resetResultChrome();
     _previousTitleStripVisible = titleStrip ? !titleStrip.classList.contains("hidden") : false;
     if (titleStrip) titleStrip.classList.add("hidden");
 

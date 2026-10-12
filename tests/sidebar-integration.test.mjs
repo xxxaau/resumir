@@ -1375,3 +1375,63 @@ test("avís de prompt nou - Resum NO personalitzat adopta el default en silenci 
         assert.ok(h.document.getElementById("prompt-update-notification").classList.contains("hidden"));
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Revisió: l'estat de «resultat acabat de generar» no sobreviu al canvi de vista
+// ---------------------------------------------------------------------------
+test("pestanyes per tipus - canviar de pestanya NO entra en mode historial (la barra continua)", async () => {
+    const url = "https://example.com/article";
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", ...seedTypes(url, ["summary", "deepdive"]) } });
+    try {
+        await h.flush(30);
+        await sleep(250);
+        h.document.querySelector('#type-tabs [data-type="deepdive"]').click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("content").textContent, /Text de deepdive/);
+        assert.ok(!h.document.querySelector(".toolbar").classList.contains("hidden"), "la barra d'eines continua visible");
+        assert.ok(h.document.getElementById("history-back-bar").classList.contains("hidden"), "sense «Tornar a l'historial»");
+    } finally { h.close(); }
+});
+
+test("procedència i refinadors s'amaguen en veure una entrada desada o l'historial", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...seedHistoryEntry() },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum A.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(!h.document.getElementById("provenance").classList.contains("hidden"));
+        assert.ok(!h.document.getElementById("refiners").classList.contains("hidden"));
+
+        h.document.getElementById("historyBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.getElementById("provenance").classList.contains("hidden"), "amb l'historial obert no hi ha procedència");
+        assert.ok(h.document.getElementById("refiners").classList.contains("hidden"), "ni refinadors");
+
+        h.document.querySelector(".history-item-title").click();
+        await h.flush(30);
+        assert.ok(h.document.getElementById("provenance").classList.contains("hidden"), "l'entrada B no porta la procedència de l'A");
+        assert.ok(h.document.getElementById("refiners").classList.contains("hidden"));
+    } finally { h.close(); }
+});
+
+test("refinadors - si la pestanya activa ja és una altra pàgina, no regeneren res", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1);
+        const other = { id: 2, url: "https://altra.example/x", title: "Altra", active: true };
+        h.window.chrome.tabs.onUpdated._fire(2, { url: other.url }, other);
+        await h.flush();
+        h.document.getElementById("refine-shorter").click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1, "«Més curt» no ha de regenerar la pàgina equivocada");
+    } finally { h.close(); }
+});

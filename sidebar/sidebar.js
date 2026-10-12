@@ -562,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tab.append(ct.label);
                 tab.addEventListener("click", async () => {
                     const entry = await getSummaryCache(url, ct.id);
-                    if (entry) await loadHistoryEntry(entry);
+                    if (entry) await loadHistoryEntry(entry, { historyMode: false });
                     updateTypeTabs(url);
                 });
                 tab.addEventListener("keydown", (e) => {
@@ -607,6 +607,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const btn = document.getElementById(id);
         if (!btn) continue;
         btn.addEventListener("click", () => {
+            // Només té sentit refinar el que es veu si és la pàgina activa (no una entrada
+            // d'una altra pàgina ni una selecció): «Més curt» regenera la pestanya activa sencera.
+            if (!lastActiveTab || lastActiveTab.url !== currentMetadata.url) return;
             const t = currentMetadata.type;
             doSummary(null, t === "deepdive", t === "science", true, false, t === "simple", false, mode);
         });
@@ -716,7 +719,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 b.textContent = ct.label;
                 b.addEventListener("click", async () => {
                     const entry = await getSummaryCache(url, ct.id);
-                    if (entry) loadHistoryEntry(entry);
+                    if (entry) loadHistoryEntry(entry, { historyMode: false });
                 });
                 savedBox.appendChild(b);
             }

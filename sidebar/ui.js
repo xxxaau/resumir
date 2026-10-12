@@ -845,6 +845,18 @@ function verifyQuotes(container, sourceText, url) {
     }
 }
 
+/**
+ * Amaga el que penja del resultat acabat de generar (procedència, refinadors, avís de
+ * model): en canviar la vista (historial, entrada desada, text enviat) deixaria de
+ * correspondre a allò que es veu.
+ */
+function resetResultChrome() {
+    hideProvenance();
+    hideRefiners();
+    const notice = document.getElementById("model-notice");
+    if (notice) { notice.textContent = ""; notice.classList.add("hidden"); }
+}
+
 function hideProvenance() {
     const el = document.getElementById("provenance");
     if (el) el.classList.add("hidden");
@@ -987,5 +999,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { verifyQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { resetResultChrome, verifyQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

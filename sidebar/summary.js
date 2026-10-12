@@ -622,7 +622,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             inputEstimated: false,
             outputEstimated: false
         });
-        if (typeof showRefiners === "function" && isProseType(contentType)) showRefiners();
+        if (typeof showRefiners === "function" && isProseType(contentType) && !overrideText) showRefiners();
         if (typeof renderProvenance === "function") {
             renderProvenance({
                 words: String(pageData.text || "").trim().split(/\s+/).filter(Boolean).length,
