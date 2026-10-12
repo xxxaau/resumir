@@ -297,6 +297,7 @@ function restoreOptions(syncData, localData) {
         showPromptUpdateBanner("conceptmap", syncData.conceptMapPromptUpdateAvailable);
         showPromptUpdateBanner("simple", syncData.simplePromptUpdateAvailable);
     }
+    updateBionicPreview();
 
     if (syncData && syncData.extensionOrder && Array.isArray(syncData.extensionOrder)) {
         applyExtensionOrder(syncData.extensionOrder);
@@ -404,14 +405,49 @@ function resetAnkiPrompt() {
     restoreField("ankiPrompt", DEFAULT_ANKI_PROMPT, "El prompt");
 }
 
+const BIONIC_PREVIEW_TEXT = "La lectura biònica ressalta l'inici de cada paraula perquè els ulls avancin amb més fluïdesa pel text.";
+
+/** Pinta la mostra amb els cinc valors actuals (mateixa regla que formatBionicText de la barra lateral). */
+function updateBionicPreview() {
+    const el = document.querySelector("#bionicPreview");
+    if (!el) return;
+    const fixation = (parseInt(document.querySelector("#bionicFixation").value, 10) || DEFAULT_BIONIC.fixation) / 100;
+    el.replaceChildren();
+    for (const part of BIONIC_PREVIEW_TEXT.split(/(\s+)/)) {
+        if (!part) continue;
+        if (/^\s+$/.test(part)) { el.appendChild(document.createTextNode(part)); continue; }
+        const boldLen = part.length > 3 ? Math.ceil(part.length * fixation) : 1;
+        const b = document.createElement("b");
+        b.textContent = part.slice(0, boldLen);
+        el.appendChild(b);
+        el.appendChild(document.createTextNode(part.slice(boldLen)));
+    }
+    el.style.fontFamily = document.querySelector("#bionicFont").value;
+    el.style.fontSize = (14 * (parseFloat(document.querySelector("#bionicFontSize").value) || 1)) + "px";
+    el.style.lineHeight = document.querySelector("#bionicLineHeight").value;
+    el.style.setProperty("--bionic-weight", document.querySelector("#bionicWeight").value);
+}
+
 function resetBionic() {
+    const ids = ["bionicFixation", "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight"];
+    const previous = Object.fromEntries(ids.map(id => [id, document.querySelector("#" + id).value]));
     document.querySelector("#bionicFixation").value = String(DEFAULT_BIONIC.fixation);
     document.querySelector("#bionicFixationValue").textContent = DEFAULT_BIONIC.fixation + "%";
     document.querySelector("#bionicFont").value = DEFAULT_BIONIC.font;
     document.querySelector("#bionicWeight").value = DEFAULT_BIONIC.weight;
     document.querySelector("#bionicFontSize").value = DEFAULT_BIONIC.fontSize;
     document.querySelector("#bionicLineHeight").value = DEFAULT_BIONIC.lineHeight;
-    showStatus("Valors de lectura biònica restaurats als valors per defecte.");
+    updateBionicPreview();
+    setDirty(true);
+    showStatus("Valors de lectura biònica restaurats als valors per defecte.", {
+        undo: () => {
+            for (const id of ids) document.querySelector("#" + id).value = previous[id];
+            document.querySelector("#bionicFixationValue").textContent = previous.bionicFixation + "%";
+            updateBionicPreview();
+            setDirty(true);
+            showStatus("Restauració desfeta.");
+        },
+    });
 }
 
 // #status és una regió role=status sempre present al DOM: quan no es mostra

@@ -1040,3 +1040,15 @@ input:checked + .slider:before {
 .plugin-about p { margin: 8px 0 4px; }
 .plugin-about ul { margin: 4px 0 0; padding-left: 20px; }
 .plugin-about li { margin: 3px 0; }
+
+/* Lectura biònica: vista prèvia en directe */
+.preview-label { margin: 0 0 6px; font-size: 0.85em; color: var(--text-muted); }
+.bionic-preview {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+.bionic-preview b { font-weight: var(--bionic-weight, 600); }

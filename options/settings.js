@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(".main-content").addEventListener("input", (e) => {
         const t = e.target;
         if (t.matches && t.matches("textarea")) updatePromptBadges();
+        if (t.id && t.id.startsWith("bionic")) updateBionicPreview();
         if (t.matches && t.matches('textarea, input[type="text"], input[type="password"], input[type="number"], input[type="range"], select:not(#themeSelect)')) setDirty(true);
     });
     window.addEventListener("beforeunload", (e) => {

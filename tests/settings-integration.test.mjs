@@ -653,3 +653,36 @@ test("desar - el missatge és «Desat.»", async () => {
         assert.match(h.document.getElementById("status").textContent, /^Desat\./);
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Lectura biònica: vista prèvia en directe i «Restaurar» amb «Desfer»
+// ---------------------------------------------------------------------------
+test("biònica - la vista prèvia reflecteix fixació, gruix i mida en directe", async () => {
+    const h = await loadSettings({ sync: { bionicFixation: 50, bionicWeight: "800", bionicFontSize: "1.4em" } });
+    try {
+        const prev = h.document.getElementById("bionicPreview");
+        assert.ok(prev.querySelector("b"), "ha de tenir paraules ressaltades");
+        // «lectura» (7 lletres) al 50 % → ceil(3.5) = 4 lletres ressaltades
+        const bolds = [...prev.querySelectorAll("b")].map(b => b.textContent);
+        assert.ok(bolds.includes("lect"), `esperat «lect» a ${JSON.stringify(bolds)}`);
+        assert.equal(prev.style.getPropertyValue("--bionic-weight"), "800");
+
+        const slider = h.document.getElementById("bionicFixation");
+        slider.value = "20";
+        slider.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        const after = [...prev.querySelectorAll("b")].map(b => b.textContent);
+        assert.ok(after.includes("le"), `al 20 % «lectura» → «le» (ceil(1.4)=2): ${JSON.stringify(after)}`);
+    } finally { h.close(); }
+});
+
+test("biònica - Restaurar es pot desfer", async () => {
+    const h = await loadSettings({ sync: { bionicFixation: 60, bionicWeight: "800" } });
+    try {
+        h.document.querySelector("#resetBionic").click();
+        await h.flush(5);
+        assert.equal(h.document.getElementById("bionicFixation").value, "20");
+        h.document.querySelector("#status .toast-action").click();
+        assert.equal(h.document.getElementById("bionicFixation").value, "60");
+        assert.equal(h.document.getElementById("bionicWeight").value, "800");
+    } finally { h.close(); }
+});
