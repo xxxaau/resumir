@@ -784,3 +784,15 @@ test("avís de prompt nou - desar Resum només neteja SEU avís i marca el flag 
         assert.equal(stored.systemPromptCustomized, true);
     } finally { h.close(); }
 });
+
+test("prompt desat per una versió antiga (default retirat) - es mostra el default actual, sense «Personalitzat»", async () => {
+    const { readFileSync } = await import("node:fs");
+    // Default d'aprofundiment de v2.3.1: el literal que desava «Desar» i que avui és un default retirat
+    const OLD_DEEP = readFileSync(new URL("./fixtures/legacy-deepdive-prompt-v2.3.1.txt", import.meta.url), "utf8");
+    const h = await loadSettings({ sync: { deepDivePrompt: OLD_DEEP } });
+    try {
+        const area = h.document.getElementById("deepDivePrompt");
+        assert.notEqual(area.value, OLD_DEEP, "no ha de mostrar el text antic");
+        assert.ok(h.document.getElementById("deepDivePromptBadge").hidden, "ni marcar-lo com a personalitzat");
+    } finally { h.close(); }
+});

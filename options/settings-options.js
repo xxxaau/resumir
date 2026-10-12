@@ -239,6 +239,18 @@ function updatePathPreview(inputId, previewId, suffix = ".md") {
   preview.textContent = `Exemple: ${path}`;
 }
 
+/**
+ * Valor d'un prompt desat, o el default si no n'hi ha cap o si és un default RETIRAT
+ * (el literal que desaven versions antigues en prémer «Desar»): així la configuració
+ * no el marca com a «Personalitzat» ni mostra un text que ningú ha escrit.
+ */
+function storedPrompt(syncData, key, defaultValue) {
+    const v = syncData ? syncData[key] : undefined;
+    if (v === undefined) return defaultValue;
+    if (typeof v === "string" && (LEGACY_PROMPT_HASHES[key] || []).includes(promptHash(v))) return defaultValue;
+    return v;
+}
+
 function restoreOptions(syncData, localData) {
     document.querySelector("#apiKey").value = (localData && localData.apiKey) || "";
     document.querySelector("#modelName").placeholder = DEFAULT_MODEL_ID;
@@ -247,7 +259,7 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#modelName").value = (syncData && syncData.modelName) || DEFAULT_MODEL_ID;
     updateModelSummary();
     document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
-    document.querySelector("#systemPrompt").value = (syncData && syncData.systemPrompt) || DEFAULT_SYSTEM_PROMPT;
+    document.querySelector("#systemPrompt").value = storedPrompt(syncData, "systemPrompt", DEFAULT_SYSTEM_PROMPT) || DEFAULT_SYSTEM_PROMPT;
     document.querySelector("#summaryFormat").value = (syncData && syncData.summaryFormat) || "default";
     document.querySelector("#summaryLength").value = (syncData && syncData.summaryLength) || "medium";
 
@@ -273,18 +285,18 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#bionicLineHeight").value = (syncData && syncData.bionicLineHeight) || DEFAULT_BIONIC.lineHeight;
 
     document.querySelector("#enableDeepdive").checked = syncData && syncData.enableDeepdive === true;
-    document.querySelector("#deepDivePrompt").value = (syncData && syncData.deepDivePrompt !== undefined) ? syncData.deepDivePrompt : DEFAULT_DEEP_DIVE_PROMPT;
+    document.querySelector("#deepDivePrompt").value = storedPrompt(syncData, "deepDivePrompt", DEFAULT_DEEP_DIVE_PROMPT);
 
     document.querySelector("#enableScience").checked = syncData ? syncData.enableScience === true : false;
-    document.querySelector("#sciencePrompt").value = (syncData && syncData.sciencePrompt !== undefined) ? syncData.sciencePrompt : DEFAULT_SCIENCE_PROMPT;
+    document.querySelector("#sciencePrompt").value = storedPrompt(syncData, "sciencePrompt", DEFAULT_SCIENCE_PROMPT);
 
     document.querySelector("#enableResum").checked = syncData ? syncData.enableResum !== false : true;
     document.querySelector("#enablePdf").checked = syncData ? syncData.enablePdf !== false : true;
     document.querySelector("#enableConceptMap").checked = syncData && syncData.enableConceptMap === true;
-    document.querySelector("#conceptMapPrompt").value = (syncData && syncData.conceptMapPrompt !== undefined) ? syncData.conceptMapPrompt : DEFAULT_CONCEPTMAP_PROMPT;
+    document.querySelector("#conceptMapPrompt").value = storedPrompt(syncData, "conceptMapPrompt", DEFAULT_CONCEPTMAP_PROMPT);
 
     document.querySelector("#enableSimple").checked = syncData && syncData.enableSimple === true;
-    document.querySelector("#simplePrompt").value = (syncData && syncData.simplePrompt !== undefined) ? syncData.simplePrompt : DEFAULT_SIMPLE_PROMPT;
+    document.querySelector("#simplePrompt").value = storedPrompt(syncData, "simplePrompt", DEFAULT_SIMPLE_PROMPT);
 
     document.querySelector("#enableAnki").checked = syncData ? syncData.enableAnki === true : false;
     // Vault independent: si encara no s'ha configurat per Anki, es pre-omple amb el
@@ -295,7 +307,7 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#ankiPath").value = (syncData && syncData.ankiPath) || DEFAULT_ANKI_PATH;
     document.querySelector("#ankiPacket").value = (syncData && syncData.ankiPacket) || DEFAULT_ANKI_PACKET;
     document.querySelector("#ankiLang").value = (syncData && syncData.ankiLang) || DEFAULT_ANKI_LANG;
-    document.querySelector("#ankiPrompt").value = (syncData && syncData.ankiPrompt !== undefined) ? syncData.ankiPrompt : DEFAULT_ANKI_PROMPT;
+    document.querySelector("#ankiPrompt").value = storedPrompt(syncData, "ankiPrompt", DEFAULT_ANKI_PROMPT);
 
     // Mostrar banners d'actualització de prompts si n'hi ha
     if (syncData) {

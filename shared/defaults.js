@@ -51,11 +51,17 @@ function promptHash(text) {
 // Quan canviïs un default, afegeix-hi aquí el hash del text que retires
 // (node -e "console.log(require('./shared/defaults.js').promptHash(text))").
 const LEGACY_PROMPT_HASHES = {
-    systemPrompt: ["14151845"],
-    deepDivePrompt: ["0ccf681e"],
-    sciencePrompt: ["d021d05b"],
-    conceptMapPrompt: ["9e85940d"],
+    // systemPrompt: 14151845=v2.2.10…v2.6.2, 962b3a47=v2.1.0, 04b6cc0a=v2.2.3
+    systemPrompt: ["14151845", "962b3a47", "04b6cc0a"],
+    // deepDivePrompt: 6ca9106d=v2.1.0, ab01aca6=v2.2.10…v2.3.1, 0ccf681e=v2.4.0…v2.6.2
+    deepDivePrompt: ["6ca9106d", "ab01aca6", "0ccf681e"],
+    // sciencePrompt: 35b8b684=v2.1.0, fe4a2158=v2.2.10…v2.3.1, d021d05b=v2.4.0…v2.6.2
+    sciencePrompt: ["35b8b684", "fe4a2158", "d021d05b"],
+    // conceptMapPrompt: 4ed7e745=v2.2.10…v2.3.1, 9e85940d=v2.4.0…v2.6.2
+    conceptMapPrompt: ["4ed7e745", "9e85940d"],
+    // simplePrompt: b8b2d4cf=v2.4.0…v2.6.2
     simplePrompt: ["b8b2d4cf"],
+    // ankiPrompt: 1cb4dda1=v2.6.0…v2.6.2
     ankiPrompt: ["1cb4dda1"],
 };
 

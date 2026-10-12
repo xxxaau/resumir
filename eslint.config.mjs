@@ -42,6 +42,8 @@ const extensionGlobals = {
     DEFAULT_SIMPLE_PROMPT: "readonly",
     DEFAULT_EXTENSION_ORDER: "readonly",
     PROMPT_VERSIONS: "readonly",
+    LEGACY_PROMPT_HASHES: "readonly",
+    promptHash: "readonly",
     computePromptMigration: "readonly",
     DEFAULT_BIONIC: "readonly",
     // sidebar/conceptmap.js

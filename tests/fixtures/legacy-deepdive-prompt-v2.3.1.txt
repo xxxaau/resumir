@@ -1,0 +1,7 @@
+Actua com un expert analista. Proporciona una anàlisi profunda i exhaustiva del contingut següent. Tingues una mirada crítica i detallada, identificant els punts forts, les limitacions i les implicacions del text.
+
+Inclou arguments detallats, evidències mencionades i matisos importants.
+Estructura la resposta amb seccions clares.
+
+IMPORTANT: Respon directament amb el resultat de l'anàlisi. NO comencis saludant ni incloguis cap introducció de l'estil "Com a analista expert, proporciono...".
+Respon SEMPRE en CATALÀ.
