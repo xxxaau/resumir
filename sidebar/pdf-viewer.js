@@ -113,6 +113,12 @@
     async function init() {
         const params = new URLSearchParams(window.location.search);
         sessionKey = params.get("key");
+        // Nom del fitxer: al títol de la pàgina i de la capçalera (no un «PDF» genèric)
+        const fileName = params.get("name");
+        if (fileName) {
+            document.getElementById("doc-title").textContent = fileName;
+            document.title = fileName + " — Visor PDF";
+        }
         if (!sessionKey) {
             showError("Falta el paràmetre 'key' a la URL.");
             return;
@@ -222,17 +228,20 @@
         window.close();
     });
 
-    window.addEventListener("beforeunload", cleanup);
+    // Només es neteja en tancar amb el botó: recarregar la pestanya necessita el PDF encara.
+    // (storage.session s'esborra sol en tancar el navegador.)
+    window.addEventListener("beforeunload", () => {
+        if (currentTextTask) { try { currentTextTask.cancel(); } catch { /* ignore */ } }
+    });
 
     window.addEventListener("resize", () => {
         if (pdfDoc) renderPage(pageNum);
     });
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            cleanup();
-            window.close();
-        }
+        // Esc no tanca la pestanya: només ho fa el botó «Tancar» (una pulsació accidental
+        // perdia el document). Les fletxes dins el camp de pàgina mouen el cursor.
+        if (e.target === pageInput) return;
         if (!pdfDoc) return;  // PDF encara no carregat (o ha fallat): no hi ha pàgines on navegar
         if (e.key === "ArrowLeft" && pageNum > 1) renderPage(pageNum - 1);
         if (e.key === "ArrowRight" && pageNum < pdfDoc.numPages) renderPage(pageNum + 1);

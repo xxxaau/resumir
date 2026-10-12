@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 if (viewerKey) {
                     ext.tabs.create({
-                        url: ext.runtime.getURL(`sidebar/pdf-viewer.html?key=${encodeURIComponent(viewerKey)}`),
+                        url: ext.runtime.getURL(`sidebar/pdf-viewer.html?key=${encodeURIComponent(viewerKey)}&name=${encodeURIComponent(file.name)}`),
                         active: false // no robar el focus de la barra lateral abans que acabi el resum
                     });
                 }

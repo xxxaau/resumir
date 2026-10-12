@@ -90,9 +90,6 @@ unificar el disseny dels dos.
 ### Altres correccions petites
 
 - Peu: «De la memòria cau» en un encert.
-- Visor PDF: nom del fitxer al títol, Esc no ha de tancar la pestanya, fletxes
-  ignorades dins del camp de pàgina, ‹ › en lloc de ⏮ ⏭, no esborrar el PDF en
-  recarregar.
 
 ## Nivell 2 — Canvis estructurals (resta)
 
