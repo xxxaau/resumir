@@ -24,6 +24,8 @@
   --danger: #af3029;
   --toggle-off: #878580;
   --star-on: #a16207;
+  --icon-blue: #0060df;
+  --icon-anki: #205ea6;
 }
 
 [data-actual-theme="dark"] {
@@ -51,6 +53,8 @@
   --danger: #e0675c;
   --toggle-off: #878580;
   --star-on: #f0c040;
+  --icon-blue: #4385be;
+  --icon-anki: #4385be;
 }
  
 [data-actual-theme="solarized"] {
@@ -78,6 +82,8 @@
   --danger: #af3029;
   --toggle-off: #878580;
   --star-on: #a16207;
+  --icon-blue: #0060df;
+  --icon-anki: #205ea6;
 }
  
 [data-actual-theme="soft-gray"] {
@@ -105,6 +111,8 @@
   --danger: #af3029;
   --toggle-off: #878580;
   --star-on: #a16207;
+  --icon-blue: #0060df;
+  --icon-anki: #205ea6;
 }
 
 body {
@@ -348,7 +356,7 @@ label {
 
 .models-list-info {
     font-size: 0.7em;
-    color: #999;
+    color: var(--text-muted);
     padding: 4px 14px 6px;
     text-align: right;
 }
@@ -719,7 +727,7 @@ input:checked + .slider:before {
 
 /* Text Utilities */
 .text-muted-small {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9em;
   margin-bottom: 10px;
 }
@@ -731,18 +739,18 @@ input:checked + .slider:before {
 }
 
 .error-button {
-  border-color: #d70022 !important;
-  color: #d70022 !important;
+  border-color: var(--danger) !important;
+  color: var(--danger) !important;
 }
 
 /* Icon Color Classes */
-.icon-blue { color: #0060df; }
+.icon-blue { color: var(--icon-blue); }
 .icon-green { color: #047857; } /* fosc per contrast ≥3:1 sobre fons clar */
 .icon-purple { color: #a855f7; }
-.icon-gray { color: #666; }
+.icon-gray { color: var(--text-muted); }
 .icon-orange { color: #bc5215; }
 .icon-amber { color: #b45309; } /* fosc per contrast ≥3:1 sobre fons clar */
-.icon-anki { color: #205EA6; } /* Flexoki Blue: igual que el botó Anki de la sidebar */
+.icon-anki { color: var(--icon-anki); } /* Flexoki Blue: igual que el botó Anki de la sidebar */
 
 /* Version History Section */
 .version-entry {
@@ -785,7 +793,7 @@ input:checked + .slider:before {
 .about-footer {
   text-align: center;
   margin-top: 50px;
-  color: #999;
+  color: var(--text-muted);
   font-size: 13px;
 }
 

@@ -40,6 +40,8 @@ const SETTINGS_PAIRS = [
     ["--danger",        "--bg-color",  4.5],
     ["--toggle-off",    "--bg-color",  3],   // interruptor apagat i estrella (UI)
     ["--star-on",       "--bg-color",  3],
+    ["--icon-blue",     "--bg-color",  3],   // icones de plugin (UI)
+    ["--icon-anki",     "--bg-color",  3],
 ];
 
 const SURFACES = [

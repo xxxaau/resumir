@@ -24,8 +24,8 @@ const BANNED = [
 
 // [fitxer, color] → màxim actual (el que encara no s'ha migrat)
 const CEILING = {
-    "options/settings.css|#666": 2,
-    "options/settings.css|#0060df": 2,
+    "options/settings.css|#666": 0,
+    "options/settings.css|#0060df": 1,
     "options/settings.css|#ccc": 0,
 };
 

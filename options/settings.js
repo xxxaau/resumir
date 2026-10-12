@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindClick("toggleApiKey", toggleApiKeyVisibility);
 
     // Bind all save buttons to saveOptions
-    ["save", "saveCustom", "saveExtensions", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple", "saveAnki"].forEach(id => {
+    ["save", "saveCustom", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple", "saveAnki"].forEach(id => {
         bindClick(id, saveOptions);
     });
 

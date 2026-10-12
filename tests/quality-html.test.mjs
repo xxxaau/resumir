@@ -174,3 +174,10 @@ test("settings: cada pàgina de plugin té la seva descripció detallada", () =>
         assert.ok(text.length > 200, `#tab-${id}: descripció massa curta`);
     }
 });
+
+test("settings: la pestanya Plugins no té botó Desar (els interruptors es desen sols) ni noms en anglès", () => {
+    const doc = load("options/settings.html");
+    assert.equal(doc.getElementById("saveExtensions"), null);
+    assert.match(doc.querySelector("#tab-extensions .section-desc").textContent, /desen automàticament/);
+    assert.doesNotMatch(doc.querySelector("#tab-extensions").textContent, /Deep Dive/);
+});
