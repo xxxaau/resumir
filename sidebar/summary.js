@@ -407,8 +407,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         if (typeof window !== "undefined") window.__ankiPageText = pageData.text;
 
         if (signal.aborted) {
-            errorDiv.textContent = "Generació aturada per l'usuari.";
-            errorDiv.classList.remove("hidden");
+            showUserAbort(ctx, false);
             return abortController;
         }
 

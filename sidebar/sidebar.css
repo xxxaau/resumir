@@ -949,7 +949,7 @@ body {
   cursor: pointer;
 }
 .type-tab:hover { background: var(--button-hover); }
-.type-tab[aria-selected="true"] {
+.type-tab[aria-pressed="true"] {
   color: var(--primary-text);
   background: var(--primary-color);
   border-color: var(--primary-color);

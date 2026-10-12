@@ -847,19 +847,19 @@ test("pestanyes per tipus - llisten els resums desats i en canvien el contingut"
         await h.flush(30);
         await sleep(250);
         const bar = h.document.getElementById("type-tabs");
-        assert.equal(bar.getAttribute("role"), "tablist");
-        const tabs = [...bar.querySelectorAll('[role="tab"]')];
+        assert.equal(bar.getAttribute("role"), "group");
+        const tabs = [...bar.querySelectorAll(".type-tab")];
         assert.equal(tabs.length, 2);
-        assert.ok(tabs.every(t => t.hasAttribute("aria-selected")));
+        assert.ok(tabs.every(t => t.hasAttribute("aria-pressed")));
 
         const deep = tabs.find(t => t.dataset.type === "deepdive");
         deep.click();
         await h.flush(30);
         assert.match(h.document.getElementById("content").textContent, /Text de deepdive/);
         await sleep(250);
-        const after = [...bar.querySelectorAll('[role="tab"]')];
-        assert.equal(after.find(t => t.dataset.type === "deepdive").getAttribute("aria-selected"), "true");
-        assert.equal(after.find(t => t.dataset.type === "summary").getAttribute("aria-selected"), "false");
+        const after = [...bar.querySelectorAll(".type-tab")];
+        assert.equal(after.find(t => t.dataset.type === "deepdive").getAttribute("aria-pressed"), "true");
+        assert.equal(after.find(t => t.dataset.type === "summary").getAttribute("aria-pressed"), "false");
     } finally { h.close(); }
 });
 
@@ -1600,5 +1600,19 @@ test("camí desat - també enllaça [m:ss], mostra la procedència i els refinad
         await h.flush(10);
         assert.equal(h.document.querySelectorAll("#content .quote-ok").length, 1, "una cita verificada");
         assert.equal(h.document.querySelectorAll("#content .quote-warn").length, 1, "una que no consta");
+    } finally { h.close(); }
+});
+
+test("pàgines de PDF - només s'enllacen en http(s) (un PDF file:// o altres esquemes no genera enllaços morts)", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url: "file:///Users/x/doc.pdf", title: "Doc", active: true }],
+        pageText: "[Pàgina 1]\n" + "text ".repeat(80),
+        modelReply: "Idea clau (p. 3).",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.document.querySelector("#content a[data-pdf-page]"), null);
     } finally { h.close(); }
 });

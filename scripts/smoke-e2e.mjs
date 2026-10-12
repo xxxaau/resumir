@@ -93,7 +93,7 @@ try {
     await page.screenshot({ path: path.join(OUT, "1-summary.png") });
 
     await page.waitForTimeout(500);
-    const tabs = await page.$$eval("#type-tabs [role=tab]", els => els.map(e => e.getAttribute("aria-selected")));
+    const tabs = await page.$$eval("#type-tabs .type-tab", els => els.map(e => e.getAttribute("aria-pressed")));
     check(tabs.length === 1 && tabs[0] === "true", "pestanya «Resum» activa");
 
     // Mapa conceptual en un navegador real: la roda desplaça, Ctrl+roda amplia, el punter arrossega

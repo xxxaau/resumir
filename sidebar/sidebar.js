@@ -556,39 +556,33 @@ document.addEventListener("DOMContentLoaded", () => {
     // Pestanyes per tipus: els resums desats d'aquesta pàgina, sota el títol.
     // La pestanya activa és la que es veu ara; clicar-ne una altra la carrega.
     let typeTabsTimer = null;
+    let typeTabsSeq = 0;
     function updateTypeTabs(url) {
         clearTimeout(typeTabsTimer);
         typeTabsTimer = setTimeout(async () => {
             const bar = document.getElementById("type-tabs");
             if (!bar) return;
+            const seq = ++typeTabsSeq;
             const types = (!url || url.startsWith("seleccio:")) ? [] : await getAvailableTypes(url);
+            if (seq !== typeTabsSeq) return;   // una consulta més nova ja ha pintat (o pintarà)
             bar.replaceChildren();
             bar.classList.toggle("hidden", types.length === 0);
             if (types.length === 0) return;
             const active = currentMetadata.url === url && currentMetadata.summary ? currentMetadata.type : null;
             const shown = CONTENT_TYPES.filter(ct => types.includes(ct.id));
-            const focusable = shown.some(ct => ct.id === active) ? active : shown[0].id;
             for (const ct of shown) {
                 const tab = document.createElement("button");
                 tab.type = "button";
                 tab.className = "type-tab";
                 tab.dataset.type = ct.id;
-                tab.setAttribute("role", "tab");
-                tab.setAttribute("aria-selected", String(ct.id === active));
-                tab.tabIndex = ct.id === focusable ? 0 : -1;
+                // Grup de botons amb estat premut (no un tablist a mitges: no hi ha tabpanel)
+                tab.setAttribute("aria-pressed", String(ct.id === active));
                 if (typeof typeIconSvg === "function") tab.appendChild(typeIconSvg(ct.id));
                 tab.append(ct.label);
                 tab.addEventListener("click", async () => {
                     const entry = await getSummaryCache(url, ct.id);
                     if (entry) await loadHistoryEntry(entry, { historyMode: false });
                     updateTypeTabs(url);
-                });
-                tab.addEventListener("keydown", (e) => {
-                    const items = [...bar.querySelectorAll('[role="tab"]')];
-                    const i = items.indexOf(tab);
-                    const next = e.key === "ArrowRight" ? items[(i + 1) % items.length]
-                        : e.key === "ArrowLeft" ? items[(i - 1 + items.length) % items.length] : null;
-                    if (next) { e.preventDefault(); next.focus(); }
                 });
                 bar.appendChild(tab);
             }
@@ -702,8 +696,9 @@ document.addEventListener("DOMContentLoaded", () => {
             && lastActiveTab && /^https?:/i.test(lastActiveTab.url || "") && lastActiveTab.url !== shownUrl;
         banner.classList.toggle("hidden", !stale);
         if (stale) {
-            document.getElementById("stale-banner-text").textContent =
-                `Aquest resum és de «${currentMetadata.title || shownUrl}».`;
+            const txt = `Aquest resum és de «${currentMetadata.title || shownUrl}».`;
+            const el = document.getElementById("stale-banner-text");
+            if (el.textContent !== txt) el.textContent = txt;   // un text igual no es reanuncia al lector de pantalla
         }
     }
     const staleBtn = document.getElementById("stale-banner-btn");

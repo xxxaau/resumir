@@ -715,7 +715,7 @@ function hideRefiners() {
  * (el visor de PDF del navegador entén #page=N). No fa res si no és un PDF.
  */
 function linkPdfPages(container, url) {
-    if (!container || typeof isPdfUrl !== "function" || !isPdfUrl(url)) return;
+    if (!container || !/^https?:/i.test(url || "") || typeof isPdfUrl !== "function" || !isPdfUrl(url)) return;
     const base = url.split("#")[0];
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
     const nodes = [];
