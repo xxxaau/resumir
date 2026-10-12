@@ -192,3 +192,11 @@ test("settings: landmarks (<nav>, <main>) i botons de les targetes amb nom propi
     assert.equal(new Set(names).size, names.length, "els noms accessibles no es repeteixen entre targetes");
     assert.equal(doc.querySelectorAll("h3").length, 2, "els títols de secció del General passen de h3 a h2");
 });
+
+test("Aprofundir: la icona és la lupa (la mateixa que les pestanyes), no un «+»", () => {
+    for (const [file, sel] of [["sidebar/sidebar.html", "#deepDiveBtn"], ["options/settings.html", "#tab-extensions .extension-item:has(#enableDeepdive)"]]) {
+        const svg = load(file).querySelector(`${sel} svg`);
+        assert.ok(svg.querySelector("circle"), `${file}: lupa (cercle)`);
+        assert.doesNotMatch(svg.innerHTML, /M12 4v16m8-8H4/, `${file}: sense el «+»`);
+    }
+});

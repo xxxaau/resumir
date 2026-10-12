@@ -101,11 +101,6 @@ comprovació de la clau, estats de càrrega, renderitzador Markdown, configuraci
 responsiva, historial amb cerca/esborrar/desfer, pantalla General reordenada,
 enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
 
-### 2.1 Barra d'eines
-
-- «Aprofundir» continua sent un «+» a la barra (la resta d'icones de tipus ja
-  són SVG).
-
 ### 2.4 Configuració
 
 - **Revelació progressiva:** plegar els prompts sota «Personalitzar instruccions
