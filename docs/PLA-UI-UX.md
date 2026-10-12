@@ -84,9 +84,6 @@ unificar el disseny dels dos.
 
 - Codis interns (`[007]`, `[PDF-013]`) al final del missatge i en gris; `[003]`
   duplicat.
-- Mapa conceptual i visor PDF: «Desplega tot / Replega tot» →
-  «Desplegar-ho tot / Plegar-ho tot»; «Apropar/Allunyar» vs «Ampliar/Reduir»
-  unificat; «Tancar», «Tornar», «Configurar» ja en infinitiu.
 - **Decisió pendent:** «Validació científica» i «Explica-ho fàcil» són noms de
   funcionalitat, no verbs de botó; dir explícitament si la regla de l'infinitiu
   s'hi aplica.

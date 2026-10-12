@@ -123,7 +123,7 @@ function parseConceptTree(text, options = {}) {
     controls.className = "concept-map-controls";
 
     const expandBtn = document.createElement("button");
-    expandBtn.textContent = "Desplega tot";
+    expandBtn.textContent = "Desplegar-ho tot";
     expandBtn.type = "button";
     expandBtn.addEventListener("click", () => {
         const container = controls.parentElement;
@@ -131,7 +131,7 @@ function parseConceptTree(text, options = {}) {
     });
 
     const collapseBtn = document.createElement("button");
-    collapseBtn.textContent = "Replega tot";
+    collapseBtn.textContent = "Plegar-ho tot";
     collapseBtn.type = "button";
     collapseBtn.addEventListener("click", () => {
         const container = controls.parentElement;

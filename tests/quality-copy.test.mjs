@@ -59,6 +59,10 @@ const CEILINGS = [
     ["Descarta-ho tot",     0, "infinitiu: «Descartar-ho tot»"],
     ["Selecciona-ho tot",   0, "infinitiu: «Seleccionar-ho tot»"],
     ["Afegeix (",           0, "diu on va: «Afegir a Obsidian (N)»"],
+    ["Desplega tot",        0, "infinitiu: «Desplegar-ho tot»"],
+    ["Replega tot",         0, "infinitiu: «Plegar-ho tot»"],
+    ['"Allunyar"',          0, "un sol parell de verbs de zoom: «Reduir» / «Ampliar»"],
+    ['"Apropar"',           0, "un sol parell de verbs de zoom: «Reduir» / «Ampliar»"],
     ["4 Arxiu",             0, "ruta personal de l'autor: usa DEFAULT_OBSIDIAN_PATH"],
     ["3 Recursos",          0, "ruta personal de l'autor: usa DEFAULT_ANKI_PATH"],
 ];
