@@ -13,6 +13,7 @@ const MARKMAP_ICONS = {
     // NotebookLM-style controls
     toggleAll: `<polyline points="7 9 12 4 17 9"/><polyline points="7 15 12 20 17 15"/>`,
     download: `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>`,
+    fit: `<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>`,
     expand: `<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>`,
 };
 

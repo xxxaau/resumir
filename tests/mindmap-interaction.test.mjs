@@ -86,3 +86,23 @@ for (const [name, build] of Object.entries(MAPS)) {
         assert.ok(Number(hit.getAttribute("r")) >= 12, "radi ≥ 12 (24 px, WCAG 2.5.8)");
     });
 }
+
+for (const [name, build] of Object.entries(MAPS)) {
+    test(`mapa ${name} - hi ha un botó «Ajustar a la vista» que recoloca el mapa`, async () => {
+        const w = newWindow();
+        const svg = build(w);
+        // el sidebar (renderMarkmapInteractive) no és al MAPS: aquí només el renderer i l'overlay
+        const root = svg.closest("#markmap-fullscreen-overlay") || w.document.body;
+        const btn = [...root.querySelectorAll("button")].find(b => b.getAttribute("aria-label") === "Ajustar a la vista");
+        if (name.startsWith("sidebar")) { assert.equal(typeof w.markmapNative.createMindMap(svg, w.markmapNative.parseMarkdownTree(TREE)).fit, "function"); return; }
+        assert.ok(btn, "el botó existeix a la vista de pantalla completa");
+        await new Promise(r => setTimeout(r, 700));         // acaba l'entrada animada inicial
+        const before = transformOf(svg);
+        svg.dispatchEvent(new w.WheelEvent("wheel", { deltaY: 200, deltaX: 90, bubbles: true, cancelable: true }));
+        assert.notDeepEqual(transformOf(svg), before);
+        btn.click();
+        await new Promise(r => setTimeout(r, 700));         // l'ajust és animat
+        const after = transformOf(svg);
+        assert.ok(Math.abs(after.x - before.x) < 1 && Math.abs(after.y - before.y) < 1, "torna a la posició ajustada");
+    });
+}

@@ -273,11 +273,13 @@ function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
     const toggleAllBtn = makeBtn(MARKMAP_ICONS.toggleAll, "Desplegar / plegar tot");
     const zoomInBtn = makeBtn(MARKMAP_ICONS.zoomIn, "Ampliar");
     const zoomOutBtn = makeBtn(MARKMAP_ICONS.zoomOut, "Reduir");
+    const fitBtn = makeBtn(MARKMAP_ICONS.fit, "Ajustar a la vista");
     const downloadBtn = makeBtn(MARKMAP_ICONS.download, "Descarregar com a PNG");
 
     controls.appendChild(toggleAllBtn);
     controls.appendChild(zoomInBtn);
     controls.appendChild(zoomOutBtn);
+    controls.appendChild(fitBtn);
     controls.appendChild(downloadBtn);
     container.appendChild(controls);
 
@@ -327,6 +329,7 @@ function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
 
             zoomInBtn.addEventListener("click", () => mm.rescale(1.25));
             zoomOutBtn.addEventListener("click", () => mm.rescale(0.8));
+            fitBtn.addEventListener("click", () => mm.fit(true));
             toggleAllBtn.setAttribute("aria-pressed", "false");
             toggleAllBtn.addEventListener("click", () => {
                 allExpanded = !allExpanded;
@@ -664,8 +667,9 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         const btnToggleAll = mkBtn(icons.toggleAll, 'Desplegar / plegar tot');
         const btnZoomIn    = mkBtn(icons.zoomIn, 'Ampliar');
         const btnZoomOut   = mkBtn(icons.zoomOut, 'Reduir');
+        const btnFit       = mkBtn(icons.fit, 'Ajustar a la vista');
         const btnPng       = mkBtn(icons.download, 'Descarregar com a PNG');
-        [btnToggleAll, btnZoomIn, btnZoomOut, btnPng].forEach(b => controls.appendChild(b));
+        [btnToggleAll, btnZoomIn, btnZoomOut, btnFit, btnPng].forEach(b => controls.appendChild(b));
 
         // Botó de tancar a dalt-dreta (al header).
         const btnClose = mkBtn(icons.close, 'Tancar (Esc)', 'markmap-fs-close');
@@ -1043,6 +1047,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
 
         btnZoomIn.addEventListener('click', () => rescale(1.25));
         btnZoomOut.addEventListener('click', () => rescale(0.8));
+        btnFit.addEventListener('click', () => fit(true));
         btnToggleAll.setAttribute('aria-pressed', 'false');
         btnToggleAll.addEventListener('click', () => {
             allExpanded = !allExpanded;

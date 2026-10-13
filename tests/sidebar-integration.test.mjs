@@ -1670,3 +1670,18 @@ test("YouTube - si no es pot moure el vídeo (sense permís), s'obre en pestanya
         assert.match(h.document.getElementById("model-notice").textContent, /No s'ha pogut moure el vídeo/);
     } finally { h.close(); }
 });
+
+test("mapa conceptual - la barra de controls porta «Ajustar a la vista»", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        sync: { enableConceptMap: true },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "- Tema\n  - A\n  - B",
+    });
+    try {
+        h.document.getElementById("conceptMapBtn").click();
+        await h.flush(40);
+        const labels = [...h.document.querySelectorAll("#content button")].map(b => b.getAttribute("aria-label"));
+        assert.ok(labels.includes("Ajustar a la vista"), `botons: ${labels}`);
+    } finally { h.close(); }
+});
