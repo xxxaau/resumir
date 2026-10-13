@@ -45,10 +45,16 @@ La lent per defecte, per fer-te una idea ràpida i ordenada.
 resumir, **sempre en català**, sense frases introductòries, i que retorni una
 estructura fixa:
 
-- un **paràgraf executiu** (màxim 150 paraules),
-- **Punts clau** (5-10 punts essencials),
-- **Aprenentatges** (mínim 3 conclusions pràctiques),
-- **Cites** (màxim 3 cites literals).
+- un **paràgraf executiu** (màxim 150 paraules) que diu quin tipus de contingut és i de què va,
+- **Punts clau** (de 3 a 8, segons la llargada del text),
+- **Aprenentatges** (fins a 3 conclusions pràctiques),
+- **Cites** (fins a 3 frases literals; Resumir comprova que consten al text original i
+  marca ✓ o ⚠).
+
+Només hi ha les seccions que tenen contingut: en un text curt en sortiran menys. Si la
+pàgina és buida o només és un avís de galetes, diu que no hi ha prou contingut en lloc
+d'inventar-se un resum. Pots ajustar el format i la llargada a la configuració de
+Resum, o amb «Més curt» / «Més detall» sota cada resum.
 
 ![Configuració de Resum amb el prompt per defecte (System Prompt) editable i el botó Restaurar](./img/prompt-resum.webp)
 
@@ -71,17 +77,21 @@ L'estructura de sortida:
 Quan no en vols el resum, sinó entendre-ho a fons.
 
 **Què fa el prompt per defecte:** demana una **anàlisi profunda i crítica** —
-arguments, evidències, punts forts, limitacions i implicacions— estructurada en
-seccions clares i, com sempre, en català.
+arguments, proves i dades, matisos, valoració crítica, implicacions i preguntes
+obertes— amb una estructura fixa i, com sempre, en català. Separa el que **diu** el
+text de la **valoració** de la IA.
 
 ### Validació científica
 Per a estudis i afirmacions que vols contrastar amb rigor.
 
-**Què fa el prompt per defecte:** la IA actua com a **auditora acadèmica**, basant-se
-només en evidència validada i el consens actual, amb la prohibició d'inventar
-referències. Assenyala afirmacions dubtoses i aporta **referències reals amb DOI o
-enllaç** (i marca explícitament les que no es poden verificar). La sortida inclou una
-síntesi crítica, punts d'avaluació i una llista de referències.
+**Què fa el prompt per defecte:** la IA actua com a **revisora científica**: avalua
+el tipus de font, el disseny i la mostra, els resultats, els salts lògics (correlació
+com a causalitat, extrapolacions) i els conflictes d'interès **segons el que diu el
+mateix text**. Comença amb un **veredicte de solidesa** (sòlid / raonable amb
+reserves / feble / no avaluable). **No aporta referències pròpies**: com que no pot
+consultar res, només transcriu les fonts que cita el contingut, i el que compara amb el
+consens científic ho marca com a «coneixement general, no verificat». És una ajuda per
+decidir, no una verificació: contrasta sempre les fonts importants.
 
 ### Mapa conceptual
 Per veure l'estructura d'un cop d'ull o per estudiar.
