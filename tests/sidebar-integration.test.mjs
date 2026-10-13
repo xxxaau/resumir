@@ -1137,8 +1137,9 @@ test("Anki - exportar diu «Enviat a Obsidian» (només s'ha obert l'URL, no se 
         assert.match(btn.textContent, /\(2\)/);
         btn.click();
         await h.flush(10);
-        assert.match(btn.textContent, /Enviat a Obsidian/);
-        assert.doesNotMatch(btn.textContent, /Afegit/);
+        const after = h.document.getElementById("ankiExportBtn");     // el panell es recrea en enviar
+        assert.match(after.textContent, /Enviat a Obsidian/);
+        assert.doesNotMatch(after.textContent, /Afegit/);
     } finally { h.close(); }
 });
 
@@ -1855,5 +1856,73 @@ test("Anki des de l'historial - no s'ofereixen «Generar més» ni «Afinar» (f
         assert.ok(texts.some(t => /Afegir a Obsidian/.test(t)), "l'exportació sí que hi és");
         assert.ok(!texts.includes("Generar més"), `botons: ${texts}`);
         assert.equal(h.document.querySelector("#content .anki-afina-input"), null);
+    } finally { h.close(); }
+});
+
+// ---------------------------------------------------------------------------
+// Anki: no duplicar en tornar a exportar; el panell conserva l'estat en re-renderitzar
+// ---------------------------------------------------------------------------
+async function ankiWithCards(extra = {}) {
+    const h = await loadSidebar({
+        sync: { enableAnki: true, ankiVault: "Notes", ...extra },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: '[{"q":"Pregunta A?","a":"Resposta A."},{"q":"Pregunta B?","a":"Resposta B."},{"q":"Pregunta C?","a":"Resposta C."}]',
+    });
+    h.document.getElementById("ankiBtn").click();
+    await h.flush(30);
+    return h;
+}
+
+test("Anki - tornar a exportar no duplica: les targetes enviades es marquen i no es reenvien", async () => {
+    const h = await ankiWithCards();
+    try {
+        h.document.querySelector(".anki-select-all").click();
+        await h.flush(5);
+        h.document.getElementById("ankiExportBtn").click();
+        await h.flush(10);
+        assert.equal(h.calls.tabsCreate.length, 1, "1r enviament");
+        assert.equal(h.document.querySelectorAll(".anki-card-sent").length, 3, "les tres queden marcades com a enviades");
+
+        // «Seleccionar-ho tot» no torna a seleccionar les ja enviades → no hi ha res a enviar
+        h.document.querySelector(".anki-select-all").click();
+        await h.flush(5);
+        const exportBtn = h.document.getElementById("ankiExportBtn");
+        assert.equal(exportBtn.disabled, true, "el botó queda inactiu: res de nou per enviar");
+        exportBtn.click();
+        await h.flush(10);
+        assert.equal(h.calls.tabsCreate.length, 1, "no s'ha reenviat res");
+    } finally { h.close(); }
+});
+
+test("Anki - una targeta enviada es pot tornar a enviar si l'usuari la marca a mà", async () => {
+    const h = await ankiWithCards();
+    try {
+        h.document.querySelector(".anki-select-all").click();
+        await h.flush(5);
+        h.document.getElementById("ankiExportBtn").click();
+        await h.flush(10);
+        const first = h.document.querySelector(".anki-card .anki-select");
+        first.checked = true;
+        first.dispatchEvent(new h.window.Event("change", { bubbles: true }));
+        assert.match(h.document.getElementById("ankiExportBtn").textContent, /\(1\)/);
+        assert.equal(h.document.getElementById("ankiExportBtn").disabled, false);
+    } finally { h.close(); }
+});
+
+test("Anki - el text d'«Afinar», el mode d'edició i el focus sobreviuen a un re-renderitzat", async () => {
+    const h = await ankiWithCards();
+    try {
+        const input = h.document.querySelector(".anki-afina-input");
+        input.value = "dates i xifres";
+        input.dispatchEvent(new h.window.Event("input", { bubbles: true }));
+        h.document.querySelector(".anki-edit").click();                       // 1a targeta en mode edició
+        const selectAll = h.document.querySelector(".anki-select-all");
+        selectAll.focus();
+        selectAll.click();                                                    // re-renderitza tot el panell
+        await h.flush(5);
+        assert.equal(h.document.querySelector(".anki-afina-input").value, "dates i xifres", "l'afinat no s'esborra");
+        assert.ok(h.document.querySelector(".anki-card textarea.anki-q"), "la targeta continua en mode edició");
+        assert.ok(h.document.activeElement.classList.contains("anki-select-all"), "el focus continua al botó premut");
     } finally { h.close(); }
 });

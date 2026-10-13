@@ -1567,3 +1567,6 @@ a.quote-link { text-decoration: none; }
   cursor: pointer;
   text-decoration: underline;
 }
+
+.anki-card-sent { opacity: 0.7; }
+.anki-sent-badge { font-size: 0.8em; color: var(--success); margin-right: auto; }

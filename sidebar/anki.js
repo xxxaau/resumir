@@ -57,12 +57,15 @@ function buildAnkiExport(cards) {
 }
 
 // ── Estat de mòdul ──────────────────────────────────────────────────────────
-let ankiState = []; // [{ q, a, selected }]
+let ankiState = []; // [{ q, a, selected, exported, editing }]
+// Text escrit a la caixa d'«Afinar»: el panell es recrea a cada acció i no s'ha de perdre.
+let ankiFocusDraft = "";
 
 function setAnkiCards(cards) {
     ankiState = (cards || []).map(c => ({
         q: c.q, a: c.a,
         selected: c.selected !== undefined ? c.selected : false,
+        exported: c.exported === true,
     }));
     return ankiState;
 }
@@ -71,9 +74,15 @@ function getSelectedAnkiCards() {
     return ankiState.filter(c => c.selected && c.q.trim() && c.a.trim())
         .map(c => ({ q: c.q, a: c.a }));
 }
+// «Seleccionar-ho tot» NO torna a marcar les targetes ja enviades (duplicarien notes a Obsidian);
+// l'usuari les pot marcar a mà si de debò vol reenviar-les.
 function setAllAnkiSelected(value) {
-    ankiState.forEach(c => { c.selected = value; });
+    ankiState.forEach(c => { c.selected = value ? !c.exported : false; });
     return ankiState;
+}
+/** Després d'enviar: les seleccionades passen a «enviades» i es desmarquen. */
+function markSelectedAnkiExported() {
+    ankiState.forEach(c => { if (c.selected) { c.exported = true; c.selected = false; } });
 }
 function appendAnkiCards(cards) {
     const existing = new Set(ankiState.map(c => c.q.trim().toLowerCase()));
@@ -81,7 +90,7 @@ function appendAnkiCards(cards) {
         const key = (c.q || "").trim().toLowerCase();
         if (!key || existing.has(key)) continue;
         existing.add(key);
-        ankiState.push({ q: c.q, a: c.a, selected: false });
+        ankiState.push({ q: c.q, a: c.a, selected: false, exported: false });
     }
     return ankiState;
 }
@@ -90,6 +99,15 @@ function appendAnkiCards(cards) {
 // ctx: { contentDiv, errorDiv, getGlobalConfig, onGenerateMore(focusText) }
 function renderAnkiPanel(ctx) {
     const { contentDiv } = ctx;
+    // El panell es recrea sencer a cada acció: recordem quin control tenia el focus per
+    // retornar-l'hi (si no, el focus cau a <body> i l'usuari de teclat es perd).
+    const prev = (typeof document !== "undefined") ? document.activeElement : null;
+    let focusKey = null;
+    if (prev && prev !== document.body && contentDiv.contains(prev)) {
+        const cardEl = prev.closest ? prev.closest(".anki-card") : null;
+        const cardIdx = cardEl ? [...contentDiv.querySelectorAll(".anki-card")].indexOf(cardEl) : -1;
+        focusKey = { cardIdx, cls: (prev.className || "").toString().split(/\s+/)[0], id: prev.id };
+    }
     contentDiv.replaceChildren();
     contentDiv.classList.remove("hidden");
 
@@ -122,7 +140,7 @@ function renderAnkiPanel(ctx) {
         const editBtn = document.createElement("button");
         editBtn.className = "anki-edit";
 
-        let editing = false;
+        let editing = card.editing === true;
         function renderBody() {
             body.replaceChildren();
             if (editing) {
@@ -153,7 +171,7 @@ function renderAnkiPanel(ctx) {
                 editBtn.setAttribute("aria-label", `Editar la targeta: ${card.q}`);
             }
         }
-        editBtn.addEventListener("click", () => { editing = !editing; renderBody(); });
+        editBtn.addEventListener("click", () => { editing = !editing; card.editing = editing; renderBody(); });
         renderBody();
 
         // Footer estil barra d'Anki: Edita (esquerra) / Descarta (dreta).
@@ -170,6 +188,14 @@ function renderAnkiPanel(ctx) {
         });
         footer.append(editBtn, discard);
 
+        if (card.exported) {
+            item.classList.add("anki-card-sent");
+            const sent = document.createElement("span");
+            sent.className = "anki-sent-badge";
+            sent.textContent = "✓ Enviada";
+            sent.title = "Ja s'ha enviat a Obsidian; si la marques, es tornarà a enviar";
+            footer.prepend(sent);
+        }
         item.append(sel, body, footer);
         panel.appendChild(item);
     });
@@ -264,6 +290,8 @@ function renderAnkiPanel(ctx) {
     focusInput.className = "anki-afina-input";
     focusInput.placeholder = "Afinar (p.ex. dates i xifres)…";
     focusInput.setAttribute("aria-label", "Afinar la generació de targetes");
+    focusInput.value = ankiFocusDraft;
+    focusInput.addEventListener("input", () => { ankiFocusDraft = focusInput.value; });
     const focusBtn = document.createElement("button");
     focusBtn.textContent = "Afinar";
     focusBtn.addEventListener("click", () => ctx.onGenerateMore(focusInput.value.trim()));
@@ -275,6 +303,17 @@ function renderAnkiPanel(ctx) {
     panel.appendChild(controls);
     if (canGenerateMore) panel.appendChild(afinaBar);
     contentDiv.appendChild(panel);
+
+    if (focusKey) {
+        let target = null;
+        if (focusKey.id) target = document.getElementById(focusKey.id);
+        else if (focusKey.cardIdx >= 0) {
+            const cards = contentDiv.querySelectorAll(".anki-card");
+            const cardEl = cards[Math.min(focusKey.cardIdx, cards.length - 1)];
+            target = cardEl && (cardEl.querySelector("." + focusKey.cls) || cardEl.querySelector("button, input, textarea"));
+        } else if (focusKey.cls) target = contentDiv.querySelector("." + focusKey.cls);
+        if (target && typeof target.focus === "function") target.focus();
+    }
 }
 
 /**
@@ -316,11 +355,17 @@ async function exportAnkiToObsidian(ctx) {
         const tab = await ext.tabs.create({ url: uri, active: false });
         setTimeout(() => ext.tabs.remove(tab.id).catch(() => {}), 5000);
         // Feedback d'èxit: mostra ✓ al botó d'exportació i restaura el text original
+        // Les enviades es marquen (i es desmarquen) perquè un segon clic no dupliqui notes
+        markSelectedAnkiExported();
+        renderAnkiPanel(ctx);
         const exportBtn = document.getElementById("ankiExportBtn");
         if (exportBtn) {
-            const original = exportBtn.textContent;
             exportBtn.textContent = "✓ Enviat a Obsidian";
-            setTimeout(() => { exportBtn.textContent = original; }, 2000);
+            exportBtn.disabled = true;
+            setTimeout(() => {
+                const btn = document.getElementById("ankiExportBtn");
+                if (btn) { btn.textContent = `Afegir a Obsidian (${getSelectedAnkiCards().length})`; btn.disabled = getSelectedAnkiCards().length === 0; }
+            }, 2000);
         }
     } catch (err) {
         if (ctx.errorDiv) {
@@ -452,7 +497,7 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         parseAnkiCards, formatCardForAnki, buildAnkiExport, ANKI_INLINE_MAX_LEN,
         setAnkiCards, getAnkiCards, getSelectedAnkiCards, setAllAnkiSelected, appendAnkiCards,
-        renderAnkiPanel, exportAnkiToObsidian,
+        renderAnkiPanel, exportAnkiToObsidian, markSelectedAnkiExported,
         buildAnkiRegenPrompt, generateMoreAnkiCards,
     };
 }

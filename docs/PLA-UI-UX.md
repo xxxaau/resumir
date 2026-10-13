@@ -176,7 +176,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les. (El cost en € 
 | Configuració | Les estadístiques d'ús es desen però no es mostren ni es poden reiniciar | `storage.local` | Baixa | M |
 | Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial (ara diu el nom del fitxer/pàgina, però continua saltant) | `conceptmap.js:398-405` | Baixa | S |
-| Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |
 
 ## Fonts
 
