@@ -390,17 +390,25 @@ function resetObsidianTemplate() {
 
 function resetSystemPrompt() {
     restoreField("systemPrompt", DEFAULT_SYSTEM_PROMPT, "El prompt");
-    dismissPromptUpdate("system");
+    hidePromptUpdateBanner("system");
 }
 
 function resetDeepDivePrompt() {
     restoreField("deepDivePrompt", DEFAULT_DEEP_DIVE_PROMPT, "El prompt");
-    dismissPromptUpdate("deepdive");
+    hidePromptUpdateBanner("deepdive");
 }
 
 function resetSciencePrompt() {
     restoreField("sciencePrompt", DEFAULT_SCIENCE_PROMPT, "El prompt");
-    dismissPromptUpdate("science");
+    hidePromptUpdateBanner("science");
+}
+
+// «Restaurar» només amaga el bàner: el flag es descarta en DESAR (SAVE_BUTTON_UPDATE_KEYS) o en
+// «Mantenir el meu prompt». Si es persistís aquí, un «Desfer» seguit de tancar sense desar deixaria
+// el bàner descartat amb el prompt personalitzat intacte.
+function hidePromptUpdateBanner(type) {
+    const banner = document.getElementById(type + "UpdateBanner");
+    if (banner) banner.style.display = "none";
 }
 
 function dismissPromptUpdate(type) {
@@ -417,17 +425,17 @@ function dismissPromptUpdate(type) {
 
 function resetConceptMapPrompt() {
     restoreField("conceptMapPrompt", DEFAULT_CONCEPTMAP_PROMPT, "El prompt");
-    dismissPromptUpdate("conceptmap");
+    hidePromptUpdateBanner("conceptmap");
 }
 
 function resetSimplePrompt() {
     restoreField("simplePrompt", DEFAULT_SIMPLE_PROMPT, "El prompt");
-    dismissPromptUpdate("simple");
+    hidePromptUpdateBanner("simple");
 }
 
 function resetAnkiPrompt() {
     restoreField("ankiPrompt", DEFAULT_ANKI_PROMPT, "El prompt");
-    dismissPromptUpdate("anki");
+    hidePromptUpdateBanner("anki");
 }
 
 const BIONIC_PREVIEW_TEXT = "La lectura biònica ressalta l'inici de cada paraula perquè els ulls avancin amb més fluïdesa pel text.";

@@ -1040,6 +1040,7 @@ test("YouTube - les marques [m:ss] són enllaços, el prompt les demana i el cli
         links[0].click();
         await h.flush(10);
         assert.equal(execs.length, 1);
+        assert.equal(h.calls.tabsCreate.length, 0, "moure el vídeo d'aquesta pestanya no ha d'obrir també una pestanya nova");
         assert.equal(JSON.stringify(execs[0].args), "[65]");
     } finally { h.close(); }
 });
@@ -1648,5 +1649,24 @@ test("historial - en esborrar una entrada el focus no es perd (va a la següent 
         await h.flush(30);
         assert.notEqual(h.document.activeElement, h.document.body, "el focus no pot quedar a <body>");
         assert.ok(h.document.getElementById("history-panel").contains(h.document.activeElement), "el focus continua dins l'historial");
+    } finally { h.close(); }
+});
+
+test("YouTube - si no es pot moure el vídeo (sense permís), s'obre en pestanya nova i s'avisa", async () => {
+    const url = "https://www.youtube.com/watch?v=abc123XYZ_0";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url, title: "Vídeo", active: true }],
+        pageText: "[TRANSCRIPT: ca]\n\n[0:00] " + "hola ".repeat(80),
+        modelReply: "Idea [1:05].",
+    });
+    try {
+        h.window.chrome.scripting.executeScript = async () => { throw new Error("Missing host permission for the tab"); };
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        h.document.querySelector("#content a[data-yt-time]").click();
+        await h.flush(20);
+        assert.equal(h.calls.tabsCreate.length, 1, "obre el vídeo en una pestanya nova: " + JSON.stringify(h.calls.tabsCreate));
+        assert.match(h.document.getElementById("model-notice").textContent, /No s'ha pogut moure el vídeo/);
     } finally { h.close(); }
 });

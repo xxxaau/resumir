@@ -196,6 +196,7 @@ const settingsGlobals = {
     resetSimplePrompt: "readonly",
     resetAnkiPrompt: "readonly",
     dismissPromptUpdate: "readonly",
+    hidePromptUpdateBanner: "readonly",
     resetBionic: "readonly",
     showStatus: "readonly",
     autosave: "readonly",

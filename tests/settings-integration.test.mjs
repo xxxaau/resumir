@@ -796,3 +796,14 @@ test("prompt desat per una versió antiga (default retirat) - es mostra el defau
         assert.ok(h.document.getElementById("deepDivePromptBadge").hidden, "ni marcar-lo com a personalitzat");
     } finally { h.close(); }
 });
+
+test("avís de prompt nou - «Restaurar» amaga el bàner però no descarta el flag fins a desar", async () => {
+    const h = await loadSettings({ sync: { deepDivePrompt: "propi", deepDivePromptUpdateAvailable: true, deepDivePromptCustomized: true } });
+    try {
+        h.document.getElementById("resetDeepDive").click();
+        await h.flush(10);
+        assert.equal(h.document.getElementById("deepdiveUpdateBanner").style.display, "none");
+        const stored = await h.storage.sync.get("deepDivePromptUpdateAvailable");
+        assert.equal(stored.deepDivePromptUpdateAvailable, true, "no es persisteix fins que l'usuari desa");
+    } finally { h.close(); }
+});

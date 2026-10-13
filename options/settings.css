@@ -879,6 +879,14 @@ input:checked + .slider:before {
     border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
     overflow-y: hidden;
+    /* Ombres de desplaçament: es veu que el menú continua a un costat (només apareixen
+       quan hi ha contingut amagat; «local» les fa seguir el desplaçament) */
+    background:
+      linear-gradient(to right, var(--sidebar-bg) 30%, transparent) left center / 40px 100% no-repeat local,
+      linear-gradient(to left, var(--sidebar-bg) 30%, transparent) right center / 40px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgba(0,0,0,0.18), transparent) left center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.18), transparent) right center / 12px 100% no-repeat scroll,
+      var(--sidebar-bg);
   }
 
   .sidebar-header,
