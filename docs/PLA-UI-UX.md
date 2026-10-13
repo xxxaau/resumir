@@ -172,8 +172,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Superfície | Troballa | On | Sev. | Esforç |
 | --- | --- | --- | --- | --- |
 | Barra lateral | El cost ja es pot calcular (`getCuratedModelInfo`) però només l'usen els tests | `api.js:24-47` | Baixa | S |
-| Barra lateral | Sense `max-width` del text en panells amples; enllaços amb `word-break: break-all` | `sidebar.css:159,167` | Baixa | S |
-| Barra lateral | CSS mort i regles duplicades (`#water-indicator`, `#timelineCleanerBtn`, `__rgba_primary_weak__`) | `sidebar.css:258-283,424,798` | Baixa | S |
 | Configuració | «Restaurar» sobreescriu un prompt llarg sense confirmació i, des de l'avís, desa tota la pàgina | `settings-options.js:168-212`, `settings.js:69-71` | Mitjana | S |
 | Configuració | Botons Amunt/Avall amb el mateix nom per a tots els plugins; en pujar es perd el focus (es mou l'element enfocat), en baixar no, i en desactivar-se als extrems també | `settings-order.js:61-95` | Mitjana | M |
 | Configuració | Les estadístiques d'ús es desen però no es mostren ni es poden reiniciar | `storage.local` | Baixa | M |

@@ -192,10 +192,15 @@ body {
   font-size: var(--content-base-size);
 }
 
+/* Línia llegible en panells amplis (el mapa i les targetes no s'hi limiten) */
+#content > :is(p, ul, ol, h1, h2, h3, h4, blockquote, pre) {
+  max-width: 72ch;
+}
+
 #content a {
   color: var(--primary-color);
   text-decoration: underline;
-  word-break: break-all;
+  overflow-wrap: anywhere;   /* talla només una URL llarguíssima, no tots els enllaços */
   cursor: pointer;
 }
 
@@ -459,13 +464,6 @@ body {
   display: inline-block;
   min-width: 5ch;
   text-align: right;
-}
-
-#water-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 0.9em;
 }
 
 #history-cache-group {
@@ -993,25 +991,6 @@ body {
 
 #ankiBtn { color: #205EA6; /* Flexoki Blue */ }
 
-#timelineCleanerBtn {
-  display: none;
-  color: #ef4444;
-  position: relative;
-}
-
-/* Línia diagonal quan el plugin NO està actiu (sense classe .active) */
-#timelineCleanerBtn:not(.active)::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 15%;
-  width: 70%;
-  height: 2px;
-  background: currentColor;
-  transform: translateY(-50%) rotate(-45deg);
-  opacity: 0.75;
-  pointer-events: none;
-}
 
 /* ── Footer history/cache group ───────────────────────────── */
 #history-cache-group {

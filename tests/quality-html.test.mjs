@@ -253,3 +253,14 @@ test("settings: cada targeta de plugin porta la seva categoria (Generar / Export
         conceptmap: "Generar", obsidian: "Exportar", markdown: "Exportar", bionic: "Llegir", anki: "Generar",
     });
 });
+
+test("barra lateral: línia llegible en panells amplis, enllaços sense break-all i sense CSS mort", () => {
+    const css = readFileSync(resolve(ROOT, "sidebar/sidebar.css"), "utf8");
+    assert.match(css, /#content > :is\(p, ul, ol[^)]*\)\s*\{[^}]*max-width:\s*72ch/);
+    const linkRule = css.match(/#content a \{([^}]*)\}/)?.[1] || "";
+    assert.doesNotMatch(linkRule, /break-all/);
+    assert.match(linkRule, /overflow-wrap:\s*anywhere/);
+    for (const dead of ["#water-indicator", "#timelineCleanerBtn", "__rgba_primary_weak__"]) {
+        assert.ok(!css.includes(dead), `CSS mort: ${dead}`);
+    }
+});
