@@ -70,3 +70,16 @@ test("generateHtml - una versió només amb items amagats no es mostra", () => {
     const html = generateHtml(parseChangelog("## [3.0.0] - 2026-01-01\n### Afegit\n- Intern (dev)\n"));
     assert.equal(html, "");
 });
+
+test("generateHtml - només les versions recents queden obertes; les antigues, plegades", () => {
+    const many = Array.from({ length: 8 }, (_, i) => ({
+        version: `1.${8 - i}.0`, date: "2026-01-01", milestone: null,
+        sections: [{ name: "Afegit", items: [`Canvi ${8 - i}`] }],
+    }));
+    const html = generateHtml(many);
+    const [recent, older] = html.split('<details class="changelog-older">');
+    assert.equal((recent.match(/class="version-entry"/g) || []).length, 5);
+    assert.match(older, /Versions anteriors/);
+    assert.equal((older.match(/class="version-entry"/g) || []).length, 3);
+    assert.ok(!generateHtml(many.slice(0, 5)).includes("changelog-older"), "amb pocs, sense plegat");
+});

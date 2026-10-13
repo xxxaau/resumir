@@ -115,9 +115,12 @@ function isHidden(item) {
     return HIDDEN_MARKER.test(item);
 }
 
+// Versions que es mostren obertes; les anteriors queden plegades sota «Versions anteriors».
+export const RECENT_VERSIONS = 5;
+
 export function generateHtml(versions) {
     const ind = "            "; // 12 espais — indentació dins <div class="changelog">
-    return versions.map(v => {
+    const entries = versions.map(v => {
         const allItems = v.sections.flatMap(s => s.items).filter(item => !isHidden(item));
         // Saltar versions sense items majors
         if (allItems.length === 0) return "";
@@ -141,5 +144,14 @@ export function generateHtml(versions) {
 
         lines.push(`${ind}</div>`);
         return lines.join("\n");
-    }).filter(Boolean).join("\n");
+    }).filter(Boolean);
+
+    if (entries.length <= RECENT_VERSIONS) return entries.join("\n");
+    return [
+        ...entries.slice(0, RECENT_VERSIONS),
+        `${ind}<details class="changelog-older">`,
+        `${ind}  <summary>Versions anteriors</summary>`,
+        ...entries.slice(RECENT_VERSIONS),
+        `${ind}</details>`,
+    ].join("\n");
 }

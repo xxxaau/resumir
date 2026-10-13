@@ -1132,3 +1132,6 @@ input:checked + .slider:before {
   border-radius: 999px;
   vertical-align: middle;
 }
+
+.changelog-older { margin-top: 12px; }
+.changelog-older > summary { cursor: pointer; font-weight: 600; margin-bottom: 12px; }
