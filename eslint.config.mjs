@@ -222,6 +222,8 @@ const settingsGlobals = {
     checkApiKey: "readonly",
     updatePathPreview: "readonly",
     toggleApiKeyVisibility: "readonly",
+    // plugin-registry.js
+    PLUGIN_REGISTRY: "readonly",
     // settings-sidebar.js
     initializeSidebarNavigation: "readonly",
     initializePluginHeaders: "readonly",

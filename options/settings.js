@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Handle "Live" Toggles in extension list
-    const extensionToggles = ["enableResum", "enablePdf", "enableObsidian", "enableMarkdown", "enableDeepdive", "enableBionic", "enableScience", "enableConceptMap", "enableSimple", "enableAnki"];
+    const extensionToggles = PLUGIN_REGISTRY.map(p => p.enableId);
     extensionToggles.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;

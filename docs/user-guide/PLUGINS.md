@@ -107,7 +107,7 @@ desplegables, pantalla completa i export a PNG.
 
 ## 📚 Conserva: el que entens avui, ho trobes demà
 
-### Integració amb Obsidian
+### Desar a Obsidian
 Desa els resums directament al teu Vault, amb carpeta i plantilla configurables. Si
 guardes el coneixement a Obsidian, els resums hi arriben sense copiar-los a mà. No té
 prompt: és una destinació d'exportació.
@@ -135,7 +135,7 @@ pugui mostrar i exportar.
 
 ![Panell de Targetes Anki: cada targeta amb pregunta i resposta, i botons Edita/Descarta](./img/panell-anki.webp)
 
-### Exportació a Markdown
+### Copiar Markdown
 Copia el resum al porta-retalls en Markdown, amb una plantilla personalitzable (per
 exemple afegint-hi el títol o l'enllaç de la font). Per enganxar-lo on vulguis.
 
