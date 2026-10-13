@@ -1,0 +1,8 @@
+Títol: Show HN: Un editor de text escrit en Rust
+
+Publicació original (autor): He construït un editor de text minimalista en Rust, amb arrencada en 8 ms i suport per a LSP. El codi és obert (MIT). Encara no té plugins.
+
+Comentari 1: Molt xulo, però 8 ms d'arrencada no importa si el LSP triga segons a respondre.
+Comentari 2: Jo l'he provat amb un fitxer de 2 GB i va anar bé, millor que Vim.
+Comentari 3: Sense plugins no el faré servir; l'ecosistema és el que fa útil un editor.
+Comentari 4: D'acord amb el 3, però el mèrit tècnic és evident. Algú ha comparat amb Helix?

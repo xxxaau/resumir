@@ -24,6 +24,7 @@ npm run version:sync    # Sync version across all manifests
 
 # Quality
 npm test             # Run all unit tests (Node.js built-in test runner)
+npm run eval:prompts # Avalua els prompts per defecte contra Gemini (cal GEMINI_API_KEY; gasta tokens)
 npm run smoke:e2e    # Prova de fum en un Chromium real (cal npm run dev:chromium abans; CHROMIUM_PATH opcional)
 npm run lint         # ESLint (0 warnings (`--max-warnings 0`))
 npm run prerelease   # Full automated pre-release audit

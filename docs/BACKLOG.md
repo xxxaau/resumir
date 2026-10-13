@@ -189,6 +189,9 @@ casos especials, estructura fixa, sense referències inventades; vegeu `git log`
 `tests/default-prompts.test.mjs`), però **no s'han provat contra el model**.
 
 **Pendent:**
+- **Eina feta:** `GEMINI_API_KEY=… npm run eval:prompts` (`scripts/eval-prompts.mjs`,
+  continguts a `tests/fixtures/prompt-eval/`) passa la bateria i comprova el que es pot
+  automatitzar; falta executar-la amb una clau real i llegir els resultats.
 - Passar una bateria petita de continguts reals (article llarg, fil de Hacker News,
   YouTube amb ASR, PDF acadèmic, text curt, avís de galetes, pàgina amb injecció) i
   comprovar: format respectat, llargada adequada, sense inventar, en català, que el
