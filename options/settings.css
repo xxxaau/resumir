@@ -1135,3 +1135,9 @@ input:checked + .slider:before {
 
 .changelog-older { margin-top: 12px; }
 .changelog-older > summary { cursor: pointer; font-weight: 600; margin-bottom: 12px; }
+
+/* Secció «Ús» */
+.usage-grid { display: grid; grid-template-columns: max-content 1fr; gap: 6px 24px; margin: 0 0 16px; }
+.usage-grid dt { color: var(--text-muted); }
+.usage-grid dd { margin: 0; font-weight: 600; }
+.usage-list { margin: 4px 0 16px; padding-left: 20px; }

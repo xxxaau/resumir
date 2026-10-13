@@ -186,6 +186,10 @@ const settingsGlobals = {
     listModels: "readonly",
     updateModelSummary: "readonly",
     refreshModels: "readonly",
+    // settings-stats.js
+    computeUsageSummary: "readonly",
+    renderUsageStats: "readonly",
+    clearUsageStats: "readonly",
     // settings-options.js
     saveOptions: "readonly",
     parseLangList: "readonly",

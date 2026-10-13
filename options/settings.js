@@ -121,6 +121,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const modelInput = getEl("modelName");
     if (modelInput) modelInput.addEventListener("input", updateModelSummary);
 
+    bindClick("clearUsageStats", clearUsageStats);
+    renderUsageStats();
+
     bindClick("verifyApiKey", checkApiKey);
     bindClick("toggleApiKey", toggleApiKeyVisibility);
 
