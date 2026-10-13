@@ -80,6 +80,21 @@ function moveExtension(extensionId, direction) {
     updateMoveButtonsState();
     updateSidebar();
     autosave({ extensionOrder: getCurrentExtensionOrder() });
+
+    // Moure l'element (insertBefore) fa perdre el focus al botó premut, i un botó que
+    // s'inhabilita a l'extrem també: es retorna el focus al botó (o al contrari si ja no es pot
+    // moure més en aquella direcció) i s'anuncia la nova posició.
+    const upBtn = item.querySelector(".btn-move-up");
+    const downBtn = item.querySelector(".btn-move-down");
+    const pressed = direction === "up" ? upBtn : downBtn;
+    const target = pressed && !pressed.disabled ? pressed : (direction === "up" ? downBtn : upBtn);
+    if (target && typeof target.focus === "function") target.focus();
+    const items = Array.from(list.querySelectorAll(".extension-item"));
+    const nameEl = item.querySelector(".extension-name");
+    const name = nameEl ? (nameEl.childNodes[0] ? nameEl.childNodes[0].textContent.trim() : nameEl.textContent.trim()) : extensionId;
+    // Regió pròpia (no el toast): l'autodesat hi escriu «Desat» just després i trepitjaria l'avís
+    const live = document.getElementById("reorderStatus");
+    if (live) live.textContent = `${name}: posició ${items.indexOf(item) + 1} de ${items.length}.`;
 }
 
 function updateMoveButtonsState() {

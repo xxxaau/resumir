@@ -172,7 +172,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les. (El cost en € 
 | Superfície | Troballa | On | Sev. | Esforç |
 | --- | --- | --- | --- | --- |
 | Configuració | «Restaurar» sobreescriu un prompt llarg sense confirmació i, des de l'avís, desa tota la pàgina | `settings-options.js:168-212`, `settings.js:69-71` | Mitjana | S |
-| Configuració | Botons Amunt/Avall amb el mateix nom per a tots els plugins; en pujar es perd el focus (es mou l'element enfocat), en baixar no, i en desactivar-se als extrems també | `settings-order.js:61-95` | Mitjana | M |
 | Configuració | Les estadístiques d'ús es desen però no es mostren ni es poden reiniciar | `storage.local` | Baixa | M |
 | Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial (ara diu el nom del fitxer/pàgina, però continua saltant) | `conceptmap.js:398-405` | Baixa | S |

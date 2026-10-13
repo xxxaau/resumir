@@ -890,3 +890,48 @@ test("YouTube - els idiomes preferits de les transcripcions es poden escriure a 
         assert.equal(JSON.stringify(stored), JSON.stringify(["es", "en", "pt-BR"]), "minúscules, sense buits ni codis invàlids");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Reordenar plugins: el focus no es perd i es diu la posició nova
+// ---------------------------------------------------------------------------
+test("reordenar - en pujar un plugin el focus continua al seu botó i s'anuncia la posició", async () => {
+    const h = await loadSettings({});
+    try {
+        const upBtn = (id) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-up`);
+        const third = h.document.querySelectorAll(".extension-item")[2].querySelector(".extension-actions").dataset.extensionId;
+        upBtn(third).focus();
+        upBtn(third).click();
+        await h.flush(5);
+        assert.equal(h.document.activeElement, upBtn(third), "el focus no ha de caure a <body> en moure l'element");
+        assert.match(h.document.getElementById("reorderStatus").textContent, /posició 2 de \d+/);
+    } finally { h.close(); }
+});
+
+test("reordenar - en arribar a un extrem, el focus passa al botó contrari (no al botó inhabilitat)", async () => {
+    const h = await loadSettings({});
+    try {
+        const first = h.document.querySelector(".extension-item .extension-actions").dataset.extensionId;
+        const second = h.document.querySelectorAll(".extension-item")[1].querySelector(".extension-actions").dataset.extensionId;
+        const up = (id) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-up`);
+        const down = (id) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-down`);
+        up(second).focus();
+        up(second).click();                   // ara «second» és el primer
+        await h.flush(5);
+        assert.equal(up(second).disabled, true);
+        assert.equal(h.document.activeElement, down(second), "el focus va a «avall», que és el que té sentit");
+        void first;
+    } finally { h.close(); }
+});
+
+test("reordenar - en baixar un plugin el focus també es manté", async () => {
+    const h = await loadSettings({});
+    try {
+        const first = h.document.querySelector(".extension-item .extension-actions").dataset.extensionId;
+        const down = h.document.querySelector(`.extension-actions[data-extension-id="${first}"] .btn-move-down`);
+        down.focus();
+        down.click();
+        await h.flush(5);
+        assert.equal(h.document.activeElement, down);
+        assert.match(h.document.getElementById("reorderStatus").textContent, /posició 2 de \d+/);
+    } finally { h.close(); }
+});
