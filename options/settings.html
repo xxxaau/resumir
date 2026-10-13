@@ -144,6 +144,22 @@
           </div>
         </div>
 
+        <div class="section" id="backupSection">
+          <h2>Còpia de seguretat</h2>
+          <div class="help-text">
+            Exporta la configuració (prompts personalitzats, plantilles, plugins i ordre) a un fitxer JSON per desar-la o portar-la a un altre navegador. La clau d'API no s'inclou, tret que ho demanis.
+          </div>
+          <div class="flex-row-gap">
+            <button id="exportConfig" class="btn btn-secondary">Exportar la configuració</button>
+            <button id="importConfig" class="btn btn-secondary">Importar una configuració…</button>
+            <input type="file" id="importConfigFile" accept=".json,application/json" hidden />
+          </div>
+          <label class="checkbox-row backup-key-row" for="exportIncludeKey">
+            <input type="checkbox" id="exportIncludeKey" />
+            Incloure la clau d'API a l'exportació (el fitxer en quedarà més sensible)
+          </label>
+        </div>
+
         <div class="section-actions">
           <button id="save" class="btn btn-primary">Desar</button>
         </div>
@@ -1662,6 +1678,7 @@
     <script defer src="settings-order.js"></script>
     <script defer src="settings-cache.js"></script>
     <script defer src="settings-stats.js"></script>
+    <script defer src="settings-backup.js"></script>
     <script defer src="settings-models.js"></script>
     <script defer src="settings-options.js"></script>
     <script defer src="settings-sidebar.js"></script>

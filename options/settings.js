@@ -121,6 +121,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const modelInput = getEl("modelName");
     if (modelInput) modelInput.addEventListener("input", updateModelSummary);
 
+    bindClick("exportConfig", exportConfig);
+    const importBtn = getEl("importConfig"), importFile = getEl("importConfigFile");
+    if (importBtn && importFile) {
+        importBtn.addEventListener("click", () => importFile.click());
+        importFile.addEventListener("change", async () => {
+            const file = importFile.files && importFile.files[0];
+            await importConfigFromFile(file);
+            importFile.value = "";   // permet tornar a triar el mateix fitxer
+        });
+    }
     bindClick("clearUsageStats", clearUsageStats);
     renderUsageStats();
 

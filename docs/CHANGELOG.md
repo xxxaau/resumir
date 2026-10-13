@@ -22,6 +22,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Configuració:** descripció «Què fa i com configurar-lo» a cada plugin, prompts
   plegats sota «avançat», capçalera comuna amb interruptor, vista prèvia en directe
   a la lectura biònica i avís de «nova versió del prompt» també per a Resum i Anki.
+- **Còpia de seguretat de la configuració:** exportar i importar prompts personalitzats,
+  plantilles, plugins i ordre en un fitxer JSON (la clau d'API només si ho demanes; la
+  importació valida cada valor i demana confirmació).
 - **Secció «Ús» a la configuració:** resums generats (total, avui, 7 dies), tokens, temps
   de resposta mitjà, recompte per tipus i per model, amb botó per esborrar-ho.
 - **Estat en repòs** amb la pàgina activa i els resums ja desats; filtre per tipus

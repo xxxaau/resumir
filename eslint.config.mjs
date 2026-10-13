@@ -186,6 +186,11 @@ const settingsGlobals = {
     listModels: "readonly",
     updateModelSummary: "readonly",
     refreshModels: "readonly",
+    // settings-backup.js
+    buildConfigExport: "readonly",
+    parseConfigImport: "readonly",
+    exportConfig: "readonly",
+    importConfigFromFile: "readonly",
     // settings-stats.js
     computeUsageSummary: "readonly",
     renderUsageStats: "readonly",

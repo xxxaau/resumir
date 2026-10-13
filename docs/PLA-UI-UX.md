@@ -123,7 +123,6 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 | --- | --- | --- | --- | --- |
 | Cites verificades als punts clau | Fet per a la secció «Cites» (✓/⚠ + ↗ amb `#:~:text=`). Queda estendre-ho a cada punt clau (cal que el model hi citi un fragment literal per punt) | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |
-| Importar/exportar configuració | JSON amb prompts i plantilles; la clau exclosa per defecte | Els prompts personalitzats són la inversió de l'usuari i només viuen a `storage.sync` (quota per element) | — | M |
 
 **Relació amb el backlog:** els prompts editables, els proveïdors alternatius i la
 i18n ja hi tenen entrada («Crear plugins propis», «Múltiples proveïdors»,
