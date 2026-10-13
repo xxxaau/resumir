@@ -211,7 +211,11 @@ function renderAnkiPanel(ctx) {
     exportBtn.id = "ankiExportBtn";
     exportBtn.addEventListener("click", () => exportAnkiToObsidian(ctx));
 
-    btnRow.append(moreBtn, discardAllBtn, selectAllBtn, exportBtn);
+    // Sense text original (targetes obertes des de l'Historial) no es pot generar més ni afinar:
+    // els controls no s'ofereixen en lloc de fallar en prémer-los.
+    const canGenerateMore = ctx.canGenerateMore !== false;
+    if (canGenerateMore) btnRow.append(moreBtn);
+    btnRow.append(discardAllBtn, selectAllBtn, exportBtn);
 
     // Declaracions de funció (hoisted): usades pels handlers de selecció de dalt.
     function updateExportCount() {
@@ -269,7 +273,7 @@ function renderAnkiPanel(ctx) {
     afinaBar.append(notice, loading, afinaRow);
 
     panel.appendChild(controls);
-    panel.appendChild(afinaBar);
+    if (canGenerateMore) panel.appendChild(afinaBar);
     contentDiv.appendChild(panel);
 }
 

@@ -1839,3 +1839,21 @@ test("PDF - amb un PDF http(s) que no es pot descarregar, el botó de triar un P
         assert.ok(h.document.getElementById("selectPdfBtn").classList.contains("pulse"), "el botó ha de destacar");
     } finally { h.close(); }
 });
+
+test("Anki des de l'historial - no s'ofereixen «Generar més» ni «Afinar» (fallarien)", async () => {
+    const url = "https://example.com/article";
+    const key = `summary_cache:${url}:anki`;
+    const entry = { url, title: "Article", summary: '<!--anki-->\n[{"q":"Què és X?","a":"Una cosa."}]', model: "gemini-2.5-flash",
+        timestamp: new Date().toISOString(), version: "1.0", stats: { input: 1, output: 1 }, type: "anki" };
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", [key]: entry, summary_cache_index: [key] } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush(30);
+        h.document.querySelector(".history-item-title").click();
+        await h.flush(30);
+        const texts = [...h.document.querySelectorAll("#content button")].map(b => b.textContent.trim());
+        assert.ok(texts.some(t => /Afegir a Obsidian/.test(t)), "l'exportació sí que hi és");
+        assert.ok(!texts.includes("Generar més"), `botons: ${texts}`);
+        assert.equal(h.document.querySelector("#content .anki-afina-input"), null);
+    } finally { h.close(); }
+});

@@ -108,16 +108,11 @@ async function loadHistoryEntry(entry, { historyMode = true } = {}) {
             contentDiv,
             errorDiv,
             getGlobalConfig: () => ankiConfig,
-            // No tenim el text original de la pàgina fora d'una sessió de
-            // generació activa (window.__ankiPageText no es persisteix a la
-            // caché) — regenerar amb contingut equivocat seria pitjor que no
-            // oferir-ho, així que expliquem la limitació en lloc de generar.
-            onGenerateMore: () => {
-                if (errorDiv) {
-                    errorDiv.textContent = "«Genera més» i «Afinar» no estan disponibles per a targetes obertes des de l'Historial.";
-                    errorDiv.classList.remove("hidden");
-                }
-            },
+            // No tenim el text original de la pàgina fora d'una sessió de generació activa
+            // (window.__ankiPageText no es persisteix a la caché): regenerar amb contingut
+            // equivocat seria pitjor que no oferir-ho, així que els controls ni apareixen.
+            canGenerateMore: false,
+            onGenerateMore: () => {},
         });
     } else {
         contentDiv.replaceChildren(formatTextToFragment(entry.summary, bionicEnabled, fixation));
