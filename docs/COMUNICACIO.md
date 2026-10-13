@@ -120,5 +120,5 @@ Per evitar que el copy prometi coses que no hi són (o n'ometi):
 - Historial + caché local (30 dies) + estadístiques de tokens/cost.
 - 5 temes (sistema/clar/fosc/solarized/gris) + accessibilitat WCAG.
 - Firefox + Chrome/Edge/Brave (MV3). Cal API key gratuïta de Google Gemini.
-- NO té: OCR, suport de documents Office online (al backlog), i18n (al
+- NO té: OCR, suport de documents Office online, plugins propis, i18n (al
   backlog), publicació al Chrome Web Store.

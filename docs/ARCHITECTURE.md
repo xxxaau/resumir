@@ -151,8 +151,10 @@ of `shared/defaults.js`.
 > `CONFIG_KEYS` in `sidebar/sidebar.js`, or its button renders in Settings but not in
 > the sidebar (bug diagnosed 2026-06-10).
 
-See the backlog item *"Crear plugins propis des de la configuració"* for the planned
-migration from static to data-driven (user-created) plugins.
+The plugin list on the settings page lives in `options/plugin-registry.js` (id, name,
+enable key, menu icon); `tests/plugin-registry.test.mjs` keeps the cards in
+`settings.html` and the sidebar button names in sync with it. User-created plugins
+are not planned.
 
 ---
 

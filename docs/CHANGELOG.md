@@ -31,6 +31,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   a l'historial.
 
 ### Arreglat
+- «Restaurar» del bàner d'actualització de prompt desa només aquell prompt (abans desava tota la pestanya).
+- Desar o esborrar resums de la memòria cau alhora ja no deixa entrades fora de l'historial.
 - **El botó «Atura» ara atura de veritat.** L'`AbortController` no arribava
   a la sidebar fins que la generació ja havia acabat, de manera que clicar
   «atura» durant l'streaming no feia res i, en alguns casos, en llançava
@@ -76,6 +78,10 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Noms unificats** entre la configuració i la barra lateral: Aprofundiment, Validació científica, Desar a Obsidian, Copiar Markdown.
+- El **mapa conceptual** es genera sempre en català (com la resta de resultats).
+- Visor PDF: el botó «Tancar» en hover i els missatges d'error tenen contrast AA.
+- Obsidian (configuració): textos menys repetits i exemple que ja no sembla un valor.
 - **Prompts per defecte revisats** (resum, aprofundiment, validació científica,
   mapa conceptual, explica-ho fàcil i Anki): no inventen, diuen «no hi ha prou
   contingut» en pàgines buides i la validació científica ja no demana referències

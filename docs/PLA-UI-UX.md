@@ -59,7 +59,8 @@ referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** 
 ## Nivell 1 — Guanys ràpids (resta)
 
 La Fase C (contrast i accessibilitat de base) està feta; vegeu `git log` i el
-test `quality-contrast`, que vigila AA amb la llista de fallades buida. Queda:
+test `quality-contrast`, que vigila AA amb la llista de fallades buida (el visor PDF, amb paleta fosca fixa, té el seu
+propi control a `pdf-viewer-contrast`). No queda res pendent.
 
 **Decisió sobre `shared/tokens.css`:** no es fa. Els dos fitxers de tema (barra
 lateral i configuració) no divergeixen per descuit sinó pel disseny (fons i
@@ -67,40 +68,16 @@ primari diferents), i el que importava —que cap parell de colors falli AA— j
 garanteixen els tests. Un fitxer compartit només valdria la pena si es vol
 unificar el disseny dels dos.
 
-### Pendent d'accessibilitat
-
-- **Visor PDF:** paleta fixa que ignora el tema (ara no passa pel mateix control
-  de contrast).
-
-### Pendent de microcopy
-
-- **Decisió pendent:** «Validació científica» i «Explica-ho fàcil» són noms de
-  funcionalitat, no verbs de botó; dir explícitament si la regla de l'infinitiu
-  s'hi aplica.
-- Normalitzar «Validar / Validació / Validació científica» a un sol nom.
-
-### Altres correccions petites
-
-- Peu: «De la memòria cau» en un encert.
-
 ## Nivell 2 — Canvis estructurals (resta)
 
 La Fase D està feta en bona part (barra d'eines agrupada i fixa, onboarding amb
 comprovació de la clau, estats de càrrega, renderitzador Markdown, configuració
 responsiva, historial amb cerca/esborrar/desfer, pantalla General reordenada,
-enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
+enllaços profunds, rutes neutres). Vegeu `git log`.
 
 ### 2.4 Configuració
 
-- **Pendent de l'auditoria de la configuració (Opus, 2026-10-11)**; la resta ja és feta:
-  - Unificar els noms entre configuració i barra lateral (Aprofundiment/Aprofundir,
-    «Integració amb Obsidian»/«Desar a Obsidian», «Exportació a Markdown»/«Copiar»);
-    decidir-ho amb la decisió de nomenclatura del Nivell 1.
-  - Ombra de desplaçament al menú horitzontal (<720 px) perquè es vegi que es pot desplaçar.
-  - Obsidian: textos repetits sobre els claudàtors, «Vault» en anglès, text d'exemple
-    que sembla un valor.
-- **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
-  sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
+Tot fet. Decisió presa: els camps de text i els sliders **no** es desen sols (hi ha avís de canvis sense desar i `beforeunload`; un desat automàtic de prompts a mig escriure podria trepitjar un prompt bo).
 
 ## Nivell 3 — Estratègia de producte
 
@@ -125,8 +102,7 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |
 
 **Relació amb el backlog:** els prompts editables, els proveïdors alternatius i la
-i18n ja hi tenen entrada («Crear plugins propis», «Múltiples proveïdors»,
-«Interfície multidioma»); aquí només se'n tracta l'impacte a la UI. El **xat de
+i18n ja hi tenen entrada («Múltiples proveïdors», «Interfície multidioma»); aquí només se'n tracta l'impacte a la UI. El **xat de
 seguiment** sobre el resum no hi és: és el patró més estès del mercat (Gemini,
 Merlin, Recall, Comet) i mereix una entrada nova, però és esforç L i fora de
 l'abast d'una millora d'UI.

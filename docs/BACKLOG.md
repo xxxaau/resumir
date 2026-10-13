@@ -13,34 +13,6 @@ i criteris d'acceptació mínims.
 
 ---
 
-## Resum de documents Office online (Word/PowerPoint de SharePoint/OneDrive)
-
-**Context (2026-06-11, premisa revisada 2026-08-09):** Actualment l'extracció de contingut (`sidebar/content.js`) injecta Readability al DOM de la pàgina (Defuddle ja no s'usa — es va retirar; vegeu `VENDORS.md`) i, per a PDFs, els detecta per Content-Type i els processa amb `sidebar/pdf-extract.js`. Els documents Word (`.docx`) i PowerPoint (`.pptx`) oberts online a SharePoint/OneDrive **no funcionen** perquè:
-
-- Es rendereixen dins del **visor web d'Office Online** (Word/PowerPoint for the web), una SPA plena d'iframes on el text no és DOM accessible/seleccionable de forma fiable → Readability no en pot extreure res útil.
-- El fitxer binari real està darrere d'**URLs autenticades** de SharePoint/OneDrive (sessió de l'usuari, no `.docx` directe a la URL) → un `fetch` simple no el recupera, i caldria respectar les credencials.
-- Encara que es recuperés el binari, caldria **parsejar el format Office** al client (p. ex. `mammoth.js` per a `.docx`, un parser de `.pptx` per a OOXML), cap dels quals existeix avui al projecte.
-
-**Comportament esperat (proposta):**
-- Detectar que la pestanya activa és un visor d'Office Online (patrons d'URL `*.sharepoint.com/.../_layouts/15/Doc.aspx`, `*-my.sharepoint.com`, `officeapps.live.com`, `view.officeapps.live.com`).
-- Recuperar el document via l'API autenticada (Microsoft Graph / endpoint de descàrrega de SharePoint) o, com a mínim, oferir un missatge clar que aquest tipus de contingut no és compatible encara.
-- Parsejar `.docx`/`.pptx` al client i passar el text pla al pipeline de resum existent.
-
-**Abast tècnic estimat:**
-- `vendor/` — afegir parser OOXML (`mammoth` per a docx; avaluar opcions lleugeres per a pptx).
-- `sidebar/content.js` — branca de detecció + extracció per a Office Online, anàloga a la del PDF.
-- Permisos de host addicionals per als dominis de SharePoint/OneDrive (probablement via `optional_host_permissions`).
-- Gestió d'autenticació (cookies de sessió / Graph token) — el punt més incert i possiblement bloquejant en entorns corporatius amb MFA/condicions d'accés.
-
-**Criteris d'acceptació mínims:**
-- [ ] Un `.docx` obert a SharePoint es resumeix correctament, o
-- [ ] Si no és viable l'extracció, es mostra un missatge específic ("Els documents d'Office online encara no són compatibles") en lloc de l'error genèric de permisos.
-- [ ] No hi ha regressió en l'extracció de PDFs ni de pàgines HTML.
-
-**Nota:** sorgit de proves a Edge (sessió 2026-06-11). Cal validar primer si l'entorn corporatiu permet recuperar el binari abans d'invertir en parsers.
-
----
-
 ## Interfície d'usuari multidioma (i18n)
 
 **Context (2026-05-27):** Actualment tota la interfície d'usuari està en català dur — ~200+ cadenes repartides entre ~18 fitxers (3 HTML + 15 JS). No existeix cap infraestructura d'internacionalització: ni `_locales/`, ni `default_locale` als manifests, ni `chrome.i18n`, ni `__MSG__` als HTML.
@@ -139,46 +111,6 @@ si es reprèn aquesta idea.
 - [ ] El comptatge de tokens i el cost es mostren correctament per al proveïdor actiu.
 - [ ] El fallback de models no creua proveïdors de forma incorrecta.
 - [ ] No hi ha regressió amb Gemini com a proveïdor per defecte.
-
----
-
-## Crear plugins propis des de la configuració (prompt + icona)
-
-**Context (2026-06-19):** Sorgit del testing amb usuaris. Avui els plugins són
-**estàtics i compilats** (`docs/CREAR-PLUGIN.md`: *"feature toggles estàtic — tots
-els plugins estan compilats dins l'extensió. No hi ha descobriment dinàmic"*).
-Afegir-ne un requereix 10+ passos repartits en molts fitxers (`sidebar/sidebar.html`,
-`sidebar/ui.js`, `shared/defaults.js`, `sidebar/sidebar.js`, `options/*`).
-
-La idea: que l'usuari es pugui crear un plugin **bàsic** des de Settings amb només
-un **prompt editable** i una **icona** (seleccionar d'un conjunt o pujar-ne una).
-
-**Comportament esperat:**
-- Botó "Crear plugin" a Settings → formulari amb nom, prompt i icona.
-- El plugin apareix com un botó més a la toolbar de la sidebar i és
-  activable/reordenable com els existents.
-- La configuració del plugin és només l'edició del prompt (i nom/icona).
-
-**Abast tècnic estimat:**
-- **Migrar de hardcoded a data-driven**: un array de plugins d'usuari
-  `{ id, nom, prompt, icona }` a `storage` (sync per a metadades; `local` per a
-  les icones, que poden ser pesades).
-- **Render dinàmic** dels botons de la toolbar a `sidebar/ui.js` /
-  `sidebar/sidebar.html` (avui són estàtics) i de la UI de settings.
-- **Icones (net-new, no existeix res avui)**: selector d'un conjunt d'icones
-  incloses + pujada d'imatge desada com a **data URI** a `storage.local`
-  (validar mida/format; no hi ha cap mecanisme d'imatges custom actualment).
-- Reaprofitar la **infra d'edició de prompts** existent (`storage.sync` + textarea).
-
-**Cost:** ALT / MITJÀ-ALT. Refactor estàtic→dinàmic dels plugins + sistema d'icones
-de zero. **Bonus:** elimina el procés manual de 10 passos de `CREAR-PLUGIN.md`.
-
-**Criteris d'acceptació mínims:**
-- [ ] L'usuari crea un plugin amb nom + prompt + icona des de Settings i apareix a la sidebar.
-- [ ] El plugin d'usuari resumeix usant el seu prompt.
-- [ ] Es pot editar, reordenar, desactivar i esborrar com els plugins integrats.
-- [ ] La icona pujada es desa i es mostra correctament (i no peta el límit de `storage`).
-- [ ] No hi ha regressió amb els plugins integrats.
 
 ---
 
