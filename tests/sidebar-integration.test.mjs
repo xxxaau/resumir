@@ -1630,3 +1630,23 @@ test("peu - amb la còpia desada a la vista diu «De la memòria cau» i els tok
         assert.equal(h.calls.fetches.length, 0);
     } finally { h.close(); }
 });
+
+test("historial - en esborrar una entrada el focus no es perd (va a la següent o a l'encapçalament)", async () => {
+    const mk = (url, ts) => {
+        const key = `summary_cache:${url}:summary`;
+        return [key, { url, title: url, summary: "R", model: "gemini-2.5-flash", timestamp: ts, version: "1.0", stats: { input: 1, output: 1 }, type: "summary" }];
+    };
+    const [k1, e1] = mk("https://a.example/1", new Date(Date.now() - 1000).toISOString());
+    const [k2, e2] = mk("https://b.example/2", new Date().toISOString());
+    const h = await loadSidebar({ local: { apiKey: "AIza_test", [k1]: e1, [k2]: e2, summary_cache_index: [k1, k2] } });
+    try {
+        h.document.getElementById("historyBtn").click();
+        await h.flush(30);
+        const del = h.document.querySelector(".history-delete");
+        del.focus();                       // com fa l'usuari amb el teclat o en clicar-hi
+        del.click();
+        await h.flush(30);
+        assert.notEqual(h.document.activeElement, h.document.body, "el focus no pot quedar a <body>");
+        assert.ok(h.document.getElementById("history-panel").contains(h.document.activeElement), "el focus continua dins l'historial");
+    } finally { h.close(); }
+});

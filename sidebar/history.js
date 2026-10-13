@@ -373,6 +373,10 @@ async function _deleteGroup(group, toast, refill) {
     }
     _historyEntries = _historyEntries.filter(e => e.url !== group.url);
     refill();
+    // El botó que tenia el focus s'ha destruït: el focus va a la primera entrada que queda
+    // (o a l'encapçalament si la llista és buida), no a <body>.
+    const nextFocus = document.querySelector("#history-panel .history-item-title") || document.getElementById("history-heading");
+    if (nextFocus && typeof nextFocus.focus === "function") nextFocus.focus();
 
     // Avís amb «Desfer» durant uns segons (no hi ha confirmació prèvia: és més
     // ràpid i es pot revertir)
