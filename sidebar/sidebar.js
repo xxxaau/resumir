@@ -340,7 +340,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Open links in content area in a new browser tab (extension sidebar context)
     contentDiv.addEventListener("click", (e) => {
         const anchor = e.target.closest("a[href]");
-        if (anchor) {
+        // Les marques [m:ss] les gestiona el seu propi handler (mou el vídeo d'aquesta pestanya)
+        if (anchor && !anchor.hasAttribute("data-yt-time")) {
             e.preventDefault();
             try {
                 const parsed = new URL(anchor.href);
@@ -610,6 +611,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (err) {
             console.warn("[YouTube] seek failed:", err);
+            // Sense permís sobre la pàgina (Firefox) no es pot moure el vídeo: s'obre en una pestanya nova, i es diu
+            showModelNotice("No s'ha pogut moure el vídeo d'aquesta pestanya; s'ha obert en una de nova.");
             ext.tabs.create({ url: link.href }).catch(() => {});
         }
     });
