@@ -156,3 +156,17 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1.5rem; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Enllaç «Salta al contingut»: només es veu en rebre el focus amb teclat */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  padding: 8px 14px;
+  background: #fff;
+  color: #0b5cf0;
+  border: 2px solid #0b5cf0;
+  border-radius: 6px;
+  z-index: 100;
+}
+.skip-link:focus { top: 8px; }

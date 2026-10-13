@@ -181,8 +181,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Anki | Des de l'historial, «Genera més» i «Afinar» semblen actius però fallen | `history.js:101-106` | Baixa | S |
 | YouTube | L'etiqueta de llengua enviada al model pot no correspondre a la transcripció descarregada | `content.js:350-370`, `extractors.js:197-201` | Mitjana | S |
 | YouTube | `youtubePreferredLangs` es llegeix però cap UI l'escriu | `content.js:341-346` | Baixa | S |
-| Punts d'entrada | Tooltip «Obre Resumir» quan en realitat obre i tanca; descripció del manifest massa estreta | `manifest.base.json:8,20` | Baixa | S |
-| Web | Sense enllaç «Salta al contingut» | `web/src/_includes/base.njk` | Baixa | S |
 
 ## Fonts
 

@@ -264,3 +264,11 @@ test("barra lateral: línia llegible en panells amplis, enllaços sense break-al
         assert.ok(!css.includes(dead), `CSS mort: ${dead}`);
     }
 });
+
+test("web: enllaç «Salta al contingut» que apunta al <main> (WCAG 2.4.1)", () => {
+    const tpl = readFileSync(resolve(ROOT, "web/src/_includes/base.njk"), "utf8");
+    const m = /<a class="skip-link" href="#([\w-]+)">/.exec(tpl);
+    assert.ok(m, "enllaç de salt");
+    assert.match(tpl, new RegExp(`<main id="${m[1]}"`), "el destí és el <main>");
+    assert.match(readFileSync(resolve(ROOT, "web/src/css/style.css"), "utf8"), /\.skip-link:focus/);
+});
