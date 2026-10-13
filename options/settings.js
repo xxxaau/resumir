@@ -9,7 +9,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // Single batch — read all settings once (elimina 3 lectures storage redundants)
     const ALL_CONFIG_KEYS = [
-        "modelName", "theme", "systemPrompt", "systemPromptCustomized", "systemPromptUpdateAvailable", "ankiPromptCustomized", "ankiPromptUpdateAvailable", "summaryFormat", "summaryLength",
+        "modelName", "theme", "systemPrompt", "systemPromptCustomized", "systemPromptUpdateAvailable", "ankiPromptCustomized", "ankiPromptUpdateAvailable", "summaryFormat", "summaryLength", "youtubePreferredLangs",
         "enableMarkdown", "markdownTemplate", "enableObsidian", "obsidianVault",
         "obsidianPath", "obsidianTemplate", "enableBionic", "bionicFixation",
         "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight",

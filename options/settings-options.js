@@ -61,6 +61,7 @@ function saveOptions(e) {
     theme: document.querySelector("#themeSelect").value,
     systemPrompt: document.querySelector("#systemPrompt").value,
     systemPromptCustomized: document.querySelector("#systemPrompt").value !== DEFAULT_SYSTEM_PROMPT,
+    youtubePreferredLangs: parseLangList(document.querySelector("#youtubePreferredLangs").value),
     summaryFormat: document.querySelector("#summaryFormat").value,
     summaryLength: document.querySelector("#summaryLength").value,
 
@@ -252,6 +253,12 @@ function storedPrompt(syncData, key, defaultValue) {
     return v;
 }
 
+/** «ca, ES, xx-yy-zz» → ["ca", "es"]: minúscules (excepte la regió), sense buits ni codis invàlids. */
+function parseLangList(text) {
+  return String(text || "").split(",").map(t => t.trim()).filter(t => /^[A-Za-z]{2,3}(-[A-Za-z]{2,4})?$/.test(t))
+    .map(t => { const [l, r] = t.split("-"); return r ? `${l.toLowerCase()}-${r.length === 2 ? r.toUpperCase() : r}` : l.toLowerCase(); });
+}
+
 function restoreOptions(syncData, localData) {
     document.querySelector("#apiKey").value = (localData && localData.apiKey) || "";
     document.querySelector("#modelName").placeholder = DEFAULT_MODEL_ID;
@@ -261,6 +268,7 @@ function restoreOptions(syncData, localData) {
     updateModelSummary();
     document.querySelector("#themeSelect").value = (syncData && syncData.theme) || "system";
     document.querySelector("#systemPrompt").value = storedPrompt(syncData, "systemPrompt", DEFAULT_SYSTEM_PROMPT) || DEFAULT_SYSTEM_PROMPT;
+    document.querySelector("#youtubePreferredLangs").value = Array.isArray(syncData && syncData.youtubePreferredLangs) ? syncData.youtubePreferredLangs.join(", ") : "";
     document.querySelector("#summaryFormat").value = (syncData && syncData.summaryFormat) || "default";
     document.querySelector("#summaryLength").value = (syncData && syncData.summaryLength) || "medium";
 

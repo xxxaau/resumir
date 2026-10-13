@@ -877,3 +877,16 @@ test("subpanell de plugin - l'engranatge porta el focus al títol i «← Plugin
         assert.equal(h.document.activeElement, gear, "i torna a l'engranatge que l'havia obert");
     } finally { h.close(); }
 });
+
+test("YouTube - els idiomes preferits de les transcripcions es poden escriure a Resum (i es desen com a llista neta)", async () => {
+    const h = await loadSettings({ sync: { youtubePreferredLangs: ["ca", "es"] } });
+    try {
+        const input = h.document.getElementById("youtubePreferredLangs");
+        assert.equal(input.value, "ca, es");
+        input.value = " es , EN,, xx-yy-zz-no, pt-BR ";
+        h.document.querySelector("#saveCustom").click();
+        await h.flush(20);
+        const stored = (await h.storage.sync.get("youtubePreferredLangs")).youtubePreferredLangs;
+        assert.equal(JSON.stringify(stored), JSON.stringify(["es", "en", "pt-BR"]), "minúscules, sense buits ni codis invàlids");
+    } finally { h.close(); }
+});

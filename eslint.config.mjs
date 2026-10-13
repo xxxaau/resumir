@@ -188,6 +188,7 @@ const settingsGlobals = {
     refreshModels: "readonly",
     // settings-options.js
     saveOptions: "readonly",
+    parseLangList: "readonly",
     restoreOptions: "readonly",
     initializeSettingsPageUI: "readonly",
     resetTemplate: "readonly",
