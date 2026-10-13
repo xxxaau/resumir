@@ -1735,3 +1735,23 @@ test("pantalla completa - amb una pestanya interna del navegador, diu què cal f
         assert.doesNotMatch(msg, /pdf-local:/);
     } finally { h.close(); }
 });
+
+test("memòria cau - veure una còpia desada NO canvia el model del selector (la propera petició usa el desat)", async () => {
+    const url = "https://example.com/article";
+    const seeded = seedTypes(url, ["summary"]);
+    seeded[`summary_cache:${url}:summary`].model = "gemini-2.5-pro";
+    const h = await loadSidebar({
+        sync: { modelName: "gemini-2.5-flash" },
+        local: { apiKey: "AIza_test", ...seeded },
+        pageText: "Un article. ".repeat(30),
+    });
+    try {
+        await h.flush(30);
+        const sel = h.document.getElementById("model-select");
+        const before = sel.value;
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(sel.value, before, "el selector no ha de mostrar un model que no s'usarà");
+        assert.match(h.document.getElementById("provenance").textContent, /2\.5 Pro|gemini-2\.5-pro/i, "el model de la còpia consta a la línia de procedència");
+    } finally { h.close(); }
+});

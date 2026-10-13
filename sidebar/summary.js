@@ -332,18 +332,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 const footer = document.getElementById("footer-status");
                 footer.classList.remove("hidden");
                 
-                if (cachedEntry.model) {
-                    if (modelSelect.value !== cachedEntry.model) {
-                        if (!Array.from(modelSelect.options).some(o => o.value === cachedEntry.model)) {
-                            const opt = document.createElement("option");
-                            opt.value = cachedEntry.model;
-                            opt.textContent = cachedEntry.model;
-                            modelSelect.appendChild(opt);
-                        }
-                        modelSelect.value = cachedEntry.model;
-                    }
-                }
-
+                // El selector de model NO es toca: mostraria un model que la propera petició no
+                // usarà (usa el desat). El de la còpia consta a la línia de procedència.
 
                 // Mateix post-procés que en generar: enllaços (p. N)/[m:ss], procedència i refinadors
                 const proseCached = !isCachedConceptMap && !isCachedAnki && isProseType(requestedType);
