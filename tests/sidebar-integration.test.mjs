@@ -1776,3 +1776,21 @@ test("avís de prompt nou - el botó «Continuar amb el meu prompt» continua l'
         assert.ok(h.document.getElementById("prompt-update-notification").classList.contains("hidden"));
     } finally { h.close(); }
 });
+
+test("historial - no es pot obrir mentre es genera (amagaria el botó d'aturar) i es recupera en acabar", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        fetchHandler: slowReplyHandler("El resum.", 200),
+    });
+    try {
+        const hist = h.document.getElementById("historyBtn");
+        const originalTitle = hist.title;
+        h.document.getElementById("summarizeBtn").click();
+        await sleep(60);
+        assert.equal(hist.disabled, true);
+        await sleep(500);
+        assert.equal(hist.disabled, false);
+        assert.equal(hist.title, originalTitle);
+    } finally { h.close(); }
+});

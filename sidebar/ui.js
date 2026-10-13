@@ -253,6 +253,10 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
             }
         }
         
+        // L'Historial amaga la barra d'eines (i amb ella el botó d'aturar): mentre es genera no s'hi pot entrar
+        const historyBtn = document.getElementById("historyBtn");
+        if (historyBtn) { historyBtn.disabled = true; historyBtn.dataset.generatingTitle = historyBtn.title; historyBtn.title = "L'historial no està disponible mentre es genera"; }
+
         loadingDiv.classList.remove("hidden");
         setLoadingStage("Llegint la pàgina…");
         announceStatus("Generant…");
@@ -301,6 +305,12 @@ function setGeneratingState(generating, hasContent = false, activeBtnId = "summa
         if (ankiBtn) ankiBtn.disabled = false;
 
         if (summarizeBtn) summarizeBtn.disabled = false;
+
+        const historyBtn = document.getElementById("historyBtn");
+        if (historyBtn) {
+            historyBtn.disabled = false;
+            if (historyBtn.dataset.generatingTitle) { historyBtn.title = historyBtn.dataset.generatingTitle; delete historyBtn.dataset.generatingTitle; }
+        }
     }
 }
 
