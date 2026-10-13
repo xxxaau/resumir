@@ -104,7 +104,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
   - Ombra de desplaçament al menú horitzontal (<720 px) perquè es vegi que es pot desplaçar.
   - Obsidian: textos repetits sobre els claudàtors, «Vault» en anglès, text d'exemple
     que sembla un valor.
-  - Anki: «Fer servir el vault d'Obsidian» per defecte (camp propi només si es desmarca).
 - **Desat automàtic dels camps de text i sliders:** avui hi ha avís de canvis
   sense desar + `beforeunload`, però no desat automàtic; decidir si cal.
 

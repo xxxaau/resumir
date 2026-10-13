@@ -124,6 +124,11 @@ function applySettingsHash() {
             // Si és dins d'un bloc plegat (prompts avançats), l'obre abans d'enfocar
             const details = el.closest("details");
             if (details) details.open = true;
+            // Camp darrere la casella «mateix vault que Obsidian»: es mostra per poder-hi escriure
+            if (focus === "ankiVault") {
+                const box = document.getElementById("ankiUseObsidianVault");
+                if (box && box.checked) { box.checked = false; toggleAnkiVaultField(); }
+            }
             el.focus();
         }
     }

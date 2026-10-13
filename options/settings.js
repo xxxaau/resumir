@@ -115,6 +115,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (isDirty()) { e.preventDefault(); e.returnValue = ""; }
     });
 
+    const ankiVaultBox = getEl("ankiUseObsidianVault");
+    if (ankiVaultBox) ankiVaultBox.addEventListener("change", () => { toggleAnkiVaultField(); setDirty(true); });
+
     const modelInput = getEl("modelName");
     if (modelInput) modelInput.addEventListener("input", updateModelSummary);
 

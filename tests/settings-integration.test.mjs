@@ -807,3 +807,55 @@ test("avís de prompt nou - «Restaurar» amaga el bàner però no descarta el f
         assert.equal(stored.deepDivePromptUpdateAvailable, true, "no es persisteix fins que l'usuari desa");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Anki: «fer servir el vault d'Obsidian» per defecte; camp propi només si es desmarca
+// ---------------------------------------------------------------------------
+test("Anki - per defecte usa el vault d'Obsidian: casella marcada, camp amagat i es desa buit", async () => {
+    const h = await loadSettings({ sync: { obsidianVault: "Notes" } });
+    try {
+        const box = h.document.getElementById("ankiUseObsidianVault");
+        assert.equal(box.checked, true);
+        assert.equal(h.document.getElementById("ankiVaultField").hidden, true);
+        h.document.querySelector("#saveAnki").click();
+        await h.flush(20);
+        assert.equal((await h.storage.sync.get("ankiVault")).ankiVault, "", "buit = el d'Obsidian");
+    } finally { h.close(); }
+});
+
+test("Anki - un vault propi (diferent del d'Obsidian) deixa la casella desmarcada i el camp visible", async () => {
+    const h = await loadSettings({ sync: { obsidianVault: "Notes", ankiVault: "Estudi" } });
+    try {
+        assert.equal(h.document.getElementById("ankiUseObsidianVault").checked, false);
+        assert.equal(h.document.getElementById("ankiVaultField").hidden, false);
+        assert.equal(h.document.getElementById("ankiVault").value, "Estudi");
+        // un valor igual al d'Obsidian equival a «el mateix»
+        const h2 = await loadSettings({ sync: { obsidianVault: "Notes", ankiVault: "Notes" } });
+        try { assert.equal(h2.document.getElementById("ankiUseObsidianVault").checked, true); } finally { h2.close(); }
+    } finally { h.close(); }
+});
+
+test("Anki - desmarcar la casella mostra el camp i es desa el vault propi", async () => {
+    const h = await loadSettings({ sync: { obsidianVault: "Notes" } });
+    try {
+        const box = h.document.getElementById("ankiUseObsidianVault");
+        box.checked = false;
+        box.dispatchEvent(new h.window.Event("change", { bubbles: true }));
+        assert.equal(h.document.getElementById("ankiVaultField").hidden, false);
+        h.document.getElementById("ankiVault").value = "Altre";
+        h.document.querySelector("#saveAnki").click();
+        await h.flush(20);
+        assert.equal((await h.storage.sync.get("ankiVault")).ankiVault, "Altre");
+    } finally { h.close(); }
+});
+
+test("Anki - l'enllaç profund al camp del vault el mostra encara que la casella estigui marcada", async () => {
+    const h = await loadSettings({});
+    try {
+        h.window.location.hash = "#tab=anki&focus=ankiVault";
+        h.window.dispatchEvent(new h.window.Event("hashchange"));
+        await h.flush(5);
+        assert.equal(h.document.getElementById("ankiUseObsidianVault").checked, false);
+        assert.equal(h.document.activeElement.id, "ankiVault");
+    } finally { h.close(); }
+});

@@ -1344,14 +1344,20 @@
         </div>
 <div class="section">
           <div class="form-group">
-            <label for="ankiVault">Nom del Vault</label>
-            <input
-              type="text"
-              id="ankiVault"
-              class="form-control"
-              placeholder="Ex.: Notes"
-            />
-            <div class="help-text">Vault d'Obsidian on s'afegiran les targetes. Independent del plugin d'Obsidian; la primera vegada s'agafa el seu valor si està configurat.</div>
+            <label class="checkbox-row" for="ankiUseObsidianVault">
+              <input type="checkbox" id="ankiUseObsidianVault" checked />
+              Fer servir el mateix vault que el plugin d'Obsidian
+            </label>
+            <div class="help-text">Les targetes es desen al vault d'Obsidian que ja tens configurat. Desmarca-ho si vols un vault diferent per a Anki.</div>
+            <div id="ankiVaultField" hidden>
+              <label for="ankiVault">Nom del vault per a Anki</label>
+              <input
+                type="text"
+                id="ankiVault"
+                class="form-control"
+                placeholder="Ex.: Estudi"
+              />
+            </div>
           </div>
 
           <div class="form-group">

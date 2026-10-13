@@ -100,7 +100,8 @@ function saveOptions(e) {
     simplePromptCustomized: document.querySelector("#simplePrompt").value !== DEFAULT_SIMPLE_PROMPT,
 
     enableAnki: document.querySelector("#enableAnki").checked,
-    ankiVault: document.querySelector("#ankiVault").value,
+    // Casella marcada = «el mateix que Obsidian»: es desa buit i l'exportació cau al vault d'Obsidian
+    ankiVault: document.querySelector("#ankiUseObsidianVault").checked ? "" : document.querySelector("#ankiVault").value,
     ankiPath: document.querySelector("#ankiPath").value || DEFAULT_ANKI_PATH,
     ankiPacket: parseInt(document.querySelector("#ankiPacket").value, 10) || DEFAULT_ANKI_PACKET,
     ankiLang: document.querySelector("#ankiLang").value || DEFAULT_ANKI_LANG,
@@ -301,9 +302,12 @@ function restoreOptions(syncData, localData) {
     document.querySelector("#enableAnki").checked = syncData ? syncData.enableAnki === true : false;
     // Vault independent: si encara no s'ha configurat per Anki, es pre-omple amb el
     // d'Obsidian (seed de primera càrrega). En desar es fixa i ja és independent.
-    document.querySelector("#ankiVault").value = (syncData && syncData.ankiVault !== undefined)
-        ? syncData.ankiVault
-        : ((syncData && syncData.obsidianVault) || "Obsidian");
+    // «Mateix vault que Obsidian» si no n'hi ha cap de propi (buit/inexistent) o és el mateix
+    const ankiOwn = (syncData && syncData.ankiVault) || "";
+    const sameAsObsidian = !ankiOwn || ankiOwn === ((syncData && syncData.obsidianVault) || "Obsidian");
+    document.querySelector("#ankiUseObsidianVault").checked = sameAsObsidian;
+    document.querySelector("#ankiVault").value = sameAsObsidian ? "" : ankiOwn;
+    toggleAnkiVaultField();
     document.querySelector("#ankiPath").value = (syncData && syncData.ankiPath) || DEFAULT_ANKI_PATH;
     document.querySelector("#ankiPacket").value = (syncData && syncData.ankiPacket) || DEFAULT_ANKI_PACKET;
     document.querySelector("#ankiLang").value = (syncData && syncData.ankiLang) || DEFAULT_ANKI_LANG;
@@ -441,6 +445,13 @@ function resetAnkiPrompt() {
 const BIONIC_PREVIEW_TEXT = "La lectura biònica ressalta l'inici de cada paraula perquè els ulls avancin amb més fluïdesa pel text.";
 
 /** Pinta la mostra amb els cinc valors actuals (mateixa regla que formatBionicText de la barra lateral). */
+/** Mostra el camp del vault propi només si la casella «mateix vault que Obsidian» està desmarcada. */
+function toggleAnkiVaultField() {
+  const box = document.querySelector("#ankiUseObsidianVault");
+  const field = document.querySelector("#ankiVaultField");
+  if (box && field) field.hidden = box.checked;
+}
+
 function updateBionicPreview() {
     const el = document.querySelector("#bionicPreview");
     if (!el) return;

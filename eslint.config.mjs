@@ -204,6 +204,7 @@ const settingsGlobals = {
     restoreField: "readonly",
     updatePromptBadges: "readonly",
     updateBionicPreview: "readonly",
+    toggleAnkiVaultField: "readonly",
     isDirty: "readonly",
     checkApiKey: "readonly",
     updatePathPreview: "readonly",
