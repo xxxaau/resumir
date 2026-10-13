@@ -85,3 +85,11 @@ test("web i comunicació: no diuen que «les dades no surten del navegador»", (
     }
     assert.match(readFileSync(join(ROOT, "web/src/index.njk"), "utf8"), /Sense servidor propi/);
 });
+
+test("manifest: la descripció diu què fa de debò (pàgines, YouTube i PDF) i el botó, que obre i tanca", () => {
+    const m = JSON.parse(readFileSync(join(ROOT, "manifest.base.json"), "utf8"));
+    assert.match(m.description, /YouTube/);
+    assert.match(m.description, /PDF/);
+    assert.ok(m.description.length <= 132, "límit de la descripció a les botigues");
+    assert.match(m.action.default_title, /tanca/i);
+});

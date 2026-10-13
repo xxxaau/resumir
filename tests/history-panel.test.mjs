@@ -361,7 +361,7 @@ test("loadHistoryEntry - una entrada Anki restaura el panell interactiu, no text
         "El marcador cru no s'ha de renderitzar com a text pla");
 });
 
-test("loadHistoryEntry - Anki des de l'Historial: 'Genera més' avisa que no està disponible en lloc de petar", async () => {
+test("loadHistoryEntry - Anki des de l'Historial: no ofereix «Genera més»/«Afinar» (canGenerateMore: false)", async () => {
     resetDOM();
     await storageMock.set({ isBionicActive: false });
 
@@ -376,12 +376,9 @@ test("loadHistoryEntry - Anki des de l'Historial: 'Genera més' avisa que no est
         timestamp: new Date().toISOString(),
     });
 
-    assert.equal(typeof capturedCtx.onGenerateMore, "function");
-    capturedCtx.onGenerateMore("");
-
-    assert.ok(!dom.els.error.classList.contains("hidden"), "error ha de ser visible");
-    assert.ok(dom.els.error.textContent.includes("Historial"),
-        `error ha d'explicar la limitació, té: "${dom.els.error.textContent}"`);
+    assert.equal(capturedCtx.canGenerateMore, false, "el panell no ha d'oferir regenerar sense el text original");
+    assert.equal(typeof capturedCtx.onGenerateMore, "function", "i el callback continua sent segur de cridar");
+    assert.doesNotThrow(() => capturedCtx.onGenerateMore(""));
 });
 
 // ---------------------------------------------------------------------------
