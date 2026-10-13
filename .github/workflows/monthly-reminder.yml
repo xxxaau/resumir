@@ -1,0 +1,40 @@
+name: Recordatori mensual
+
+# Obre una issue cada dia 1 amb el checklist de docs/MANTENIMENT.md (YouTube canvia sovint com
+# serveix els subtítols). També es pot llançar a mà des de la pestanya Actions.
+on:
+  schedule:
+    - cron: "17 7 1 * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  youtube:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Crear la issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          month=$(date -u +%Y-%m)
+          title="Revisió mensual: transcripcions i subtítols de YouTube ($month)"
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq 'length' | grep -qv '^0$'; then
+            echo "Ja n'hi ha una d'oberta."; exit 0
+          fi
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$(cat <<'BODY'
+          Revisa que continuï funcionant l'extracció de transcripcions i subtítols de YouTube i arregla-ho si YouTube ha canviat alguna cosa.
+
+          Passos i vies d'extracció: [`docs/MANTENIMENT.md`](../blob/main/docs/MANTENIMENT.md)
+
+          - [ ] Vídeo amb només subtítols automàtics (p. ex. https://www.youtube.com/watch?v=AwYYpXfFM9k)
+          - [ ] Vídeo amb subtítols manuals
+          - [ ] Vídeo sense subtítols (ha de resumir la descripció)
+          - [ ] Els `[m:ss]` del resum són enllaços i salten al moment del vídeo
+          - [ ] `npm run smoke:connectors` (informatiu)
+          - [ ] Si ha fallat: arreglat, amb test, i nota a `docs/LEARNINGS.md`
+
+          Tanca la issue quan estigui fet.
+          BODY
+          )"
