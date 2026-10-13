@@ -447,6 +447,65 @@ async function getPageContent() {
                     }
                 }
 
+                // Via B2: la mateixa petició que fa el reproductor. YouTube ja no serveix els subtítols
+                // (sobretot els automàtics) sense un token `pot` que només porten les peticions del
+                // propi reproductor: la descàrrega de la Via B torna 200 amb el cos buit. Aquí s'agafa
+                // de `performance` la URL de timedtext que el reproductor ha demanat (activant CC un
+                // moment si cal) i es torna a demanar en JSON des de la pàgina. Autocontinguda: va al món MAIN.
+                if (!transcriptText && (meta.hasTracks || meta.captionBaseUrl)) {
+                    try {
+                        const playerResult = await executeScriptSafe({
+                            target: { tabId: tabId },
+                            world: "MAIN",
+                            func: async () => {
+                                try {
+                                    const sleep = ms => new Promise(r => setTimeout(r, ms));
+                                    const findUrl = () => {
+                                        const hits = performance.getEntriesByType('resource')
+                                            .filter(e => e.name.includes('/api/timedtext') && /[?&]pot=/.test(e.name));
+                                        return hits.length ? hits[hits.length - 1].name : null;
+                                    };
+                                    let url = findUrl();
+                                    if (!url) {
+                                        const btn = document.querySelector('.ytp-subtitles-button');
+                                        const wasOn = btn && btn.getAttribute('aria-pressed') === 'true';
+                                        if (btn && !wasOn) btn.click();
+                                        for (let i = 0; i < 10 && !url; i++) { await sleep(400); url = findUrl(); }
+                                        if (btn && !wasOn && btn.getAttribute('aria-pressed') === 'true') btn.click();
+                                    }
+                                    if (!url) return { error: 'no timedtext url' };
+                                    const u = new URL(url, location.href);
+                                    u.searchParams.set('fmt', 'json3');
+                                    const resp = await fetch(u.toString(), { credentials: 'same-origin' });
+                                    const raw = await resp.text();
+                                    if (!resp.ok || !raw) return { error: 'empty (' + resp.status + ')' };
+                                    const data = JSON.parse(raw);
+                                    const segments = (data.events || [])
+                                        .filter(e => e.segs)
+                                        .map(e => ({ startMs: e.tStartMs, text: e.segs.map(x => x.utf8 ?? '').join('').replace(/\n/g, ' ').trim() }))
+                                        .filter(x => x.text);
+                                    return { segments, lang: u.searchParams.get('lang') || '', asr: u.searchParams.get('kind') === 'asr' };
+                                } catch (e) { return { error: String(e) }; }
+                            }
+                        });
+                        const pr = playerResult?.[0]?.result;
+                        if (pr && Array.isArray(pr.segments) && pr.segments.length > 0) {
+                            const fetched = formatTimedTranscript(pr.segments);
+                            if (fetched.length > 50) {
+                                const lang = (resolvedTrack && resolvedTrack.lang) || pr.lang || '';
+                                const isAsr = resolvedTrack ? !!resolvedTrack.isAsr : !!pr.asr;
+                                transcriptText = lang || isAsr
+                                    ? `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${fetched}`
+                                    : `[TRANSCRIPT]\n\n${fetched}`;
+                            }
+                        } else if (pr && pr.error) {
+                            console.debug("YouTube Via B2 (reproductor) failed:", pr.error);
+                        }
+                    } catch (e) {
+                        console.debug("YouTube Via B2 failed:", e?.message);
+                    }
+                }
+
                 // Via C: youtubei/v1/get_transcript — última via abans del DOM scraping.
                 // Útil per a vídeos amb només pista ASR on timedtext torna body buit.
                 // Executem al MAIN world per accedir a ytcfg (INNERTUBE_API_KEY/CONTEXT) i

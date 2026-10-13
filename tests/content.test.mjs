@@ -544,3 +544,41 @@ test("getPageContent - Twitter/X usa el scrape de tweets com a via primària", a
     assert.ok(result.text.includes("segon tweet del fil"), "Ha de contenir el segon tweet (fil)");
     assert.ok(!result.text.includes("NO-S-HA-D-USAR"), "No ha d'usar og:description si el scrape té contingut");
 });
+
+test("getPageContent - YouTube: si timedtext torna buit (sense pot), agafa els subtítols de la petició del reproductor", async () => {
+    // Cas real (2026): els subtítols automàtics ja no es descarreguen amb la baseUrl (200 sense cos);
+    // el reproductor sí que els demana amb pot. La Via B2 en reutilitza la URL des de la pàgina.
+    const ytTab = { id: 21, url: "https://www.youtube.com/watch?v=asrNoPot001", title: "ASR sense pot" };
+    const prevFetch = global.fetch;
+    global.fetch = async () => ({ ok: true, status: 200, text: async () => "" });   // Via B: buida
+    let playerCalls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async (inj) => {
+                if (inj.world === "MAIN" && inj.func.toString().includes("timedtext")) {
+                    playerCalls++;
+                    return [{ result: { lang: "es", asr: true, segments: [
+                        { startMs: 0, text: "hola a tothom avui parlem de models generalistes" },
+                        { startMs: 40000, text: "i de com es comparen amb els models anteriors del laboratori" },
+                    ] } }];
+                }
+                if (inj.world === "MAIN") {
+                    return [{ result: { hasTracks: true, tracks: [{ lang: "es", vssId: "a.es", isAsr: true }], activeVssId: "a.es",
+                        prerenderedText: "", captionBaseUrl: "https://www.youtube.com/api/timedtext?v=asrNoPot001&lang=es&kind=asr" } }];
+                }
+                return [{ result: { error: "no ha d'arribar aquí" } }];
+            },
+        },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: { sync: { get: async () => ({}) }, local: { get: async () => ({}) } },
+    };
+    try {
+        const result = await getPageContent();
+        assert.equal(playerCalls, 1);
+        assert.ok(result.text.startsWith("[TRANSCRIPT: es (Auto)]"), `etiqueta d'idioma i (Auto): ${result.text.slice(0, 40)}`);
+        assert.ok(result.text.includes("[0:00] hola a tothom"), "porta les marques de temps");
+        assert.ok(result.text.includes("[0:40] i de com"));
+        assert.ok(!result.noTranscript);
+    } finally { global.fetch = prevFetch; }
+});
