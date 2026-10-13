@@ -1708,3 +1708,30 @@ test("mapa conceptual - el PNG s'exporta amb TOTS els nodes (desplegats) i el ma
         assert.equal(count(), 3, "i després el mapa torna a com estava");
     } finally { h.close(); }
 });
+
+// Pantalla completa del mapa d'un PDF local / una selecció: missatges llegibles (no la clau interna)
+test("pantalla completa - el mapa d'un PDF local demana confirmació amb el nom del fitxer, no «pdf-local:…»", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" } });
+    try {
+        let asked = null;
+        h.window.confirm = (m) => { asked = m; return false; };
+        await h.window.openFullPageView("- T\n  - A", "T", "pdf-local:informe anual.pdf:1234:1700000000");
+        assert.ok(asked, "ha de demanar confirmació (el contingut s'insereix en una altra pàgina)");
+        assert.match(asked, /informe anual\.pdf/);
+        assert.doesNotMatch(asked, /pdf-local:/);
+    } finally { h.close(); }
+});
+
+test("pantalla completa - amb una pestanya interna del navegador, diu què cal fer per a un PDF local", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url: "about:blank", title: "Nova pestanya", active: true }],
+    });
+    try {
+        await h.window.openFullPageView("- T\n  - A", "T", "pdf-local:informe.pdf:1:2");
+        const msg = h.document.getElementById("error").textContent;
+        assert.match(msg, /PDF/, "el consell esmenta el PDF");
+        assert.match(msg, /http|web/i);
+        assert.doesNotMatch(msg, /pdf-local:/);
+    } finally { h.close(); }
+});

@@ -421,6 +421,14 @@ function _showMapError(msg) {
     }
 }
 
+/** Nom llegible de l'origen d'un mapa: el fitxer d'un PDF local, la pàgina d'una selecció o la URL. */
+function describeMapOrigin(originUrl) {
+    const m = /^pdf-local:(.*):\d+:\d+$/.exec(originUrl || "");
+    if (m) return `el PDF «${m[1]}» (fitxer local)`;
+    if ((originUrl || "").startsWith("seleccio:")) return `una selecció de ${originUrl.slice("seleccio:".length)}`;
+    return originUrl || "";
+}
+
 async function openFullPageView(text, pageTitle = "", originUrl = "") {
     try {
         const tabs = await ext.tabs.query({ active: true, currentWindow: true });
@@ -429,7 +437,11 @@ async function openFullPageView(text, pageTitle = "", originUrl = "") {
         const tabUrl = tabs[0].url;
 
         if (!isInjectableUrl(tabUrl)) {
-            _showMapError(`Aquesta pàgina és interna del navegador i no admet la vista a pantalla completa (${tabUrl}). Canvia a una pestanya web (http/https) i torna-ho a provar.`);
+            const fromLocal = /^pdf-local:/.test(originUrl || "");
+            _showMapError(`Aquesta pestanya és interna del navegador i no admet la vista a pantalla completa (${tabUrl}). ` +
+                (fromLocal
+                    ? "El mapa d'un PDF local s'obre sobre la pestanya activa: canvia a una pàgina web (http/https), qualsevol, i torna-ho a provar."
+                    : "Canvia a una pestanya web (http/https) i torna-ho a provar."));
             return;
         }
 
@@ -439,7 +451,7 @@ async function openFullPageView(text, pageTitle = "", originUrl = "") {
         // demanem confirmació si l'origen i la pestanya activa no coincideixen.
         if (originUrl && tabUrl && originUrl !== tabUrl) {
             const ok = confirm(
-                "Aquest mapa prové de:\n" + originUrl +
+                "Aquest mapa prové de:\n" + describeMapOrigin(originUrl) +
                 "\n\nperò la pestanya activa és:\n" + tabUrl +
                 "\n\nObrir-lo a pantalla completa inserirà el contingut del mapa en aquesta pestanya. Vols continuar?"
             );
