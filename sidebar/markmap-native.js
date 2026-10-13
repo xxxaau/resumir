@@ -216,7 +216,7 @@
     // Índex = min(depth, 3). 0 lavanda · 1 blau · 2 verd · 3+ verd clar.
     const DEPTH_SOLID = ["#b1a8e6", "#a7c6ef", "#93d4b4", "#c2ebd3"];  // sòlid (cercle toggle)
     const DEPTH_GRAD  = [["#c6c0f2", "#a59ce0"], ["#c1d6f6", "#97b8e8"], ["#b9ebcd", "#87cda8"], ["#d6f2e0", "#b0e0c4"]];
-    const EDGE_COLOR  = "#c7cbe0";
+    const EDGE_COLOR  = "#858bb0";
     const TEXT_COLOR  = "#1a1a1a";
 
     // Crea un <linearGradient> vertical (top→bottom) sense innerHTML.

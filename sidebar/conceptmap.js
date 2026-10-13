@@ -488,7 +488,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
         // Índex = min(depth, 3). 0 lavanda · 1 blau · 2 verd · 3+ verd clar.
         const DEPTH_SOLID = ['#b1a8e6', '#a7c6ef', '#93d4b4', '#c2ebd3'];
         const DEPTH_GRAD  = [['#c6c0f2', '#a59ce0'], ['#c1d6f6', '#97b8e8'], ['#b9ebcd', '#87cda8'], ['#d6f2e0', '#b0e0c4']];
-        const EDGE_COLOR  = '#c7cbe0';  // arestes uniformes clares
+        const EDGE_COLOR  = '#858bb0';  // arestes uniformes (3:1 sobre blanc, WCAG 1.4.11)
         const TEXT_COLOR  = '#1a1a1a';
 
         // ─── Parser ─────────────────────────────────────────────────────────

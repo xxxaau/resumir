@@ -106,3 +106,12 @@ for (const [name, build] of Object.entries(MAPS)) {
         assert.ok(Math.abs(after.x - before.x) < 1 && Math.abs(after.y - before.y) < 1, "torna a la posició ajustada");
     });
 }
+
+test("mapa - les arestes tenen contrast ≥ 3:1 sobre blanc a les dues còpies (WCAG 1.4.11)", () => {
+    const lum = (h) => { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(c => c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    for (const f of ["markmap-native.js", "conceptmap.js"]) {
+        const m = /EDGE_COLOR\s*=\s*["'](#[0-9a-f]{6})["']/i.exec(readFileSync(resolve(SIDEBAR, f), "utf8"));
+        assert.ok(m, `${f}: EDGE_COLOR`);
+        assert.ok(1.05 / (lum(m[1]) + 0.05) >= 3, `${f}: ${m[1]} sobre blanc < 3:1`);
+    }
+});

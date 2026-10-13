@@ -79,3 +79,11 @@ test("visor PDF - botons de pàgina amb ‹ › (no emoji de reproductor)", asyn
     assert.equal(v.document.getElementById("prevBtn").textContent.trim(), "‹");
     assert.equal(v.document.getElementById("nextBtn").textContent.trim(), "›");
 });
+
+test("visor PDF - els controls tenen :focus-visible (navegació amb teclat)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const html = readFileSync(resolve(SIDEBAR, "pdf-viewer.html"), "utf8");
+    assert.match(html, /\.close-btn:focus-visible/);
+    assert.match(html, /#footer button:focus-visible/);
+    assert.match(html, /page-input:focus-visible/);
+});

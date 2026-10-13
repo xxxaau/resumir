@@ -73,8 +73,7 @@ unificar el disseny dels dos.
   (`navigateToTab`) i el visor PDF encara no mouen el focus a l'encapçalament ni
   el retornen al disparador (el panell de text enviat ja ho fa).
 - **Visor PDF:** paleta fixa que ignora el tema (ara no passa pel mateix control
-  de contrast) i sense `:focus-visible`.
-- **Mapa:** les vores de les pastilles per sota de 3:1 (la roda, el punter/tàctil i la zona de toc de 24 px ja són fets).
+  de contrast).
 
 ### Pendent de microcopy
 
@@ -192,7 +191,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
 | Historial de canvis | Entrades de desenvolupador (CI, npm, Defuddle), totes les versions desplegades, avís de seguretat enterrat | `settings.html:1252-1310` | Mitjana | S |
 | Mapa conceptual | L'export PNG només captura els nodes desplegats (per defecte, nivells 0–1) sense dir-ho | `markmap-native.js:666-720` | Mitjana | M |
-| Mapa conceptual | No hi ha botó d'ajustar a la vista | `conceptmap.js:266-282` | Mitjana | S–M |
 | Mapa conceptual | Pantalla completa impossible des d'un PDF local, amb un consell enganyador | `conceptmap.js:349-391` | Mitjana | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial | `conceptmap.js:398-405` | Baixa | S |
 | Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |
