@@ -836,7 +836,7 @@ function textFragmentFor(quote) {
 }
 
 /**
- * Comprova les cites «…» de la secció «Cites» contra el text enviat: ✓ i enllaç
+ * Comprova les cites «…» de les seccions «Cites» i «Punts clau» contra el text enviat: ✓ i enllaç
  * al passatge (només en pàgines http/https que no siguin PDF) si hi consten
  * literalment; ⚠ si no (el model l'ha parafrasejat o inventat).
  */
@@ -845,33 +845,34 @@ function verifyQuotes(container, sourceText, url) {
     const haystack = normalizeForQuote(sourceText);
     const canLink = /^https?:/i.test(url || "") && !(typeof isPdfUrl === "function" && isPdfUrl(url));
     const base = canLink ? url.split("#")[0] : null;
-    // Elements de la secció: des del títol «Cites» fins al següent títol
-    const section = [];
-    let inCites = false;
+    // Seccions amb cites: «Cites» (la 1a frase entre «») i «Punts clau» (l'última, que és
+    // la que el model hi afegeix al final com a suport del punt).
+    const SECTIONS = { "cites": "first", "punts clau": "last" };
+    const work = [];
+    let mode = null;
     for (const el of container.children) {
-        if (/^H[1-6]$/.test(el.tagName)) { inCites = /^cites$/i.test(el.textContent.trim()); continue; }
-        if (inCites) section.push(el);
+        if (/^H[1-6]$/.test(el.tagName)) { mode = SECTIONS[el.textContent.trim().toLowerCase()] || null; continue; }
+        if (!mode) continue;
+        for (const li of el.matches("li") ? [el] : el.querySelectorAll("li")) work.push({ li, mode });
     }
-    for (const block of section) {
-        for (const li of block.matches("li") ? [block] : block.querySelectorAll("li")) {
-            const m = /«([^»]{8,})»/.exec(li.textContent);
-            if (!m) continue;
-            const quote = m[1].trim();
-            const found = haystack.includes(normalizeForQuote(quote));
-            const badge = document.createElement("span");
-            badge.className = found ? "quote-ok" : "quote-warn";
-            badge.textContent = found ? " ✓ verificada" : " ⚠ no consta al text";
-            li.appendChild(badge);
-            if (found && base) {
-                const a = document.createElement("a");
-                a.className = "quote-link";
-                a.href = `${base}#:~:text=${textFragmentFor(quote)}`;
-                a.target = "_blank";
-                a.rel = "noopener noreferrer";
-                a.title = "Anar al passatge a la pàgina";
-                a.textContent = " ↗";
-                li.appendChild(a);
-            }
+    for (const { li, mode: which } of work) {
+        const all = [...li.textContent.matchAll(/«([^»]{8,})»/g)];
+        if (!all.length) continue;
+        const quote = (which === "last" ? all[all.length - 1] : all[0])[1].trim();
+        const found = haystack.includes(normalizeForQuote(quote));
+        const badge = document.createElement("span");
+        badge.className = found ? "quote-ok" : "quote-warn";
+        badge.textContent = found ? " ✓ verificada" : " ⚠ no consta al text";
+        li.appendChild(badge);
+        if (found && base) {
+            const a = document.createElement("a");
+            a.className = "quote-link";
+            a.href = `${base}#:~:text=${textFragmentFor(quote)}`;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.title = "Anar al passatge a la pàgina";
+            a.textContent = " ↗";
+            li.appendChild(a);
         }
     }
 }

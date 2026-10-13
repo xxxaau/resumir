@@ -1330,6 +1330,26 @@ test("cites verificades - ✓ i enllaç al passatge si és al text; ⚠ si no hi
     } finally { h.close(); }
 });
 
+test("cites verificades - cada punt clau verifica el seu fragment final (✓ + enllaç, ⚠ si no consta, res si no en porta)", async () => {
+    const real = "El reactor va mantenir el plasma durant quaranta segons.";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
+        modelReply: `Resum.\n\n### Punts clau\n- Rècord de durada «${real}»\n- Dada inventada «Aquesta frase no apareix enlloc de la pàgina original.»\n- Punt sense cita\n\n### Aprenentatges\n- Una «expressió llarga entre cometes» que no es comprova`,
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const items = [...h.document.querySelectorAll("#content li")];
+        assert.equal(items.length, 4);
+        assert.ok(items[0].querySelector(".quote-ok"), "el 1r punt es verifica");
+        assert.match(items[0].querySelector("a.quote-link").getAttribute("href"), /#:~:text=/);
+        assert.ok(items[1].querySelector(".quote-warn"), "el 2n no consta");
+        assert.equal(items[2].querySelector(".quote-ok, .quote-warn"), null, "sense cita, sense insígnia");
+        assert.equal(items[3].querySelector(".quote-ok, .quote-warn"), null, "Aprenentatges no es comprova");
+    } finally { h.close(); }
+});
+
 test("cites verificades - només a la secció «Cites», no a altres cometes del resum", async () => {
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },

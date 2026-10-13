@@ -8,6 +8,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ## [Sense publicar]
 
 ### Afegit
+- **Cites verificades també als punts clau:** cada punt acaba amb un fragment
+  literal del text; es marca ✓ amb enllaç al passatge o ⚠ si no hi consta.
 - **Línia de procedència sota el resum:** quantes paraules s'han enviat, amb quin
   model i quants tokens; avisa si el text s'ha tallat o sembla un bàner de galetes
   i porta l'enllaç «Veure el text enviat».

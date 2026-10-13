@@ -232,7 +232,7 @@ ESTRUCTURA:
 [Paràgraf de 2-5 frases (màxim 150 paraules), sense títol: quin tipus de contingut és (notícia, opinió, tutorial, estudi, fil de fòrum…), de què va el contingut, què sosté i a quina conclusió arriba]
 
 ### Punts clau
-- [3-8 punts segons la llargada del text; una idea per punt, en l'ordre del text]
+- [3-8 punts segons la llargada del text; una idea per punt, en l'ordre del text. Cada punt acaba amb un fragment LITERAL del contingut (5-15 paraules, en la llengua original, sense retocar) entre «», que el sustenti; si no n'hi ha cap de fidel, deixa el punt sense]
 
 ### Aprenentatges
 - [Fins a 3 conclusions pràctiques que es desprenguin directament del text, sense repetir els punts clau]
