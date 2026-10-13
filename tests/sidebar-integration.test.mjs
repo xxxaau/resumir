@@ -1616,3 +1616,17 @@ test("pàgines de PDF - només s'enllacen en http(s) (un PDF file:// o altres es
         assert.equal(h.document.querySelector("#content a[data-pdf-page]"), null);
     } finally { h.close(); }
 });
+
+test("peu - amb la còpia desada a la vista diu «De la memòria cau» i els tokens d'aleshores", async () => {
+    const url = "https://example.com/article";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...seedTypes(url, ["summary"]) },
+        pageText: "Un article. ".repeat(30),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.equal(h.document.getElementById("generation-timer").textContent, "De la memòria cau");
+        assert.equal(h.calls.fetches.length, 0);
+    } finally { h.close(); }
+});

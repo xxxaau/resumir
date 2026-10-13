@@ -567,6 +567,7 @@ function startGenerationTimer() {
     
     const timerEl = document.getElementById("generation-timer");
     timerEl.textContent = "0.0s";
+    timerEl.title = "Temps de resposta";
     timerEl.style.color = "var(--text-muted)";
     
     generationStartTime = Date.now();

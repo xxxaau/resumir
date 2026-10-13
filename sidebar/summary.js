@@ -323,7 +323,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 applyBionicStyles(contentDiv, ctx.isBionicEnabled(), cfg);
                 
                 setGeneratingState(false, true);
-                
+
+                // Al peu: no ha trigat res perquè no s'ha cridat el model, i els tokens són els de quan es va generar
+                const timerEl = document.getElementById("generation-timer");
+                if (timerEl) { timerEl.textContent = "De la memòria cau"; timerEl.title = "Resum desat: no s'ha cridat el model"; }
+                if (cachedEntry.stats) updateTokenStats(cachedEntry.stats.input || 0, cachedEntry.stats.output || 0);
+
                 const footer = document.getElementById("footer-status");
                 footer.classList.remove("hidden");
                 
