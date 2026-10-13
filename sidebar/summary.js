@@ -145,7 +145,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         return null;
     }
 
-    const { contentDiv, errorDiv, modelSelect, currentMetadata } = ctx;
+    const { contentDiv, errorDiv, currentMetadata } = ctx;
     const requestedType = isConceptMap ? "conceptmap" : isAnki ? "anki" : isScience ? "science" : isDeepDive ? "deepdive" : isSimple ? "simple" : "summary";
 
     // Si ara mateix hi ha la targeta d'onboarding (falta la clau), no l'esborrem:
