@@ -177,9 +177,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les. (El cost en € 
 | Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial (ara diu el nom del fitxer/pàgina, però continua saltant) | `conceptmap.js:398-405` | Baixa | S |
 | Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |
-| Anki | Des de l'historial, «Genera més» i «Afinar» semblen actius però fallen | `history.js:101-106` | Baixa | S |
-| YouTube | L'etiqueta de llengua enviada al model pot no correspondre a la transcripció descarregada | `content.js:350-370`, `extractors.js:197-201` | Mitjana | S |
-| YouTube | `youtubePreferredLangs` es llegeix però cap UI l'escriu | `content.js:341-346` | Baixa | S |
 
 ## Fonts
 
