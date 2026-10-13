@@ -171,7 +171,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 
 | Superfície | Troballa | On | Sev. | Esforç |
 | --- | --- | --- | --- | --- |
-| Barra lateral | Copiar i Obsidian exporten el JSON cru d'Anki i l'esquema del mapa | `sidebar.js:256-303` | Baixa | S |
 | Barra lateral | El cost ja es pot calcular (`getCuratedModelInfo`) però només l'usen els tests | `api.js:24-47` | Baixa | S |
 | Barra lateral | El mapa d'errors PDF està duplicat i ja ha divergit; no diu el límit de pàgines | `sidebar.js:228-234`, `content.js:259-267` | Baixa | S |
 | Barra lateral | Sense `max-width` del text en panells amples; enllaços amb `word-break: break-all` | `sidebar.css:159,167` | Baixa | S |

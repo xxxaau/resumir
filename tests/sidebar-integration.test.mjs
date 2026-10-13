@@ -1794,3 +1794,21 @@ test("historial - no es pot obrir mentre es genera (amagaria el botó d'aturar) 
         assert.equal(hist.title, originalTitle);
     } finally { h.close(); }
 });
+
+test("Copiar - amb targetes d'Anki a la vista copia les targetes llegibles, no el JSON cru", async () => {
+    const h = await loadSidebar({
+        sync: { enableAnki: true, enableMarkdown: true, markdownTemplate: "{{summary}}" },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: '[{"q":"Què és X?","a":"Una cosa."}]',
+    });
+    try {
+        h.document.getElementById("ankiBtn").click();
+        await h.flush(30);
+        h.document.getElementById("copyBtn").click();
+        await h.flush(10);
+        const copied = h.calls.clipboard.at(-1);
+        assert.match(copied, /Què és X\?/);
+        assert.doesNotMatch(copied, /"q"\s*:/, "no ha de ser el JSON cru");
+    } finally { h.close(); }
+});

@@ -350,11 +350,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Copiar i Obsidian exporten EL QUE ES LLEGEIX: les targetes d'Anki van com a «Pregunta::Resposta»,
+    // no com el JSON cru que desa el resum.
+    function exportableMetadata() {
+        if (currentMetadata.type !== "anki") return currentMetadata;
+        let text = currentMetadata.summary;
+        try { text = buildAnkiExport(parseAnkiCards(currentMetadata.summary)) || text; } catch { /* JSON malformat: es deixa tal qual */ }
+        return { ...currentMetadata, summary: text };
+    }
+
     copyBtn.addEventListener("click", async () => {
         if (!currentMetadata.summary) return;
         try {
             const template = globalConfigCache.markdownTemplate || DEFAULT_MARKDOWN_TEMPLATE;
-            const markdown = formatMarkdownContent(template, currentMetadata);
+            const markdown = formatMarkdownContent(template, exportableMetadata());
             await navigator.clipboard.writeText(markdown);
             
             const originalChild = copyBtn.firstElementChild.cloneNode(true);
@@ -375,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const contentTemplate = globalConfigCache.obsidianTemplate || "- [{{title}}]({{url}})\n\t- {{summary_executive}}";
 
             const filePath = parseObsidianPath(pathTemplate);
-            const content = formatObsidianContent(contentTemplate, currentMetadata);
+            const content = formatObsidianContent(contentTemplate, exportableMetadata());
             const uri = `obsidian://new?vault=${encodeURIComponent(vault)}&file=${encodeURIComponent(filePath)}&content=${encodeURIComponent(content.trim())}&append=true`;
 
             try {
