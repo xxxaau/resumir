@@ -582,3 +582,28 @@ test("getPageContent - YouTube: si timedtext torna buit (sense pot), agafa els s
         assert.ok(!result.noTranscript);
     } finally { global.fetch = prevFetch; }
 });
+
+test("getPageContent - YouTube: l'etiqueta de llengua és la de la pista realment descarregada, no la suposada", async () => {
+    const ytTab = { id: 22, url: "https://www.youtube.com/watch?v=langMismatch", title: "Llengua" };
+    const prevFetch = global.fetch;
+    global.fetch = async (url) => ({
+        ok: true, status: 200,
+        text: async () => url.includes("fmt=json3")
+            ? JSON.stringify({ events: [{ tStartMs: 0, segs: [{ utf8: "hola a tothom, avui parlarem d'un tema molt interessant per a tots" }] }] })
+            : "",
+    });
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: {
+            executeScript: async () => [{ result: { hasTracks: true, activeVssId: ".en",
+                tracks: [{ lang: "en", vssId: ".en", isAsr: false }, { lang: "ca", vssId: ".ca", isAsr: false }],
+                prerenderedText: "", captionBaseUrl: "https://www.youtube.com/api/timedtext?v=langMismatch&lang=ca" } }],
+        },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: { sync: { get: async () => ({}) }, local: { get: async () => ({}) } },
+    };
+    try {
+        const result = await getPageContent();
+        assert.ok(result.text.startsWith("[TRANSCRIPT: ca]"), `ha d'etiquetar «ca» (la URL), no «en»: ${result.text.slice(0, 30)}`);
+    } finally { global.fetch = prevFetch; }
+});

@@ -441,7 +441,17 @@ async function getPageContent() {
                             }
                             const fetched = formatTimedTranscript(timed);
                             if (fetched.length > 50) {
-                                if (resolvedTrack) {
+                                // L'etiqueta és la de la pista REALMENT descarregada (la de la URL), no la que
+                                // resolvedTrack suposa: poden diferir i el model rebria una llengua equivocada.
+                                let dlLang = '', dlAsr = false;
+                                try {
+                                    const du = new URL(meta.captionBaseUrl);
+                                    dlLang = du.searchParams.get('lang') || '';
+                                    dlAsr = du.searchParams.get('kind') === 'asr';
+                                } catch { /* URL no analitzable: s'usa resolvedTrack */ }
+                                if (dlLang) {
+                                    transcriptText = `[TRANSCRIPT: ${dlLang}${dlAsr ? ' (Auto)' : ''}]\n\n${fetched}`;
+                                } else if (resolvedTrack) {
                                     const lang = resolvedTrack.lang || '';
                                     const isAsr = !!resolvedTrack.isAsr;
                                     transcriptText = `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${fetched}`;
@@ -499,8 +509,9 @@ async function getPageContent() {
                         if (pr && Array.isArray(pr.segments) && pr.segments.length > 0) {
                             const fetched = formatTimedTranscript(pr.segments);
                             if (fetched.length > 50) {
-                                const lang = (resolvedTrack && resolvedTrack.lang) || pr.lang || '';
-                                const isAsr = resolvedTrack ? !!resolvedTrack.isAsr : !!pr.asr;
+                                // La pista és la que el reproductor ha demanat (la URL), no la suposada
+                                const lang = pr.lang || (resolvedTrack && resolvedTrack.lang) || '';
+                                const isAsr = pr.lang ? !!pr.asr : (resolvedTrack ? !!resolvedTrack.isAsr : false);
                                 transcriptText = lang || isAsr
                                     ? `[TRANSCRIPT: ${lang}${isAsr ? ' (Auto)' : ''}]\n\n${fetched}`
                                     : `[TRANSCRIPT]\n\n${fetched}`;
