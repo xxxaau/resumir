@@ -1812,3 +1812,30 @@ test("Copiar - amb targetes d'Anki a la vista copia les targetes llegibles, no e
         assert.doesNotMatch(copied, /"q"\s*:/, "no ha de ser el JSON cru");
     } finally { h.close(); }
 });
+
+test("PDF - un error d'extracció diu el límit de pàgines i porta el codi al final (taula única d'errors)", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true } });
+    try {
+        h.window.extractPdfText = async () => { throw Object.assign(new Error("massa pàgines"), { code: "TOO_LARGE" }); };
+        await pickPdf(h);
+        await h.flush(20);
+        const err = h.document.getElementById("error");
+        assert.match(err.textContent, /500 pàgines/);
+        assert.doesNotMatch(err.textContent.trim(), /^\[PDF-/, "el codi no va al començament");
+        assert.match(err.querySelector(".error-code").textContent, /codi PDF-013/);
+    } finally { h.close(); }
+});
+
+test("PDF - amb un PDF http(s) que no es pot descarregar, el botó de triar un PDF local «pulsa» per fer-se descobrible", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        sync: { enablePdf: true },
+        tabs: [{ id: 1, url: "http://exemple.local/doc.pdf", title: "Doc", active: true }],
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("error").textContent, /PDF-016|Triar un PDF/);
+        assert.ok(h.document.getElementById("selectPdfBtn").classList.contains("pulse"), "el botó ha de destacar");
+    } finally { h.close(); }
+});

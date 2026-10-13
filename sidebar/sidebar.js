@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Pulsa el bot\u00f3 quan apareix l'error PDF-016 a l'errorDiv per fer-lo descobrible.
         if (errorDiv && typeof MutationObserver !== "undefined") {
             const obs = new MutationObserver(() => {
-                if (errorDiv.textContent && errorDiv.textContent.includes("[PDF-016]")) {
+                if (errorDiv.textContent && errorDiv.textContent.includes("PDF-016")) {
                     selectPdfBtn.classList.add("pulse");
                     setTimeout(() => selectPdfBtn.classList.remove("pulse"), 4000);
                 }
@@ -321,18 +321,8 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (err) {
                 setPdfReading(false);
                 console.error("[PDF picker] error:", err);
-                const codeMap = {
-                    PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
-                    INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
-                    SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
-                    TOO_LARGE: "[PDF-013] PDF massa gran.",
-                    TIMEOUT: "[PDF-014] S'ha esgotat el temps en extreure el PDF.",
-                };
-                const msg = codeMap[err?.code] || `[PDF-019] Error obrint PDF: ${err?.message || err}`;
-                if (errorDiv) {
-                    errorDiv.textContent = msg;
-                    errorDiv.classList.remove("hidden");
-                }
+                const msg = pdfErrorMessage(err, "Error obrint PDF");
+                if (errorDiv) setErrorMessage(errorDiv, msg);
             }
         });
     }

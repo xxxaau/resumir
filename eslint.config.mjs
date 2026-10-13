@@ -97,6 +97,7 @@ const extensionGlobals = {
     hideProvenance: "readonly",
     showRefiners: "readonly",
     resetResultChrome: "readonly",
+    setErrorMessage: "readonly",
     linkPdfPages: "readonly",
     verifyQuotes: "readonly",
     linkYoutubeTimes: "readonly",
@@ -113,6 +114,8 @@ const extensionGlobals = {
     isPdfUrl: "readonly",
     looksLikePdfByHead: "readonly",
     extractPdfText: "readonly",
+    pdfErrorMessage: "readonly",
+    PDF_ERROR_MESSAGES: "readonly",
     // sidebar/pdf-zoom.js
     computePdfScale: "readonly",
     // sidebar/pdf-extract.js, sidebar/pdf-viewer.js

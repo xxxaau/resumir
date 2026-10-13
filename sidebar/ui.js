@@ -676,6 +676,22 @@ function updateTokenStats(inputTokens, outputTokens, options = {}) {
 }
 
 /**
+ * Mostra un error a `el`: el codi intern ([007], [PDF-013]) va al final i atenuat («(codi 007)»),
+ * no al començament. Reutilitzat per tots els camins d'error (resum, selector de PDF…).
+ */
+function setErrorMessage(el, message) {
+    const codeMatch = /^\[([A-Z]*-?\d+)\]\s*/.exec(message || "");
+    el.textContent = codeMatch ? message.slice(codeMatch[0].length) : (message || "");
+    if (codeMatch) {
+        const code = document.createElement("span");
+        code.className = "error-code";
+        code.textContent = ` (codi ${codeMatch[1]})`;
+        el.appendChild(code);
+    }
+    el.classList.remove("hidden");
+}
+
+/**
  * Línia de procedència sota el resum: de quant text es basa, amb quin model i
  * quants tokens, i un avís explícit si el text s'ha tallat.
  * @param {{words?: number, model?: string, inputTokens?: number, outputTokens?: number, truncated?: boolean}} info
@@ -1014,5 +1030,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { resetResultChrome, verifyQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { setErrorMessage, resetResultChrome, verifyQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

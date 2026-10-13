@@ -7,6 +7,22 @@
 /**
  * Safely executes a script in the target tab, requesting permissions if necessary.
  */
+// Missatges dels errors d'extracció de PDF (una sola taula: abans n'hi havia dues de divergents).
+// Els límits reals són a pdf-extract.js (500 pàgines, 2 M de caràcters).
+const PDF_ERROR_MESSAGES = {
+    PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
+    INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
+    SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
+    TOO_LARGE: "[PDF-013] PDF massa gran: el límit són 500 pàgines.",
+    TIMEOUT: "[PDF-014] S'ha esgotat el temps en extreure el PDF. Prova amb un fitxer més petit.",
+    FETCH_FAILED: "[PDF-015] No s'ha pogut descarregar el PDF.",
+    NON_HTTPS: "[PDF-016] PDFs locals i HTTP no es poden descarregar directament. Usa el botó 'Triar un PDF de l'ordinador' de la barra lateral.",
+};
+
+function pdfErrorMessage(err, unexpectedPrefix) {
+    return PDF_ERROR_MESSAGES[err?.code] || `[PDF-019] ${unexpectedPrefix}: ${err?.message || err}`;
+}
+
 async function executeScriptSafe(injection) {
     // Strategy: try first, request permissions only if needed.
     // This avoids false negatives from permissions.contains() with complex URLs.
@@ -257,16 +273,7 @@ async function getPageContent() {
             };
         } catch (e) {
             console.error("[PDF] Error final:", e?.code, e?.message, e);
-            const codeMap = {
-                PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
-                INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
-                SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
-                TOO_LARGE: "[PDF-013] PDF massa gran. Massa pàgines per processar.",
-                TIMEOUT: "[PDF-014] S'ha esgotat el temps en extreure el PDF. Prova amb un fitxer més petit.",
-                FETCH_FAILED: "[PDF-015] No s'ha pogut descarregar el PDF.",
-                NON_HTTPS: "[PDF-016] PDFs locals i HTTP no es poden descarregar directament. Usa el bot\u00f3 'Triar un PDF de l'ordinador' de la barra lateral.",
-            };
-            const friendly = codeMap[e?.code] || `[PDF-019] Error inesperat extraient PDF: ${e?.message || e}`;
+            const friendly = pdfErrorMessage(e, "Error inesperat extraient PDF");
             throw new Error(friendly);
         }
         } // end if (isPdf)

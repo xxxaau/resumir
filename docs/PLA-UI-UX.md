@@ -172,7 +172,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Superfície | Troballa | On | Sev. | Esforç |
 | --- | --- | --- | --- | --- |
 | Barra lateral | El cost ja es pot calcular (`getCuratedModelInfo`) però només l'usen els tests | `api.js:24-47` | Baixa | S |
-| Barra lateral | El mapa d'errors PDF està duplicat i ja ha divergit; no diu el límit de pàgines | `sidebar.js:228-234`, `content.js:259-267` | Baixa | S |
 | Barra lateral | Sense `max-width` del text en panells amples; enllaços amb `word-break: break-all` | `sidebar.css:159,167` | Baixa | S |
 | Barra lateral | CSS mort i regles duplicades (`#water-indicator`, `#timelineCleanerBtn`, `__rgba_primary_weak__`) | `sidebar.css:258-283,424,798` | Baixa | S |
 | Configuració | «Restaurar» sobreescriu un prompt llarg sense confirmació i, des de l'avís, desa tota la pàgina | `settings-options.js:168-212`, `settings.js:69-71` | Mitjana | S |
