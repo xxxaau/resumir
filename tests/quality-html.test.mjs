@@ -241,3 +241,15 @@ test("build: cap script que carreguen settings.html o pdf-viewer.html es pot esb
         }
     }
 });
+
+test("settings: cada targeta de plugin porta la seva categoria (Generar / Exportar / Llegir / Font)", () => {
+    const doc = load("options/settings.html");
+    const tags = Object.fromEntries([...doc.querySelectorAll("#tab-extensions .extension-item")].map(item => [
+        item.querySelector(".extension-actions").dataset.extensionId,
+        item.querySelector(".extension-tag")?.textContent.trim(),
+    ]));
+    assert.deepEqual(tags, {
+        resum: "Generar", selectpdf: "Font", simple: "Generar", deepdive: "Generar", science: "Generar",
+        conceptmap: "Generar", obsidian: "Exportar", markdown: "Exportar", bionic: "Llegir", anki: "Generar",
+    });
+});

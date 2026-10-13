@@ -99,8 +99,6 @@ enllaços profunds, rutes neutres). Vegeu `git log`. Queda:
   - Unificar els noms entre configuració i barra lateral (Aprofundiment/Aprofundir,
     «Integració amb Obsidian»/«Desar a Obsidian», «Exportació a Markdown»/«Copiar»);
     decidir-ho amb la decisió de nomenclatura del Nivell 1.
-  - Agrupar la llista de plugins (Generar / Exportar / Llegir / Fonts) amb etiqueta
-    «Cal configurar» a Obsidian i Anki si no tenen vault.
   - Ombra de desplaçament al menú horitzontal (<720 px) perquè es vegi que es pot desplaçar.
   - Obsidian: textos repetits sobre els claudàtors, «Vault» en anglès, text d'exemple
     que sembla un valor.
