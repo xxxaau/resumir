@@ -1685,3 +1685,26 @@ test("mapa conceptual - la barra de controls porta «Ajustar a la vista»", asyn
         assert.ok(labels.includes("Ajustar a la vista"), `botons: ${labels}`);
     } finally { h.close(); }
 });
+
+test("mapa conceptual - el PNG s'exporta amb TOTS els nodes (desplegats) i el mapa torna al seu estat", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        sync: { enableConceptMap: true },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "- Tema\n  - A\n    - A1\n  - B\n    - B1",
+    });
+    try {
+        h.document.getElementById("conceptMapBtn").click();
+        await h.flush(40);
+        const count = () => h.document.querySelectorAll("#content svg .markmap-node").length;
+        const before = count();
+        assert.equal(before, 3, "inicialment només es veuen els dos primers nivells");
+        let atExport = null;
+        h.window.markmapNative.exportToPNG = async () => { atExport = count(); };
+        const btn = [...h.document.querySelectorAll("#content button")].find(b => b.getAttribute("aria-label") === "Descarregar com a PNG");
+        btn.click();
+        await h.flush(10);
+        assert.equal(atExport, 5, "en exportar es veuen tots els nodes");
+        assert.equal(count(), 3, "i després el mapa torna a com estava");
+    } finally { h.close(); }
+});

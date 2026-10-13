@@ -184,7 +184,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 | Configuració | Les estadístiques d'ús es desen però no es mostren ni es poden reiniciar | `storage.local` | Baixa | M |
 | Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
 | Historial de canvis | Entrades de desenvolupador (CI, npm, Defuddle), totes les versions desplegades, avís de seguretat enterrat | `settings.html:1252-1310` | Mitjana | S |
-| Mapa conceptual | L'export PNG només captura els nodes desplegats (per defecte, nivells 0–1) sense dir-ho | `markmap-native.js:666-720` | Mitjana | M |
 | Mapa conceptual | Pantalla completa impossible des d'un PDF local, amb un consell enganyador | `conceptmap.js:349-391` | Mitjana | M |
 | Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial | `conceptmap.js:398-405` | Baixa | S |
 | Anki | Tornar a exportar duplica targetes; cada acció re-renderitza i esborra el camp «Afinar» | `anki.js:91-200,283-307` | Mitjana | M |

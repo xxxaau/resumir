@@ -115,3 +115,20 @@ test("mapa - les arestes tenen contrast ≥ 3:1 sobre blanc a les dues còpies (
         assert.ok(1.05 / (lum(m[1]) + 0.05) >= 3, `${f}: ${m[1]} sobre blanc < 3:1`);
     }
 });
+
+test("mapa pantalla completa - el PNG s'exporta amb TOTS els nodes i el mapa torna al seu estat", () => {
+    const w = newWindow();
+    const svg = MAPS["pantalla completa (fullscreenOverlayFunc)"](w);
+    w.SVGElement.prototype.getBBox = () => ({ x: 0, y: 0, width: 300, height: 200 });
+    w.Image = class { set src(_v) { /* no es carrega */ } };
+    const count = () => svg.querySelectorAll(".markmap-node").length;
+    const before = count();
+    let atSerialize = null;
+    const orig = w.XMLSerializer.prototype.serializeToString;
+    w.XMLSerializer.prototype.serializeToString = function (n) { atSerialize = n.querySelectorAll(".markmap-node").length; return orig.call(this, n); };
+    const btn = [...w.document.querySelectorAll("#markmap-fullscreen-overlay button")].find(b => b.getAttribute("aria-label") === "Descarregar com a PNG");
+    assert.ok(btn, "botó de descarregar");
+    btn.click();
+    assert.ok(atSerialize > before, `en exportar es veuen més nodes (${before} → ${atSerialize})`);
+    assert.equal(count(), before, "després, el mapa torna a com estava");
+});

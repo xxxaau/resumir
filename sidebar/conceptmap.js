@@ -346,7 +346,21 @@ function renderMarkmapInteractive(text, pageTitle = "", originUrl = "") {
                         ? window.buildConceptMapFilename
                         : () => "mapa-conceptual.png";
                     const filename = builder(root.label || pageTitle);
-                    await window.markmapNative.exportToPNG(svg, filename, { backgroundColor: "#ffffff" });
+                    // El PNG ha de dur TOTS els nodes, no només els desplegats ara: es desplega
+                    // tot un instant (la serialització és síncrona) i es restaura l'estat de plegat.
+                    const folds = [];
+                    (function snap(n) { folds.push(n.fold); (n.children || []).forEach(snap); })(mm.getRoot());
+                    mm.setFoldAll(false);
+                    mm.rerender();
+                    let exporting;
+                    try {
+                        exporting = window.markmapNative.exportToPNG(svg, filename, { backgroundColor: "#ffffff" });
+                    } finally {
+                        let i = 0;
+                        (function restore(n) { n.fold = folds[i++]; (n.children || []).forEach(restore); })(mm.getRoot());
+                        mm.rerender();
+                    }
+                    await exporting;
                 } catch (error) {
                     console.error("Error exporting PNG:", error);
                     alert("Error exportant a PNG.");
@@ -1090,6 +1104,16 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
             return `${date}_${picked.join('_')}.png`;
         }
         btnPng.addEventListener('click', async () => {
+            // El PNG ha de dur TOTS els nodes: es desplega tot un instant i es restaura l'estat de plegat
+            const folds = [];
+            (function snap(n) { folds.push(n.fold); (n.children || []).forEach(snap); })(root);
+            setFoldAll(false);
+            render();
+            const restoreFolds = () => {
+                let i = 0;
+                (function restore(n) { n.fold = folds[i++]; (n.children || []).forEach(restore); })(root);
+                render();
+            };
             try {
                 const clone = svg.cloneNode(true);
                 const vp = clone.querySelector('.markmap-viewport');
@@ -1105,6 +1129,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                 clone.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${w} ${h}`);
                 clone.setAttribute('xmlns', SVG_NS);
                 const xml = new XMLSerializer().serializeToString(clone);
+                restoreFolds();   // la serialització ja és feta (síncrona)
                 // data: URL en lloc de blob: per coherència amb la sidebar i per
                 // resistir CSP estrictes (img-src sense blob:) de la pàgina amfitriona.
                 const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
@@ -1134,6 +1159,7 @@ function fullscreenOverlayFunc(text, _pageTitle, icons) {
                 img.onerror = () => { URL.revokeObjectURL(url); };
                 img.src = url;
             } catch (err) {
+                restoreFolds();
                 console.error('PNG export failed:', err);
             }
         });
