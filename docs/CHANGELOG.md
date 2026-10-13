@@ -8,8 +8,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ## [Sense publicar]
 
 ### Afegit
-- **Cites verificades també als punts clau:** cada punt acaba amb un fragment
-  literal del text; es marca ✓ amb enllaç al passatge o ⚠ si no hi consta.
+- **Cites clicables:** cada punt clau acaba amb un fragment literal del text i, en
+  clicar-lo (o una cita de «Cites»), la pàgina el ressalta en groc i hi desplaça la
+  vista, com un Ctrl+F. No funciona en PDF ni en vídeos de YouTube.
 - **Línia de procedència sota el resum:** quantes paraules s'han enviat, amb quin
   model i quants tokens; avisa si el text s'ha tallat o sembla un bàner de galetes
   i porta l'enllaç «Veure el text enviat».
@@ -18,8 +19,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Refinadors «Més curt» i «Més detall»** sota el resum.
 - **Drecera de teclat Alt+Maj+S** per obrir Resumir i resumir la pàgina.
 - **Enllaços als orígens:** `(p. N)` als PDF web i `[m:ss]` als vídeos de YouTube
-  (el vídeo salta a aquell moment); les cites de la secció «Cites» es verifiquen
-  literalment contra el text i enllacen amb el passatge.
+  (el vídeo salta a aquell moment).
 - **Format i llargada del resum** com a preferències a la configuració de Resum.
 - **Configuració:** descripció «Què fa i com configurar-lo» a cada plugin, prompts
   plegats sota «avançat», capçalera comuna amb interruptor, vista prèvia en directe

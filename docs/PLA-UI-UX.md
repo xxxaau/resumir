@@ -87,7 +87,7 @@ Tot fet. Decisió presa: els camps de text i els sliders **no** es desen sols (h
 > de resum d'una altra pàgina, refinadors «Més curt / Més detall», drecera
 > Alt+Maj+S, cites `(p. N)` dels PDF web, marques `[m:ss]` de YouTube (camins B, C i
 > text pre-renderitzat; el rascat del DOM no en porta), format i llargada com a
-> preferències de Resum, i verificació literal de la secció «Cites».
+> preferències de Resum, i cites clicables que ressalten el passatge a la pàgina.
 > Mètode: test de regressió primer, commit atòmic, `npm test` + `npm run lint` +
 > `npm run dev:chromium` + `npm run smoke:e2e` abans de commitejar, i treure del pla
 > el que es completi.
@@ -98,7 +98,7 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 
 | Idea | Què veu l'usuari | Per què | Referència | Esforç |
 | --- | --- | --- | --- | --- |
-| Cites verificades als punts clau | Fet per a «Cites» i «Punts clau» (✓/⚠ + ↗ amb `#:~:text=`; cada punt acaba amb un fragment literal) | Les cites inventades augmenten la falsa confiança; verificades, la calibren | Perplexity Comet; AAAI 2025 (Ding et al.) | L |
+| Cites clicables | Fet: «Cites» i «Punts clau» ressalten el passatge a la pàgina en clicar (decisió: la insígnia ✓/⚠ de verificació es va treure, no aportava) | Permet comprovar el fragment en context | Perplexity Comet | — |
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |
 
 **Relació amb el backlog:** els prompts editables, els proveïdors alternatius i la

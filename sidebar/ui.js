@@ -816,37 +816,19 @@ function linkYoutubeTimes(container, url) {
     }
 }
 
-/** Minúscules, espais i cometes unificats: perquè una cita copiada «literalment» compari bé. */
-function normalizeForQuote(t) {
-    return String(t).normalize("NFC").toLowerCase()
-        .replace(/[\u2018\u2019\u201a\u201b]/g, "'").replace(/[\u201c\u201d\u201e\u00ab\u00bb]/g, '"')
-        .replace(/[\u2013\u2014]/g, "-")
-        // Marques que l'extensió posa dins del text enviat ([0:30], [Pàgina 3]): una cita
-        // literal que les travessa no pot sortir com a «no consta».
-        .replace(/\[\d+(?::\d{2}){1,2}\]|\[pàgina \d+\]/g, " ")
-        .replace(/\s+/g, " ").trim();
-}
-
-/** Fragment de text (#:~:text=) per a una cita: inici,final si és llarga. */
-function textFragmentFor(quote) {
-    const enc = (t) => encodeURIComponent(t).replace(/-/g, "%2D");
-    const words = quote.trim().split(/\s+/);
-    if (quote.length <= 90 || words.length < 12) return enc(quote.trim());
-    return enc(words.slice(0, 5).join(" ")) + "," + enc(words.slice(-5).join(" "));
-}
-
 /**
- * Comprova les cites «…» de les seccions «Cites» i «Punts clau» contra el text enviat: ✓ i enllaç
- * al passatge (només en pàgines http/https que no siguin PDF) si hi consten
- * literalment; ⚠ si no (el model l'ha parafrasejat o inventat).
+ * Fa clicables les cites «…» de les seccions «Cites» i «Punts clau»: en clicar-ne una,
+ * sidebar.js la busca a la pàgina, la ressalta en groc i hi desplaça la vista (com un
+ * Ctrl+F). Només té sentit si el text surt de la pàgina tal com es veu: no en PDF
+ * (el visor és una altra pàgina) ni en vídeos de YouTube (la transcripció no és al DOM).
  */
-function verifyQuotes(container, sourceText, url) {
-    if (!container || !sourceText) return;
-    const haystack = normalizeForQuote(sourceText);
-    const canLink = /^https?:/i.test(url || "") && !(typeof isPdfUrl === "function" && isPdfUrl(url));
-    const base = canLink ? url.split("#")[0] : null;
-    // Seccions amb cites: «Cites» (la 1a frase entre «») i «Punts clau» (l'última, que és
-    // la que el model hi afegeix al final com a suport del punt).
+function linkQuotes(container, url) {
+    if (!container) return;
+    if (!/^https?:/i.test(url || "")) return;
+    if (typeof isPdfUrl === "function" && isPdfUrl(url)) return;
+    if (/^https?:\/\/([^/]+\.)?youtube\.com\/watch/i.test(url)) return;
+    // «Cites» → la 1a frase entre «» de l'element; «Punts clau» → l'última (la que el model
+    // hi afegeix al final com a suport del punt).
     const SECTIONS = { "cites": "first", "punts clau": "last" };
     const work = [];
     let mode = null;
@@ -856,24 +838,22 @@ function verifyQuotes(container, sourceText, url) {
         for (const li of el.matches("li") ? [el] : el.querySelectorAll("li")) work.push({ li, mode });
     }
     for (const { li, mode: which } of work) {
-        const all = [...li.textContent.matchAll(/«([^»]{8,})»/g)];
-        if (!all.length) continue;
-        const quote = (which === "last" ? all[all.length - 1] : all[0])[1].trim();
-        const found = haystack.includes(normalizeForQuote(quote));
-        const badge = document.createElement("span");
-        badge.className = found ? "quote-ok" : "quote-warn";
-        badge.textContent = found ? " ✓ verificada" : " ⚠ no consta al text";
-        li.appendChild(badge);
-        if (found && base) {
-            const a = document.createElement("a");
-            a.className = "quote-link";
-            a.href = `${base}#:~:text=${textFragmentFor(quote)}`;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.title = "Anar al passatge a la pàgina";
-            a.textContent = " ↗";
-            li.appendChild(a);
+        const found = [];
+        const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            for (const m of n.nodeValue.matchAll(/«([^»]{8,})»/g)) found.push({ node: n, m });
         }
+        if (!found.length) continue;
+        const { node, m } = which === "last" ? found[found.length - 1] : found[0];
+        const a = document.createElement("a");
+        a.href = "#";
+        a.className = "quote-jump";
+        a.dataset.quote = m[1].trim();
+        a.title = "Mostra-la a la pàgina";
+        a.textContent = m[0];
+        const tail = node.splitText(m.index);
+        tail.nodeValue = tail.nodeValue.slice(m[0].length);
+        node.parentNode.insertBefore(a, tail);
     }
 }
 
@@ -1031,5 +1011,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { setErrorMessage, resetResultChrome, verifyQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { setErrorMessage, resetResultChrome, linkQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

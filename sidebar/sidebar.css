@@ -1554,9 +1554,8 @@ body {
 .error-code { opacity: 0.7; font-size: 0.85em; white-space: nowrap; }
 
 /* Cites verificades */
-.quote-ok { color: var(--success); font-size: 0.85em; white-space: nowrap; }
-.quote-warn { color: var(--error-text); font-size: 0.85em; white-space: nowrap; }
-a.quote-link { text-decoration: none; }
+a.quote-jump { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, #ffe14d 45%, transparent); }
 
 .prompt-update-banner .btn-link {
   font: inherit;

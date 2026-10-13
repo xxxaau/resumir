@@ -21,9 +21,9 @@ const OUT = process.env.SMOKE_OUT || fs.mkdtempSync(path.join(os.tmpdir(), "resu
 const failures = [];
 const check = (ok, msg) => { console.log(`${ok ? "OK  " : "FAIL"} ${msg}`); if (!ok) failures.push(msg); };
 
-const ARTICLE = `<!doctype html><html><head><title>Article de prova</title></head><body><article><h1>Article de prova</h1>${"<p>La fusió nuclear imita el procés que alimenta les estrelles. Els investigadors han obtingut resultats prometedors amb el confinament magnètic del plasma a temperatures extremes.</p>".repeat(12)}</article></body></html>`;
+const ARTICLE = `<!doctype html><html><head><title>Article de prova</title></head><body><article><h1>Article de prova</h1>${"<p>La fusió nuclear imita el procés que alimenta les estrelles. Els investigadors han obtingut resultats prometedors amb el confinament magnètic del plasma a temperatures extremes.</p>".repeat(12)}<div style="height:3000px"></div><p>Frase final única que s'ha de ressaltar al final de la pàgina.</p></article></body></html>`;
 const MAP_REPLY = "- Fusió nuclear\n  - Confinament\n    - Tokamak\n  - Resultats\n    - Plasma";
-const REPLY = "La fusió nuclear imita les estrelles.\n\n### Punts clau\n- Confinament magnètic del plasma\n- Resultats prometedors\n\n### Cites\n- «La fusió nuclear imita el procés que alimenta les estrelles.»\n- «Aquesta frase no surt a l'article original enlloc.»";
+const REPLY = "La fusió nuclear imita les estrelles.\n\n### Punts clau\n- Confinament magnètic del plasma\n- Resultats prometedors\n\n### Cites\n- «Frase final ÚNICA que s'ha de ressaltar al final de la pàgina.»\n- «Aquesta frase no surt a l'article original enlloc.»";
 
 // Chromium: CHROMIUM_PATH, el de la versió de Playwright o, si no s'ha descarregat,
 // qualsevol altre de la memòria cau de Playwright (les extensions només van en Chromium).
@@ -85,9 +85,23 @@ try {
     const prov = await page.textContent("#provenance");
     check(/Basat en \d+ paraules/.test(prov) && /tokens/.test(prov), `línia de procedència («${prov.trim().slice(0, 60)}…»)`);
     check(await page.isVisible("#refiners"), "refinadors visibles");
-    check(await page.locator("#content .quote-ok").count() === 1 && await page.locator("#content .quote-warn").count() === 1, "cites verificades: 1 ✓ i 1 ⚠");
-    const quoteLink = page.locator("#content a.quote-link");
-    check(await quoteLink.count() === 1 && (await quoteLink.getAttribute("href")).includes("#:~:text="), "la cita verificada enllaça amb el passatge");
+    // Cites clicables: la cita surt ressaltada (groc) a la pàgina i la vista hi baixa
+    const jumps = page.locator("#content a.quote-jump");
+    check(await jumps.count() === 2 && await page.locator("#content .quote-ok, #content .quote-warn").count() === 0, "cites clicables, sense insígnies de verificació");
+    await jumps.nth(0).click();
+    await page.waitForTimeout(1500);
+    const hl = await tabA.evaluate(() => {
+        const h = window.CSS && CSS.highlights && CSS.highlights.get("resumir-quote");
+        const r = h && [...h][0];
+        return { text: r ? r.toString() : null, scrollY: Math.round(window.scrollY) };
+    });
+    // CSS.highlights viu al món de l'extensió; si no es veu des de la pàgina, es comprova la selecció
+    const sel = await tabA.evaluate(() => String(getSelection()));
+    check((hl.text || sel).includes("Frase final única"), `la cita es ressalta a la pàgina (${hl.text ? "groc, CSS Highlight" : "selecció"})`);
+    check(hl.scrollY > 1000, `la pàgina baixa fins a la cita (scrollY ${hl.scrollY})`);
+    await jumps.nth(1).click();
+    await page.waitForTimeout(800);
+    check(/No s'ha trobat aquesta cita/.test(await page.textContent("#model-notice")), "una cita que no hi és, ho avisa");
     check(await page.isVisible("#copyBtn"), "Copiar visible per defecte");
     check((await page.textContent("#content")).includes("Confinament magnètic"), "el resum es mostra");
     await page.screenshot({ path: path.join(OUT, "1-summary.png") });

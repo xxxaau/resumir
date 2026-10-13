@@ -99,7 +99,7 @@ const extensionGlobals = {
     resetResultChrome: "readonly",
     setErrorMessage: "readonly",
     linkPdfPages: "readonly",
-    verifyQuotes: "readonly",
+    linkQuotes: "readonly",
     linkYoutubeTimes: "readonly",
     youtubeVideoId: "readonly",
     hideRefiners: "readonly",
@@ -138,6 +138,7 @@ const extensionGlobals = {
     // sidebar/extractors.js (connectors — font única de selectors, usats a content.js)
     extractHackerNewsFromDOM: "readonly",
     readYoutubeCaptionMeta: "readonly",
+    highlightQuoteInPage: "readonly",
     extractLinkedInPost: "readonly",
     scrapeTwitterTweets: "readonly",
     extractTwitterOG: "readonly",

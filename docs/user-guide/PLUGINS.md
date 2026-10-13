@@ -48,8 +48,8 @@ estructura fixa:
 - un **paràgraf executiu** (màxim 150 paraules) que diu quin tipus de contingut és i de què va,
 - **Punts clau** (de 3 a 8, segons la llargada del text),
 - **Aprenentatges** (fins a 3 conclusions pràctiques),
-- **Cites** (fins a 3 frases literals; Resumir comprova que consten al text original i
-  marca ✓ o ⚠).
+- **Cites** (fins a 3 frases literals; en clicar-les, la pàgina les ressalta en groc i hi
+  desplaça la vista).
 
 Només hi ha les seccions que tenen contingut: en un text curt en sortiran menys. Si la
 pàgina és buida o només és un avís de galetes, diu que no hi ha prou contingut en lloc

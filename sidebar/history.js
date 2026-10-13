@@ -122,6 +122,7 @@ async function loadHistoryEntry(entry, { historyMode = true } = {}) {
     applyBionicStyles(contentDiv, bionicEnabled, bionicConfig);
     if (!isConceptMap && !isAnki && typeof linkPdfPages === "function") linkPdfPages(contentDiv, entry.url);
     if (!isConceptMap && !isAnki && typeof linkYoutubeTimes === "function") linkYoutubeTimes(contentDiv, entry.url);
+    if (!isConceptMap && !isAnki && typeof linkQuotes === "function") linkQuotes(contentDiv, entry.url);
     contentDiv.classList.remove("hidden");
 
     const historyPanel = document.getElementById("history-panel");

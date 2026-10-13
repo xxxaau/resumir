@@ -592,6 +592,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 150);
     }
 
+    // Cites clicables: es busquen a la pàgina de la pestanya activa, es ressalten en groc i
+    // s'hi desplaça la vista. Només si el resum és d'aquesta pàgina.
+    contentDiv.addEventListener("click", async (e) => {
+        const link = e.target.closest && e.target.closest("a.quote-jump");
+        if (!link) return;
+        e.preventDefault();
+        try {
+            const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
+            if (!tab || !currentMetadata || tab.url !== currentMetadata.url) {
+                showModelNotice("Aquest resum és d'una altra pàgina: obre-la per veure'n les cites.");
+                return;
+            }
+            const res = await ext.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: highlightQuoteInPage,
+                args: [link.dataset.quote],
+            });
+            if (res && res[0] && res[0].result && res[0].result.found) showModelNotice("");
+            else showModelNotice("No s'ha trobat aquesta cita a la pàgina (pot haver canviat o ser en una part que no és visible).");
+        } catch (err) {
+            console.warn("[cites] highlight failed:", err);
+            showModelNotice("No s'ha pogut ressaltar la cita en aquesta pàgina.");
+        }
+    });
+
     // Marques de temps d'un resum de vídeo: porten el vídeo d'aquesta pestanya a
     // l'instant (sense recarregar-lo); si la pestanya activa és una altra, obren el vídeo.
     contentDiv.addEventListener("click", async (e) => {

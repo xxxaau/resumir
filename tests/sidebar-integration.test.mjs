@@ -1306,51 +1306,99 @@ test("text enviat - el focus entra al panell i, en tancar-lo, torna al botó del
 });
 
 // ---------------------------------------------------------------------------
-// Cites verificades (Fase E): cada cita de la secció «Cites» es comprova
-// literalment contra el text enviat; si hi és, enllaç al passatge (#:~:text=)
+// Cites clicables: la cita de «Cites» i la final de cada punt clau és un enllaç que,
+// en clicar-lo, la ressalta a la pàgina (sense insígnies de verificació)
 // ---------------------------------------------------------------------------
-test("cites verificades - ✓ i enllaç al passatge si és al text; ⚠ si no hi és", async () => {
+test("cites clicables - «Cites» i «Punts clau» porten un enllaç per cita, sense insígnies ✓/⚠", async () => {
     const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },
         pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
-        modelReply: `Resum.\n\n### Cites\n- «${real}»\n- «Aquesta frase no apareix enlloc de la pàgina original.»`,
+        modelReply: `Resum.\n\n### Punts clau\n- Idea «${real}»\n- Punt sense cita\n\n### Aprenentatges\n- Una «expressió llarga entre cometes» que no s'enllaça\n\n### Cites\n- «${real}»\n- «Aquesta frase no apareix enlloc de la pàgina original.»`,
     });
     try {
         h.document.getElementById("summarizeBtn").click();
         await h.flush(30);
-        const items = [...h.document.querySelectorAll("#content li")];
-        assert.equal(items.length, 2);
-        assert.ok(items[0].querySelector(".quote-ok"), "la primera es verifica");
-        const link = items[0].querySelector("a.quote-link");
-        assert.ok(link, "enllaç al passatge");
-        assert.match(link.getAttribute("href"), /^https:\/\/example\.com\/article#:~:text=/);
-        assert.ok(items[1].querySelector(".quote-warn"), "la segona no consta");
-        assert.equal(items[1].querySelector("a.quote-link"), null);
+        const links = [...h.document.querySelectorAll("#content a.quote-jump")];
+        assert.equal(links.length, 3, "1 punt clau + 2 cites");
+        assert.equal(links[0].dataset.quote, real);
+        assert.equal(links[0].textContent, `«${real}»`, "el text visible no canvia");
+        assert.equal(h.document.querySelector("#content .quote-ok, #content .quote-warn, #content a.quote-link"), null);
+        assert.equal(h.document.querySelectorAll("#content li")[1].querySelector("a.quote-jump"), null, "punt sense cita");
     } finally { h.close(); }
 });
 
-test("cites verificades - cada punt clau verifica el seu fragment final (✓ + enllaç, ⚠ si no consta, res si no en porta)", async () => {
-    const real = "El reactor va mantenir el plasma durant quaranta segons.";
+test("cites clicables - clicar-ne una la fa ressaltar a la pestanya activa", async () => {
+    const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },
-        pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
-        modelReply: `Resum.\n\n### Punts clau\n- Rècord de durada «${real}»\n- Dada inventada «Aquesta frase no apareix enlloc de la pàgina original.»\n- Punt sense cita\n\n### Aprenentatges\n- Una «expressió llarga entre cometes» que no es comprova`,
+        pageText: `${real} ` + "Més text. ".repeat(30),
+        modelReply: `Resum.\n\n### Cites\n- «${real}»`,
     });
     try {
         h.document.getElementById("summarizeBtn").click();
         await h.flush(30);
-        const items = [...h.document.querySelectorAll("#content li")];
-        assert.equal(items.length, 4);
-        assert.ok(items[0].querySelector(".quote-ok"), "el 1r punt es verifica");
-        assert.match(items[0].querySelector("a.quote-link").getAttribute("href"), /#:~:text=/);
-        assert.ok(items[1].querySelector(".quote-warn"), "el 2n no consta");
-        assert.equal(items[2].querySelector(".quote-ok, .quote-warn"), null, "sense cita, sense insígnia");
-        assert.equal(items[3].querySelector(".quote-ok, .quote-warn"), null, "Aprenentatges no es comprova");
+        const injected = [];
+        h.window.chrome.scripting.executeScript = async (inj) => { injected.push(inj); return [{ result: { found: true } }]; };
+        h.document.querySelector("#content a.quote-jump").click();
+        await h.flush(10);
+        assert.equal(injected.length, 1);
+        assert.equal(injected[0].args.length, 1);
+        assert.equal(injected[0].args[0], real);
+        assert.equal(injected[0].target.tabId, 1);
+        assert.match(String(injected[0].func), /highlightQuoteInPage/);
     } finally { h.close(); }
 });
 
-test("cites verificades - només a la secció «Cites», no a altres cometes del resum", async () => {
+test("cites clicables - si no es troba a la pàgina o el resum és d'una altra pàgina, ho diu", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Text de la pàgina. ".repeat(30),
+        modelReply: "Resum.\n\n### Cites\n- «Una frase que potser ja no hi és.»",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        h.window.chrome.scripting.executeScript = async () => [{ result: { found: false } }];
+        h.document.querySelector("#content a.quote-jump").click();
+        await h.flush(10);
+        const notice = h.document.getElementById("model-notice");
+        assert.ok(!notice.classList.contains("hidden"));
+        assert.match(notice.textContent, /No s'ha trobat aquesta cita/);
+        // Resum d'una altra pàgina: no s'injecta res
+        let called = 0;
+        h.window.chrome.scripting.executeScript = async () => { called++; return [{ result: { found: true } }]; };
+        h.window.chrome.tabs.query = async () => [{ id: 1, url: "https://altra.example/x", title: "x", active: true }];
+        h.document.querySelector("#content a.quote-jump").click();
+        await h.flush(10);
+        assert.equal(called, 0);
+        assert.match(notice.textContent, /d'una altra pàgina/);
+    } finally { h.close(); }
+});
+
+test("cites clicables - no s'enllacen en un PDF (el visor és una altra pàgina)", async () => {
+    const pdf = "https://example.com/doc.pdf";
+    const key = `summary_cache:${pdf}:summary`;
+    const local = { summary_cache_index: [key] };
+    local[key] = {
+        url: pdf, title: "Doc", model: "gemini-2.5-flash", timestamp: new Date().toISOString(), version: "1.0",
+        stats: { input: 900, output: 60 }, type: "summary", style: "default|medium",
+        summary: "Idea.\n\n### Cites\n- «Una frase literal del document.»",
+    };
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", ...local },
+        tabs: [{ id: 1, url: pdf, title: "Doc", active: true }],
+        pageText: "Text del document. ".repeat(30),
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.querySelector("#content li"), "el resum desat es mostra");
+        assert.equal(h.document.querySelector("#content a.quote-jump"), null);
+    } finally { h.close(); }
+});
+
+test("cites clicables - només a la secció «Cites», no a altres cometes del resum", async () => {
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },
         pageText: "Un article. ".repeat(30),
@@ -1359,7 +1407,7 @@ test("cites verificades - només a la secció «Cites», no a altres cometes del
     try {
         h.document.getElementById("summarizeBtn").click();
         await h.flush(30);
-        assert.equal(h.document.querySelector("#content .quote-ok, #content .quote-warn"), null);
+        assert.equal(h.document.querySelector("#content a.quote-jump"), null);
     } finally { h.close(); }
 });
 
@@ -1528,19 +1576,6 @@ test("aturar i tornar a generar - la generació antiga, en acabar tard, no deixa
     } finally { h.close(); }
 });
 
-test("cites verificades - una cita que travessa una marca [m:ss] o [Pàgina N] es verifica igualment", async () => {
-    const h = await loadSidebar({
-        local: { apiKey: "AIza_test" },
-        pageText: "Abans de tot. La fusió nuclear imita [0:30] el procés que alimenta les estrelles. " + "Més text. ".repeat(20),
-        modelReply: "Resum.\n\n### Cites\n- «La fusió nuclear imita el procés que alimenta les estrelles.»",
-    });
-    try {
-        h.document.getElementById("summarizeBtn").click();
-        await h.flush(30);
-        assert.ok(h.document.querySelector("#content .quote-ok"), "no ha de ser ⚠ per una marca enmig");
-    } finally { h.close(); }
-});
-
 test("PDF local - en obrir un segon PDF, el del visor anterior s'esborra de storage.session (no s'acumulen)", async () => {
     const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true }, modelReply: "Resum." });
     try {
@@ -1597,7 +1632,7 @@ test("refinadors - el refinat no trepitja el resum desat", async () => {
     } finally { h.close(); }
 });
 
-test("camí desat - també enllaça [m:ss], mostra la procedència i els refinadors, i verifica les cites", async () => {
+test("camí desat - també enllaça [m:ss], mostra la procedència i els refinadors, i enllaça les cites", async () => {
     const yt = "https://www.youtube.com/watch?v=abc123XYZ_0";
     const local = { summary_cache_index: [] };
     const key = `summary_cache:${yt}:summary`;
@@ -1619,9 +1654,7 @@ test("camí desat - també enllaça [m:ss], mostra la procedència i els refinad
         assert.ok(h.document.querySelector("#content a[data-yt-time]"), "enllaç de temps");
         assert.ok(!h.document.getElementById("provenance").classList.contains("hidden"), "procedència");
         assert.ok(!h.document.getElementById("refiners").classList.contains("hidden"), "refinadors");
-        await h.flush(10);
-        assert.equal(h.document.querySelectorAll("#content .quote-ok").length, 1, "una cita verificada");
-        assert.equal(h.document.querySelectorAll("#content .quote-warn").length, 1, "una que no consta");
+        assert.equal(h.document.querySelector("#content a.quote-jump"), null, "YouTube: cites sense enllaç");
     } finally { h.close(); }
 });
 

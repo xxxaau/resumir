@@ -340,6 +340,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 if (proseCached) {
                     if (typeof linkYoutubeTimes === "function") linkYoutubeTimes(contentDiv, currentMetadata.url);
                     if (typeof linkPdfPages === "function") linkPdfPages(contentDiv, currentMetadata.url);
+                    if (typeof linkQuotes === "function") linkQuotes(contentDiv, currentMetadata.url);
                     if (typeof renderProvenance === "function") {
                         renderProvenance({
                             model: cachedEntry.model,
@@ -353,8 +354,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 getPageContent().then(data => {
                     if (data && data.text) {
                         ctx.setSourceText(data.text);
-                        // Les cites es verifiquen quan arriba el text (la còpia desada no el porta)
-                        if (proseCached && typeof verifyQuotes === "function") verifyQuotes(contentDiv, data.text, currentMetadata.url);
                     }
                 }).catch(() => { /* background preload failed silently */ });
                 
@@ -612,7 +611,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         applyBionicStyles(contentDiv, bionicEnabled, config);
-        if (typeof verifyQuotes === "function" && isProseType(requestedType)) verifyQuotes(contentDiv, pageData.text, currentMetadata.url);
+        if (typeof linkQuotes === "function" && isProseType(requestedType)) linkQuotes(contentDiv, currentMetadata.url);
         if (typeof linkYoutubeTimes === "function" && isProseType(requestedType)) linkYoutubeTimes(contentDiv, currentMetadata.url);
         if (typeof linkPdfPages === "function" && isProseType(requestedType)) linkPdfPages(contentDiv, currentMetadata.url);
 

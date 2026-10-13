@@ -251,6 +251,90 @@ function readYoutubeCaptionMeta() {
     } catch (e) { return { error: String(e) }; }
 }
 
+/**
+ * Cerca una cita al text visible de la pàgina, la ressalta en groc i hi desplaça la vista
+ * (com un Ctrl+F). S'injecta amb executeScript: ha de ser autocontinguda. Compara sense
+ * distingir majúscules, amb espais, cometes i guions unificats; si la cita sencera no hi
+ * és, prova amb el seu començament. Retorna { found }.
+ */
+function highlightQuoteInPage(quote) {
+    try {
+        const QUOTES = { "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'", "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u00ab": '"', "\u00bb": '"', "\u2013": "-", "\u2014": "-" };
+        const normChar = (c) => {
+            if (/\s/.test(c)) return " ";
+            if (QUOTES[c]) return QUOTES[c];
+            const l = c.toLowerCase();
+            return l.length === 1 ? l : c;
+        };
+        const normString = (t) => {
+            let out = "";
+            for (const c of String(t)) {
+                const n = normChar(c);
+                if (n === " " && (out === "" || out.endsWith(" "))) continue;
+                out += n;
+            }
+            return out.trimEnd();
+        };
+        // Text visible de la pàgina, amb un mapa de cada caràcter normalitzat al seu node/posició
+        let acc = "";
+        const map = [];
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: (n) => (n.parentElement && !n.parentElement.closest("script,style,noscript,template,[hidden],[aria-hidden='true']"))
+                ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+        });
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            const v = n.nodeValue;
+            for (let i = 0; i < v.length; i++) {
+                const c = normChar(v[i]);
+                if (c === " " && (acc === "" || acc.endsWith(" "))) continue;
+                acc += c;
+                map.push([n, i]);
+            }
+        }
+        const target = normString(quote);
+        if (!target) return { found: false };
+        const tries = [target];
+        const words = target.split(" ");
+        if (words.length > 6) tries.push(words.slice(0, 6).join(" "));
+        let range = null;
+        for (const t of tries) {
+            for (let from = 0; ;) {
+                const at = acc.indexOf(t, from);
+                if (at < 0) break;
+                const [n1, o1] = map[at];
+                const [n2, o2] = map[at + t.length - 1];
+                const r = document.createRange();
+                r.setStart(n1, o1);
+                r.setEnd(n2, o2 + 1);
+                // Si el 1r resultat és amagat (menú, pestanya tancada), es prova el següent
+                if (r.getClientRects().length > 0) { range = r; break; }
+                from = at + 1;
+            }
+            if (range) break;
+        }
+        if (!range) return { found: false };
+        const host = range.startContainer.parentElement;
+        if (host && host.scrollIntoView) host.scrollIntoView({ block: "center", behavior: "smooth" });
+        if (typeof CSS !== "undefined" && CSS.highlights && typeof Highlight !== "undefined") {
+            let style = document.getElementById("resumir-quote-style");
+            if (!style) {
+                style = document.createElement("style");
+                style.id = "resumir-quote-style";
+                style.textContent = "::highlight(resumir-quote){background-color:#ffe14d;color:#000}";
+                document.head.appendChild(style);
+            }
+            CSS.highlights.set("resumir-quote", new Highlight(range));
+            clearTimeout(window.__resumirQuoteTimer);
+            window.__resumirQuoteTimer = setTimeout(() => CSS.highlights.delete("resumir-quote"), 10000);
+        } else {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+        return { found: true };
+    } catch (e) { return { found: false, error: String(e) }; }
+}
+
 // Export per a Node (tests/canari). Ignorat al navegador (module undefined).
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
@@ -260,6 +344,7 @@ if (typeof module !== "undefined" && module.exports) {
         extractWithReadability,
         extractLinkedInPost,
         readYoutubeCaptionMeta,
+        highlightQuoteInPage,
         formatTimedTranscript,
     };
 }
