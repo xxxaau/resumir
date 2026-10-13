@@ -1755,3 +1755,24 @@ test("memòria cau - veure una còpia desada NO canvia el model del selector (la
         assert.match(h.document.getElementById("provenance").textContent, /2\.5 Pro|gemini-2\.5-pro/i, "el model de la còpia consta a la línia de procedència");
     } finally { h.close(); }
 });
+
+test("avís de prompt nou - el botó «Continuar amb el meu prompt» continua l'acció (no només el ×)", async () => {
+    const h = await loadSidebar({
+        sync: { systemPrompt: "El meu prompt de resum", promptVersions: { systemPrompt: 0 } },
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        await h.flush(30);
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(10);
+        assert.equal(h.calls.fetches.length, 0);
+        const btn = h.document.getElementById("prompt-update-continue");
+        assert.match(btn.textContent, /Continuar/);
+        btn.click();
+        await h.flush(30);
+        assert.equal(h.calls.fetches.length, 1);
+        assert.ok(h.document.getElementById("prompt-update-notification").classList.contains("hidden"));
+    } finally { h.close(); }
+});

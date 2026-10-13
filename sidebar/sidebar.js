@@ -490,6 +490,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (promptUpdateDismiss) {
         promptUpdateDismiss.addEventListener("click", dismissAndContinue);
     }
+    // El × sol no deixava clar que és el que continua l'acció: botó amb text
+    const promptUpdateContinue = document.getElementById("prompt-update-continue");
+    if (promptUpdateContinue) promptUpdateContinue.addEventListener("click", dismissAndContinue);
 
     deepDiveBtn.addEventListener("click", () => {
         checkPromptUpdate("aprofundiment", "deepDivePromptUpdateAvailable", () => {

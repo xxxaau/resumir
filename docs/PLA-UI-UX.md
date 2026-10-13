@@ -171,7 +171,6 @@ Troballes que no surten als nivells de dalt, per no perdre-les.
 
 | Superfície | Troballa | On | Sev. | Esforç |
 | --- | --- | --- | --- | --- |
-| Barra lateral | L'avís de prompt nou bloqueja l'acció: només es genera en clicar × (Tancar) | `sidebar.js:342-381` | Mitjana | S |
 | Barra lateral | Obrir l'historial durant la generació amaga el botó d'aturar; el stream continua invisible | `history.js:13,24` | Mitjana | S |
 | Barra lateral | Copiar i Obsidian exporten el JSON cru d'Anki i l'esquema del mapa | `sidebar.js:256-303` | Baixa | S |
 | Barra lateral | El cost ja es pot calcular (`getCuratedModelInfo`) però només l'usen els tests | `api.js:24-47` | Baixa | S |
