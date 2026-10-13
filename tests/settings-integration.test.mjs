@@ -859,3 +859,21 @@ test("Anki - l'enllaç profund al camp del vault el mostra encara que la casella
         assert.equal(h.document.activeElement.id, "ankiVault");
     } finally { h.close(); }
 });
+
+// ---------------------------------------------------------------------------
+// Focus als subpanells de configuració: entra a l'encapçalament i torna al disparador
+// ---------------------------------------------------------------------------
+test("subpanell de plugin - l'engranatge porta el focus al títol i «← Plugins» el torna a l'engranatge", async () => {
+    const h = await loadSettings({});
+    try {
+        const gear = h.document.querySelector('.btn-icon[data-target="science"]');
+        gear.focus();
+        gear.click();
+        await h.flush(5);
+        const title = h.document.querySelector("#tab-science .page-title");
+        assert.equal(h.document.activeElement, title, "el focus entra al títol del subpanell");
+        h.document.querySelector("#tab-science .plugin-back").click();
+        await h.flush(5);
+        assert.equal(h.document.activeElement, gear, "i torna a l'engranatge que l'havia obert");
+    } finally { h.close(); }
+});

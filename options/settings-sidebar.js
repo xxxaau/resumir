@@ -72,7 +72,12 @@ function initializePluginHeaders() {
         back.type = 'button';
         back.className = 'plugin-back';
         back.textContent = '← Plugins';
-        back.addEventListener('click', () => navigateToTab('extensions'));
+        back.addEventListener('click', () => {
+            navigateToTab('extensions');
+            // Torna el focus al botó que va obrir aquest subpanell
+            const opener = document.querySelector(`.btn-icon[data-target="${pane}"]`);
+            if (opener) opener.focus();
+        });
 
         const switchLabel = document.createElement('label');
         switchLabel.className = 'switch';
@@ -135,7 +140,7 @@ function applySettingsHash() {
 }
 
 // Navigate to tab helper
-function navigateToTab(tabId) {
+function navigateToTab(tabId, { focusHeading = false } = {}) {
     // Find nav item (might be dynamic)
     const navItem = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
     
@@ -155,6 +160,12 @@ function navigateToTab(tabId) {
             parent.classList.add('active');
             parent.setAttribute('aria-current', 'page');
         }
+    }
+    // Entrar a un subpanell des d'un botó (engranatge) és com canviar de pàgina: el focus va al
+    // títol (el focus no pot quedar a un botó de la pàgina anterior, ara amagada).
+    if (focusHeading) {
+        const heading = document.querySelector(`#tab-${tabId} .page-title`);
+        if (heading) { heading.tabIndex = -1; heading.focus(); }
     }
 }
 

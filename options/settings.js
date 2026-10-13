@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelectorAll('.btn-icon[data-target]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const target = e.currentTarget.getAttribute('data-target');
-            navigateToTab(target);
+            navigateToTab(target, { focusHeading: true });
         });
     });
 

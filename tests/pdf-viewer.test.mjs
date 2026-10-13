@@ -87,3 +87,10 @@ test("visor PDF - els controls tenen :focus-visible (navegació amb teclat)", as
     assert.match(html, /#footer button:focus-visible/);
     assert.match(html, /page-input:focus-visible/);
 });
+
+test("visor PDF - en carregar, el focus entra al títol del document (un h1)", async () => {
+    const v = await loadViewer();
+    const title = v.document.getElementById("doc-title");
+    assert.equal(title.tagName, "H1");
+    assert.equal(v.document.activeElement, title);
+});

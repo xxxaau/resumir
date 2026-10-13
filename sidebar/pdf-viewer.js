@@ -168,6 +168,9 @@
             footerDiv.style.display = "flex";
 
             await renderPage(1);
+            // El focus entra al títol del document (no queda a <body>)
+            const docTitle = document.getElementById("doc-title");
+            if (docTitle && typeof docTitle.focus === "function") docTitle.focus();
         } catch (e) {
             console.error("[pdf-viewer] init error:", e);
             const msg = e?.name === "PasswordException"

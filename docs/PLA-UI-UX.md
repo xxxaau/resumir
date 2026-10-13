@@ -69,9 +69,6 @@ unificar el disseny dels dos.
 
 ### Pendent d'accessibilitat
 
-- **Focus a la resta de panells:** els subpanells de configuració
-  (`navigateToTab`) i el visor PDF encara no mouen el focus a l'encapçalament ni
-  el retornen al disparador (el panell de text enviat ja ho fa).
 - **Visor PDF:** paleta fixa que ignora el tema (ara no passa pel mateix control
   de contrast).
 
