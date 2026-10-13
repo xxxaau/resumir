@@ -935,3 +935,19 @@ test("reordenar - en baixar un plugin el focus també es manté", async () => {
         assert.match(h.document.getElementById("reorderStatus").textContent, /posició 2 de \d+/);
     } finally { h.close(); }
 });
+
+test("avís de prompt nou - «Restaurar» desa NOMÉS aquell prompt, no els canvis a mig fer d'altres camps", async () => {
+    const h = await loadSettings({ sync: { systemPrompt: "propi", systemPromptUpdateAvailable: true, systemPromptCustomized: true } });
+    try {
+        h.document.getElementById("deepDivePrompt").value = "a mig escriure, sense desar";
+        h.document.querySelector('#systemUpdateBanner [data-banner-action="reset"]').click();
+        await h.flush(20);
+        const stored = await h.storage.sync.get(null);
+        assert.equal(stored.systemPrompt, undefined, "el prompt propi s'esborra (torna al default)");
+        assert.equal(stored.systemPromptUpdateAvailable, false);
+        assert.equal(stored.systemPromptCustomized, false);
+        assert.equal(stored.deepDivePrompt, undefined, "l'altre camp no s'ha desat");
+        assert.equal(h.document.getElementById("systemUpdateBanner").style.display, "none");
+        assert.ok(h.document.getElementById("systemPrompt").value.length > 50, "el camp mostra el default");
+    } finally { h.close(); }
+});

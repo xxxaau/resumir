@@ -59,20 +59,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Banners d'actualització de prompts: els handlers van per data-attributes
     // perquè la CSP de MV3 (script-src 'self') bloqueja els onclick inline.
     const bannerResets = {
-        system: { reset: resetSystemPrompt, saveId: "saveCustom" },
-        anki: { reset: resetAnkiPrompt, saveId: "saveAnki" },
-        deepdive: { reset: resetDeepDivePrompt, saveId: "saveDeepDive" },
-        science: { reset: resetSciencePrompt, saveId: "saveScience" },
-        conceptmap: { reset: resetConceptMapPrompt, saveId: "saveConceptMap" },
-        simple: { reset: resetSimplePrompt, saveId: "saveSimple" },
+        system: resetSystemPrompt, anki: resetAnkiPrompt, deepdive: resetDeepDivePrompt,
+        science: resetSciencePrompt, conceptmap: resetConceptMapPrompt, simple: resetSimplePrompt,
     };
     document.querySelectorAll('[data-banner-action]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const action = e.currentTarget.getAttribute('data-banner-action');
             const type = e.currentTarget.getAttribute('data-banner-type');
             if (action === "reset" && bannerResets[type]) {
-                bannerResets[type].reset();
-                document.getElementById(bannerResets[type].saveId)?.click();
+                restorePromptFromBanner(type, bannerResets[type]);
             } else if (action === "dismiss") {
                 dismissPromptUpdate(type);
             }

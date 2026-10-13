@@ -435,6 +435,31 @@ function dismissPromptUpdate(type) {
     ext.storage.sync.set({ [updateKey]: false }).catch(() => {});
 }
 
+// «Restaurar» des del bàner: torna el prompt al default i desa NOMÉS aquest prompt i el seu avís
+// (abans clicava «Desar» de la pestanya i, de passada, es desava tot el que l'usuari tingués a mig editar).
+const BANNER_PROMPT_KEYS = {
+    system: ["systemPrompt", "systemPromptCustomized", "systemPromptUpdateAvailable"],
+    anki: ["ankiPrompt", "ankiPromptCustomized", "ankiPromptUpdateAvailable"],
+    deepdive: ["deepDivePrompt", "deepDivePromptCustomized", "deepDivePromptUpdateAvailable"],
+    science: ["sciencePrompt", "sciencePromptCustomized", "sciencePromptUpdateAvailable"],
+    conceptmap: ["conceptMapPrompt", "conceptMapPromptCustomized", "conceptMapPromptUpdateAvailable"],
+    simple: ["simplePrompt", "simplePromptCustomized", "simplePromptUpdateAvailable"],
+};
+async function restorePromptFromBanner(type, reset) {
+    const wasDirty = isDirty();
+    reset();
+    setDirty(wasDirty);
+    const [promptKey, customizedKey, updateKey] = BANNER_PROMPT_KEYS[type];
+    try {
+        await ext.storage.sync.remove(promptKey);
+        await ext.storage.sync.set({ [customizedKey]: false, [updateKey]: false });
+        showStatus("Prompt restaurat al valor per defecte.");
+    } catch (err) {
+        console.error("Error restaurant el prompt:", err);
+        showStatus("No s'ha pogut restaurar el prompt.");
+    }
+}
+
 function resetConceptMapPrompt() {
     restoreField("conceptMapPrompt", DEFAULT_CONCEPTMAP_PROMPT, "El prompt");
     hidePromptUpdateBanner("conceptmap");
