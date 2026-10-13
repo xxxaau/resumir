@@ -30,6 +30,16 @@ function _keyToType(key) {
     return "summary";
 }
 
+// Cua que serialitza les operacions que llegeixen-modifiquen-escriuen l'índex: sense ella, dos
+// desats/esborrats simultanis llegeixen el mateix índex i l'últim a escriure trepitja l'altre
+// (una entrada quedava fora de l'índex i no sortia a l'historial ni es netejava mai).
+let _cacheIndexQueue = Promise.resolve();
+function withCacheIndexLock(task) {
+    const run = _cacheIndexQueue.then(task, task);
+    _cacheIndexQueue = run.catch(() => {});
+    return run;
+}
+
 async function getSummaryCacheIndex() {
     // NOTA: `get({[KEY]: []})` (amb valor per defecte) retornaria `[]` tant si
     // la clau no existeix com si existeix i és un array buit — indistingibles.
@@ -82,72 +92,76 @@ async function getSummaryCache(url, type) {
 }
 
 async function saveSummaryCache(url, title, summary, modelName, inputTokens, outputTokens, type, style) {
-    if (!type) type = "summary";
-    try {
-        const cacheKey = getCacheKey(url, type);
-        const cacheEntry = {
-            url: url,
-            title: title,
-            summary: summary,
-            model: modelName,
-            timestamp: new Date().toISOString(),
-            version: "1.0",
-            stats: { input: inputTokens, output: outputTokens },
-            type: type,
-        };
-        // Preferències d'estil (format|llargada) amb què es va generar: una còpia generada amb
-        // unes altres no s'ha de reutilitzar com si fos la d'ara.
-        if (style) cacheEntry.style = style;
+    return withCacheIndexLock(async () => {
+        if (!type) type = "summary";
+        try {
+            const cacheKey = getCacheKey(url, type);
+            const cacheEntry = {
+                url: url,
+                title: title,
+                summary: summary,
+                model: modelName,
+                timestamp: new Date().toISOString(),
+                version: "1.0",
+                stats: { input: inputTokens, output: outputTokens },
+                type: type,
+            };
+            // Preferències d'estil (format|llargada) amb què es va generar: una còpia generada amb
+            // unes altres no s'ha de reutilitzar com si fos la d'ara.
+            if (style) cacheEntry.style = style;
 
-        const cacheIndex = await getSummaryCacheIndex();
-        if (!cacheIndex.includes(cacheKey)) {
-            cacheIndex.push(cacheKey);
+            const cacheIndex = await getSummaryCacheIndex();
+            if (!cacheIndex.includes(cacheKey)) {
+                cacheIndex.push(cacheKey);
+            }
+
+            const MAX_CACHE_ENTRIES = 500;
+            if (cacheIndex.length > MAX_CACHE_ENTRIES) {
+                const toRemove = cacheIndex.splice(0, cacheIndex.length - MAX_CACHE_ENTRIES);
+                await ext.storage.local.remove(toRemove);
+            }
+
+            await ext.storage.local.set({
+                [cacheKey]: cacheEntry,
+                [SUMMARY_CACHE_INDEX_KEY]: cacheIndex
+            });
+            return true;
+        } catch (e) {
+            console.error("Error saving to cache:", e);
+            return false;
         }
-
-        const MAX_CACHE_ENTRIES = 500;
-        if (cacheIndex.length > MAX_CACHE_ENTRIES) {
-            const toRemove = cacheIndex.splice(0, cacheIndex.length - MAX_CACHE_ENTRIES);
-            await ext.storage.local.remove(toRemove);
-        }
-
-        await ext.storage.local.set({
-            [cacheKey]: cacheEntry,
-            [SUMMARY_CACHE_INDEX_KEY]: cacheIndex
-        });
-        return true;
-    } catch (e) {
-        console.error("Error saving to cache:", e);
-        return false;
-    }
+    });
 }
 
 async function purgeStaleCacheEntries() {
-    try {
-        const cacheIndex = await getSummaryCacheIndex();
-        if (cacheIndex.length === 0) return 0;
+    return withCacheIndexLock(async () => {
+        try {
+            const cacheIndex = await getSummaryCacheIndex();
+            if (cacheIndex.length === 0) return 0;
 
-        const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
-        const allData = await ext.storage.local.get(cacheIndex);
-        const keysToRemove = [];
+            const cutoff = Date.now() - CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+            const allData = await ext.storage.local.get(cacheIndex);
+            const keysToRemove = [];
 
-        for (const key of cacheIndex) {
-            const value = allData[key];
-            const ts = value?.timestamp ? new Date(value.timestamp).getTime() : 0;
-            if (ts < cutoff || !value) {
-                keysToRemove.push(key);
+            for (const key of cacheIndex) {
+                const value = allData[key];
+                const ts = value?.timestamp ? new Date(value.timestamp).getTime() : 0;
+                if (ts < cutoff || !value) {
+                    keysToRemove.push(key);
+                }
             }
-        }
 
-        if (keysToRemove.length > 0) {
-            const newIndex = cacheIndex.filter(key => !keysToRemove.includes(key));
-            await ext.storage.local.remove(keysToRemove);
-            await ext.storage.local.set({ [SUMMARY_CACHE_INDEX_KEY]: newIndex });
+            if (keysToRemove.length > 0) {
+                const newIndex = cacheIndex.filter(key => !keysToRemove.includes(key));
+                await ext.storage.local.remove(keysToRemove);
+                await ext.storage.local.set({ [SUMMARY_CACHE_INDEX_KEY]: newIndex });
+            }
+            return keysToRemove.length;
+        } catch (e) {
+            console.error("Error purging stale cache:", e);
+            return 0;
         }
-        return keysToRemove.length;
-    } catch (e) {
-        console.error("Error purging stale cache:", e);
-        return 0;
-    }
+    });
 }
 
 async function listCachedSummaries() {
@@ -213,19 +227,21 @@ async function getAvailableTypes(url) {
 }
 
 async function deleteSummaryCache(url, type) {
-    if (!type) type = "summary";
-    try {
-        const cacheKey = getCacheKey(url, type);
-        const cacheIndex = await getSummaryCacheIndex();
-        const newIndex = cacheIndex.filter(k => k !== cacheKey);
-        if (newIndex.length === cacheIndex.length) return false;
-        await ext.storage.local.remove(cacheKey);
-        await ext.storage.local.set({ [SUMMARY_CACHE_INDEX_KEY]: newIndex });
-        return true;
-    } catch (e) {
-        console.error("Error deleting cache entry:", e);
-        return false;
-    }
+    return withCacheIndexLock(async () => {
+        if (!type) type = "summary";
+        try {
+            const cacheKey = getCacheKey(url, type);
+            const cacheIndex = await getSummaryCacheIndex();
+            const newIndex = cacheIndex.filter(k => k !== cacheKey);
+            if (newIndex.length === cacheIndex.length) return false;
+            await ext.storage.local.remove(cacheKey);
+            await ext.storage.local.set({ [SUMMARY_CACHE_INDEX_KEY]: newIndex });
+            return true;
+        } catch (e) {
+            console.error("Error deleting cache entry:", e);
+            return false;
+        }
+    });
 }
 
 /**
@@ -233,25 +249,27 @@ async function deleteSummaryCache(url, type) {
  * timestamp original. `entries` són les que retorna listCachedSummaries().
  */
 async function restoreSummaryCacheEntries(entries) {
-    try {
-        if (!Array.isArray(entries) || entries.length === 0) return false;
-        const cacheIndex = await getSummaryCacheIndex();
-        const toSet = {};
-        for (const e of entries) {
-            const type = e.type || "summary";
-            const key = getCacheKey(e.url, type);
-            toSet[key] = {
-                url: e.url, title: e.title, summary: e.summary, model: e.model,
-                timestamp: e.timestamp, version: "1.0", stats: e.stats || { input: 0, output: 0 }, type,
-            };
-            if (!cacheIndex.includes(key)) cacheIndex.push(key);
+    return withCacheIndexLock(async () => {
+        try {
+            if (!Array.isArray(entries) || entries.length === 0) return false;
+            const cacheIndex = await getSummaryCacheIndex();
+            const toSet = {};
+            for (const e of entries) {
+                const type = e.type || "summary";
+                const key = getCacheKey(e.url, type);
+                toSet[key] = {
+                    url: e.url, title: e.title, summary: e.summary, model: e.model,
+                    timestamp: e.timestamp, version: "1.0", stats: e.stats || { input: 0, output: 0 }, type,
+                };
+                if (!cacheIndex.includes(key)) cacheIndex.push(key);
+            }
+            await ext.storage.local.set({ ...toSet, [SUMMARY_CACHE_INDEX_KEY]: cacheIndex });
+            return true;
+        } catch (e) {
+            console.error("Error restoring cache entries:", e);
+            return false;
         }
-        await ext.storage.local.set({ ...toSet, [SUMMARY_CACHE_INDEX_KEY]: cacheIndex });
-        return true;
-    } catch (e) {
-        console.error("Error restoring cache entries:", e);
-        return false;
-    }
+    });
 }
 
 async function saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, title, url, cacheTokens) {
