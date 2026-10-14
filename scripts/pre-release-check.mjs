@@ -366,6 +366,32 @@ check("ZIP: tot <script src=\"...\"> referenciat existeix al paquet", () => {
     pass('ZIP: tot <script src="..."> referenciat existeix al paquet');
 });
 
+// 14. ZIP: res que no hi pertany (brossa de l'SO, mapes de codi, tests, scripts, documents interns)
+check("ZIP: sense fitxers que no hi pertanyen", () => {
+    const pkg = readJson(resolve(root, "package.json"));
+    const forbidden = [
+        [/(^|\/)\.DS_Store$/, ".DS_Store"],
+        [/\.map$/, "mapa de codi"],
+        [/^(tests|scripts|web|docs|node_modules|\.github|\.git)\//, "directori de desenvolupament"],
+        [/^icons\/(src|dev|prod)\//, "icones font"],
+        [/\.md$/i, "document Markdown"],
+        [/(^|\/)(package(-lock)?\.json|eslint\.config\.mjs)$/, "configuració de desenvolupament"],
+    ];
+    const errs = [];
+    for (const t of ["firefox", "chromium"]) {
+        const zipPath = resolve(root, "build", `resumir-contingut-v${pkg.version}-${t}.zip`);
+        let names;
+        try { names = [...readZipEntries(zipPath).keys()]; } catch (e) { errs.push(`${t}: no s'ha pogut llegir el ZIP (${e.message})`); continue; }
+        for (const n of names) {
+            if (n === "docs/PRIVACY_POLICY.md") continue; // l'única excepció: la política de privacitat va al paquet
+            const hit = forbidden.find(([re]) => re.test(n));
+            if (hit) errs.push(`${t}: ${n} (${hit[1]})`);
+        }
+    }
+    if (errs.length) throw new Error("\n  " + errs.join("\n  "));
+    pass("ZIP: sense fitxers que no hi pertanyen");
+});
+
 // ─── ZIP helpers (lectura sense dependències) ────────────────────────────────
 
 /**

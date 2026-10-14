@@ -20,7 +20,7 @@ This document describes how to build **Resumir** from source. Required by AMO (a
 # 1. Install dependencies
 npm ci
 
-# 2. Switch to production mode (removes DEV label from icons and manifest)
+# 2. Make sure tracked files are in production mode (normally already true)
 npm run prod
 
 # 3. Build both ZIPs (Firefox + Chromium)
@@ -97,32 +97,12 @@ npm run prerelease  # Full pre-release audit
 
 ## Release workflow
 
-The recommended way is to use the **interactive script** — it asks for confirmation
-at every step and never proceeds without your explicit approval:
+Releases follow `docs/RELEASE-PROCESS.md`: CHANGELOG → `npm run prod` → prepare commit → `npm version` → `npm run build` → `npm run prerelease` → push commit + tag (the tag triggers `release.yml`, which checks that the tag matches the version, builds, lints the real Firefox package and publishes the GitHub Release).
+
+### Commands
 
 ```bash
-node scripts/prepare-release.mjs
-# or
-npm run prepare-release
-```
-
-This walks you through:
-1. ✓ Check you're on `main` branch
-2. ✓ Check working tree is clean (or let you commit)
-3. ✓ Switch to PROD mode
-4. ✓ Bump version (patch / minor / major — you choose)
-5. ✓ Build ZIPs
-6. ✓ Run prerelease audit
-7. ✓ Create release commit + tag
-8. ✓ Push to GitHub
-9. ✓ Confirm the AMO upload
-
-Each step requires `s` confirmation — nothing happens automatically.
-
-### Manual steps (equivalent)
-
-```bash
-# Switch to DEV mode (orange icons, "Resumir (DEV)" name, separate gecko.id)
+# DEV folders (orange icons, "Resumir (DEV)" name, separate gecko.id) — tracked files stay PROD
 npm run dev
 
 # Make changes, test in browser...
@@ -144,8 +124,6 @@ npm run release:chromium
 # Commit, tag, push, GitHub release
 ```
 
-### Git hooks
+### DEV safety
 
-The local `pre-push` git hook (in `.git/hooks`, not versioned in the repo) blocks pushes while the manifest contains
-`"Resumir (DEV)"` to avoid accidentally publishing the DEV build.
-Note: the hook is a Bash script — on Windows, use `git-bash` or WSL.
+DEV mode never rewrites tracked files (it lives in `build_firefox_dev/` and `build_chromium_dev/`, which are git-ignored), so there is nothing DEV to publish by accident. `scripts/build.mjs` still aborts if a manifest carries "(DEV)", and `npm run prerelease` checks it too.

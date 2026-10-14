@@ -70,7 +70,7 @@ Expected:
 
 ```bash
 # 2. Switch to production
-npm run prod               # Remove DEV label
+npm run prod               # Assegura els fitxers versionats en PROD
 
 # 3. Build both targets
 npm run build              # Firefox + Chromium ZIPs

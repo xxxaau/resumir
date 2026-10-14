@@ -23,6 +23,14 @@ jobs:
       - name: Instal·lar dependències
         run: npm ci
 
+      - name: Comprovar que el tag coincideix amb la versió
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${V}" ]; then
+            echo "El tag ${GITHUB_REF_NAME} no coincideix amb la versió de package.json (v${V})" >&2
+            exit 1
+          fi
+
       - name: Build Firefox i Chromium ZIPs
         run: node scripts/build.mjs all
 
@@ -32,8 +40,11 @@ jobs:
       - name: Verificar vendors (SHA-256)
         run: npm run vendor:verify
 
-      - name: web-ext lint (AMO compliance)
-        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' 'web/**' '*.zip'
+      - name: web-ext lint (paquet Firefox real, el que es puja a AMO)
+        run: |
+          mkdir -p build/lint-firefox
+          unzip -q "build/resumir-contingut-${GITHUB_REF_NAME}-firefox.zip" -d build/lint-firefox
+          npx --yes web-ext@10.7.0 lint --source-dir build/lint-firefox
 
       - name: Crear GitHub Release amb els ZIPs
         uses: softprops/action-gh-release@v3

@@ -39,5 +39,16 @@ jobs:
       - name: Verificar vendors
         run: npm run vendor:verify
 
-      - name: web-ext lint (Firefox)
-        run: npx web-ext lint --source-dir . --ignore-files 'node_modules/**' 'tests/**' 'scripts/**' 'web/**' '*.test.*' '*.zip'
+      - name: web-ext lint (paquet Firefox real, el que es puja a AMO)
+        if: runner.os == 'Linux'
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          mkdir -p build/lint-firefox
+          unzip -q "build/resumir-contingut-v${VER}-firefox.zip" -d build/lint-firefox
+          npx --yes web-ext@10.7.0 lint --source-dir build/lint-firefox
+
+      - name: Manifests regenerats = manifests versionats (no s'editen a mà)
+        if: runner.os == 'Linux'
+        run: |
+          npm run manifests:gen
+          git diff --exit-code -- manifest.json manifest.chromium.json

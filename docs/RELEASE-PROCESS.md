@@ -164,21 +164,9 @@ git push origin vX.Y.Z   # el tag dispara release.yml (build + Release amb ZIPs)
 # https://github.com/xxxaau/resumir/releases
 ```
 
-> ⚠️ **Parany del pre-push hook** (hook local de `.git/hooks`, no versionat al repo;
-> només aplica si el tens instal·lat): el hook bloqueja el push si el *working
-> tree* està en mode DEV (icones taronges / name amb `(DEV)`). Si ja has
-> tornat a `npm run dev` per treballar en local, fes un stash temporal del
-> mode DEV mentre puges:
->
-> ```bash
-> git stash push -- icons manifest.base.json manifest.json \
->   manifest.chromium.json manifest.chromium.patch.json manifest.firefox.patch.json
-> git push origin main && git push origin vX.Y.Z
-> git stash pop   # restaura el mode DEV local
-> ```
->
-> El commit taggejat ja és PROD (el bump es fa en mode PROD); això només
-> afecta l'estat sense committejar del working tree.
+> ℹ️ El tag ha de coincidir amb la versió de `package.json`: `release.yml` falla si no (és el
+> que va passar a la v2.5.0). El mode DEV viu a `build_*_dev/` (ignorades per git), així que
+> els fitxers versionats són sempre PROD: no cal cap stash ni hi ha cap hook que bloquegi el push.
 
 ### Fase 5: Submissió a Firefox Add-ons (AMO) (10-15 min)
 
@@ -254,8 +242,8 @@ git checkout -b hotfix/critical-bug
 # 2. Arreglar bug
 # ... editar fitxers, tests, etc ...
 
-# 3. Commit hotfix
-git add .
+# 3. Commit hotfix (afegeix només els fitxers del fix, mai estat DEV ni `git add .`)
+git add <fitxers del fix>
 git commit -m "fix: Critical bug description"
 
 # 4. Merge a main
@@ -313,7 +301,7 @@ DURING RELEASE:
 [ ] npm version X.Y.Z (syncs everything)
 [ ] npm run build → 2 ZIPs < 4 MB
 [ ] npm run prerelease → tots els checks ✅
-[ ] git push origin main && git push origin vX.Y.Z (stash del mode DEV si cal)
+[ ] git push origin main && git push origin vX.Y.Z (el tag ha de coincidir amb la versió; release.yml ho comprova)
 
 POST-RELEASE:
 [ ] Verificar GitHub release created automatically
@@ -321,8 +309,7 @@ POST-RELEASE:
 [ ] Submitir a CWS (Upload new package) — només quan es publiqui al CWS (Fase 6)
 [ ] Monitorizar email per a approvals
 [ ] Update GitHub release description (copy CHANGELOG)
-[ ] Tornar a mode DEV en local: npm run dev (l'extensió torna a mode desenvolupament; `npm run release` ja ho fa al pas 4/5). SEMPRE després del bump.
-[ ] Regenerar la build local d'Edge: npm run dev:chromium (deixa build_chromium_dev a la versió nova; evita carregar codi/versió vells a Edge; `npm run release` ho fa al pas 5/5).
+[ ] Regenerar les carpetes dev: npm run dev (build_firefox_dev/ i build_chromium_dev/ a la versió nova; evita carregar codi/versió vells als navegadors).
 ```
 
 ---

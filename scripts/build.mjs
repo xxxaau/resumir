@@ -114,6 +114,7 @@ function copyDir(src, dest) {
   function copyRecursive(from, to) {
     mkdirSync(to, { recursive: true });
     for (const file of readdirSync(from)) {
+      if (file === ".DS_Store") continue; // brossa de macOS: mai al paquet
       const srcFile = join(from, file);
       const destFile = join(to, file);
       if (statSync(srcFile).isDirectory()) {
