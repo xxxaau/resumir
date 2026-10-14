@@ -1058,3 +1058,13 @@ test("Dades i privadesa - historial, ús i còpia de seguretat són a la seva pe
         assert.ok(h.document.querySelector('.nav-item[data-tab="data"]'));
     } finally { h.close(); }
 });
+
+test("navegació - en canviar de pestanya, l'entrada activa del menú es porta a la vista (menú horitzontal en pantalles estretes)", async () => {
+    const h = await loadSettings();
+    try {
+        const seen = [];
+        h.window.HTMLElement.prototype.scrollIntoView = function () { seen.push(this.dataset.tab); };
+        h.document.querySelector('.nav-item[data-tab="about"]').click();
+        assert.deepEqual(seen, ["about"]);
+    } finally { h.close(); }
+});

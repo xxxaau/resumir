@@ -38,6 +38,8 @@ function initializeSidebarNavigation() {
         // Add to current
         target.classList.add('active');
         target.setAttribute('aria-current', 'page');
+        // Menú horitzontal que es desplaça (pantalla estreta): l'entrada activa no pot quedar fora de la vista
+        if (target.scrollIntoView) target.scrollIntoView({ inline: 'nearest', block: 'nearest' });
         const tabId = target.getAttribute('data-tab');
         const tab = document.getElementById(`tab-${tabId}`);
         if (tab) {

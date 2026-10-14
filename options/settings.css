@@ -920,8 +920,9 @@ button:disabled,
     display: none !important;
   }
 
+  /* Els plugins actius ja s'obren des de «Plugins»: aquí només farien el menú inabastable */
   #activeExtensionsList {
-    display: flex;
+    display: none;
   }
 
   .nav-item {

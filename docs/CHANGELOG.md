@@ -80,6 +80,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Configuració en pantalles estretes:** el menú ja no queda inabastable (els plugins
+  actius s'obren des de «Plugins») i l'entrada activa sempre es veu.
 - **Pestanya «Dades i privadesa»** a la configuració: l'historial, l'ús i la còpia de
   seguretat surten de «General», que queda només amb la clau, el model i el tema.
 - **Plugins agrupats com la barra d'eines:** la llista té els blocs Generar, Exportar i
