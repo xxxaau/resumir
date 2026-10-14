@@ -57,6 +57,14 @@ es duplica aquí per evitar que les dues còpies es desincronitzin.
   s'hi afegeix una entrada nova per sessió (mira la taula de continguts de
   dalt del tot per no duplicar una lliçó ja capturada).
 
+## «Sobre l'extensió» a cada versió
+
+- L'historial de canvis de la configuració (`options/settings.html`, bloc
+  `CHANGELOG_START/END`) **s'actualitza a cada versió nova**: es genera de
+  `docs/CHANGELOG.md` amb `node scripts/update-changelog-html.mjs`. Les entrades han de
+  ser per a l'usuari final; el que és intern es marca `(dev)` i el detall menor `(minor)`.
+  `npm test` falla si no està sincronitzat.
+
 ## Referències
 
 - Context tècnic i arquitectura: `docs/DEV-CONTEXT.md`

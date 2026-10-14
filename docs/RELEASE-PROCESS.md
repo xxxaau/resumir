@@ -54,6 +54,17 @@ git rebase -i origin/main
 
 **Format:** Usa [Keep a Changelog](https://keepachangelog.com)
 
+> **«Sobre l'extensió» s'ha d'actualitzar a CADA versió.** L'historial que veu l'usuari a
+> la configuració es genera d'aquest fitxer:
+>
+> 1. Escriu les entrades pensant en l'usuari (què canvia per a ell, sense jerga).
+> 2. Marca amb `(minor)` el que és detall d'usuari poc rellevant i amb `(dev)` el que és
+>    intern (CI, npm, refactors): no surt a la configuració.
+> 3. Executa `node scripts/update-changelog-html.mjs` i commiteja `options/settings.html`.
+>
+> `npm test` falla si `settings.html` no reflecteix el CHANGELOG (o no hi surt la versió
+> més nova), així que no es pot oblidar.
+
 ### Fase 2: Build & Validation (20 min)
 
 #### 2.1 Switch to production mode
@@ -284,7 +295,7 @@ git commit -m "chore: Sync manifests after version bump"
 PRE-RELEASE:
 [ ] Main branch net (git status clean)
 [ ] Revisar fitxers esborrables abans del bump (p. ex. buidar temp/ —captures compartides—, artefactes de build antics)
-[ ] CHANGELOG.md actualitzat
+[ ] CHANGELOG.md actualitzat i «Sobre l'extensió» regenerada (`node scripts/update-changelog-html.mjs`; `npm test` ho vigila)
 [ ] Totes les features tested
 [ ] npm run check → 0 errors
 [ ] npm audit --omit=dev → 0 vulnerabilities

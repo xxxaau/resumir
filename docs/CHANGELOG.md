@@ -5,7 +5,7 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
-## [Sense publicar]
+## [2.7.0] - 2026-10-14
 
 ### Afegit
 - **Cites clicables:** cada punt clau acaba amb un fragment literal del text i, en
@@ -34,50 +34,42 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ### Arreglat
 - «Restaurar» del bàner d'actualització de prompt desa només aquell prompt (abans desava tota la pestanya).
-- Desar o esborrar resums de la memòria cau alhora ja no deixa entrades fora de l'historial.
-- **El botó «Atura» ara atura de veritat.** L'`AbortController` no arribava
-  a la sidebar fins que la generació ja havia acabat, de manera que clicar
-  «atura» durant l'streaming no feia res i, en alguns casos, en llançava
-  una segona generació sobre el mateix resum.
-- **Un PDF local seleccionat ja no contamina resums posteriors.** El
-  contingut precarregat d'un PDF triat manualment es quedava «enganxat» i
-  podia reaparèixer en resumir una pestanya completament diferent.
-- **Les targetes Anki desades a l'Historial es poden tornar a obrir.**
-  Abans es renderitzava el JSON cru com a text pla en lloc del panell
-  interactiu. Si el model no retorna cap targeta vàlida, ara es mostra un
-  avís en lloc de desar una entrada d'Historial trencada.
+- Desar o esborrar resums de la memòria cau alhora ja no deixa entrades fora de l'historial. (minor)
+- **El botó «Atura» ara atura de veritat:** abans, durant la generació, no feia res i podia
+  llançar-ne una segona.
+- **Un PDF local seleccionat ja no contamina resums posteriors** d'una altra pestanya.
+- **Les targetes Anki desades a l'historial es poden tornar a obrir**, i si el model no en
+  retorna cap de vàlida es mostra un avís.
 - **Missatge d'estat en «Actualitzar models».** El text d'èxit/error del
   botó a Settings quedava permanentment invisible per un conflicte entre
-  `style.display` i la classe CSS `.hidden`; ara es mostra correctament.
+  `style.display` i la classe CSS `.hidden`; ara es mostra correctament. (minor)
 - **Ordre de la toolbar en instal·lacions antigues.** Un `extensionOrder`
   desat abans que existís el plugin d'Anki no l'incloïa mai a la migració
   automàtica, deixant el seu botó sempre a la posició per defecte del DOM
-  en lloc de l'ordre triat per l'usuari.
+  en lloc de l'ordre triat per l'usuari. (minor)
 - **Fuita de listeners al mapa conceptual del sidebar.** Cada cop que es
   renderitzava un mapa conceptual (nova generació, cache o historial)
   s'afegien listeners de pan/zoom a `window` que mai es netejaven; en
-  sessions llargues amb molts mapes s'acumulaven indefinidament.
+  sessions llargues amb molts mapes s'acumulaven indefinidament. (minor)
 - **Avortar durant la cerca del contingut de la pàgina ara avisa.** Abans
   tornava en silenci sense cap missatge; ara mostra "Generació aturada per
-  l'usuari" com a la resta de camins d'aturada.
+  l'usuari" com a la resta de camins d'aturada. (minor)
 - **Ordre del desplegable de models.** El model per defecte surt sempre
-  primer, independentment de si n'hi ha un de més nou a la llista.
+  primer, independentment de si n'hi ha un de més nou a la llista. (minor)
 - **Desmarcar el model per defecte dels favorits ara es respecta.** Abans es
-  tornava a afegir sol a cada càrrega del sidebar.
+  tornava a afegir sol a cada càrrega del sidebar. (minor)
 - **Fallback de models amb context més petit.** Si la generació passa a un
   model de reserva amb una finestra de context més petita, el text ara es
   retalla per a aquell model en lloc de reutilitzar el retall fet per al
   model preferit (podia provocar un error no reintentable i tallar tota la
-  cadena de reserva).
+  cadena de reserva). (minor)
 - **Historial de resums buit en instal·lacions sense l'índex de cache
-  creat.** Es reconstrueix correctament enumerant les entrades existents.
+  creat.** Es reconstrueix correctament enumerant les entrades existents. (minor)
 - **«Genera més»/«Afinar» de les targetes Anki amb doble clic.** Una segona
   petició mentre la primera encara s'estava generant podia duplicar o
-  entrellaçar targetes; ara s'ignora fins que la primera acaba.
-- **Un resum que s'encallava a mig streaming es quedava penjat per sempre.**
-  El timeout de seguretat (60s) només cobria l'espera inicial de resposta
-  del servidor; ara es reinicia a cada fragment rebut i també protegeix el
-  cos de l'streaming.
+  entrellaçar targetes; ara s'ignora fins que la primera acaba. (minor)
+- **Un resum que s'encallava a mig generació ja no es queda penjat per sempre:** si el
+  model deixa de respondre, es talla i s'avisa.
 
 ### Canviat
 - **«Dades i privadesa» més clara:** una taula diu on es desa cada dada (clau, text de la
@@ -90,7 +82,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Barra de canvis pendents** a la configuració, amb «Desar» i «Descartar»: es veu
   sempre que hi ha text a mig editar, sigui quina sigui la pestanya.
 - **Configuració en pantalles estretes:** el menú ja no queda inabastable (els plugins
-  actius s'obren des de «Plugins») i l'entrada activa sempre es veu.
+  actius s'obren des de «Plugins») i l'entrada activa sempre es veu. (minor)
 - **Pestanya «Dades i privadesa»** a la configuració: l'historial, l'ús i la còpia de
   seguretat surten de «General», que queda només amb la clau, el model i el tema.
 - **Plugins agrupats com la barra d'eines:** la llista té els blocs Generar, Exportar i
@@ -101,16 +93,16 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   buit d'una altra pestanya et porta al camp, n'obre el desplegable i el marca.
 - **Pàgines de plugin més netes:** l'ajuda («Què fa i com configurar-lo») surt tancada,
   «Desar» i «Restaurar» són dins del desplegable del prompt, «Restaurar» avisa quan ja
-  és el prompt per defecte, i Resum (el nucli) ja no porta «← Plugins» ni interruptor.
+  és el prompt per defecte, i Resum (el nucli) ja no porta «← Plugins» ni interruptor. (minor)
 - **Configuració, retocs:** un botó desactivat ja no sembla actiu, més aire entre
   els textos d'ajuda i els botons, textos més nets i coherents («Targetes per
   petició», «Actualitzar la llista», lectura biònica sense unitats tècniques), la pàgina
   de PDF sense repeticions i l'interruptor de cada plugin porta el seu nom per als
-  lectors de pantalla.
+  lectors de pantalla. (minor)
 - **Noms unificats** entre la configuració i la barra lateral: Aprofundiment, Validació científica, Desar a Obsidian, Copiar Markdown.
 - El **mapa conceptual** es genera sempre en català (com la resta de resultats).
-- Visor PDF: el botó «Tancar» en hover i els missatges d'error tenen contrast AA.
-- Obsidian (configuració): textos menys repetits i exemple que ja no sembla un valor.
+- Visor PDF: el botó «Tancar» en hover i els missatges d'error tenen contrast AA. (minor)
+- Obsidian (configuració): textos menys repetits i exemple que ja no sembla un valor. (minor)
 - **Prompts per defecte revisats** (resum, aprofundiment, validació científica,
   mapa conceptual, explica-ho fàcil i Anki): no inventen, diuen «no hi ha prou
   contingut» en pàgines buides i la validació científica ja no demana referències

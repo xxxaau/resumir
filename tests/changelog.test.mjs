@@ -92,3 +92,14 @@ test("historial de canvis de la configuració - sense jerga de desenvolupador (l
         assert.ok(!block.includes(word), `«${word}» surt a l'historial que veu l'usuari: marca l'entrada amb (dev) a docs/CHANGELOG.md`);
     }
 });
+
+test("historial de canvis de la configuració - està sincronitzat amb docs/CHANGELOG.md (executa `node scripts/update-changelog-html.mjs` després d'editar-lo)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const md = readFileSync(new URL("../docs/CHANGELOG.md", import.meta.url), "utf8");
+    const html = readFileSync(new URL("../options/settings.html", import.meta.url), "utf8");
+    const block = html.slice(html.indexOf("<!-- CHANGELOG_START -->") + "<!-- CHANGELOG_START -->".length, html.indexOf("<!-- CHANGELOG_END -->"));
+    const norm = (t) => t.replace(/\s+/g, " ").trim();
+    assert.equal(norm(block), norm(generateHtml(parseChangelog(md))), "«Sobre l'extensió» no reflecteix el CHANGELOG");
+    const top = parseChangelog(md)[0].version;
+    assert.ok(block.includes(`v${top}`), `la versió més nova (v${top}) ha de ser a «Sobre l'extensió»`);
+});
