@@ -722,6 +722,11 @@ input:checked + .slider:before {
   gap: 15px;
 }
 
+.help-text + .flex-row-gap,
+p + .flex-row-gap {
+  margin-top: 10px;
+}
+
 .flex-grow {
   flex-grow: 1;
 }
@@ -742,6 +747,25 @@ input:checked + .slider:before {
 .error-button {
   border-color: var(--danger) !important;
   color: var(--danger) !important;
+}
+
+/* Un botó desactivat no s'ha de veure com un d'actiu (ni el vermell d'.error-button) */
+button:disabled,
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.error-button:disabled {
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+
+/* Selectors de poques opcions: no cal que ocupin tota l'amplada */
+#themeSelect,
+#bionicFont,
+#bionicWeight,
+#bionicFontSize {
+  max-width: 22rem;
 }
 
 /* Icon Color Classes */

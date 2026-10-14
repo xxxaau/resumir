@@ -80,6 +80,11 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Configuració, retocs:** un botó desactivat ja no sembla actiu, més aire entre
+  els textos d'ajuda i els botons, textos més nets i coherents («Targetes per
+  petició», «Actualitzar la llista», lectura biònica sense unitats tècniques), la pàgina
+  de PDF sense repeticions i l'interruptor de cada plugin porta el seu nom per als
+  lectors de pantalla.
 - **Noms unificats** entre la configuració i la barra lateral: Aprofundiment, Validació científica, Desar a Obsidian, Copiar Markdown.
 - El **mapa conceptual** es genera sempre en català (com la resta de resultats).
 - Visor PDF: el botó «Tancar» en hover i els missatges d'error tenen contrast AA.

@@ -81,7 +81,7 @@ async function listModels(e) {
         const hintDiv = document.createElement("div");
         hintDiv.className = "models-list-info";
         hintDiv.style.fontStyle = "italic";
-        hintDiv.textContent = 'Prem "Actualitzar" per descarregar tots els models disponibles.';
+        hintDiv.textContent = 'Prem «Actualitzar la llista» per descarregar tots els models disponibles.';
         modelsList.appendChild(hintDiv);
     }
 

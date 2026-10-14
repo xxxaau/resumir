@@ -951,3 +951,11 @@ test("avís de prompt nou - «Restaurar» desa NOMÉS aquell prompt, no els canv
         assert.ok(h.document.getElementById("systemPrompt").value.length > 50, "el camp mostra el default");
     } finally { h.close(); }
 });
+
+test("capçalera de plugin - l'interruptor porta el nom del plugin a l'aria-label (no un «aquest plugin» genèric)", async () => {
+    const h = await loadSettings();
+    try {
+        const label = h.document.querySelector("#tab-anki .plugin-head input[type=checkbox]").getAttribute("aria-label");
+        assert.equal(label, "Activa Targetes Anki");
+    } finally { h.close(); }
+});

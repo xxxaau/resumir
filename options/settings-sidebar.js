@@ -79,7 +79,8 @@ function initializePluginHeaders() {
         switchLabel.className = 'switch';
         const toggle = document.createElement('input');
         toggle.type = 'checkbox';
-        toggle.setAttribute('aria-label', 'Activa aquest plugin');
+        const entry = PLUGIN_REGISTRY.find(p => p.id === pane);
+        toggle.setAttribute('aria-label', `Activa ${entry ? entry.label : 'aquest plugin'}`);
         const slider = document.createElement('span');
         slider.className = 'slider round';
         switchLabel.append(toggle, slider);
