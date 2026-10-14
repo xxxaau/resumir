@@ -124,7 +124,8 @@ body {
   padding: 6px 48px 6px 12px;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--toolbar-bg) !important;
-  border-radius: 0;
+  /* Cantonades de dalt arrodonides com el panell de Firefox */
+  border-radius: 8px 8px 0 0;
   position: sticky;
   top: 0;
   z-index: 20;
@@ -342,6 +343,7 @@ body {
   width: 100%;
   background-color: var(--footer-bg);
   border-top: 1px solid var(--footer-border);
+  border-radius: 0 0 8px 8px; /* com el panell de Firefox */
   padding: 6px 10px;
   font-size: 11px;
   color: var(--footer-text);
@@ -782,7 +784,7 @@ body {
   border-bottom: 1px solid var(--border-color);
   margin: 0 -12px 10px;
   background-color: var(--toolbar-bg) !important;
-  border-radius: 0;
+  border-radius: 8px 8px 0 0;
   /* Fix a dalt: en un resum llarg el botó de tornar no pot sortir de pantalla.
      La barra d'eines (amagada en mode historial) fa --toolbar-height = 0. */
   position: sticky;
@@ -1492,8 +1494,9 @@ body {
 
 /* Estat en repòs: només es veu si no hi ha contingut, càrrega, error ni panells */
 #idle-state { padding: 16px 12px; text-align: center; }
-#idle-state[hidden] { display: none; }
-#container:has(#content:not(.hidden), #loading:not(.hidden), #error:not(.hidden), #history-panel:not(.hidden), #source-panel:not(.hidden)) #idle-state { display: none; }
+#idle-state[hidden], #idle-unsupported[hidden] { display: none; }
+#idle-unsupported { padding: 16px 12px; text-align: center; }
+#container:has(#content:not(.hidden), #loading:not(.hidden), #error:not(.hidden), #history-panel:not(.hidden), #source-panel:not(.hidden)) :is(#idle-state, #idle-unsupported) { display: none; }
 .idle-title { margin: 0 0 12px; font-weight: 600; overflow-wrap: anywhere; }
 .idle-saved { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; }
 .idle-saved-label { flex-basis: 100%; margin: 0; font-size: 0.85em; color: var(--text-muted); }

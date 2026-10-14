@@ -783,6 +783,8 @@ test("estat en repòs - sense pàgina web (chrome://…) s'amaga", async () => {
     try {
         await h.flush(10);
         assert.equal(h.document.getElementById("idle-state").hidden, true);
+        assert.equal(h.document.getElementById("idle-unsupported").hidden, false, "missatge en lloc d'un panell en blanc");
+        assert.match(h.document.querySelector("#idle-unsupported .idle-title").textContent, /pàgina web/);
     } finally { h.close(); }
 });
 

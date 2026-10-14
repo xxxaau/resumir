@@ -744,7 +744,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const idle = document.getElementById("idle-state");
         if (!idle) return;
         const url = tab && tab.url;
-        if (!url || !/^https?:/i.test(url)) { idle.hidden = true; return; }
+        const unsupported = document.getElementById("idle-unsupported");
+        if (!url || !/^https?:/i.test(url)) {
+            idle.hidden = true;
+            if (unsupported) {
+                unsupported.hidden = false;
+                // La drecera es llegeix del navegador: l'usuari la pot haver canviat
+                const hint = document.getElementById("idle-shortcut");
+                try {
+                    const cmds = ext.commands && ext.commands.getAll ? await ext.commands.getAll() : [];
+                    const key = (cmds.find(c => c.name === "summarize-page") || {}).shortcut;
+                    hint.textContent = key ? `Drecera: ${key}` : "";
+                } catch { hint.textContent = ""; }
+            }
+            return;
+        }
+        if (unsupported) unsupported.hidden = true;
         document.getElementById("idle-title").textContent = tab.title || url;
         const savedBox = document.getElementById("idle-saved");
         savedBox.replaceChildren();
