@@ -20,26 +20,28 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Drecera de teclat Alt+Maj+S** per obrir Resumir i resumir la pàgina.
 - **Enllaços als orígens:** `(p. N)` als PDF web i `[m:ss]` als vídeos de YouTube
   (el vídeo salta a aquell moment).
-- **Format i llargada del resum** com a preferències a la configuració de Resum.
+- **Format i llargada del resum** com a preferències a la configuració de Resum. (minor)
 - **Configuració:** descripció «Què fa i com configurar-lo» a cada plugin, prompts
   plegats sota «avançat», capçalera comuna amb interruptor, vista prèvia en directe
-  a la lectura biònica i avís de «nova versió del prompt» també per a Resum i Anki.
+  a la lectura biònica i avís de «nova versió del prompt» també per a Resum i Anki. (minor)
 - **Còpia de seguretat de la configuració:** exportar i importar prompts personalitzats,
   plantilles, plugins i ordre en un fitxer JSON (la clau d'API només si ho demanes; la
   importació valida cada valor i demana confirmació).
 - **Secció «Ús» a la configuració:** resums generats (total, avui, 7 dies), tokens, temps
   de resposta mitjà, recompte per tipus i per model, amb botó per esborrar-ho.
 - **Estat en repòs** amb la pàgina activa i els resums ja desats; filtre per tipus
-  a l'historial.
+  a l'historial. (minor)
+- **Icona nova:** una rajola blava amb línies que s'escurcen fins a un punt (la versió de proves porta una cinta taronja).
+- **Barra lateral més polida:** barra d'eines a tota l'amplada, botó de resumir més còmode i lectura biònica amb l'estat ben marcat (activat o desactivat).
 
 ### Arreglat
-- «Restaurar» del bàner d'actualització de prompt desa només aquell prompt (abans desava tota la pestanya).
+- «Restaurar» del bàner d'actualització de prompt desa només aquell prompt (abans desava tota la pestanya). (minor)
 - Desar o esborrar resums de la memòria cau alhora ja no deixa entrades fora de l'historial. (minor)
 - **El botó «Atura» ara atura de veritat:** abans, durant la generació, no feia res i podia
   llançar-ne una segona.
 - **Un PDF local seleccionat ja no contamina resums posteriors** d'una altra pestanya.
 - **Les targetes Anki desades a l'historial es poden tornar a obrir**, i si el model no en
-  retorna cap de vàlida es mostra un avís.
+  retorna cap de vàlida es mostra un avís. (minor)
 - **Missatge d'estat en «Actualitzar models».** El text d'èxit/error del
   botó a Settings quedava permanentment invisible per un conflicte entre
   `style.display` i la classe CSS `.hidden`; ara es mostra correctament. (minor)
@@ -75,22 +77,19 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **«Dades i privadesa» més clara:** una taula diu on es desa cada dada (clau, text de la
   pàgina, resums, estadístiques, configuració) i si surt del navegador, i l'historial mostra
   quants resums hi ha i quant ocupen abans d'esborrar-lo.
-- **Selector de model més clar** a la configuració: el model triat es veu amb el nom
-  llegible, el nivell i l'identificador en segon pla, amb un botó «Canviar de model»; la
-  llista explica què fa cada cosa (clic per triar, ★ per a la barra lateral) i l'escriptura
-  a mà de l'identificador queda en un desplegable avançat.
+- **Selector de model més clar** a la configuració: nom llegible, nivell i un botó «Canviar de model».
 - **Barra de canvis pendents** a la configuració, amb «Desar» i «Descartar»: es veu
-  sempre que hi ha text a mig editar, sigui quina sigui la pestanya.
+  sempre que hi ha text a mig editar, sigui quina sigui la pestanya. (minor)
 - **Configuració en pantalles estretes:** el menú ja no queda inabastable (els plugins
   actius s'obren des de «Plugins») i l'entrada activa sempre es veu. (minor)
 - **Pestanya «Dades i privadesa»** a la configuració: l'historial, l'ús i la còpia de
-  seguretat surten de «General», que queda només amb la clau, el model i el tema.
+  seguretat surten de «General», que queda només amb la clau, el model i el tema. (minor)
 - **Plugins agrupats com la barra d'eines:** la llista té els blocs Generar, Exportar i
   Vista, i les fletxes només mouen un plugin dins del seu grup (abans semblava que
-  podien canviar-lo de grup i no feien res).
+  podien canviar-lo de grup i no feien res). (minor)
 - **Configuració que valida abans de desar:** un nombre de targetes fora de rang o uns
   idiomes de YouTube il·legibles ja no es desen (ni es descarten en silenci); un prompt
-  buit d'una altra pestanya et porta al camp, n'obre el desplegable i el marca.
+  buit d'una altra pestanya et porta al camp, n'obre el desplegable i el marca. (minor)
 - **Pàgines de plugin més netes:** l'ajuda («Què fa i com configurar-lo») surt tancada,
   «Desar» i «Restaurar» són dins del desplegable del prompt, «Restaurar» avisa quan ja
   és el prompt per defecte, i Resum (el nucli) ja no porta «← Plugins» ni interruptor. (minor)
@@ -99,8 +98,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   petició», «Actualitzar la llista», lectura biònica sense unitats tècniques), la pàgina
   de PDF sense repeticions i l'interruptor de cada plugin porta el seu nom per als
   lectors de pantalla. (minor)
-- **Noms unificats** entre la configuració i la barra lateral: Aprofundiment, Validació científica, Desar a Obsidian, Copiar Markdown.
-- El **mapa conceptual** es genera sempre en català (com la resta de resultats).
+- **Noms unificats** entre la configuració i la barra lateral: Aprofundiment, Validació científica, Desar a Obsidian, Copiar Markdown. (minor)
+- El **mapa conceptual** es genera sempre en català (com la resta de resultats). (minor)
 - Visor PDF: el botó «Tancar» en hover i els missatges d'error tenen contrast AA. (minor)
 - Obsidian (configuració): textos menys repetits i exemple que ja no sembla un valor. (minor)
 - **Prompts per defecte revisats** (resum, aprofundiment, validació científica,
@@ -122,7 +121,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   sortida de `gemini-2.5-pro` (era la meitat del real: $5,00 en lloc de
   $10,00/1M tokens) i es reflecteix la pujada de preu de `gemini-3.5-flash`
   ($0,30→$1,50 entrada, $2,50→$9,00 sortida). Taxa EUR/USD actualitzada a
-  Q3 2026 (0,87).
+  Q3 2026 (0,87). (minor)
 
 ## [2.6.2] - 2026-07-27
 
