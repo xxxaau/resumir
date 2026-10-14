@@ -25,6 +25,7 @@
       </div>
 
       <div class="sidebar-spacer"></div>
+      <button class="nav-item" data-tab="data">Dades i privadesa</button>
       <button class="nav-item" data-tab="about">Sobre l'extensió</button>
     </nav>
 
@@ -111,8 +112,17 @@
         </div>
 
 
+        <div class="section-actions">
+          <button id="save" class="btn btn-primary">Desar</button>
+        </div>
+      </div>
+
+      <!-- Tab: Dades i privadesa -->
+      <div id="tab-data" class="tab-pane">
+        <h1 class="page-title">Dades i privadesa</h1>
+
         <div class="section">
-          <h2>Emmagatzematge i privadesa</h2>
+          <h2>Historial</h2>
           <div class="form-group">
             <p class="field-label">Historial de resums</p>
             <div class="help-text">
@@ -149,19 +159,15 @@
           <div class="help-text">
             Exporta la configuració (prompts personalitzats, plantilles, plugins i ordre) a un fitxer JSON per desar-la o portar-la a un altre navegador. La clau d'API no s'inclou, tret que ho demanis.
           </div>
+          <label class="checkbox-row backup-key-row" for="exportIncludeKey">
+            <input type="checkbox" id="exportIncludeKey" />
+            Incloure la clau d'API a l'exportació (el fitxer en quedarà més sensible)
+          </label>
           <div class="flex-row-gap">
             <button id="exportConfig" class="btn btn-secondary">Exportar la configuració</button>
             <button id="importConfig" class="btn btn-secondary">Importar una configuració…</button>
             <input type="file" id="importConfigFile" accept=".json,application/json" hidden />
           </div>
-          <label class="checkbox-row backup-key-row" for="exportIncludeKey">
-            <input type="checkbox" id="exportIncludeKey" />
-            Incloure la clau d'API a l'exportació (el fitxer en quedarà més sensible)
-          </label>
-        </div>
-
-        <div class="section-actions">
-          <button id="save" class="btn btn-primary">Desar</button>
         </div>
       </div>
 

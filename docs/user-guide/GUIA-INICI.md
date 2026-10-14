@@ -72,9 +72,9 @@ Tot es controla des de **Configuració (⚙️)**:
 |---|---|
 | **Claus i models** | La teva clau d'API i el model de Gemini a fer servir |
 | **Aparença** | Tema visual de l'extensió |
-| **Emmagatzematge i privadesa** | Caché dels resums i preferències |
-| **Ús** | Quants resums has generat, amb quins models i tokens (només en aquest navegador) |
-| **Còpia de seguretat** | Exportar i importar la configuració (prompts personalitzats, plantilles, plugins) en un fitxer JSON; la clau d'API no s'inclou tret que ho demanis |
+| **Dades i privadesa → Historial** | Els resums desats en aquest ordinador i com esborrar-los |
+| **Dades i privadesa → Ús** | Quants resums has generat, amb quins models i tokens (només en aquest navegador) |
+| **Dades i privadesa → Còpia de seguretat** | Exportar i importar la configuració (prompts personalitzats, plantilles, plugins) en un fitxer JSON; la clau d'API no s'inclou tret que ho demanis |
 | **Plugins** | Activar, reordenar i configurar cada eina (i editar-ne els prompts) |
 
 ---

@@ -1169,4 +1169,4 @@ button:disabled,
 .usage-grid dd { margin: 0; font-weight: 600; }
 .usage-list { margin: 4px 0 16px; padding-left: 20px; }
 
-.backup-key-row { font-weight: 400; margin-top: 12px; font-size: 0.9em; }
+.backup-key-row { font-weight: 400; margin: 12px 0; font-size: 0.9em; }

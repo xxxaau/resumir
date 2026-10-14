@@ -344,7 +344,7 @@ test("General - «Desar» treu espais, cometes i «Bearer» de la clau", async (
 test("General - la privadesa diu que el text de les pàgines s'envia a Google Gemini", async () => {
     const h = await loadSettings({});
     try {
-        const text = h.document.getElementById("tab-general").textContent;
+        const text = h.document.getElementById("tab-general").textContent + h.document.getElementById("tab-data").textContent;
         assert.match(text, /s'envia a l'API de Google\s+Gemini/);
         assert.match(text, /només\s+en aquest navegador/, "La clau es desa només en aquest navegador");
     } finally { h.close(); }
@@ -489,6 +489,7 @@ test("navegació - «Resum» és una entrada fixa i «Sobre» l'última", async 
         const items = [...h.document.querySelectorAll(".sidebar .nav-item")].map(b => b.dataset.tab);
         assert.deepEqual(items.slice(0, 3), ["general", "resum", "extensions"]);
         assert.equal(items[items.length - 1], "about");
+        assert.equal(items[items.length - 2], "data", "«Dades i privadesa» abans de «Sobre»");
         assert.equal(items.filter(t => t === "resum").length, 1, "No es duplica a «Plugins actius»");
         h.document.querySelector('.nav-item[data-tab="resum"]').click();
         assert.ok(h.document.getElementById("tab-resum").classList.contains("active"));
@@ -1041,5 +1042,19 @@ test("plugins - la llista té els grups de la barra d'eines i només es reordena
         await h.flush(5);
         assert.deepEqual(ids("Exportar"), ["markdown", "obsidian"]);
         assert.deepEqual(ids("Generar").length, 7, "no travessa grups");
+    } finally { h.close(); }
+});
+
+test("Dades i privadesa - historial, ús i còpia de seguretat són a la seva pestanya (General en queda lleugera) i la casella de la clau va abans dels botons", async () => {
+    const h = await loadSettings();
+    try {
+        const data = h.document.getElementById("tab-data");
+        for (const id of ["clearCache", "usageSection", "exportConfig", "importConfig", "exportIncludeKey"]) {
+            assert.ok(data.querySelector("#" + id), `${id} a «Dades i privadesa»`);
+            assert.equal(h.document.querySelector("#tab-general #" + id), null, `${id} ja no és a General`);
+        }
+        const pos = (id) => [...data.querySelectorAll("input, button")].indexOf(data.querySelector("#" + id));
+        assert.ok(pos("exportIncludeKey") < pos("exportConfig"), "la casella va abans d'«Exportar»");
+        assert.ok(h.document.querySelector('.nav-item[data-tab="data"]'));
     } finally { h.close(); }
 });

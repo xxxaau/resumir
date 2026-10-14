@@ -80,6 +80,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Pestanya «Dades i privadesa»** a la configuració: l'historial, l'ús i la còpia de
+  seguretat surten de «General», que queda només amb la clau, el model i el tema.
 - **Plugins agrupats com la barra d'eines:** la llista té els blocs Generar, Exportar i
   Vista, i les fletxes només mouen un plugin dins del seu grup (abans semblava que
   podien canviar-lo de grup i no feien res).
