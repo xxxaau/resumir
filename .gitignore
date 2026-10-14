@@ -68,3 +68,4 @@ scripts/toolbar-shot.png
 tests/pdf-flow-*.png
 test-results/
 playwright-report/
+.Rhistory
