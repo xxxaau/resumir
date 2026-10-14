@@ -602,10 +602,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 12px 8px 20px;
+  padding: 12px 8px 36px;
   color: var(--text-color);
   box-sizing: border-box;
   white-space: normal;
+  /* Centrat verticalment mentre càpiga; si no, el panell fa scroll amb normalitat */
+  min-height: var(--centered-min-height, 0);
+  justify-content: center;
 }
 
 .api-key-icon {
@@ -1499,9 +1502,12 @@ body {
 .history-filter:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
 
 /* Estat en repòs: només es veu si no hi ha contingut, càrrega, error ni panells */
-#idle-state { padding: 24px 16px 16px; text-align: center; }
+/* Estats sense contingut (repòs, pestanya sense pàgina web i onboarding de la clau): centrats
+   verticalment a l'espai entre la barra d'eines i el peu, una mica cap amunt (ull òptic). */
+:root { --centered-min-height: calc(100vh - var(--toolbar-height, 44px) - 56px); }
+#idle-state, #idle-unsupported { padding: 16px 16px 40px; text-align: center; box-sizing: border-box; min-height: var(--centered-min-height); flex-direction: column; align-items: center; justify-content: center; }
+#idle-state:not([hidden]), #idle-unsupported:not([hidden]) { display: flex; }
 #idle-state[hidden], #idle-unsupported[hidden] { display: none; }
-#idle-unsupported { padding: 16px 12px; text-align: center; }
 #container:has(#content:not(.hidden), #loading:not(.hidden), #error:not(.hidden), #history-panel:not(.hidden), #source-panel:not(.hidden)) :is(#idle-state, #idle-unsupported) { display: none; }
 .idle-eyebrow { margin: 0 0 6px; font-size: 0.72em; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
 .idle-title { margin: 0 0 16px; font-size: 0.95em; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
