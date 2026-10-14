@@ -149,21 +149,18 @@ npm run check
 # Compilar per a tots els navegadors
 npm run build
 
-# Carpeta dev per a Edge/Chrome (carrega-la desempaquetada a edge://extensions)
-npm run dev:chromium
+# Carpetes dev (DEV: nom «(DEV)», gecko.id i icones de dev): build_firefox_dev/ i build_chromium_dev/
+npm run dev            # totes dues (o dev:firefox / dev:chromium)
 
 # Verificació completa pre-release (lint + tests + manifests)
 npm run prerelease
 
-# Activar mode desenvolupament (icones DEV)
-npm run dev
-
-# Tornar a mode producció
+# Deixar els fitxers versionats en mode producció (normalment ja ho són)
 npm run prod
 ```
 
-> **Firefox:** carrega l'arrel del projecte (`manifest.json`) des de `about:debugging#/runtime/this-firefox`.
-> **Edge/Chrome:** el `manifest.json` de l'arrel és el de Firefox — fes servir `npm run dev:chromium` i carrega la carpeta `build_chromium_dev/`.
+> **Firefox:** `npm run dev` i carrega `build_firefox_dev/manifest.json` des de `about:debugging#/runtime/this-firefox`.
+> **Edge/Chrome:** `npm run dev` i carrega la carpeta `build_chromium_dev/` (el `manifest.json` de l'arrel és el de Firefox).
 
 ---
 

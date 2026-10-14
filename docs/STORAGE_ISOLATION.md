@@ -86,10 +86,10 @@ node scripts/backup-extension-data.mjs restore firefox-dev-2026-04-01T15-30-45 f
 
 ## Resum Tècnic
 
-- **manifest.firefox.patch.json** (DEV) - Extension ID dev: `sergi.dev@xaudiera.xyz`
-- **manifest.firefox.prod.patch.json** (PROD) - Extension ID prod: `sergi@xaudiera.xyz`
-- **manifest.chromium.patch.json** (DEV) / **manifest.chromium.prod.patch.json** (PROD) - Sense `key`; l'aïllament ve de la carpeta carregada
-- **npm run dev / npm run prod** (`scripts/set-mode.mjs`) - Copia els parches correctes según el mode
+- **manifest.firefox.patch.json** / **manifest.firefox.prod.patch.json** - Extension ID prod: `sergi@xaudiera.xyz` (versionats, sempre PROD)
+- **scripts/dev-firefox.mjs** (`npm run dev:firefox`) - Genera `build_firefox_dev/` amb l'ID dev `sergi.dev@xaudiera.xyz` i el nom «(DEV)»; no toca els fitxers versionats
+- **manifest.chromium.patch.json** / **manifest.chromium.prod.patch.json** - Sense `key`; l'aïllament ve de la carpeta carregada
+- **npm run prod** (`scripts/set-mode.mjs`) - Retorna els fitxers versionats a PROD si cal
 - **scripts/backup-extension-data.mjs** - Tool de backup/restore
 
 ---

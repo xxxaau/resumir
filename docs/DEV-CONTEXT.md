@@ -12,9 +12,10 @@ Browser extension (Firefox + Chromium, MV3) that summarizes web pages using Goog
 
 ```bash
 # Development
-npm run dev          # Switch manifests to development mode (adds DEV label to icons)
-npm run prod         # Switch manifests to production mode
-npm run dev:chromium # Build build_chromium_dev/ (unpacked DEV folder for Edge/Chrome)
+npm run dev          # Generate build_firefox_dev/ + build_chromium_dev/ (unpacked DEV folders, git-ignored; tracked files stay PROD)
+npm run dev:firefox  # Only build_firefox_dev/ (load its manifest.json from about:debugging)
+npm run dev:chromium # Only build_chromium_dev/ (unpacked DEV folder for Edge/Chrome)
+npm run prod         # Put tracked files back in production mode (only needed if one was left in DEV)
 npm run icons:gen    # Regenerate icon PNGs (icons/prod/, icons/dev/) from icons/src/icon-{prod,dev}.svg
 
 # Build
@@ -82,7 +83,7 @@ Tests use Node.js built-in `node:test` — no external framework. Test files are
 ## Build Pipeline
 
 `node scripts/build.mjs all` (via `npm run build`), in Node.js — not PowerShell — orchestrates the full build:
-1. Aborts if the manifests are in DEV mode (run `npm run prod` first, or use `npm run release`, which switches and restores the mode)
+1. Aborts if the manifests are in DEV mode (run `npm run prod` first)
 2. Runs esbuild bundling (background + sidebar)
 3. Runs `scripts/make-zip.mjs` to create AMO-compliant ZIPs with `/` path separators
 4. Outputs `resumir-contingut-vX.Y.Z-firefox.zip` and `resumir-contingut-vX.Y.Z-chromium.zip`

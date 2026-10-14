@@ -12,15 +12,17 @@ es duplica aquí per evitar que les dues còpies es desincronitzin.
 
 ## Mode DEV vs PROD
 
-- El repositori es treballa **sempre en mode DEV** (`npm run dev`): manifests
-  amb sufix «(DEV)» i icones marcades.
-- Els canvis de manifests/icones que genera `npm run dev` / `npm run prod`
-  **no es commitegen mai** — és estat local que canvia constantment entre
-  sessions. Només es commiteja el mode PROD com a part del pas
-  `chore: prepara vX.Y.Z` d'una release real (vegeu `docs/RELEASE-PROCESS.md`).
+- Els fitxers **versionats** (manifests, `icons/`) són **sempre PROD**. El mode
+  DEV (nom «(DEV)», gecko.id de dev, icones taronges) es genera en carpetes
+  ignorades per git amb `npm run dev` → `build_firefox_dev/` i
+  `build_chromium_dev/`. Carrega aquestes carpetes (Firefox: `about:debugging`
+  → `build_firefox_dev/manifest.json`; Edge/Chrome: «Carregar desempaquetada»).
+- Per això **no hi ha cap estat DEV per commitejar ni per fer stash** abans de
+  pujar. Si un fitxer versionat queda en DEV per error, `npm run prod` el
+  retorna a PROD.
 - Després de tocar codi de `sidebar/*.js` o `background.js`, torna a córrer
-  `npm run dev:chromium` perquè `build_chromium_dev/` reflecteixi el codi
-  actual (l'Edge de proves no agafa canvis sols).
+  `npm run dev` (o `dev:firefox` / `dev:chromium`) perquè les carpetes dev
+  reflecteixin el codi actual (els navegadors no agafen canvis sols).
 - **Mai editar `manifest.json` ni `manifest.chromium.json` directament** —
   són generats des de `manifest.base.json` + patches amb
   `npm run manifests:gen`.

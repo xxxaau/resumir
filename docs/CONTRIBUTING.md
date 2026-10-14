@@ -17,7 +17,7 @@ Gràcies per l'interès en contribuir a **Resumir**! Aquesta guia explica com ar
 git clone https://github.com/xxxaau/resumir.git
 cd resumir
 npm install
-npm run dev
+npm run dev     # genera build_firefox_dev/ i build_chromium_dev/ (carrega'ls als navegadors)
 ```
 
 ### Fes canvis
@@ -126,7 +126,7 @@ npm run dev
     ├── build-sidebar-bundle.mjs
     ├── merge-manifest.mjs
     ├── release.mjs         # Release workflow
-    ├── set-mode.mjs        # Dev/Prod mode
+    ├── set-mode.mjs        # Deixa els fitxers versionats en PROD (el DEV viu a build_*_dev/)
     └── pre-release-check.mjs # Auditoria pre-release
 ```
 

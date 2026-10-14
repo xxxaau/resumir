@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * set-mode.mjs - Cross-platform port of set_dev_mode.ps1
- * Alterna entre mode DEV i PROD: ajusta manifest.base.json (name), els patches
- * Firefox (gecko.id), regenera els manifests merged i copia les icones
- * corresponents (icons/dev/ o icons/prod/) a icons/.
+ * set-mode.mjs — Deixa els fitxers VERSIONATS en mode PRODUCCIÓ: manifest.base.json (name),
+ * els patches Firefox/Chromium (gecko.id), els manifests merged i les icones d'icons/prod/.
+ *
+ * El mode DEV ja NO reescriu fitxers versionats: es genera en carpetes ignorades per git
+ * (`npm run dev` → build_firefox_dev/ i build_chromium_dev/). Això només cal si un fitxer
+ * versionat ha quedat en estat DEV per error.
  *
  * Usage:
- *   node scripts/set-mode.mjs dev
- *   node scripts/set-mode.mjs prod
+ *   node scripts/set-mode.mjs prod      (o `npm run prod`)
  */
 
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from "fs";
@@ -19,9 +20,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
 const mode = process.argv[2];
-if (!["dev", "prod"].includes(mode)) {
-    console.error("ERROR: cal especificar mode 'dev' o 'prod'");
-    console.error("Usage: node scripts/set-mode.mjs <dev|prod>");
+if (mode === "dev") {
+    console.error("El mode DEV ja no reescriu fitxers versionats. Usa `npm run dev` (genera build_firefox_dev/ i build_chromium_dev/).");
+    process.exit(1);
+}
+if (mode !== "prod") {
+    console.error("Usage: node scripts/set-mode.mjs prod");
     process.exit(1);
 }
 

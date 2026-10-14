@@ -18,6 +18,7 @@ background.bundle.js
 sidebar.bundle.js
 build/
 build_chromium_dev/
+build_firefox_dev/
 .backups/
 
 # Temporary output files

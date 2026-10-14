@@ -77,8 +77,13 @@ for (const d of DIRS) {
     else console.warn(`  ⚠️  directori no trobat: ${d}/`);
 }
 
-// 5. Treu subdirectoris interns d'icones (no calen a l'extensió carregada).
-for (const sub of ["dev", "prod"]) {
+// 5. Icones DEV (taronges) sobre les de producció: els fitxers versionats d'icons/ són sempre PROD.
+for (const sz of [16, 32, 48, 64, 96, 128]) {
+    copyFileSync(resolve(root, "icons", "dev", `icon-${sz}.png`), resolve(outDir, "icons", `icon-${sz}.png`));
+}
+
+// 5b. Treu subdirectoris interns d'icones (no calen a l'extensió carregada).
+for (const sub of ["dev", "prod", "src"]) {
     const p = resolve(outDir, "icons", sub);
     if (existsSync(p)) rmSync(p, { recursive: true, force: true });
 }
