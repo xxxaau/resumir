@@ -837,14 +837,14 @@ function linkQuotes(container, url) {
         const found = [];
         const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT);
         for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-            for (const m of n.nodeValue.matchAll(/«([^»]{8,})»|“([^”]{8,})”/g)) found.push({ node: n, m });
+            for (const m of n.nodeValue.matchAll(/«([^»]{8,})»|“([^”]{8,})”|"([^"]{8,})"/g)) found.push({ node: n, m });
         }
         if (!found.length) continue;
         const { node, m } = which === "last" ? found[found.length - 1] : found[0];
         const a = document.createElement("a");
         a.href = "#";
         a.className = "quote-jump";
-        a.dataset.quote = (m[1] || m[2]).trim();
+        a.dataset.quote = (m[1] || m[2] || m[3]).trim();
         a.title = "Mostra-la a la pàgina";
         a.textContent = m[0];
         const tail = node.splitText(m.index);

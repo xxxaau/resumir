@@ -1284,13 +1284,13 @@ test("cites clicables - tolera variants del títol («Cites literals») i comete
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },
         pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
-        modelReply: `Resum.\n\n### Cites literals\n- “${real}”\n\n### Punts clau (resum)\n- Idea «${real}»`,
+        modelReply: `Resum.\n\n### Cites literals\n- “${real}”\n\n### Punts clau (resum)\n- Idea «${real}»\n- Altra idea "${real}"`,
     });
     try {
         h.document.getElementById("summarizeBtn").click();
         await h.flush(30);
         const links = [...h.document.querySelectorAll("#content a.quote-jump")];
-        assert.equal(links.length, 2);
+        assert.equal(links.length, 3, "també amb cometes rectes");
         assert.equal(links[0].dataset.quote, real);
     } finally { h.close(); }
 });
