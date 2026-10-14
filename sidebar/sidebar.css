@@ -1608,20 +1608,21 @@ a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, 
 .anki-card-sent { opacity: 0.7; }
 .anki-sent-badge { font-size: 0.8em; color: var(--success); margin-right: auto; }
 
-/* Firefox: el contingut de la barra té la cantonada de dalt a l'esquerra arrodonida (12px, com la targeta
-   del navegador; les altres toquen la vora i queden rectes). El quadre de l'extensió és opac: les cantonades mostren el color del llenç, així que
-   l'html es pinta amb el color de la targeta (--ff-card, llegit del tema a sidebar.js; si no n'hi ha,
-   el del llenç). El fons del body no es propaga al llenç perquè l'html ja té fons. El desplaçament passa
-   del document al body perquè les cantonades no marxin en fer scroll. Només Firefox (@supports
-   -moz-appearance): a Chromium no hi ha targeta. */
+/* Firefox a macOS: el contingut de la barra té la cantonada de dalt a l'esquerra arrodonida (12px, com la
+   targeta del navegador; les altres toquen la vora i queden rectes). A Windows/Linux la barra de Firefox
+   no és una targeta arrodonida i es deixa quadrada (com sempre). El quadre de l'extensió és opac: les
+   cantonades mostren el color del llenç, així que l'html es pinta amb el color de la targeta (--ff-card,
+   llegit del tema a sidebar.js; si no n'hi ha, el del llenç). El fons del body no es propaga al llenç
+   perquè l'html ja té fons. El desplaçament passa del document al body perquè les cantonades no marxin
+   en fer scroll. Només Firefox (@supports -moz-appearance) i només macOS (html[data-os], de theme.js). */
 @supports (-moz-appearance: none) {
-  html {
+  html[data-os="mac"] {
     height: 100%;
     overflow: hidden;
     background: var(--ff-card, Canvas);
     scroll-padding-top: 0;
   }
-  body {
+  html[data-os="mac"] body {
     height: 100%;
     box-sizing: border-box;
     overflow-y: auto;
@@ -1629,8 +1630,8 @@ a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, 
     scroll-padding-top: calc(var(--toolbar-height, 0px) + var(--backbar-height, 0px) + 44px);
     scroll-padding-bottom: 48px;
   }
-  .toolbar,
-  #history-back-bar { border-radius: 12px 0 0 0; }
+  html[data-os="mac"] .toolbar,
+  html[data-os="mac"] #history-back-bar { border-radius: 12px 0 0 0; }
 }
 
 /* ── Aspecte Obsidian + Minimal: text de lectura una mica més gran, enllaços suaus ── */

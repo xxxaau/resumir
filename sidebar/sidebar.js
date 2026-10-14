@@ -745,6 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function syncFirefoxCard() {
         const api = typeof browser !== "undefined" ? browser : null;
         if (!api || !api.theme || !api.theme.getCurrent) return;
+        if (document.documentElement.getAttribute("data-os") !== "mac") return;  // l'arrodoniment només és de macOS
         try {
             const win = await api.windows.getCurrent();
             const theme = await api.theme.getCurrent(win.id);

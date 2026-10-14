@@ -1,5 +1,9 @@
 // --- Theme Logic ---
 (function() {
+    // Sistema operatiu a l'<html> (data-os): el CSS en depèn (p. ex. l'arrodoniment de la barra lateral de Firefox només és de macOS).
+    const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
+    document.documentElement.setAttribute('data-os', /mac/i.test(platform) ? 'mac' : /win/i.test(platform) ? 'win' : 'other');
+
     const STORAGE_KEY = 'theme';
     const DEFAULT_THEME = 'system';
 
