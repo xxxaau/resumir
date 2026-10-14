@@ -42,7 +42,7 @@ La clau es desa **només al teu ordinador**.
 
 Drecera: **Alt+Maj+S** obre Resumir i resumeix la pàgina actual (la pots canviar
 des de la gestió de dreceres del navegador). Sota cada resum veuràs de quant text
-parteix, amb quin model, i els botons **«Més curt»** i **«Més detall»**; als
+parteix i amb quin model; als
 vídeos i als PDF, les marques de temps i de pàgina són enllaços, i les cites de la
 secció «Cites» i dels punts clau són clicables: la pàgina les ressalta en groc i hi
 desplaça la vista (no en PDF ni en vídeos).

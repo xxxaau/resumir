@@ -54,7 +54,7 @@ estructura fixa:
 Només hi ha les seccions que tenen contingut: en un text curt en sortiran menys. Si la
 pàgina és buida o només és un avís de galetes, diu que no hi ha prou contingut en lloc
 d'inventar-se un resum. Pots ajustar el format i la llargada a la configuració de
-Resum, o amb «Més curt» / «Més detall» sota cada resum.
+Resum.
 
 ![Configuració de Resum amb el prompt per defecte (System Prompt) editable i el botó Restaurar](./img/prompt-resum.webp)
 

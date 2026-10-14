@@ -927,45 +927,6 @@ test("procedència - detecta un bàner de galetes i ofereix veure el text enviat
 });
 
 // ---------------------------------------------------------------------------
-// Refinadors ràpids (Fase E): «Més curt» / «Més detall» sota el resum
-// ---------------------------------------------------------------------------
-test("refinadors - «Més curt» torna a generar amb la instrucció afegida", async () => {
-    const h = await loadSidebar({
-        local: { apiKey: "AIza_test" },
-        pageText: "Un article. ".repeat(30),
-        modelReply: "El resum.",
-    });
-    try {
-        const box = h.document.getElementById("refiners");
-        assert.ok(box.classList.contains("hidden"), "sense resum no hi són");
-        h.document.getElementById("summarizeBtn").click();
-        await h.flush(30);
-        assert.ok(!box.classList.contains("hidden"));
-        assert.equal(h.calls.fetches.length, 1);
-
-        h.document.getElementById("refine-shorter").click();
-        await h.flush(30);
-        assert.equal(h.calls.fetches.length, 2, "ha de regenerar, no reutilitzar la memòria cau");
-        assert.match(h.calls.fetches[1].body, /més curt/i);
-        assert.doesNotMatch(h.calls.fetches[0].body, /més curt/i);
-    } finally { h.close(); }
-});
-
-test("refinadors - amagats en un mapa conceptual", async () => {
-    const h = await loadSidebar({
-        local: { apiKey: "AIza_test" },
-        sync: { enableConceptMap: true },
-        pageText: "Un article. ".repeat(30),
-        modelReply: "# Tema\n## Subtema",
-    });
-    try {
-        h.document.getElementById("conceptMapBtn").click();
-        await h.flush(30);
-        assert.ok(h.document.getElementById("refiners").classList.contains("hidden"));
-    } finally { h.close(); }
-});
-
-// ---------------------------------------------------------------------------
 // Botó de tornar (historial/text enviat): visible i fix, no un text gris que
 // surt de pantalla en un resum llarg. (jsdom no calcula layout: es comprova el CSS.)
 // ---------------------------------------------------------------------------
@@ -1482,36 +1443,14 @@ test("procedència i refinadors s'amaguen en veure una entrada desada o l'histor
         h.document.getElementById("summarizeBtn").click();
         await h.flush(30);
         assert.ok(!h.document.getElementById("provenance").classList.contains("hidden"));
-        assert.ok(!h.document.getElementById("refiners").classList.contains("hidden"));
 
         h.document.getElementById("historyBtn").click();
         await h.flush(30);
         assert.ok(h.document.getElementById("provenance").classList.contains("hidden"), "amb l'historial obert no hi ha procedència");
-        assert.ok(h.document.getElementById("refiners").classList.contains("hidden"), "ni refinadors");
 
         h.document.querySelector(".history-item-title").click();
         await h.flush(30);
         assert.ok(h.document.getElementById("provenance").classList.contains("hidden"), "l'entrada B no porta la procedència de l'A");
-        assert.ok(h.document.getElementById("refiners").classList.contains("hidden"));
-    } finally { h.close(); }
-});
-
-test("refinadors - si la pestanya activa ja és una altra pàgina, no regeneren res", async () => {
-    const h = await loadSidebar({
-        local: { apiKey: "AIza_test" },
-        pageText: "Un article. ".repeat(30),
-        modelReply: "El resum.",
-    });
-    try {
-        h.document.getElementById("summarizeBtn").click();
-        await h.flush(30);
-        assert.equal(h.calls.fetches.length, 1);
-        const other = { id: 2, url: "https://altra.example/x", title: "Altra", active: true };
-        h.window.chrome.tabs.onUpdated._fire(2, { url: other.url }, other);
-        await h.flush();
-        h.document.getElementById("refine-shorter").click();
-        await h.flush(30);
-        assert.equal(h.calls.fetches.length, 1, "«Més curt» no ha de regenerar la pàgina equivocada");
     } finally { h.close(); }
 });
 
@@ -1621,26 +1560,6 @@ test("memòria cau - una còpia generada amb un altre estil no es reutilitza", a
     } finally { h.close(); }
 });
 
-test("refinadors - el refinat no trepitja el resum desat", async () => {
-    let n = 0;
-    const h = await loadSidebar({
-        local: { apiKey: "AIza_test" },
-        pageText: "Un article. ".repeat(30),
-        fetchHandler: async (u, o) => slowReplyHandler(n++ === 0 ? "Resum normal." : "Resum curt.", 5)(u, o),
-    });
-    try {
-        h.document.getElementById("summarizeBtn").click();
-        await h.flush(30);
-        await sleep(30);
-        h.document.getElementById("refine-shorter").click();
-        await h.flush(30);
-        await sleep(30);
-        assert.match(h.document.getElementById("content").textContent, /Resum curt/);
-        const key = "summary_cache:https://example.com/article:summary";
-        assert.match((await h.storage.local.get(key))[key].summary, /Resum normal/, "el desat continua sent el normal");
-    } finally { h.close(); }
-});
-
 test("camí desat - també enllaça [m:ss], mostra la procedència i els refinadors, i enllaça les cites", async () => {
     const yt = "https://www.youtube.com/watch?v=abc123XYZ_0";
     const local = { summary_cache_index: [] };
@@ -1662,7 +1581,6 @@ test("camí desat - també enllaça [m:ss], mostra la procedència i els refinad
         assert.equal(h.calls.fetches.length, 0);
         assert.ok(h.document.querySelector("#content a[data-yt-time]"), "enllaç de temps");
         assert.ok(!h.document.getElementById("provenance").classList.contains("hidden"), "procedència");
-        assert.ok(!h.document.getElementById("refiners").classList.contains("hidden"), "refinadors");
         assert.equal(h.document.querySelector("#content a.quote-jump"), null, "YouTube: cites sense enllaç");
     } finally { h.close(); }
 });

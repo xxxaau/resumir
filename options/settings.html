@@ -203,7 +203,7 @@
           <ul>
             <li><strong>Instruccions:</strong> el text de sota és el que rep el model abans de cada resum. Aquí pots canviar l'idioma, el to, la llargada o l'estructura (per exemple, «màxim 5 punts»).</li>
             <li>El de per defecte ja funciona bé per a la majoria de pàgines; si el canvies, apareix la insígnia <em>Personalitzat</em> i <em>Restaurar</em> el recupera.</li>
-            <li>El model i la clau es trien a <strong>General</strong>. Per ajustar el resultat sense editar res, fes servir «Més curt» i «Més detall» sota cada resum.</li>
+            <li>El model i la clau es trien a <strong>General</strong>. Per ajustar el resultat sense editar el prompt, fes servir el format i la llargada d'aquí sota.</li>
           </ul>
         </details>
 
@@ -232,7 +232,7 @@
               <option value="long">Llarg</option>
             </select>
             <div class="help-text">
-              S'afegeix com a instrucció extra al resum. Només afecta el plugin Resum; a la barra lateral, «Més curt» i «Més detall» ho ajusten resum a resum.
+              S'afegeix com a instrucció extra al resum. Només afecta el plugin Resum.
             </div>
           </div>
         </div>
@@ -1488,7 +1488,6 @@
                 <li><strong>Cites clicables:</strong> cada punt clau acaba amb un fragment literal del text i, en clicar-lo (o una cita de «Cites»), la pàgina el ressalta en groc i hi desplaça la vista, com un Ctrl+F. No funciona en PDF ni en vídeos de YouTube.</li>
                 <li><strong>Línia de procedència sota el resum:</strong> quantes paraules s'han enviat, amb quin model i quants tokens; avisa si el text s'ha tallat o sembla un bàner de galetes i porta l'enllaç «Veure el text enviat».</li>
                 <li><strong>Pestanyes per tipus</strong> amb els resums desats de la pàgina, i avís quan el resum visible és d'una altra pestanya.</li>
-                <li><strong>Refinadors «Més curt» i «Més detall»</strong> sota el resum.</li>
                 <li><strong>Drecera de teclat Alt+Maj+S</strong> per obrir Resumir i resumir la pàgina.</li>
                 <li><strong>Enllaços als orígens:</strong> <code>(p. N)</code> als PDF web i <code>[m:ss]</code> als vídeos de YouTube (el vídeo salta a aquell moment).</li>
                 <li><strong>Còpia de seguretat de la configuració:</strong> exportar i importar prompts personalitzats, plantilles, plugins i ordre en un fitxer JSON (la clau d'API només si ho demanes; la importació valida cada valor i demana confirmació).</li>

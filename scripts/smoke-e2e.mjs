@@ -84,7 +84,6 @@ try {
     await page.waitForSelector("#provenance:not(.hidden)", { timeout: 15000 });
     const prov = await page.textContent("#provenance");
     check(/Basat en \d+ paraules/.test(prov) && /tokens/.test(prov), `línia de procedència («${prov.trim().slice(0, 60)}…»)`);
-    check(await page.isVisible("#refiners"), "refinadors visibles");
     // Cites clicables: la cita surt ressaltada (groc) a la pàgina i la vista hi baixa
     const jumps = page.locator("#content a.quote-jump");
     check(await jumps.count() === 2 && await page.locator("#content .quote-ok, #content .quote-warn").count() === 0, "cites clicables, sense insígnies de verificació");

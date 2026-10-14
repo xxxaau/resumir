@@ -16,7 +16,6 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   i porta l'enllaç «Veure el text enviat».
 - **Pestanyes per tipus** amb els resums desats de la pàgina, i avís quan el
   resum visible és d'una altra pestanya.
-- **Refinadors «Més curt» i «Més detall»** sota el resum.
 - **Drecera de teclat Alt+Maj+S** per obrir Resumir i resumir la pàgina.
 - **Enllaços als orígens:** `(p. N)` als PDF web i `[m:ss]` als vídeos de YouTube
   (el vídeo salta a aquell moment).

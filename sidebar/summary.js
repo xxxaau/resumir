@@ -134,13 +134,7 @@ const STYLE_INSTRUCTIONS = {
     },
 };
 
-// Instruccions afegides al prompt pels refinadors ràpids de sota el resum.
-const REFINE_INSTRUCTIONS = {
-    shorter: "Instrucció addicional: fes el resultat molt més curt i concís que de costum, només l'essencial.",
-    detailed: "Instrucció addicional: fes el resultat més detallat que de costum, amb més matisos, xifres i exemples del text.",
-};
-
-async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false, refine = null) {
+async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false) {
     if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isAnki && !isUserInitiated) {
         return null;
     }
@@ -177,7 +171,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     const generationStartMs = startGenerationTimer();
     updateTokenStats(0, 0);  // Reset tokens display for new generation
     if (typeof hideProvenance === "function") hideProvenance();
-    if (typeof hideRefiners === "function") hideRefiners();
 
     try {
         // 1. Get Configuration
@@ -227,9 +220,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             if (f) systemPrompt += "\n\n" + f;
             if (l) systemPrompt += "\n\n" + l;
         }
-
-        // Refinador ràpid: instrucció afegida al prompt del tipus actual.
-        if (refine && REFINE_INSTRUCTIONS[refine]) systemPrompt += "\n\n" + REFINE_INSTRUCTIONS[refine];
 
         applyExtensionVisibility(config);
         if (config.extensionOrder) {
@@ -281,7 +271,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
 
         // El preload de la pàgina activa NO ha d'impedir reutilitzar la còpia desada (abans sí:
         // el primer clic regenerava sempre i gastava tokens); només els PDF locals en queden fora.
-        if (!isRefresh && !refine && !hasLocalPdf && !overrideText) {
+        if (!isRefresh && !hasLocalPdf && !overrideText) {
             const cachedEntry = await getSummaryCache(currentUrl, requestedType);
             // Una còpia generada amb un altre format/llargada (o sense estil = el per defecte) no val
             const sameStyle = requestedType !== "summary" || (cachedEntry && (cachedEntry.style || "default|medium") === styleKey);
@@ -348,7 +338,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                             outputTokens: cachedEntry.stats && cachedEntry.stats.output,
                         });
                     }
-                    if (typeof showRefiners === "function") showRefiners();
                 }
 
                 getPageContent().then(data => {
@@ -629,8 +618,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         const summaryToCache = isConceptMap ? "<!--conceptmap-->\n" + currentMetadata.summary
             : isAnki ? "<!--anki-->\n" + currentMetadata.summary
             : currentMetadata.summary;
-        // Un refinat («Més curt»…) és una variant d'aquesta vegada: no trepitja el resum desat.
-        if (!ankiHasNoCards && !refine) {
+        if (!ankiHasNoCards) {
             await saveSummaryCache(currentMetadata.url, currentMetadata.title, summaryToCache, modelName, inputTokens, outputTokens, contentType, styleKey || undefined);
         }
         await saveUsageStats(inputTokens, outputTokens, contentType, modelName, Date.now() - generationStartMs, currentMetadata.title, currentMetadata.url, cacheTokens);
@@ -639,7 +627,6 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             inputEstimated: false,
             outputEstimated: false
         });
-        if (typeof showRefiners === "function" && isProseType(contentType) && !overrideText) showRefiners();
         if (typeof renderProvenance === "function") {
             renderProvenance({
                 words: String(pageData.text || "").trim().split(/\s+/).filter(Boolean).length,

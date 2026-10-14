@@ -84,7 +84,7 @@ Tot fet. Decisió presa: els camps de text i els sliders **no** es desen sols (h
 > **Estat (2026-10-12):** les fases A–D són fetes i, de la Fase E, tot excepte el que
 > queda a la taula de sota (vegeu `git log`). Ja hi són: línia de procedència (amb
 > text enviat i avisos de text tallat / bàner de galetes), pestanyes per tipus, avís
-> de resum d'una altra pàgina, refinadors «Més curt / Més detall», drecera
+> de resum d'una altra pàgina, drecera
 > Alt+Maj+S, cites `(p. N)` dels PDF web, marques `[m:ss]` de YouTube (camins B, C i
 > text pre-renderitzat; el rascat del DOM no en porta), format i llargada com a
 > preferències de Resum, i cites clicables que ressalten el passatge a la pàgina.

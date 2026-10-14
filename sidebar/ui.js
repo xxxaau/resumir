@@ -727,16 +727,6 @@ function looksLikeCookieBanner(text) {
     return words < 400 && hits >= 3;
 }
 
-function showRefiners() {
-    const el = document.getElementById("refiners");
-    if (el) el.classList.remove("hidden");
-}
-
-function hideRefiners() {
-    const el = document.getElementById("refiners");
-    if (el) el.classList.add("hidden");
-}
-
 /**
  * Converteix les cites «(p. N)» d'un resum de PDF web en enllaços a `url#page=N`
  * (el visor de PDF del navegador entén #page=N). No fa res si no és un PDF.
@@ -864,7 +854,6 @@ function linkQuotes(container, url) {
  */
 function resetResultChrome() {
     hideProvenance();
-    hideRefiners();
     const notice = document.getElementById("model-notice");
     if (notice) { notice.textContent = ""; notice.classList.add("hidden"); }
 }
@@ -1011,5 +1000,5 @@ function renderApiKeyWarning(contentDiv) {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { setErrorMessage, resetResultChrome, linkQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, showRefiners, hideRefiners, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
+    module.exports = { setErrorMessage, resetResultChrome, linkQuotes, linkYoutubeTimes, youtubeVideoId, linkPdfPages, renderProvenance, looksLikeCookieBanner, hideProvenance, formatTextToFragment, formatBionicText, setGeneratingState, resetUI, startGenerationTimer, stopGenerationTimer, announceStatus, setLoadingStage, openSettings, applyExtensionOrder, applyExtensionVisibility, TOOLBAR_GROUPS };
 }

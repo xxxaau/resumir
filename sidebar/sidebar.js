@@ -130,14 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
         genSeq++;
         setGeneratingState(false, !!currentMetadata.summary);
     }
-    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki, refine = null) => {
+    const doSummary = (overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki) => {
         if (isGenerating && abortController) {
             abortCurrentGeneration();
             return;
         }
         const gen = ++genSeq;
         isGenerating = true;
-        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki, refine).then(ctrl => {
+        startSummary(ctx, overrideText, isDeepDive, isScience, isUserInitiated, isConceptMap, isSimple, isAnki).then(ctrl => {
             if (gen === genSeq) abortController = ctrl;
         }).finally(() => {
             if (gen !== genSeq) return;
@@ -649,19 +649,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ext.tabs.create({ url: link.href }).catch(() => {});
         }
     });
-
-    // Refinadors ràpids: tornen a generar el mateix tipus amb una instrucció afegida.
-    for (const [id, mode] of [["refine-shorter", "shorter"], ["refine-detailed", "detailed"]]) {
-        const btn = document.getElementById(id);
-        if (!btn) continue;
-        btn.addEventListener("click", () => {
-            // Només té sentit refinar el que es veu si és la pàgina activa (no una entrada
-            // d'una altra pàgina ni una selecció): «Més curt» regenera la pestanya activa sencera.
-            if (!lastActiveTab || lastActiveTab.url !== currentMetadata.url) return;
-            const t = currentMetadata.type;
-            doSummary(null, t === "deepdive", t === "science", true, false, t === "simple", false, mode);
-        });
-    }
 
     // 0.6: sense clau d'API els generadors són «no disponibles» (aria-disabled, no
     // disabled: altres camins n'activen/desactiven l'estat) i el clic porta al camp
