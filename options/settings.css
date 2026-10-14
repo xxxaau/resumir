@@ -990,21 +990,22 @@ button:disabled,
     margin-bottom: 20px;
   }
 
-  /* Cada plugin: descripció a dalt i els controls a sota, no esprémer el text */
+  /* Cada plugin: els controls es queden a la dreta de la mateixa fila mentre hi càpiguen; si no,
+     baixen a una fila pròpia (alineats a la dreta) en lloc d'esprémer el text */
   .extension-item {
     flex-wrap: wrap;
     gap: 8px;
   }
 
   .extension-info {
-    flex: 1 1 160px;
+    flex: 1 1 120px;
     min-width: 0;
   }
 
   .extension-actions {
-    flex: 1 1 100%;
-    margin-left: 0;
-    justify-content: flex-end;
+    flex: 0 0 auto;
+    margin-left: auto;
+    gap: 8px;
   }
 
   /* El camp del model i els seus botons baixen de línia en lloc d'esprémer el camp */
@@ -1185,13 +1186,13 @@ button:disabled,
   }
 
   .extension-info {
-    flex: 1 1 220px;
+    flex: 1 1 180px;
     min-width: 0;
   }
 
   .extension-actions {
-    flex: 1 1 100%;
-    justify-content: flex-end;
+    flex: 0 0 auto;
+    margin-left: auto;
   }
 }
 
