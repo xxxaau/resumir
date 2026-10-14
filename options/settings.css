@@ -1214,6 +1214,17 @@ button:disabled,
 .usage-grid dd { margin: 0; font-weight: 600; }
 .usage-list { margin: 4px 0 16px; padding-left: 20px; }
 
+.privacy-table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 0.92em; }
+.privacy-table th, .privacy-table td { padding: 9px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border-color); }
+.privacy-table thead th { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+.privacy-table tbody th { font-weight: 600; }
+.history-info { margin: 0 0 12px; font-weight: 500; }
+@media (max-width: 720px) {
+  .privacy-table thead { display: none; }
+  .privacy-table, .privacy-table tbody, .privacy-table tr, .privacy-table th, .privacy-table td { display: block; }
+  .privacy-table tr { padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+  .privacy-table th, .privacy-table td { border: 0; padding: 2px 0; }
+}
 .backup-key-row { font-weight: 400; margin: 12px 0; font-size: 0.9em; }
 
 /* Els botons del camp del model no es parteixen en dues línies («Triar model…») */

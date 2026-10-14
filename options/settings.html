@@ -131,28 +131,38 @@
       <div id="tab-data" class="tab-pane">
         <h1 class="page-title">Dades i privadesa</h1>
 
+        <div class="section" id="privacySection">
+          <h2>On són les teves dades</h2>
+          <p class="help-text">Resumir no té servidors propis ni analítica: no rep res de tu. Això és tot el que es desa o es mou.</p>
+          <table class="privacy-table">
+            <caption class="sr-only">On es desa cada dada i si surt del teu navegador</caption>
+            <thead>
+              <tr><th scope="col">Dada</th><th scope="col">On es desa</th><th scope="col">Surt del navegador?</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Clau d'API de Gemini</th><td>Només en aquest navegador (no se sincronitza)</td><td>Només s'envia a Google, per poder generar els resums</td></tr>
+              <tr><th scope="row">Text de la pàgina que resumeixes</th><td>No es desa</td><td>Sí: s'envia a Google Gemini quan demanes un resum</td></tr>
+              <tr><th scope="row">Resums desats (historial)</th><td>Només en aquest ordinador</td><td>No</td></tr>
+              <tr><th scope="row">Estadístiques d'ús</th><td>Només en aquest navegador</td><td>No</td></tr>
+              <tr><th scope="row">Configuració (prompts, plugins, tema…)</th><td>Al navegador; amb la sincronització activada, també al teu compte del navegador</td><td>No s'envia a Resumir ni a Google</td></tr>
+            </tbody>
+          </table>
+          <p class="help-text">
+            Google tracta el text que li envies segons <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">la seva política de privadesa</a>.
+            <br />
+            <a href="https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md" target="_blank" rel="noopener noreferrer">Política de privadesa de Resumir →</a>
+          </p>
+        </div>
+
         <div class="section">
           <h2>Historial</h2>
-          <div class="form-group">
-            <p class="field-label">Historial de resums</p>
-            <div class="help-text">
-              L'extensió guarda còpies locals dels resums (és el que veus a
-              l'historial de la barra lateral) per estalviar costos i millorar la
-              velocitat. Aquesta còpia no surt mai del teu ordinador.
-            </div>
-            <div class="help-text">
-              El text de les pàgines que resumeixes sí que s'envia a l'API de Google
-              Gemini per generar el resum.
-            </div>
-            <div class="flex-row-gap">
-              <button
-                id="clearCache"
-                class="btn btn-secondary error-button"
-              >
-                Esborrar l'historial de resums
-              </button>
-              
-            </div>
+          <p class="help-text">
+            Còpies locals dels resums (és el que veus a l'historial de la barra lateral):
+            estalvien costos i fan que tornar-hi sigui instantani.
+          </p>
+          <p id="historyInfo" class="history-info" aria-live="polite">Calculant…</p>
+          <div class="flex-row-gap">
+            <button id="clearCache" class="btn btn-secondary error-button">Esborrar l'historial de resums</button>
           </div>
         </div>
 

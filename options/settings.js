@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     bindClick("clearUsageStats", clearUsageStats);
     renderUsageStats();
+    if (typeof renderHistoryInfo === 'function') renderHistoryInfo();
 
     bindClick("verifyApiKey", checkApiKey);
     bindClick("toggleApiKey", toggleApiKeyVisibility);

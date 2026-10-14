@@ -345,7 +345,7 @@ test("General - la privadesa diu que el text de les pàgines s'envia a Google Ge
     const h = await loadSettings({});
     try {
         const text = h.document.getElementById("tab-general").textContent + h.document.getElementById("tab-data").textContent;
-        assert.match(text, /s'envia a l'API de Google\s+Gemini/);
+        assert.match(text, /s'envia a Google Gemini quan demanes un resum/);
         assert.match(text, /només\s+en aquest navegador/, "La clau es desa només en aquest navegador");
     } finally { h.close(); }
 });
@@ -1103,5 +1103,21 @@ test("selector de models - el model triat es veu amb nom i identificador en sego
         assert.match(h.document.getElementById("refreshModels").textContent, /Actualitzar la llista de models/);
         const list = await openModelPicker(h);
         assert.match(list.querySelector(".models-list-help").textContent, /★/);
+    } finally { h.close(); }
+});
+
+test("Dades i privadesa - la taula diu on és cada dada i l'historial mostra quants resums hi ha i es posa a zero en esborrar-lo", async () => {
+    const h = await loadSettings({ local: seedCache(3) });
+    try {
+        const rows = [...h.document.querySelectorAll("#privacySection tbody tr")].map(r => r.textContent.replace(/\s+/g, " "));
+        assert.equal(rows.length, 5);
+        assert.match(rows.find(r => /Clau d'API/.test(r)), /no se sincronitza/);
+        assert.match(rows.find(r => /Text de la pàgina/.test(r)), /No es desa.*s'envia a Google Gemini/);
+        assert.match(rows.find(r => /Configuració/.test(r)), /sincronització/);
+        await h.flush(10);
+        assert.match(h.document.getElementById("historyInfo").textContent, /3 resums desats · uns \d+ KB/);
+        h.document.getElementById("clearCache").click();
+        await h.flush(20);
+        assert.match(h.document.getElementById("historyInfo").textContent, /Encara no hi ha cap resum desat/);
     } finally { h.close(); }
 });

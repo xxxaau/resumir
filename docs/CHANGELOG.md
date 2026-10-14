@@ -80,6 +80,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **«Dades i privadesa» més clara:** una taula diu on es desa cada dada (clau, text de la
+  pàgina, resums, estadístiques, configuració) i si surt del navegador, i l'historial mostra
+  quants resums hi ha i quant ocupen abans d'esborrar-lo.
 - **Selector de model més clar** a la configuració: el model triat es veu amb el nom
   llegible, el nivell i l'identificador en segon pla, amb un botó «Canviar de model»; la
   llista explica què fa cada cosa (clic per triar, ★ per a la barra lateral) i l'escriptura

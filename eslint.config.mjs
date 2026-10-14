@@ -182,6 +182,7 @@ const settingsGlobals = {
     updateMoveButtonsState: "readonly",
     // settings-cache.js
     clearCache: "readonly",
+    renderHistoryInfo: "readonly",
     // settings-models.js
     modelNote: "readonly",
     listModels: "readonly",
