@@ -959,3 +959,26 @@ test("capçalera de plugin - l'interruptor porta el nom del plugin a l'aria-labe
         assert.equal(label, "Activa Targetes Anki");
     } finally { h.close(); }
 });
+
+test("pàgines de plugin - l'ajuda surt tancada, Resum no porta «← Plugins» ni interruptor i el prompt únic té Desar/Restaurar dins del desplegable", async () => {
+    const h = await loadSettings();
+    try {
+        for (const d of h.document.querySelectorAll(".plugin-about")) assert.equal(d.hasAttribute("open"), false, "ajuda tancada");
+        assert.equal(h.document.querySelector("#tab-resum .plugin-head"), null, "Resum és el nucli");
+        assert.ok(h.document.querySelector("#tab-deepdive .plugin-head"), "els altres plugins sí");
+        for (const [tab, btn] of [["deepdive", "saveDeepDive"], ["science", "saveScience"], ["conceptmap", "saveConceptMap"], ["simple", "saveSimple"]]) {
+            const b = h.document.querySelector(`#tab-${tab} #${btn}`);
+            assert.ok(b, `${btn} existeix`);
+            assert.ok(b.closest("details.advanced-prompt"), `${btn} dins del desplegable del prompt`);
+        }
+    } finally { h.close(); }
+});
+
+test("«Restaurar» amb el prompt ja per defecte ho diu, no es queda mut", async () => {
+    const h = await loadSettings();
+    try {
+        h.document.getElementById("resetDeepDive").click();
+        await h.flush?.(10);
+        assert.match(h.document.getElementById("status").textContent, /ja és el valor per defecte/);
+    } finally { h.close(); }
+});

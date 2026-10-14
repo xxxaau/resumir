@@ -60,7 +60,8 @@ function initializePluginHeaders() {
     for (const [pane, enableId] of Object.entries(PLUGIN_PANES)) {
         const tab = document.getElementById(`tab-${pane}`);
         const source = document.getElementById(enableId);
-        if (!tab || !source || tab.querySelector('.plugin-head')) continue;
+        // Resum és el nucli i té entrada pròpia al menú: no porta «← Plugins» ni interruptor
+        if (pane === 'resum' || !tab || !source || tab.querySelector('.plugin-head')) continue;
 
         const head = document.createElement('div');
         head.className = 'plugin-head';

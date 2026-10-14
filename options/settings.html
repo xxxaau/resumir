@@ -169,7 +169,7 @@
       <div id="tab-resum" class="tab-pane">
         <h1 class="page-title">Resum: configuració</h1>
 
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> És la funció principal: resumeix la pàgina, el vídeo (a partir de la transcripció) o el PDF en punts clau, en català i fidel al text original.</p>
           <p><strong>Per què és útil.</strong> Et deixa decidir en segons si val la pena llegir-ho o mirar-ho sencer, i recuperar després les idees principals.</p>
@@ -932,7 +932,7 @@
       <!-- Tab: Obsidian Config -->
       <div id="tab-obsidian" class="tab-pane">
         <h1 class="page-title">Desar a Obsidian: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Afegeix un botó a la barra d'eines que desa el resum com a nota dins del teu vault d'Obsidian, amb títol, enllaç a la pàgina original i el resum ja formatat.</p>
           <p><strong>Per què és útil.</strong> Els resums passen directament al teu quadern de notes, sense copiar i enganxar, i queden ordenats per data.</p>
@@ -1005,7 +1005,7 @@
       <!-- Tab: Markdown Config -->
       <div id="tab-markdown" class="tab-pane">
         <h1 class="page-title">Copiar Markdown: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Afegeix un botó <em>Copiar</em> que posa el resum al porta-retalls en format Markdown, amb la plantilla que triïs.</p>
           <p><strong>Per què és útil.</strong> Pots enganxar el resum a qualsevol eina (Notion, correu, documents, editors de codi) mantenint títols, llistes i l'enllaç a la font.</p>
@@ -1046,7 +1046,7 @@
       <!-- Tab: Deep Dive Config -->
       <div id="tab-deepdive" class="tab-pane">
         <h1 class="page-title">Aprofundiment: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Genera una anàlisi més profunda de la pàgina: context, arguments, matisos i implicacions, més enllà del resum curt.</p>
           <p><strong>Per què és útil.</strong> Quan un text importa de debò (un article d'opinió, un informe, una notícia polèmica), el resum curt no n'hi ha prou per decidir què en penses.</p>
@@ -1054,7 +1054,7 @@
           <ul>
             <li><b>Prompt:</b> són les instruccions que rep el model. El de per defecte ja funciona bé; edita'l només si vols un altre estil o estructura.</li>
             <li>Si el canvies, apareix la insígnia <em>Personalitzat</em>; <em>Restaurar</em> recupera el de per defecte.</li>
-            <li>Activa o desactiva el plugin des de la llista de Plugins: el botó apareix a la barra d'eines.</li>
+            <li>L'interruptor de dalt activa o desactiva el plugin: quan és actiu, el botó apareix a la barra d'eines.</li>
           </ul>
         </details>
 
@@ -1082,18 +1082,18 @@
               detallada.
             </div>
           </div>
-          </details>
           <div class="section-actions">
             <button id="saveDeepDive" class="btn btn-primary">Desar</button>
             <button id="resetDeepDive" class="btn btn-secondary">Restaurar</button>
           </div>
+          </details>
         </div>
       </div>
 
       <!-- Tab: Scientific Validation Config -->
       <div id="tab-science" class="tab-pane">
         <h1 class="page-title">Validació científica: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Avalua el rigor científic del contingut: tipus d'estudi, mostra, possibles biaixos, conflictes d'interès i si les conclusions se sostenen.</p>
           <p><strong>Per què és útil.</strong> Ajuda a distingir un resultat sòlid d'un titular exagerat quan llegeixes notícies de salut, nutrició o ciència.</p>
@@ -1129,18 +1129,18 @@
               usant evidència científica enllaçada.
             </div>
           </div>
-          </details>
           <div class="section-actions">
             <button id="saveScience" class="btn btn-primary">Desar</button>
             <button id="resetScience" class="btn btn-secondary">Restaurar</button>
           </div>
+          </details>
         </div>
       </div>
 
       <!-- Tab: Bionic Reader Config -->
       <div id="tab-bionic" class="tab-pane">
         <h1 class="page-title">Lectura biònica: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Marca amb negreta l'inici de cada paraula del resum perquè l'ull les reconegui més de pressa.</p>
           <p><strong>Per què és útil.</strong> Per a alguns lectors (inclosos molts amb dislèxia o TDAH) fa la lectura de textos llargs més fluida. Si no t'ajuda, deixa-ho desactivat.</p>
@@ -1234,7 +1234,7 @@
       <!-- Tab: Concept Map Config -->
       <div id="tab-conceptmap" class="tab-pane">
         <h1 class="page-title">Mapa conceptual: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Converteix la pàgina en un mapa conceptual interactiu: tema central, branques i subbranques que pots plegar, ampliar i exportar com a imatge.</p>
           <p><strong>Per què és útil.</strong> Serveix per veure l'estructura d'un tema d'un cop d'ull, estudiar-lo o preparar un esquema.</p>
@@ -1269,19 +1269,18 @@
               Instruccions que s'enviaran al model per generar el mapa conceptual jeràrquic.
             </div>
           </div>
-          </details>
-
           <div class="section-actions">
             <button id="saveConceptMap" class="btn btn-primary">Desar</button>
             <button id="resetConceptMap" class="btn btn-secondary">Restaurar</button>
           </div>
+          </details>
         </div>
       </div>
 
       <!-- Tab: Explain Simple Config -->
       <div id="tab-simple" class="tab-pane">
         <h1 class="page-title">Explica-ho fàcil: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Reescriu el contingut amb llenguatge senzill, frases curtes i exemples quotidians, sense perdre les idees principals.</p>
           <p><strong>Per què és útil.</strong> Quan un text és tècnic o dens, aquesta versió ajuda a entendre'l ràpid o a explicar-lo a algú altre.</p>
@@ -1315,19 +1314,18 @@
               Instruccions que s'enviaran al model per reescriure el contingut en llenguatge planer, per a algú sense coneixements previs.
             </div>
           </div>
-          </details>
-
           <div class="section-actions">
             <button id="saveSimple" class="btn btn-primary">Desar</button>
             <button id="resetSimple" class="btn btn-secondary">Restaurar</button>
           </div>
+          </details>
         </div>
       </div>
 
       <!-- Tab: PDF local -->
       <div id="tab-selectpdf" class="tab-pane">
         <h1 class="page-title">PDF: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Et deixa triar un PDF del teu ordinador i el resumeix, amb el visor propi al costat per consultar-lo.</p>
           <p><strong>Per què és útil.</strong> Els PDF locals (articles, informes, apunts) no s'obren com una pàgina web i d'altra manera no es podrien resumir.</p>
@@ -1348,7 +1346,7 @@
       <!-- Tab: Anki Config -->
       <div id="tab-anki" class="tab-pane">
         <h1 class="page-title">Targetes Anki: configuració</h1>
-        <details class="plugin-about" open>
+        <details class="plugin-about">
           <summary>Què fa i com configurar-lo</summary>
           <p><strong>Què fa.</strong> Genera targetes de memorització (pregunta i resposta) a partir del contingut i les desa al teu vault d'Obsidian, per al plugin d'Anki.</p>
           <p><strong>Per què és útil.</strong> Passes de llegir a recordar: l'espaiat de les repeticions fa que això es quedi a la memòria.</p>

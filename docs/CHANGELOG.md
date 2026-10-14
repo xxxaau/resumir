@@ -80,6 +80,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Pàgines de plugin més netes:** l'ajuda («Què fa i com configurar-lo») surt tancada,
+  «Desar» i «Restaurar» són dins del desplegable del prompt, «Restaurar» avisa quan ja
+  és el prompt per defecte, i Resum (el nucli) ja no porta «← Plugins» ni interruptor.
 - **Configuració, retocs:** un botó desactivat ja no sembla actiu, més aire entre
   els textos d'ajuda i els botons, textos més nets i coherents («Targetes per
   petició», «Actualitzar la llista», lectura biònica sense unitats tècniques), la pàgina

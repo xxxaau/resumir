@@ -382,7 +382,10 @@ function linkHelpTexts() {
 function restoreField(id, defaultValue, label) {
     const el = document.querySelector("#" + id);
     const previous = el.value;
-    if (previous === defaultValue) return false;
+    if (previous === defaultValue) {
+        showStatus(`${label} ja és el valor per defecte.`);
+        return false;
+    }
     el.value = defaultValue;
     updatePromptBadges();
     setDirty(true);
