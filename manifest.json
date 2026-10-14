@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Resumir",
     "short_name": "Resumir",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "author": "Sergi Xaudiera",
     "homepage_url": "https://github.com/xxxaau/resumir",
     "description": "Resumeix pàgines web, vídeos de YouTube i PDF amb Gemini, en català i fidel al text original.",
