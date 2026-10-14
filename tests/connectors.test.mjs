@@ -105,3 +105,20 @@ test("YouTube: el text pre-renderitzat conserva els temps dels segments", () => 
     const meta = extractors.readYoutubeCaptionMeta();
     assert.equal(meta.prerenderedText, "[0:00] Primer [0:40] Segon");
 });
+
+test("YouTube: després d'una navegació SPA, les pistes són les del vídeo de la URL i no les del vídeo anterior", () => {
+    const track = (v) => ({ baseUrl: `https://www.youtube.com/api/timedtext?v=${v}&lang=es&kind=asr`, vssId: "a.es", languageCode: "es", kind: "asr" });
+    const resp = (v) => ({ videoDetails: { videoId: v }, captions: { playerCaptionsTracklistRenderer: { captionTracks: [track(v)] } } });
+    global.location = { href: "https://www.youtube.com/watch?v=NOU" };
+    // Els globals encara són del vídeo anterior; el reproductor ja és el nou
+    global.window = { ytInitialPlayerResponse: resp("ANTIC"), ytInitialData: { currentVideoEndpoint: { watchEndpoint: { videoId: "ANTIC" } } } };
+    global.document = { querySelector: () => ({ getPlayerResponse: () => resp("NOU") }) };
+    try {
+        const meta = extractors.readYoutubeCaptionMeta();
+        assert.match(meta.captionBaseUrl, /v=NOU/, "ha de fer servir el vídeo actual");
+        // Sense reproductor i amb globals vells: no s'inventa pistes d'un altre vídeo
+        global.document = { querySelector: () => null };
+        const stale = extractors.readYoutubeCaptionMeta();
+        assert.ok(!stale.hasTracks && !stale.captionBaseUrl, "no ha de reutilitzar les pistes del vídeo anterior");
+    } finally { delete global.location; }
+});

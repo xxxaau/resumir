@@ -183,8 +183,25 @@ function formatTimedTranscript(segments) {
 // o { error } si falla. Autocontinguda: només usa globals window i document.
 function readYoutubeCaptionMeta() {
     try {
+        // YouTube navega sense recarregar (SPA): ytInitialPlayerResponse i ytInitialData poden ser els
+        // del vídeo ANTERIOR. Es fa servir la resposta del reproductor (sempre l'actual) i els globals
+        // només si són del vídeo de la URL; si no, es resumiria el vídeo equivocat sense cap error.
+        let urlVideoId = null;
+        try { urlVideoId = new URL(location.href).searchParams.get('v'); } catch { /* sense location */ }
+        const isCurrent = (id) => !urlVideoId || !id || id === urlVideoId;
+        let playerResponse = null;
+        try {
+            const live = document.querySelector('#movie_player')?.getPlayerResponse?.();
+            if (live && isCurrent(live.videoDetails?.videoId)) playerResponse = live;
+        } catch { /* API privada — ignorem */ }
+        if (!playerResponse && isCurrent(window.ytInitialPlayerResponse?.videoDetails?.videoId)) {
+            playerResponse = window.ytInitialPlayerResponse || null;
+        }
+        const initialData = isCurrent(window.ytInitialData?.currentVideoEndpoint?.watchEndpoint?.videoId)
+            ? window.ytInitialData : null;
+
         // Pistes de subtítols del player
-        const rawCaptionTracks = window.ytInitialPlayerResponse?.captions
+        const rawCaptionTracks = playerResponse?.captions
             ?.playerCaptionsTracklistRenderer?.captionTracks || [];
 
         // Pista activa via API privada del player (pot no estar disponible)
@@ -199,7 +216,7 @@ function readYoutubeCaptionMeta() {
         // Text pre-renderitzat del panell de transcripció (ytInitialData)
         let prerenderedText = '';
         try {
-            const panels = window.ytInitialData?.engagementPanels || [];
+            const panels = initialData?.engagementPanels || [];
             const transcriptPanel = panels.find(p =>
                 p?.engagementPanelSectionListRenderer?.targetId === 'engagement-panel-searchable-transcript'
             );

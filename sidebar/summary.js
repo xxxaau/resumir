@@ -462,7 +462,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         for (const tryModel of candidates) {
             if (signal.aborted) break;
             try {
-                currentMetadata.summary = pageData.noTranscript ? "Vídeo sense transcripció.\n\n" : ""; // Reset output text
+                currentMetadata.summary = pageData.noTranscript ? "No s'ha pogut obtenir la transcripció d'aquest vídeo (YouTube no l'ha servida): aquest resum es basa només en el títol i la descripció.\n\n" : ""; // Reset output text
                 liveOutputTokens = 0;
                 const loadingDiv = document.getElementById("loading");
                 setLoadingStage(tryModel === preferredModel

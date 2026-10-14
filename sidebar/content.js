@@ -477,22 +477,34 @@ async function getPageContent() {
                             func: async () => {
                                 try {
                                     const sleep = ms => new Promise(r => setTimeout(r, ms));
-                                    const findUrl = () => {
-                                        const hits = performance.getEntriesByType('resource')
-                                            .filter(e => e.name.includes('/api/timedtext') && /[?&]pot=/.test(e.name));
-                                        return hits.length ? hits[hits.length - 1].name : null;
-                                    };
-                                    let url = findUrl();
+                                    const player = document.querySelector('#movie_player');
+                                    let vid = null;
+                                    try { vid = player?.getPlayerResponse?.()?.videoDetails?.videoId || null; } catch { /* API privada */ }
+                                    vid = vid || new URL(location.href).searchParams.get('v');
+                                    const isTimedtext = n => n.includes('/api/timedtext') && /[?&]pot=/.test(n) && (!vid || n.includes('v=' + vid));
+                                    // YouTube buida el buffer de Resource Timing (clearResourceTimings) cada pocs segons:
+                                    // getEntriesByType() no hi troba la petició. Un PerformanceObserver (amb `buffered`) rep
+                                    // les entrades que queden i les noves en viu.
+                                    let url = null;
+                                    const obs = new PerformanceObserver(l => { for (const e of l.getEntries()) if (isTimedtext(e.name)) url = e.name; });
+                                    obs.observe({ type: 'resource', buffered: true });
+                                    await sleep(0);
                                     if (!url) {
                                         const btn = document.querySelector('.ytp-subtitles-button');
                                         const wasOn = btn && btn.getAttribute('aria-pressed') === 'true';
-                                        if (btn && !wasOn) btn.click();
-                                        for (let i = 0; i < 10 && !url; i++) { await sleep(400); url = findUrl(); }
-                                        if (btn && !wasOn && btn.getAttribute('aria-pressed') === 'true') btn.click();
+                                        if (btn) {
+                                            // Si CC ja és actiu no es genera cap petició nova: s'apaga i s'encén per forçar-ne una
+                                            if (wasOn) { btn.click(); await sleep(150); }
+                                            btn.click();
+                                            for (let i = 0; i < 20 && !url; i++) await sleep(250);
+                                            if (!wasOn && btn.getAttribute('aria-pressed') === 'true') btn.click();
+                                        }
                                     }
+                                    obs.disconnect();
                                     if (!url) return { error: 'no timedtext url' };
                                     const u = new URL(url, location.href);
                                     u.searchParams.set('fmt', 'json3');
+                                    u.searchParams.delete('tlang');
                                     const resp = await fetch(u.toString(), { credentials: 'same-origin' });
                                     const raw = await resp.text();
                                     if (!resp.ok || !raw) return { error: 'empty (' + resp.status + ')' };
