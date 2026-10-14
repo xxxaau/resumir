@@ -124,8 +124,7 @@ body {
   padding: 6px 48px 6px 12px;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--toolbar-bg) !important;
-  /* Cantonades de dalt arrodonides com el panell de Firefox */
-  border-radius: 8px 8px 0 0;
+  border-radius: 0;
   position: sticky;
   top: 0;
   z-index: 20;
@@ -352,7 +351,6 @@ body {
   width: 100%;
   background-color: var(--footer-bg);
   border-top: 1px solid var(--footer-border);
-  border-radius: 0 0 8px 8px; /* com el panell de Firefox */
   padding: 6px 10px;
   font-size: 11px;
   color: var(--footer-text);
@@ -793,7 +791,7 @@ body {
   border-bottom: 1px solid var(--border-color);
   margin: 0 -12px 10px;
   background-color: var(--toolbar-bg) !important;
-  border-radius: 8px 8px 0 0;
+  border-radius: 0;
   /* Fix a dalt: en un resum llarg el botó de tornar no pot sortir de pantalla.
      La barra d'eines (amagada en mode historial) fa --toolbar-height = 0. */
   position: sticky;
@@ -1617,30 +1615,3 @@ a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, 
 
 .anki-card-sent { opacity: 0.7; }
 .anki-sent-badge { font-size: 0.8em; color: var(--success); margin-right: auto; }
-
-/* Firefox: el contingut de la barra és una peça amb les cantonades arrodonides (com la targeta
-   de la barra lateral del navegador), que deixa veure el fons del navegador a les cantonades.
-   Per això el fons és al body (no al canvas) i el desplaçament passa del document al body: així
-   les cantonades segueixen arrodonides encara que es faci scroll. Només Firefox
-   (@supports -moz-appearance): al panell de Chromium el fons de fora és un altre i quedaria un rebaix. */
-@supports (-moz-appearance: none) {
-  html {
-    height: 100%;
-    overflow: hidden;
-    /* No pot ser «transparent»: aleshores el fons del body es propaga al llenç i les cantonades
-       del body no es veurien arrodonides. Un alfa gairebé nul ho evita sense canviar el color. */
-    background: rgb(0 0 0 / 0.01);
-    scroll-padding-top: 0;
-  }
-  body {
-    height: 100%;
-    box-sizing: border-box;
-    overflow-y: auto;
-    border-radius: 12px;
-    scroll-padding-top: calc(var(--toolbar-height, 0px) + var(--backbar-height, 0px) + 44px);
-    scroll-padding-bottom: 48px;
-  }
-  .toolbar,
-  #history-back-bar { border-radius: 12px 12px 0 0; }
-  #footer-status { border-radius: 0 0 12px 12px; }
-}
