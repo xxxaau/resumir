@@ -83,3 +83,12 @@ test("generateHtml - només les versions recents queden obertes; les antigues, p
     assert.equal((older.match(/class="version-entry"/g) || []).length, 3);
     assert.ok(!generateHtml(many.slice(0, 5)).includes("changelog-older"), "amb pocs, sense plegat");
 });
+
+test("historial de canvis de la configuració - sense jerga de desenvolupador (les entrades tècniques porten «(dev)»)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const html = readFileSync(new URL("../options/settings.html", import.meta.url), "utf8");
+    const block = html.slice(html.indexOf("<!-- CHANGELOG_START -->"), html.indexOf("<!-- CHANGELOG_END -->"));
+    for (const word of ["softprops", "typeof browser", "npm run", "FORCE_JAVASCRIPT", "warnings d'AMO", "Zero warnings", "node-version"]) {
+        assert.ok(!block.includes(word), `«${word}» surt a l'historial que veu l'usuari: marca l'entrada amb (dev) a docs/CHANGELOG.md`);
+    }
+});

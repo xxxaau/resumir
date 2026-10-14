@@ -163,20 +163,15 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   Twitter/X passa a: scrape de tweets com a via primària + meta `og:description`
   com a fallback robust (HTML servit pel servidor, immune a canvis del DOM).
   Elimina 3 warnings recurrents d'AMO («Unsafe assignment to innerHTML» interns
-  de la llibreria de tercers) i ~571 KB del paquet.
+  de la llibreria de tercers) i ~571 KB del paquet. (dev)
 
 ---
 
 ## [2.5.0] - 2026-06-12
 
 ### Arreglat
-- **Chromium/Edge: el panell lateral s'obre des de la icona.** El Chromium modern
-  (≥ ~140) també exposa un global `browser`, cosa que feia que la detecció de
-  navegador (`typeof browser`) classifiqués Edge/Chrome com a Firefox i tot
-  `ext.sidebar` fos un no-op silenciós (el panell no s'obria mai). La detecció ara
-  usa `browser.sidebarAction` i s'exposa com a `ext.isFirefox` (única font de
-  veritat). Tests de regressió que simulen el Chromium real (global `browser`
-  present sense `sidebarAction`).
+- **Chromium/Edge: el panell lateral s'obre des de la icona.** En versions recents
+  d'Edge i Chrome la icona de l'extensió no obria el panell; ara sí.
 - **Selector de models llegible** a la barra inferior: la fletxa nativa del
   desplegable se superposava al nom del model a Chromium/Edge; ara hi ha un caret
   SVG propi amb espai reservat i el·lipsi.
@@ -212,10 +207,10 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ### Desenvolupament
 - `npm run dev:chromium`: genera la carpeta desempaquetada per provar a
   Edge/Chrome (el `manifest.json` de l'arrel és el de Firefox i no funciona a
-  Chromium).
+  Chromium). (dev)
 - Proposta de valor i pla de comunicació (`docs/COMUNICACIO.md`); literals d'AMO
   i CWS alineats; README reescrit amb crèdits a les llibreries open source
-  (Readability, Defuddle, pdf.js, markmap+D3).
+  (Readability, Defuddle, pdf.js, markmap+D3). (dev)
 
 ---
 
@@ -224,10 +219,10 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ### Canviat
 - **CI/Node:** `node-version` 20 → 22 als workflows (Node 20 és EOL),
   `softprops/action-gh-release` v2 → v3 (node24-native) i eliminada l'env var
-  pont `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`; `engines.node` >=18 → >=20.
+  pont `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`; `engines.node` >=18 → >=20. (dev)
 - **Migració de prompts versionada per-prompt** (`PROMPT_VERSIONS`): evita banners
   falsos de "nova versió del prompt" quan només canvia un prompt. Lògica extreta a
-  una funció pura testejada (`computePromptMigration`, 8 casos nous).
+  una funció pura testejada (`computePromptMigration`, 8 casos nous). (dev)
 - **Llengua:** verbs dels botons unificats a **infinitiu** (guia de Comunicació
   Clara de Gencat) i castellanismes corregits ("Desar" per "Guardar", "memòria cau"
   per "caché", "claudàtors" per "corxers", "ressaltarà", "a la barra lateral").
@@ -389,7 +384,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - Eliminat `web_accessible_resources` del manifest Firefox (ja no calen els vendors a la pàgina). (minor)
 
 ### Seguretat
-- **Zero warnings a la revisió d'AMO**: el codi nou no utilitza `innerHTML` dinàmic, `eval()` ni `Function()` — totes operacions DOM via `createElementNS` i `DOMParser`. Això elimina els 6 warnings que retardaven la revisió de l'extensió.
+- **Zero warnings a la revisió d'AMO**: el codi nou no utilitza `innerHTML` dinàmic, `eval()` ni `Function()` — totes operacions DOM via `createElementNS` i `DOMParser`. Això elimina els 6 warnings que retardaven la revisió de l'extensió. (dev)
 - Reducció significativa de superfície d'atac: tot el codi de visualització és auditable i prop de 95% més petit que les llibreries substituïdes. (minor)
 
 ### Intern
@@ -401,7 +396,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 ## [2.2.8] - 2026-05-22
 
 ### Corregit
-- **Crític**: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7.
+- **Crític**: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7. (dev)
 - Les llibreries `d3.min.js`, `markmap-lib.js` i `markmap-view.js` ara s'inclouen al ZIP de release (abans referenciades al HTML però absents al paquet). (minor)
 - `conceptmap.js` integrat al bundle del sidebar per simplificar el manteniment i reduir el nombre de requests. (minor)
 

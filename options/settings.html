@@ -1494,7 +1494,6 @@
                 <li><strong>Plugin «Targetes Anki»</strong>: genera targetes de pregunta/resposta (flashcards) del contingut de la pàgina amb Gemini i les exporta a Obsidian amb la sintaxi <code>obsidian_to_anki</code>. Configurable a Settings: activació, <strong>vault propi</strong> (independent del plugin d'Obsidian; la primera càrrega n'agafa el valor si Obsidian està configurat), ruta de la nota, mida del paquet, idioma (CA/EN) i prompt editable.</li>
                 <li><strong>Panell de targetes estil flashcard</strong>: pregunta centrada a dalt, divisòria i resposta a sota; cada targeta s'edita o es descarta individualment (<code>Edita</code> / <code>Descarta</code>). Selecció <strong>desmarcada per defecte</strong>, amb toggle <code>Selecciona-ho tot</code> / <code>Deselecciona-ho tot</code> i botó <code>Descarta-ho tot</code>.</li>
                 <li><strong><code>Genera més</code> i <code>Afinar</code></strong>: «Genera més» empeny el model cap a detalls secundaris per seguir produint targetes noves; «Afinar» centra la generació en un aspecte concret (sense excloure les existents, perquè pugui aprofundir). Indicador de càrrega (puntets) mentre s'espera i avís informatiu quan no hi ha més punts nous. La caixa d'Afinar queda fixa al fons, just sobre la barra inferior.</li>
-                <li><strong>Llibreria Defuddle (<code>defuddle.js</code>, ~571 KB)</strong>: només s'usava per a Twitter/X i el scrape directe del DOM (<code>[data-testid="tweetText"]</code>) ja captura els fils igual de bé (tots dos llegeixen el mateix DOM renderitzat). L'extracció de Twitter/X passa a: scrape de tweets com a via primària + meta <code>og:description</code> com a fallback robust (HTML servit pel servidor, immune a canvis del DOM). Elimina 3 warnings recurrents d'AMO («Unsafe assignment to innerHTML» interns de la llibreria de tercers) i ~571 KB del paquet.</li>
               </ul>
             </div>
             <div class="version-entry">
@@ -1503,7 +1502,7 @@
                 <span class="version-date">Juny 2026</span>
               </div>
               <ul class="version-list">
-                <li><strong>Chromium/Edge: el panell lateral s'obre des de la icona.</strong> El Chromium modern (≥ ~140) també exposa un global <code>browser</code>, cosa que feia que la detecció de navegador (<code>typeof browser</code>) classifiqués Edge/Chrome com a Firefox i tot <code>ext.sidebar</code> fos un no-op silenciós (el panell no s'obria mai). La detecció ara usa <code>browser.sidebarAction</code> i s'exposa com a <code>ext.isFirefox</code> (única font de veritat). Tests de regressió que simulen el Chromium real (global <code>browser</code> present sense <code>sidebarAction</code>).</li>
+                <li><strong>Chromium/Edge: el panell lateral s'obre des de la icona.</strong> En versions recents d'Edge i Chrome la icona de l'extensió no obria el panell; ara sí.</li>
                 <li><strong>Selector de models llegible</strong> a la barra inferior: la fletxa nativa del desplegable se superposava al nom del model a Chromium/Edge; ara hi ha un caret SVG propi amb espai reservat i el·lipsi.</li>
                 <li><strong>Lectura biònica amb mida coherent a tot arreu</strong>: la mida s'aplicava en <code>em</code> relatiu al pare (12px) i «Normal» es veia més petit que la lectura normal; a més, cada camí (toggle, streaming, historial) aplicava els estils pel seu compte. Ara un únic helper (<code>applyBionicStyles</code>) ancora la mida en px sobre <code>--content-base-size</code> (sidebar.css).</li>
                 <li><strong>Twitter/X als paquets publicats</strong>: <code>defuddle.js</code> no s'incloïa als ZIPs de producció i l'extracció de fils queia silenciosament al fallback.</li>
@@ -1513,8 +1512,6 @@
                 <li><strong>Permisos: <code>&lt;all_urls&gt;</code> ara és requerit a la instal·lació</strong> (abans era opcional en temps d'execució): resumir ja no demana permís lloc a lloc. ⚠️ En actualitzar, el navegador demana re-aprovar els permisos — és normal i només passa una vegada.</li>
                 <li>A Chromium el clic a la icona usa el comportament natiu del panell (<code>openPanelOnActionClick</code>); el listener d'acció només es registra a Firefox (són mútuament excloents a Chromium).</li>
                 <li>Focus de teclat visible al selector de models (WCAG 2.4.7), que amb el caret personalitzat hauria quedat invisible.</li>
-                <li><code>npm run dev:chromium</code>: genera la carpeta desempaquetada per provar a Edge/Chrome (el <code>manifest.json</code> de l'arrel és el de Firefox i no funciona a Chromium).</li>
-                <li>Proposta de valor i pla de comunicació (<code>docs/COMUNICACIO.md</code>); literals d'AMO i CWS alineats; README reescrit amb crèdits a les llibreries open source (Readability, Defuddle, pdf.js, markmap+D3).</li>
               </ul>
             </div>
             <div class="version-entry">
@@ -1523,8 +1520,6 @@
                 <span class="version-date">Juny 2026</span>
               </div>
               <ul class="version-list">
-                <li><strong>CI/Node:</strong> <code>node-version</code> 20 → 22 als workflows (Node 20 és EOL), <code>softprops/action-gh-release</code> v2 → v3 (node24-native) i eliminada l'env var pont <code>FORCE_JAVASCRIPT_ACTIONS_TO_NODE24</code>; <code>engines.node</code> &gt;=18 → &gt;=20.</li>
-                <li><strong>Migració de prompts versionada per-prompt</strong> (<code>PROMPT_VERSIONS</code>): evita banners falsos de "nova versió del prompt" quan només canvia un prompt. Lògica extreta a una funció pura testejada (<code>computePromptMigration</code>, 8 casos nous).</li>
                 <li><strong>Llengua:</strong> verbs dels botons unificats a <strong>infinitiu</strong> (guia de Comunicació Clara de Gencat) i castellanismes corregits ("Desar" per "Guardar", "memòria cau" per "caché", "claudàtors" per "corxers", "ressaltarà", "a la barra lateral").</li>
                 <li><strong>Mapa conceptual operable amb teclat</strong>: toggles amb <code>tabindex</code>/<code>role=button</code>/ <code>aria-label</code> i Enter/Espai; vista a pantalla completa com a diàleg modal real (<code>role=dialog</code>, focus al botó de tancar, focus trap i restauració del focus).</li>
                 <li><strong>Contrast</strong> del tema solarized a WCAG AA (text i text secundari).</li>
@@ -1574,16 +1569,6 @@
               </div>
               <ul class="version-list">
                 <li><strong>Mapa conceptual interactiu reescrit des de zero</strong>: substituïdes les llibreries de tercers <code>d3.min.js</code>, <code>markmap-lib.js</code> i <code>markmap-view.js</code> (~640 KB) per un renderitzador SVG natiu propi (<code>sidebar/markmap-native.js</code>, ~22 KB). Mateixa funcionalitat (zoom, pan, plegat de branques, exportació a PNG i pàgina completa) sense dependències externes.</li>
-                <li><strong>Zero warnings a la revisió d'AMO</strong>: el codi nou no utilitza <code>innerHTML</code> dinàmic, <code>eval()</code> ni <code>Function()</code> — totes operacions DOM via <code>createElementNS</code> i <code>DOMParser</code>. Això elimina els 6 warnings que retardaven la revisió de l'extensió.</li>
-              </ul>
-            </div>
-            <div class="version-entry">
-              <div class="version-title">
-                v2.2.8
-                <span class="version-date">Maig 2026</span>
-              </div>
-              <ul class="version-list">
-                <li><strong>Crític</strong>: els scripts del sidebar no s'incloïen al paquet de release a causa d'un regex fràgil al bundler que es va trencar amb l'ordre de scripts introduït a v2.2.5. Resultat: en instal·lacions des d'AMO, la sidebar no responia als botons (configuració, historial, mode biònic) i la bottom bar no es mostrava. Afectava v2.2.5, v2.2.6 i v2.2.7.</li>
               </ul>
             </div>
             <div class="version-entry">
