@@ -10,12 +10,12 @@ L'extensió **NO** recopila ni comparteix dades personals amb els desenvolupador
 
 ### Dades Locals
 
-Les següents dades s'emmagatzemen exclusivament al teu navegador (`browser.storage.local`):
+Les següents dades s'emmagatzemen al teu navegador. La clau d'API, la memòria cau, l'historial i les estadístiques van a `browser.storage.local` (només aquest ordinador); les preferències van a `browser.storage.sync`, que el navegador pot sincronitzar amb el teu compte si hi tens la sincronització activada (l'extensió mateixa no envia res a cap servidor propi):
 
 - **API Key de Google Gemini**: Necessària per connectar amb el servei d'IA. Aquesta clau es guarda localment i s'envia només en headers HTTP a la crida de l'API.
 - **Memòria cau de Resums**: Títol, URL, text del resum, model i data de generació.
 - **Historial d'ús**: Títol, URL, model, tokens consumits i durada de cada petició (pestanya "Estadístiques").
-- **Preferències**: Configuració de model, tema, prompts i extensions actives.
+- **Preferències** (`storage.sync`): Configuració de model, tema, prompts i extensions actives. La clau d'API no hi és mai.
 
 El text de la pàgina que es processa no es desa externament per l'extensió mateixa, sinó que es transmet a Google Gemini per generar el resum quan l'usuari ho sol·licita.
 
