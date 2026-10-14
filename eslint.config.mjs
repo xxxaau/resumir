@@ -233,6 +233,7 @@ const settingsGlobals = {
     applySettingsHash: "readonly",
     parseSettingsHash: "readonly",
     navigateToTab: "readonly",
+    PLUGIN_GROUPS: "readonly",
     updateSidebar: "readonly",
 };
 

@@ -80,6 +80,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Plugins agrupats com la barra d'eines:** la llista té els blocs Generar, Exportar i
+  Vista, i les fletxes només mouen un plugin dins del seu grup (abans semblava que
+  podien canviar-lo de grup i no feien res).
 - **Configuració que valida abans de desar:** un nombre de targetes fora de rang o uns
   idiomes de YouTube il·legibles ja no es desen (ni es descarten en silenci); un prompt
   buit d'una altra pestanya et porta al camp, n'obre el desplegable i el marca.

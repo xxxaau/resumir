@@ -14,6 +14,28 @@ function getCurrentExtensionOrder() {
     }).filter(id => id !== null);
 }
 
+/** Un bloc amb títol per cada grup de la barra d'eines (Generar | Exportar | Vista). */
+function ensureGroupBoxes(list) {
+    const boxes = {};
+    for (const g of PLUGIN_GROUPS) {
+        let box = list.querySelector(`.extension-group[data-group="${g}"]`);
+        if (!box) {
+            const title = document.createElement("h2");
+            title.className = "extension-group-title";
+            title.id = `extgroup-${g}`;
+            title.textContent = g;
+            box = document.createElement("div");
+            box.className = "extension-group";
+            box.dataset.group = g;
+            box.setAttribute("role", "group");
+            box.setAttribute("aria-labelledby", title.id);
+            list.append(title, box);
+        }
+        boxes[g] = box;
+    }
+    return boxes;
+}
+
 function applyExtensionOrder(order) {
     // Migrate orders that don't include 'resum' yet
     if (!order.includes("resum")) {
@@ -35,25 +57,29 @@ function applyExtensionOrder(order) {
     const list = document.querySelector(".extensions-list");
     const items = Array.from(list.querySelectorAll(".extension-item"));
     const itemsMap = new Map();
-    
+
     items.forEach(item => {
         const id = item.querySelector(".extension-actions").getAttribute("data-extension-id");
         if (id) itemsMap.set(id, item);
     });
 
-    // Re-append items in order
+    const boxes = ensureGroupBoxes(list);
+    const place = (id, item) => {
+        const entry = PLUGIN_REGISTRY.find(p => p.id === id);
+        boxes[entry ? entry.group : PLUGIN_GROUPS[0]].appendChild(item);
+    };
+
+    // L'ordre desat es respecta DINS de cada grup (els grups són els de la barra d'eines)
     order.forEach(id => {
         const item = itemsMap.get(id);
         if (item) {
-            list.appendChild(item); // Moves it to the end (reordering)
+            place(id, item);
             itemsMap.delete(id);
         }
     });
 
-    // Append any remaining items (new ones?)
-    itemsMap.forEach(item => {
-        list.appendChild(item);
-    });
+    // Plugins que l'ordre desat no coneix (nous): al final del seu grup
+    itemsMap.forEach((item, id) => place(id, item));
 
     updateMoveButtonsState();
 }
@@ -65,15 +91,17 @@ function moveExtension(extensionId, direction) {
     const item = actions.closest(".extension-item");
     if (!item) return;
 
+    // Només es mou dins del seu grup: la barra d'eines els té fixos (Generar | Exportar | Vista)
+    const box = item.parentElement;
     if (direction === "up") {
         const prev = item.previousElementSibling;
         if (prev) {
-            list.insertBefore(item, prev);
+            box.insertBefore(item, prev);
         }
     } else if (direction === "down") {
         const next = item.nextElementSibling;
         if (next) {
-            list.insertBefore(next, item);
+            box.insertBefore(next, item);
         }
     }
 
@@ -89,23 +117,25 @@ function moveExtension(extensionId, direction) {
     const pressed = direction === "up" ? upBtn : downBtn;
     const target = pressed && !pressed.disabled ? pressed : (direction === "up" ? downBtn : upBtn);
     if (target && typeof target.focus === "function") target.focus();
-    const items = Array.from(list.querySelectorAll(".extension-item"));
+    const items = Array.from(box.querySelectorAll(".extension-item"));
     const nameEl = item.querySelector(".extension-name");
     const name = nameEl ? (nameEl.childNodes[0] ? nameEl.childNodes[0].textContent.trim() : nameEl.textContent.trim()) : extensionId;
     // Regió pròpia (no el toast): l'autodesat hi escriu «Desat» just després i trepitjaria l'avís
     const live = document.getElementById("reorderStatus");
-    if (live) live.textContent = `${name}: posició ${items.indexOf(item) + 1} de ${items.length}.`;
+    if (live) live.textContent = `${name}: posició ${items.indexOf(item) + 1} de ${items.length} a ${box.dataset.group || "la llista"}.`;
 }
 
 function updateMoveButtonsState() {
     const list = document.querySelector(".extensions-list");
-    const items = list.querySelectorAll(".extension-item");
-    
-    items.forEach((item, index) => {
-        const upBtn = item.querySelector(".btn-move-up");
-        const downBtn = item.querySelector(".btn-move-down");
-        
-        if (upBtn) upBtn.disabled = (index === 0);
-        if (downBtn) downBtn.disabled = (index === items.length - 1);
+    // Els límits són els del grup, no els de tota la llista
+    const groups = list.querySelectorAll(".extension-group");
+    (groups.length ? Array.from(groups) : [list]).forEach(box => {
+        const items = box.querySelectorAll(".extension-item");
+        items.forEach((item, index) => {
+            const upBtn = item.querySelector(".btn-move-up");
+            const downBtn = item.querySelector(".btn-move-down");
+            if (upBtn) upBtn.disabled = (index === 0);
+            if (downBtn) downBtn.disabled = (index === items.length - 1);
+        });
     });
 }

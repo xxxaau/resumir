@@ -1022,3 +1022,24 @@ test("desar - un prompt buit d'una altra pestanya porta a aquella pestanya i n'o
         assert.match(h.document.getElementById("status").textContent, /no pot estar buit/);
     } finally { h.close(); }
 });
+
+test("plugins - la llista té els grups de la barra d'eines i només es reordena dins de cada grup", async () => {
+    const h = await loadSettings({ sync: { extensionOrder: ["resum", "selectpdf", "obsidian", "simple", "markdown", "deepdive", "bionic", "science", "conceptmap", "anki"] } });
+    try {
+        const titles = [...h.document.querySelectorAll("#tab-extensions .extension-group-title")].map(t => t.textContent);
+        assert.deepEqual(titles, ["Generar", "Exportar", "Vista"]);
+        const ids = (g) => [...h.document.querySelectorAll(`.extension-group[data-group="${g}"] .extension-actions`)].map(a => a.dataset.extensionId);
+        // L'ordre desat barreja grups: dins de cada grup es manté, entre grups mana la barra d'eines
+        assert.deepEqual(ids("Generar"), ["resum", "selectpdf", "simple", "deepdive", "science", "conceptmap", "anki"]);
+        assert.deepEqual(ids("Exportar"), ["obsidian", "markdown"]);
+        assert.deepEqual(ids("Vista"), ["bionic"]);
+        const btn = (id, dir) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-${dir}`);
+        assert.equal(btn("obsidian", "up").disabled, true, "primer del seu grup");
+        assert.equal(btn("markdown", "down").disabled, true, "últim del seu grup");
+        assert.equal(btn("bionic", "up").disabled && btn("bionic", "down").disabled, true, "sol al seu grup");
+        btn("markdown", "up").click();
+        await h.flush(5);
+        assert.deepEqual(ids("Exportar"), ["markdown", "obsidian"]);
+        assert.deepEqual(ids("Generar").length, 7, "no travessa grups");
+    } finally { h.close(); }
+});

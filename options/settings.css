@@ -1144,17 +1144,20 @@ button:disabled,
 .checkbox-row { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
 #ankiVaultField { margin-top: 12px; }
 
-/* Etiqueta de categoria del plugin (Generar / Exportar / Llegir / Font) */
-.extension-tag {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 8px;
-  font-size: 0.72em;
-  font-weight: 500;
+/* Grups de plugins: els mateixos que la barra d'eines (Generar | Exportar | Vista) */
+.extension-group-title {
+  margin: 8px 0 -4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--text-muted);
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  vertical-align: middle;
+}
+.extension-group-title:first-child { margin-top: 0; }
+.extension-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .changelog-older { margin-top: 12px; }

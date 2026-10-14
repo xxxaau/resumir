@@ -5,7 +5,13 @@ import { createRequire } from "node:module";
 import { JSDOM } from "jsdom";
 
 const require = createRequire(import.meta.url);
-const { PLUGIN_REGISTRY } = require("../options/plugin-registry.js");
+const { PLUGIN_REGISTRY, PLUGIN_GROUPS } = require("../options/plugin-registry.js");
+// ui.js no es pot carregar a Node (usa DOMParser en carregar): se'n llegeix la constant
+const TOOLBAR_GROUPS = (() => {
+    const src = readFileSync(new URL("../sidebar/ui.js", import.meta.url), "utf8");
+    const body = /const TOOLBAR_GROUPS = (\[[\s\S]*?\n\]);/.exec(src)[1];
+    return JSON.parse(body.replace(/\/\/.*$/gm, "").replace(/,(\s*[\]}])/g, "$1"));
+})();
 const settings = new JSDOM(readFileSync(new URL("../options/settings.html", import.meta.url), "utf8")).window.document;
 const sidebar = new JSDOM(readFileSync(new URL("../sidebar/sidebar.html", import.meta.url), "utf8")).window.document;
 
@@ -44,4 +50,13 @@ test("registre: el nom és el mateix que el títol del botó del sidebar", () =>
 test("registre: cap plugin és a la pàgina sense ser al registre", () => {
     const inHtml = [...settings.querySelectorAll(".extension-actions[data-extension-id]")].map(e => e.dataset.extensionId).sort();
     assert.deepEqual(inHtml, PLUGIN_REGISTRY.map(p => p.id).sort());
+});
+
+test("registre: el grup de cada plugin és el de la seva posició a la barra d'eines (Generar | Exportar | Vista)", () => {
+    assert.equal(PLUGIN_GROUPS.length, TOOLBAR_GROUPS.length, "mateix nombre de grups");
+    for (const p of PLUGIN_REGISTRY) {
+        const btnId = p.id === "resum" ? "summarizeBtn" : p.id === "selectpdf" ? "selectPdfBtn" : SIDEBAR_BUTTON[p.id];
+        const toolbarGroup = TOOLBAR_GROUPS.findIndex(ids => ids.includes(btnId));
+        assert.equal(PLUGIN_GROUPS.indexOf(p.group), toolbarGroup, `${p.id} (${btnId}): grup «${p.group}»`);
+    }
 });
