@@ -7,60 +7,23 @@ values layer).
 ## Short Description (≤132 characters — CWS limit)
 
 ```
-Summarize web pages, YouTube videos, threads and PDFs with Gemini, and understand them better. Private, in your browser.
+Summarize web pages, YouTube videos and PDFs with Gemini. Private, in your browser.
 ```
-(120 chars ✓)
+(83 chars ✓)
 
 ---
 
 ## Long Description (English)
 
-**Resumir** gives you a clear summary of any web page, YouTube video, thread or PDF — and lets you go deeper when you want more. Everything runs in your browser, with your own Google Gemini API key.
+**Resumir** summarizes articles, YouTube videos, threads and PDFs in your browser's side panel, using your own free Google Gemini API key.
 
-### How it works
+- A clear summary with key points and quotes: click a quote and the page highlights it in yellow.
+- Deep dive, plain-language explanation, science check and concept map when you want more.
+- Save it to Obsidian, copy it as Markdown, or come back to it from the history.
 
-1. Open a page and click **Summarize** (or press Alt+Shift+S).
-2. Read the summary in the side panel as it is generated.
-3. Click a quote and the page highlights it in yellow and scrolls to it, like Ctrl+F.
+### Private by design
 
-### What you can summarize
-
-- Articles and web pages
-- YouTube videos (with clickable timestamps)
-- Twitter/X threads and Hacker News discussions
-- PDFs, from the web or from your computer (with linked page numbers)
-
-### Five ways to understand it
-
-- **Summary** — the essentials, with key points and literal quotes
-- **Deep dive** — the context and nuance a summary leaves out
-- **Explain it simply** — the same, in plain language
-- **Science check** — what the text claims versus what the consensus says
-- **Concept map** — an interactive map you can zoom, fold and download
-
-Every summary says how much text it is based on and which model made it, so you know how far to trust it. All prompts are editable.
-
-### Keep it
-
-- Save the summary to **Obsidian** with your own template
-- Copy it as **Markdown**
-- Reopen any summary from the **history**, at no cost
-- Generate **Anki** flashcards
-- Export and import your settings as a file
-
-### Your way
-
-- Optional Bionic Reading
-- Light, dark, Flexoki and gray themes, or follow your system
-- Keyboard-friendly, with careful contrast
-
-### Your privacy
-
-- No server of ours, no telemetry, no account, no ads
-- Your API key stays in this browser only
-- Page text leaves your browser only for Google Gemini, when you ask for a summary
-- The "Data and privacy" page in Settings shows you where everything is stored
-- Open source (MPL-2.0)
+No server of ours, no telemetry, no account, no ads. Your API key stays in your browser, and page text goes only to Google Gemini when you ask for a summary. Open source (MPL-2.0).
 
 ### Requirements
 

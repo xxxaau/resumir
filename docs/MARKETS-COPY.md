@@ -23,10 +23,10 @@ de valors).
 **Límit:** ~160 caràcters (AMO) · 132 (Chrome)
 
 ```
-Resumeix pàgines, vídeos de YouTube, fils i PDFs amb Gemini i entén-los millor. Privat, al teu navegador i en català.
+Resumeix pàgines, vídeos de YouTube i PDFs amb Gemini. Privat, al teu navegador i en català.
 ```
 
-**Caràcters:** 117 ✅
+**Caràcters:** 92 ✅
 
 ---
 
@@ -37,70 +37,30 @@ Resumeix pàgines, vídeos de YouTube, fils i PDFs amb Gemini i entén-los millo
 ```
 Resumir — Entén el que llegeixes i mires, en un clic
 
-Cada dia obres més pestanyes de les que pots llegir. Resumir et dona un resum clar de qualsevol pàgina, vídeo de YouTube, fil o PDF, i et deixa aprofundir-hi quan en vols més. Tot al teu navegador, amb la teva pròpia clau de Google Gemini.
+Resumeix articles, vídeos de YouTube, fils i PDFs al panell lateral del navegador, amb la teva pròpia clau gratuïta de Google Gemini.
 
-COM FUNCIONA
+• Un resum clar amb punts clau i cites: clica una cita i la pàgina la ressalta en groc.
+• Aprofundiment, explicació fàcil, validació científica i mapa conceptual quan en vols més.
+• Desa'l a Obsidian, copia'l en Markdown o torna-hi des de l'historial.
 
-1. Obre una pàgina i clica «Resumir» (o prem Alt+Maj+S).
-2. Llegeix el resum al panell lateral mentre es genera.
-3. Clica una cita i la pàgina la ressalta en groc i hi va, com un Ctrl+F.
+PRIVAT PER DISSENY
 
-QUÈ POTS RESUMIR
-
-• Articles i pàgines web
-• Vídeos de YouTube (amb les marques de temps clicables)
-• Fils de Twitter/X i discussions de Hacker News
-• PDFs, de la web o del teu ordinador (amb números de pàgina enllaçats)
-
-CINC MANERES D'ENTENDRE-HO
-
-• Resum: l'essencial, amb punts clau i cites literals
-• Aprofundiment: el context i els matisos que un resum deixa fora
-• Explica-ho fàcil: el mateix, en llenguatge planer
-• Validació científica: què diu el text i què en diu el consens
-• Mapa conceptual: un mapa interactiu que pots ampliar, plegar i descarregar
-
-Cada resum diu de quant text parteix i amb quin model s'ha fet, perquè sàpigues què pots creure. Els prompts els pots canviar tots.
-
-CONSERVA-HO
-
-• Desa el resum a Obsidian amb la teva plantilla
-• Copia'l en Markdown
-• Torna a veure qualsevol resum a l'historial, sense gastar res
-• Genera targetes de memòria per a Anki
-• Exporta i importa la configuració en un fitxer
-
-A LA TEVA MIDA
-
-• Lectura biònica opcional
-• Temes clar, fosc, Flexoki i gris, o el del sistema
-• Es pot fer servir amb el teclat i té contrast acurat
-
-LA TEVA PRIVACITAT
-
-• No hi ha servidor nostre, ni telemetria, ni compte, ni anuncis
-• La clau d'API es queda només en aquest navegador
-• El text de la pàgina només surt cap a Google Gemini quan tu demanes un resum
-• La pàgina «Dades i privadesa» de la configuració t'ho mostra tot
-• Codi obert (MPL-2.0)
-
-Política de privacitat: https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md
+Sense servidor propi, telemetria, compte ni anuncis. La clau es queda al teu navegador i el text només va a Google Gemini quan demanes un resum. Codi obert (MPL-2.0).
 
 COM COMENÇAR
 
 1. Instal·la l'extensió.
-2. Crea una clau d'API gratuïta de Google Gemini, sense targeta de crèdit: https://aistudio.google.com/app/apikey
-3. Enganxa-la a la barra lateral i comença a resumir.
+2. Crea una clau gratuïta de Gemini, sense targeta: https://aistudio.google.com/app/apikey
+3. Enganxa-la al panell i clica «Resumir» (o prem Alt+Maj+S).
 
-Resumir fa servir Readability.js i pdf.js de Mozilla (Apache-2.0).
-
+Política de privacitat: https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md
 Errors i suggeriments: https://github.com/xxxaau/resumir/issues
 Codi font: https://github.com/xxxaau/resumir
 
 Fet a Banyoles.
 ```
 
-**Caràcters:** 2384 ✅ (dins del límit de 3.000)
+**Caràcters:** 1040 ✅ (molt per sota dels 3.000)
 
 ---
 
@@ -152,24 +112,11 @@ els canvis ja són a `main`). Ha de coincidir amb «Sobre l'extensió» (vegeu
 ```
 Resumir — novetats
 
-Cites clicables
-• Clica una cita o un punt clau i la pàgina el ressalta en groc, com un Ctrl+F.
-• Les marques de temps dels vídeos de YouTube i els números de pàgina dels PDF també són enllaços.
-
-Més clar què has llegit
-• Cada resum diu de quant text parteix i amb quin model s'ha fet, i avisa si el text s'ha tallat.
-• Pestanyes per tipus amb els resums que ja tens d'aquella pàgina.
-• Drecera Alt+Maj+S per obrir Resumir i resumir.
-
-Configuració renovada
-• Nova pàgina «Dades i privadesa»: on es desa cada dada, quant ocupa l'historial i còpia de seguretat de la configuració.
-• Selector de model més clar, plugins agrupats com la barra d'eines i canvis pendents sempre visibles.
-• Nou aspecte Flexoki (clar, fosc o segons el sistema) i una icona nova.
-
-Arreglat
-• El botó «Atura» ara atura de veritat.
-• Un PDF local ja no es barreja amb resums d'altres pestanyes.
-• Prompts per defecte revisats: no inventen i avisen quan no hi ha prou contingut.
+• Cites clicables: clica una cita i la pàgina la ressalta en groc, com un Ctrl+F.
+• Cada resum diu de quant text parteix i amb quin model s'ha fet.
+• Marques de temps de YouTube i números de pàgina de PDF clicables.
+• Nova pàgina «Dades i privadesa» a la configuració, i aspecte Flexoki.
+• El botó «Atura» ara atura de veritat, i la transcripció automàtica de YouTube és més fiable.
 ```
 
 ---
@@ -231,7 +178,7 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 ```
 [ ] Títol correcte
 [ ] Descripció breu dins del límit de caràcters
-[ ] Descripció llarga dins del límit (2.384 / 3.000)
+[ ] Descripció llarga dins del límit (~1.000 / 3.000)
 [ ] Enllaços funcionen (GitHub, issues, privacitat)
 [ ] Permisos justificats (⚠️ <all_urls> ara és REQUERIT — text actualitzat)
 [ ] Release notes actualitzades (inclou avís de re-aprovació de permisos)

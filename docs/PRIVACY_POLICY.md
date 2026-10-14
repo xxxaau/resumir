@@ -1,6 +1,6 @@
 # Política de Privadesa - Resumir
 
-**Última actualització:** 29 de Maig de 2026
+**Última actualització:** 14 d'octubre de 2026
 
 La teva privadesa és important per a nosaltres. Aquesta política explica com l'extensió **Resumir** gestiona les teves dades.
 
@@ -31,7 +31,8 @@ Per a generar els resums, l'extensió envia el contingut de text de la pàgina w
 
 ## 3. YouTube i contingut de tercers
 
-- Quan resums vídeos de **YouTube**, l'extensió executa un petit script en el context de la pàgina (`world: "MAIN"`) per llegir les dades del reproductor (`ytInitialPlayerResponse`) ja carregades al navegador i extreure'n la transcripció automàtica. **No es fa cap petició de xarxa addicional als servidors de YouTube.** No s'envien dades de l'usuari.
+- Quan resums vídeos de **YouTube**, l'extensió executa un petit script en el context de la pàgina (`world: "MAIN"`) per llegir les dades del reproductor ja carregades al navegador i obtenir-ne la transcripció (també l'automàtica).
+- Per obtenir-la, l'extensió pot fer les mateixes peticions que fa el reproductor de YouTube (subtítols i transcripció) **a youtube.com, amb la teva sessió del navegador**. Mai fa peticions a tercers i no s'hi envia cap dada teva més enllà del que ja envia el reproductor.
 
 ## 4. Permisos Requerits
 
