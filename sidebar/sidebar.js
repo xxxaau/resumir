@@ -743,6 +743,26 @@ document.addEventListener("DOMContentLoaded", () => {
         summarizeBtn.click();
     });
 
+    // Només Firefox: el contingut de la barra és una peça arrodonida sobre la targeta del navegador, i
+    // les cantonades han de mostrar el color d'aquesta targeta (el del tema). No cal cap permís.
+    async function syncFirefoxCard() {
+        const api = typeof browser !== "undefined" ? browser : null;
+        if (!api || !api.theme || !api.theme.getCurrent) return;
+        try {
+            const win = await api.windows.getCurrent();
+            const theme = await api.theme.getCurrent(win.id);
+            const dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const color = firefoxCardColor((theme && theme.colors) || {}, dark);
+            if (color) document.documentElement.style.setProperty("--ff-card", color);
+            else document.documentElement.style.removeProperty("--ff-card");
+        } catch {}
+    }
+    syncFirefoxCard();
+    try {
+        if (typeof browser !== "undefined" && browser.theme && browser.theme.onUpdated) browser.theme.onUpdated.addListener(syncFirefoxCard);
+        if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncFirefoxCard);
+    } catch {}
+
     // Estat en repòs: títol de la pestanya activa, botó de resumir i els resums
     // ja desats d'aquesta URL. La visibilitat real (només si el panell és buit)
     // la decideix el CSS; aquí només s'omple.

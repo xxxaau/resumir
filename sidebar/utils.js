@@ -115,6 +115,36 @@ function formatMarkdownContent(template, metadata) {
 }
 
 // Token Estimation (Simple char count / 4)
+/** Color CSS d'un tema de Firefox ("#rgb", "#rrggbb", "rgb()/rgba()" o [r,g,b]) → [r,g,b] o null. */
+function parseThemeColor(value) {
+    if (Array.isArray(value) && value.length >= 3) return value.slice(0, 3).map(Number);
+    if (typeof value !== "string") return null;
+    const v = value.trim();
+    let m = /^#([0-9a-f]{3})$/i.exec(v);
+    if (m) return [...m[1]].map(h => parseInt(h + h, 16));
+    m = /^#([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(v);
+    if (m) return [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
+    m = /^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i.exec(v);
+    if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+    return null;
+}
+
+/**
+ * Color de fons de la targeta de la barra lateral de Firefox, a partir de `theme.getCurrent().colors`.
+ * Retorna una cadena CSS o null (→ es fa servir el color del llenç). `getCurrent` només dona la variant
+ * CLARA del tema: si el sistema és fosc i el text de la barra del tema és fosc (tema clar), Firefox
+ * fa servir la variant fosca que no veiem, i no ens en fiem.
+ */
+function firefoxCardColor(colors, systemDark) {
+    const bg = parseThemeColor(colors && colors.sidebar);
+    if (!bg) return null;
+    if (systemDark) {
+        const text = parseThemeColor(colors.sidebar_text);
+        if (text && (0.2126 * text[0] + 0.7152 * text[1] + 0.0722 * text[2]) < 128) return null;
+    }
+    return `rgb(${bg.join(",")})`;
+}
+
 function estimateTokens(text) {
     if (!text) return 0;
     return Math.ceil(text.length / 4);
@@ -130,6 +160,8 @@ if (typeof module !== 'undefined' && module.exports) {
         formatMarkdownContent,
         getSourceHttpUrl,
         extractExecutiveSummary,
-        estimateTokens
+        estimateTokens,
+        parseThemeColor,
+        firefoxCardColor
     };
 }

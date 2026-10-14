@@ -22,6 +22,7 @@ const extensionGlobals = {
     formatObsidianContent: "readonly",
     formatMarkdownContent: "readonly",
     estimateTokens: "readonly",
+    firefoxCardColor: "readonly",
     // shared/models.js
     CURATED_MODELS: "readonly",
     DEFAULT_MODEL_ID: "readonly",

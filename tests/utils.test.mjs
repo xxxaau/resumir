@@ -210,3 +210,17 @@ test("formatMarkdownContent - amb URL http(s) l'enllaç no canvia", () => {
     const md = formatMarkdownContent("[{{title}}]({{url}})", { title: "T", url: "https://x.org", summary: "" });
     assert.equal(md, "[T](https://x.org)");
 });
+
+test("firefoxCardColor - color de la targeta de Firefox a partir del tema", () => {
+    const { parseThemeColor, firefoxCardColor } = require("../sidebar/utils.js");
+    assert.deepEqual(parseThemeColor("#f2f0e5"), [242, 240, 229]);
+    assert.deepEqual(parseThemeColor("#abc"), [170, 187, 204]);
+    assert.deepEqual(parseThemeColor("rgb(28, 27, 26)"), [28, 27, 26]);
+    assert.deepEqual(parseThemeColor("rgba(1,2,3,0.5)"), [1, 2, 3]);
+    assert.deepEqual(parseThemeColor([1, 2, 3]), [1, 2, 3]);
+    assert.equal(parseThemeColor("papaya"), null);
+    assert.equal(firefoxCardColor({ sidebar: "#f2f0e5", sidebar_text: "#100f0f" }, false), "rgb(242,240,229)");
+    assert.equal(firefoxCardColor({}, false), null, "sense tema, el color del llenç");
+    assert.equal(firefoxCardColor({ sidebar: "#f2f0e5", sidebar_text: "#100f0f" }, true), null, "sistema fosc i tema clar: la variant fosca no la veiem");
+    assert.equal(firefoxCardColor({ sidebar: "#1c1b1a", sidebar_text: "#ffffff" }, true), "rgb(28,27,26)", "tema fosc amb sistema fosc: fiable");
+});
