@@ -834,22 +834,34 @@ function linkQuotes(container, url) {
         for (const li of el.matches("li") ? [el] : el.querySelectorAll("li")) work.push({ li, mode });
     }
     for (const { li, mode: which } of work) {
-        const found = [];
+        // Es treballa sobre el text sencer de l'element, no node a node: amb la lectura biònica cada
+        // paraula va partida en <b> i la cita quedaria repartida entre molts nodes de text.
+        const nodes = [];
         const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT);
-        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-            for (const m of n.nodeValue.matchAll(/«([^»]{8,})»|“([^”]{8,})”|"([^"]{8,})"/g)) found.push({ node: n, m });
-        }
+        let full = "";
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) { nodes.push({ node: n, start: full.length }); full += n.nodeValue; }
+        const found = [...full.matchAll(/«([^»]{8,})»|“([^”]{8,})”|"([^"]{8,})"/g)];
         if (!found.length) continue;
-        const { node, m } = which === "last" ? found[found.length - 1] : found[0];
+        const m = which === "last" ? found[found.length - 1] : found[0];
+        const locate = (offset, atEnd) => {
+            for (const { node, start } of nodes) {
+                const end = start + node.nodeValue.length;
+                if (atEnd ? (offset > start && offset <= end) : (offset >= start && offset < end)) return [node, offset - start];
+            }
+            return null;
+        };
+        const from = locate(m.index, false), to = locate(m.index + m[0].length, true);
+        if (!from || !to) continue;
+        const range = document.createRange();
+        range.setStart(from[0], from[1]);
+        range.setEnd(to[0], to[1]);
         const a = document.createElement("a");
         a.href = "#";
         a.className = "quote-jump";
-        a.dataset.quote = (m[1] || m[2] || m[3]).trim();
+        a.dataset.quote = (m[1] || m[2] || m[3]).replace(/\s+/g, " ").trim();
         a.title = "Mostra-la a la pàgina";
-        a.textContent = m[0];
-        const tail = node.splitText(m.index);
-        tail.nodeValue = tail.nodeValue.slice(m[0].length);
-        node.parentNode.insertBefore(a, tail);
+        a.appendChild(range.extractContents());
+        range.insertNode(a);
     }
 }
 

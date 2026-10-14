@@ -398,6 +398,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // En tornar a pintar el resum (biònica activada/desactivada) es perden els enllaços: es refan.
+    function relinkContent() {
+        if (!currentMetadata.summary || !isProseType(currentMetadata.type)) return;
+        if (typeof linkQuotes === "function") linkQuotes(contentDiv, currentMetadata.url);
+        if (typeof linkYoutubeTimes === "function") linkYoutubeTimes(contentDiv, currentMetadata.url);
+        if (typeof linkPdfPages === "function") linkPdfPages(contentDiv, currentMetadata.url);
+    }
+
     function applyBionicToContent(config) {
         const cfg = config || globalConfigCache;
         // applyBionicStyles (summary.js) és l'únic punt que estila #content en
@@ -406,6 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const fixation = (cfg.bionicFixation || DEFAULT_BIONIC.fixation) / 100;
         if (currentMetadata.summary && isProseType(currentMetadata.type)) {
             contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, true, fixation));
+            relinkContent();
         }
     }
 
@@ -428,6 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
             applyBionicStyles(contentDiv, false);
             if (currentMetadata.summary && isProseType(currentMetadata.type)) {
                contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
+               relinkContent();
             }
         }
     });

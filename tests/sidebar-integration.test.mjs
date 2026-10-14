@@ -1279,6 +1279,47 @@ test("text enviat - el focus entra al panell i, en tancar-lo, torna al botó del
 // Cites clicables: la cita de «Cites» i la final de cada punt clau és un enllaç que,
 // en clicar-lo, la ressalta a la pàgina (sense insígnies de verificació)
 // ---------------------------------------------------------------------------
+test("cites clicables - també amb la lectura biònica activada (cada paraula va partida en <b>)", async () => {
+    const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", isBionicActive: true },
+        sync: { enableBionic: true },
+        pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
+        modelReply: `Resum.\n\n### Punts clau\n- Idea «${real}»\n\n### Cites\n- «${real}»`,
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.ok(h.document.querySelector("#content b, #content strong, #content .bionic"), "la biònica està activa");
+        const links = [...h.document.querySelectorAll("#content a.quote-jump")];
+        assert.equal(links.length, 2, "un enllaç per cita malgrat la biònica");
+        assert.equal(links[0].dataset.quote, real);
+        assert.equal(links[0].textContent, `«${real}»`, "el text visible no canvia");
+    } finally { h.close(); }
+});
+
+test("cites clicables - es conserven en activar i desactivar la lectura biònica", async () => {
+    const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        sync: { enableBionic: true },
+        pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
+        modelReply: `Resum.\n\n### Cites\n- «${real}»`,
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const count = () => h.document.querySelectorAll("#content a.quote-jump").length;
+        assert.equal(count(), 1);
+        h.document.getElementById("bionicBtn").click();
+        await h.flush(10);
+        assert.equal(count(), 1, "amb la biònica activada");
+        h.document.getElementById("bionicBtn").click();
+        await h.flush(10);
+        assert.equal(count(), 1, "i en desactivar-la");
+    } finally { h.close(); }
+});
+
 test("cites clicables - tolera variants del títol («Cites literals») i cometes tipogràfiques", async () => {
     const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
     const h = await loadSidebar({
