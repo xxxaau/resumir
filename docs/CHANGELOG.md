@@ -73,6 +73,7 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   model deixa de respondre, es talla i s'avisa.
 
 ### Canviat
+- **Aspecte Flexoki, com Obsidian amb el tema Minimal:** nous temes «Flexoki clar» i «Fosc» amb accent cian, opció «Flexoki (automàtic)» que segueix el sistema, i una configuració més sobria (menú compacte, plugins en files planes, interruptors més petits). Les cites ara es veuen com a enllaços.
 - **«Dades i privadesa» més clara:** una taula diu on es desa cada dada (clau, text de la
   pàgina, resums, estadístiques, configuració) i si surt del navegador, i l'historial mostra
   quants resums hi ha i quant ocupen abans d'esborrar-lo.
