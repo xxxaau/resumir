@@ -54,7 +54,6 @@ Tres categories:
 | `docs/SCREENSHOTS-GUIDE.md` | Especificació de captures | Canvia el set de captures |
 | `docs/MANTENIMENT.md` | Revisions recurrents (YouTube cada mes) i com arreglar-les | Canvia una via d'extracció de YouTube o s'afegeix una altra revisió recurrent |
 | `docs/BACKLOG.md` | Idees pendents (**només pendents** — vegeu nota al capdamunt del fitxer) | Afegeixes o completes una idea |
-| `docs/PLA-UI-UX.md` | Pla d'execució de millores UI/UX (**només pendent**; es treu el que es completa) | Completes un ítem o fase del pla, o en canvia l'abast |
 | `docs/SPONSORS.md` | Programa de sponsors | Canvia el patrocini |
 | `docs/CODE_OF_CONDUCT.md` | Normes de comunitat | Rarament (boilerplate) |
 

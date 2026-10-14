@@ -7,7 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
-- YouTube SPA, timedtext i la targeta de Firefox — Sessió 2026-10-14
+- YouTube SPA, timedtext, la targeta de Firefox, la lectura biònica i la prova a Firefox real — Sessió 2026-10-14
 - Fases B–E del pla UI/UX, revisió de prompts i prova de fum en navegador real — Sessió 2026-10-12
 - Fase A del pla UI/UX + harness d'integració i tests de qualitat — Sessió 2026-10-11
 - Auditoria funcional + catàleg de models — Sessió 2026-08-09
@@ -24,7 +24,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ---
 
-# YouTube SPA, timedtext i la targeta de Firefox — Sessió 2026-10-14
+# YouTube SPA, timedtext, la targeta de Firefox, la lectura biònica i la prova a Firefox real — Sessió 2026-10-14
 
 ## A YouTube, els globals `ytInitial*` poden ser del vídeo anterior
 
@@ -64,6 +64,86 @@ tema clar no ens en fiem i es cau a `Canvas` (`firefoxCardColor` a
   `overflow-y: auto`) perquè les cantonades no marxin en fer scroll.
 - **Només Firefox sense JS de detecció:** `@supports (-moz-appearance: none)`
   aplica el bloc només a Gecko; a Chromium no hi ha targeta.
+- **Només macOS (correcció posterior, v2.7.1):** la targeta arrodonida és de
+  macOS; a Windows/Linux la barra de Firefox és quadrada i el bloc deixava la
+  cantonada mal pintada. Ara `theme.js` posa `data-os` (`mac`/`win`/`other`) a
+  l'`<html>` i el CSS ho exigeix (`html[data-os="mac"]`); el CSS no pot
+  detectar l'SO, així que cal un atribut.
+
+## Els enllaços sobre el text han de funcionar a través de nodes (lectura biònica)
+
+La lectura biònica parteix cada paraula en `<b>…</b>`: una cita `«…»` o una
+marca `[1:05]` queda repartida en molts nodes de text, i qualsevol codi que
+faci `nodeValue.match(…)` node a node no la troba. Va passar a les cites, a
+les marques `[m:ss]` de YouTube i a les `(p. N)` dels PDF, i només es veia amb
+la biònica activada (que l'usuari tenia, a les captures). Solució:
+`linkTextMatches` (`sidebar/ui.js`) treballa sobre el text sencer del
+contenidor, localitza l'inici i el final i fa `range.extractContents()` dins
+d'un `<a>`; `linkQuotes` fa el mateix per element. A més, en activar o
+desactivar la biònica el resum es torna a pintar i es perden tots els
+enllaços: `relinkContent()` (`sidebar/sidebar.js`) els refà. Qualsevol
+enllaçat nou ha de provar-se amb la biònica activada i en alternar-la.
+
+## Provar l'extensió en un Firefox REAL (sense Playwright)
+
+Playwright no carrega extensions a Firefox. Funciona WebDriver BiDi amb el
+Firefox instal·lat: `firefox --headless --profile <perfil> --remote-debugging-port=9230
+-remote-allow-system-access --no-remote`; al perfil, `user.js` amb
+`xpinstall.signatures.required=false` i, per fixar l'UUID de les pàgines
+`moz-extension://`, `extensions.webextensions.uuids`. Des d'un client
+WebSocket: `session.new`, `webExtension.install {type:"path"}` amb la carpeta
+dev (`build_firefox_dev/`). BiDi **no pot navegar** a `moz-extension://`: es
+afegeix a una còpia de la carpeta un `probe-open.js` al `background.scripts`
+que fa `browser.tabs.create({url: browser.runtime.getURL("sidebar/sidebar.html")})`,
+i amb `-remote-allow-system-access` es pot fer `script.evaluate` dins la
+pàgina de l'extensió (substituir `fetch` per un Gemini simulat, prémer botons,
+llegir el DOM i el `CSS.highlights` de la pàgina). Va servir per descartar que
+fallés l'API (permisos, `executeScript`, CSS Highlight) i trobar el bug real.
+Els scripts eren a la carpeta temporal de la sessió; si es reutilitza, convé
+convertir-ho en un `scripts/smoke-firefox.mjs`.
+
+## Un camp de contrasenya fa saltar el gestor de contrasenyes
+
+La clau d'API era un `<input type="password">` i Firefox oferia desar-la com a
+contrasenya en sortir de la configuració. `autocomplete="off"` s'ignora per al
+desat de contrasenyes. Solució: `type="text"` amb `-webkit-text-security: disc`
+(Firefox i Chromium el suporten; comprovat a Firefox 158), més `data-lpignore`,
+`data-1p-ignore`, `data-bwignore` i `data-form-type="other"`; si el navegador
+no l'admet (`CSS.supports`) es manté `type="password"` perquè la clau no es
+vegi mai (`hardenSecretInput` / `toggleSecretInput`, `shared/api-key.js`).
+
+## El prompt per defecte ometia les cites dels vídeos
+
+El prompt de Resum diu «no en citis de transcripcions (Auto) que semblin mal
+transcrites»; amb transcripció automàtica el model deixava la secció «Cites»
+buida i l'usuari ho veia com «no em mostra les cites del vídeo». En lloc de
+canviar el prompt per defecte (versionat, amb avís de «nova versió» a qui l'ha
+editat), `summary.js` afegeix en temps d'execució una instrucció addicional per
+a vídeos amb marques de temps: omple «Cites» i comença cada cita amb la marca
+`[m:ss]`, que `linkYoutubeTimes` ja converteix en enllaç. Les instruccions
+addicionals prevalen sobre l'estructura (ho diu el prompt).
+
+## Cites a Hacker News: el text citat pot ser de l'article, no dels comentaris
+
+El resum d'un fil de HN barreja l'article enllaçat (que es descarrega des del
+sidebar) i els comentaris (el DOM). La cita d'un comentari es ressalta a la
+pàgina; la de l'article no hi és. Solució: si no es troba, s'obre l'article
+amb un fragment de text (`textFragmentUrl`, `sidebar/utils.js`:
+`#:~:text=inici,final`, amb `-` escapat com `%2D`) i el navegador la ressalta i
+hi va tot sol (comprovat a Firefox 158).
+
+## Procés: el mode DEV no ha de reescriure fitxers versionats
+
+`npm run dev` reescrivia manifests i icones versionats (nom «(DEV)», gecko.id
+de dev, icones taronges), cosa que obligava a no commitejar-los, a fer stash
+abans de pujar i a descriure un hook pre-push que ni existia. Ara el mode DEV
+es genera a `build_firefox_dev/` i `build_chromium_dev/` (ignorades per git) i
+els fitxers versionats són sempre PROD. A més: `release.yml` falla si el tag no
+coincideix amb la versió; `web-ext lint` revisa el paquet real (versió fixada);
+`prerelease` té una llista de fitxers prohibits al ZIP (`.DS_Store`, mapes,
+tests…); `ci.yml` comprova que `manifests:gen` no deixa diff; es va esborrar
+`prepare-release.mjs` (no funcionava) i la doc ja només descriu la via
+`npm version`. Els `.DS_Store` de macOS entraven al ZIP: `build.mjs` els salta.
 
 ---
 

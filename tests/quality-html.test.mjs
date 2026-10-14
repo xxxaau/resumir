@@ -39,7 +39,7 @@ function accessibleName(el, doc) {
     return (el.getAttribute("title") || "").trim();
 }
 
-// Incompliments coneguts (vegeu docs/PLA-UI-UX.md). Format: "pàgina: descripció"
+// Incompliments coneguts (ratchet: només pot baixar). Format: "pàgina: descripció"
 const KNOWN_UNNAMED_BUTTONS = new Set([
     // (cap de moment: tots tenen aria-label o title)
 ]);

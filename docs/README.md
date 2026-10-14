@@ -35,8 +35,7 @@ L'inventari complet amb categories i fonts de veritat és a
   **CODE_OF_CONDUCT.md**
 
 ### Registres i backlog
-- **PLA-UI-UX.md** (pla de millora d'interfícies, només pendent) ·
-  **BACKLOG.md** (idees pendents, no històric) · **CHANGELOG.md** (canvis
+**BACKLOG.md** (idees pendents, no històric) · **CHANGELOG.md** (canvis
   publicats) · **LEARNINGS.md** (lliçons tècniques sessió a sessió, amb
   taula de continguts al capdamunt)
 

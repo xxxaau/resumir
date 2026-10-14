@@ -5,6 +5,15 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
+## [Sense publicar]
+
+### Arreglat
+- **La clau d'API ja no fa saltar el gestor de contrasenyes:** el navegador deixa d'oferir desar-la
+  com a contrasenya quan surts de la configuració.
+- **Cites dels vídeos de YouTube:** el resum de vídeo també porta la secció «Cites» (encara que la
+  transcripció sigui automàtica) i cada cita té el minut i segon clicables.
+- **Fils de Hacker News:** una cita de l'article enllaçat obre l'article amb la frase ressaltada.
+
 ## [2.7.1] - 2026-10-14
 
 ### Arreglat

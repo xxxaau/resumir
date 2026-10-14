@@ -49,7 +49,7 @@ const SURFACES = [
     { name: "settings", css: "options/settings.css",  pairs: SETTINGS_PAIRS },
 ];
 
-// Fallades conegudes (mesurades; vegeu docs/PLA-UI-UX.md, Nivell 1). Clau: superfície/tema/text/fons
+// Fallades conegudes (mesurades; ratchet: només poden baixar). Clau: superfície/tema/text/fons
 const KNOWN_FAILURES = new Set([
     // (buida: tots els parells compleixen AA)
 ]);

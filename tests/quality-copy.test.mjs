@@ -1,7 +1,7 @@
 /**
  * tests/quality-copy.test.mjs
  * Control de qualitat del text visible (català): frases que el pla de
- * microcopy (docs/PLA-UI-UX.md, Nivell 1) vol eliminar. És un RATCHET: cada
+ * microcopy que es vol eliminar. És un RATCHET: cada
  * patró té un màxim igual al recompte actual; no pot créixer, i quan baixa cal
  * abaixar-lo aquí (així la llista només es pot escurçar). Tots a 0: qualsevol reaparició d'aquestes frases fa fallar la suite.
  */
