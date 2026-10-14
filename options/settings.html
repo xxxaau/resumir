@@ -75,28 +75,34 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="modelName">Model de resum</label>
-            <div class="model-input-group">
-              <input
-                type="text"
-                id="modelName"
-                class="form-control"
-              />
+          <div class="form-group model-field" role="group" aria-labelledby="modelLabel">
+            <p class="field-label" id="modelLabel">Model de resum</p>
+            <div class="model-current">
+              <div id="modelSummary" class="model-summary" aria-live="polite"></div>
               <button id="checkModels" class="btn btn-secondary" aria-expanded="false" aria-controls="modelsList">
-                Triar model…
-              </button>
-              <button id="refreshModels" class="btn btn-secondary" title="Consulta l'API de Google i actualitza la llista de models disponibles a la barra lateral">
-                Actualitzar la llista
+                Canviar de model
               </button>
             </div>
-            <div id="modelSummary" class="model-summary" aria-live="polite"></div>
             <div id="modelsList"></div>
-            <div id="refreshModelsStatus" class="help-text hidden" role="status" aria-live="polite"></div>
             <div class="help-text">
-              El model utilitzat per generar els resums. Els models marcats amb ★
-              apareixen al selector de la barra lateral.
+              És el model que genera els resums. Els marcats amb ★ també apareixen al
+              selector de la barra lateral.
             </div>
+            <div class="model-tools">
+              <button id="refreshModels" class="btn btn-ghost btn-sm" title="Consulta l'API de Google i actualitza la llista de models disponibles a la barra lateral">
+                Actualitzar la llista de models
+              </button>
+            </div>
+            <div id="refreshModelsStatus" class="help-text hidden" role="status" aria-live="polite"></div>
+            <details class="model-advanced">
+              <summary>Escriure l'identificador del model a mà</summary>
+              <label for="modelName">Identificador del model</label>
+              <input type="text" id="modelName" class="form-control" spellcheck="false" autocomplete="off" />
+              <div class="help-text">
+                Només si el model que vols no surt a la llista (per exemple, un de molt nou).
+                Ha de ser un identificador que l'API de Gemini accepti.
+              </div>
+            </details>
           </div>
         </div>
 

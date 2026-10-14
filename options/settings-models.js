@@ -52,6 +52,10 @@ async function listModels(e) {
 
     setModelsListOpen(true);
     modelsList.replaceChildren();
+    const help = document.createElement("div");
+    help.className = "models-list-help";
+    help.textContent = "Clica un model per triar-lo. Amb ★ l'afegeixes al selector de la barra lateral.";
+    modelsList.appendChild(help);
 
     // Carregar la cache de models i els favorits de l'usuari
     const [localData, favoriteIds] = await Promise.all([
@@ -81,7 +85,7 @@ async function listModels(e) {
         const hintDiv = document.createElement("div");
         hintDiv.className = "models-list-info";
         hintDiv.style.fontStyle = "italic";
-        hintDiv.textContent = 'Prem «Actualitzar la llista» per descarregar tots els models disponibles.';
+        hintDiv.textContent = 'Prem «Actualitzar la llista de models» per descarregar tots els models disponibles.';
         modelsList.appendChild(hintDiv);
     }
 
@@ -151,6 +155,13 @@ function updateModelSummary() {
     name.textContent = info.name;
     out.appendChild(name);
     out.appendChild(createModelBadges(id));
+    // L'identificador tècnic, en segon pla (només si el nom llegible és un altre)
+    if (info.name !== id) {
+        const code = document.createElement("span");
+        code.className = "model-id";
+        code.textContent = id;
+        out.appendChild(code);
+    }
 }
 
 /**
@@ -300,7 +311,7 @@ async function refreshModels(e) {
         statusDiv.style.color = "var(--danger)";
         statusDiv.textContent = `✗ Error: ${err.message}`;
     } finally {
-        btn.textContent = "Actualitzar";
+        btn.textContent = "Actualitzar la llista de models";
         btn.disabled = false;
     }
 }

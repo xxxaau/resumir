@@ -80,6 +80,10 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Selector de model més clar** a la configuració: el model triat es veu amb el nom
+  llegible, el nivell i l'identificador en segon pla, amb un botó «Canviar de model»; la
+  llista explica què fa cada cosa (clic per triar, ★ per a la barra lateral) i l'escriptura
+  a mà de l'identificador queda en un desplegable avançat.
 - **Barra de canvis pendents** a la configuració, amb «Desar» i «Descartar»: es veu
   sempre que hi ha text a mig editar, sigui quina sigui la pestanya.
 - **Configuració en pantalles estretes:** el menú ja no queda inabastable (els plugins

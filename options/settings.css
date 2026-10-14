@@ -333,6 +333,39 @@ label {
     gap: 10px;
 }
 
+/* Model triat: nom llegible i nivell a l'esquerra, «Canviar de model» a la dreta */
+.model-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+}
+.model-current .model-summary { margin: 0; flex: 1 1 220px; min-width: 0; }
+.model-id {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+.model-field { position: relative; }
+.model-field #modelsList { left: 0; right: 0; width: auto; box-sizing: border-box; z-index: 10; }
+.model-tools { margin-top: 6px; }
+.model-advanced { margin-top: 12px; }
+.model-advanced summary { cursor: pointer; font-size: 0.9em; color: var(--text-muted); }
+.model-advanced label { display: block; margin: 10px 0 6px; }
+.models-list-help {
+    padding: 8px 12px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+}
+
 #modelsList {
     background: var(--card-bg);
     border: 1px solid var(--border-color);

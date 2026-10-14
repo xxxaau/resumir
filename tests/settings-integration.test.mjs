@@ -1088,3 +1088,20 @@ test("barra de canvis pendents - «Desar» desa i «Descartar» torna al valor d
         assert.equal(bar.hidden, true);
     } finally { h.close(); }
 });
+
+test("selector de models - el model triat es veu amb nom i identificador en segon pla; l'identificador manual és un desplegable avançat", async () => {
+    const h = await loadSettings({ sync: { modelName: "gemini-2.5-pro" } });
+    try {
+        const sum = h.document.getElementById("modelSummary");
+        assert.match(sum.querySelector("strong").textContent, /Gemini 2\.5 Pro/);
+        assert.equal(sum.querySelector(".model-id").textContent, "gemini-2.5-pro");
+        const adv = h.document.querySelector("details.model-advanced");
+        assert.ok(adv.contains(h.document.getElementById("modelName")), "el camp de text és a l'avançat");
+        assert.equal(adv.open, false);
+        assert.ok(h.document.querySelector('label[for="modelName"]'), "el camp té etiqueta pròpia");
+        assert.match(h.document.getElementById("checkModels").textContent, /Canviar de model/);
+        assert.match(h.document.getElementById("refreshModels").textContent, /Actualitzar la llista de models/);
+        const list = await openModelPicker(h);
+        assert.match(list.querySelector(".models-list-help").textContent, /★/);
+    } finally { h.close(); }
+});
