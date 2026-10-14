@@ -2,6 +2,12 @@
 
 Guia pràctica per a crear screenshots de qualitat professional per a Firefox Add-ons i Chrome Web Store.
 
+> **Set vigent (v2.7.0):** el set de captures i els seus textos es defineixen a
+> [`MARKETS-COPY.md` §6](MARKETS-COPY.md) (font única): **5 captures** — 1) resum amb cites
+> clicables, 2) mapa conceptual, 3) YouTube, 4) configuració, 5) «Dades i privadesa». Les
+> seccions de sota (3 captures + opcionals) descriuen el set antic i serveixen només com a
+> guia de com capturar; si hi ha discrepància, mana MARKETS-COPY.md.
+
 ---
 
 ## 📐 REQUISITS TÈCNICS
@@ -14,7 +20,7 @@ Guia pràctica per a crear screenshots de qualitat professional per a Firefox Ad
 | **Format** | PNG, JPG, JPEG |
 | **Mida màxima** | 5 MB per fitxer |
 | **Nombre** | 1-5 screenshots (recomanat 3) |
-| **Aspect ratio** | 16:9 (1280÷800 = 1.6) |
+| **Aspect ratio** | 16:10 (1280÷800 = 1.6) |
 
 ### Chrome Web Store
 
@@ -24,7 +30,7 @@ Guia pràctica per a crear screenshots de qualitat professional per a Firefox Ad
 | **Format** | PNG, JPG |
 | **Mida màxima** | 5 MB per fitxer |
 | **Nombre** | 1-5 screenshots |
-| **Aspect ratio** | 16:9 (1280÷800 = 1.6) |
+| **Aspect ratio** | 16:10 (1280÷800 = 1.6) |
 
 ---
 
@@ -37,7 +43,7 @@ Guia pràctica per a crear screenshots de qualitat professional per a Firefox Ad
 - 📍 **URL barra:** Pàgina exemple (ex: `wikipedia.org/wiki/...`)
 - 📍 **Panell lateral:** Resum generat
 - 📍 **Botó de còpia:** Visible
-- 📍 **Estadístiques:** Tokens, temps
+- 📍 **Línia de procedència** sota el resum: paraules enviades, model i tokens
 
 #### Passos per capturar:
 
@@ -51,11 +57,11 @@ Guia pràctica per a crear screenshots de qualitat professional per a Firefox Ad
    - Assegura't que: 
      - ✅ Panell resum visible + complert
      - ✅ Text resum llegible
-     - ✅ Botó "Copia a Markdown" visible
-     - ✅ Estadístiques (tokens, ms) visibles
+     - ✅ Botó «Copiar Markdown» visible
+     - ✅ Línia de procedència (paraules, model, tokens) visible
 
 #### Design Tips:
-- **Fons:** Panell fosc (tema "Dark" o "System" en mode dark)
+- **Fons:** Panell fosc (tema «Fosc» o «Sistema (automàtic)» en mode fosc)
 - **Contrast:** Alt contrast per llegibilitat
 - **Text:** Sans-serif clara, 16px mínima
 
@@ -74,11 +80,10 @@ English:
 **Objectiu:** Mostrar facilitat d'instal·lació i personalització
 
 #### Contingut a mostrar:
-- 📍 **Pestanya "Settings"** de l'extensió
-- 📍 **Campo API Key** (sense mostrar clau real!)
-- 📍 **Selector de tema** amb opcions visibles
-- 📍 **Checkbox d'historial**
-- 📍 **Link privacitat**
+- 📍 **Pàgina de configuració** de l'extensió (pestanyes General, Resum, Plugins, Dades i privadesa, Sobre l'extensió)
+- 📍 **Camp de la clau d'API** (sense mostrar clau real!)
+- 📍 **Selector de tema** (Sistema, Flexoki, Clar, Fosc, Flexoki clar, Gris clar)
+- 📍 **Pestanya «Dades i privadesa»** (on es desa cada dada, historial)
 
 #### Passos per capturar:
 
@@ -88,15 +93,15 @@ English:
 4. **Mostra:** 
    - Camp "API Key" (deixa buit o usa placeholder "••••••••••••")
    - Dropdown temes (expandi per veure opcions)
-   - Checkbox "Enable history"
+   - (o bé la pestanya «Dades i privadesa»)
 5. **Captura:** Pantalla 1280×800
    - ✅ Tots els camps visibles
-   - ✅ Tema selecionat (recomanat: "Dark")
+   - ✅ Tema selecionat (recomanat: «Fosc»)
    - ✅ Text legible
 
 #### Design Tips:
-- **Tema:** Usa tema "Light" per contrast (fons blanc)
-- **Colores:** Ressalta botó "Save" en blau/verd
+- **Tema:** Usa tema «Clar» per contrast (fons blanc)
+- **Colores:** Ressalta el botó de desar de la barra de canvis pendents
 - **Spacing:** Deja padding entre camps
 
 #### Example caption:
@@ -114,7 +119,7 @@ English:
 **Objectiu:** Mostrar feature **cache local + accés ràpid**
 
 #### Contingut a mostrar:
-- 📍 **Pestanya Historial** amb múltiples entrades
+- 📍 **Panell d'historial** (botó «Historial» de la barra d'eines del panell) amb múltiples entrades
 - 📍 **URLs de pàgines anteriors**
 - 📍 **Preview del resum cachejat**
 - 📍 **Timestamps**
@@ -122,7 +127,7 @@ English:
 
 #### Passos per capturar:
 
-1. Extensió oberta → clica pestanya **"History"**
+1. Extensió oberta → clica el botó **«Historial»** de la barra d'eines
 2. **Genera 3-4 resums** de pàgines diferents PRÈVIAMENT:
    - Wikipedia article
    - News article
@@ -140,7 +145,7 @@ English:
 
 #### Design Tips:
 - **Ordenació:** Descendent (més recent primer)
-- **Colores:** Usa tema "Dark" per contrast
+- **Colores:** Usa tema «Fosc» per contrast
 - **Icons:** Trash icon visible per eliminar
 
 #### Example caption:
@@ -179,7 +184,7 @@ English:
 ```
 **Mostrar:**
 - Text amb fixacions destacades (bold)
-- Slider de "Fixation level"
+- Control «Percentatge de fixació» (configuració del plugin)
 - Text sense distraccions
 
 ---
@@ -280,20 +285,10 @@ sips -z 800 1280 input.png --out output.png
 
 ### Organització al repo
 
-```
-📁 icons/ (for marketing/documentation screenshots)
-├── cws-screenshot-1.png          (Main panel)
-├── cws-screenshot-2.png          (Settings)
-├── cws-screenshot-3.png          (History)
-├── amo-screenshot-1.png          (idem)
-├── amo-screenshot-2.png          (idem)
-└── amo-screenshot-3.png          (idem)
-
-// Noms alternatius acceptats:
-// screenshot-main.png
-// screenshot-settings.png
-// screenshot-history.png
-```
+Les captures de les botigues **no es versionen** al repo (`icons/` només conté les
+icones de l'extensió). Desa-les fora de git (p. ex. `temp/`, que és a `.gitignore`).
+Les captures del web viuen a `web/src/shots/` i les de les guies d'usuari a
+`docs/user-guide/img/`.
 
 ---
 

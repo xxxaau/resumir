@@ -6,7 +6,7 @@ Guia pas a pas per a lançar una nova versió de **Resumir contingut** a producc
 
 - ✅ Branca `main` neta (cap canvi sense committejar)
 - ✅ Tots els tests passen: `npm run check` (lint + test)
-- ✅ Pre-release validation: `npm run prerelease` → 18/18 ✅
+- ✅ Pre-release validation: `npm run prerelease` → tots els checks ✅
 - ✅ Access a [GitHub](https://github.com/xxxaau/resumir)
 - ✅ Access a [Firefox Add-ons (AMO)](https://addons.mozilla.org/)
 - ✅ Access a [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/developer/dashboard)
@@ -111,9 +111,9 @@ npm version minor -m "chore: release v%s"  # o patch/major
 ```bash
 npm run build
 
-# Hauria generar (la mida creix amb el suport PDF embalat; límit < 4 MB):
-# ✅ resumir-contingut-vX.Y.Z-firefox.zip (~537 KB a v2.6.0)
-# ✅ resumir-contingut-vX.Y.Z-chromium.zip (~536 KB a v2.6.0)
+# Hauria generar a build/ (límit < 4 MB, ho comprova `npm run prerelease`):
+# ✅ resumir-contingut-vX.Y.Z-firefox.zip
+# ✅ resumir-contingut-vX.Y.Z-chromium.zip
 ```
 
 #### 2.4 Pre-release validation
@@ -124,7 +124,7 @@ npm run prerelease
 # ✅ Manifests: name sense '(DEV)' ✅
 # ✅ Manifests: gecko.id sense 'dev' ✅
 # ✅ Manifests: versió sincronitzada ✅
-# ✅ ... (18/18 total)
+# ✅ ... (tots els checks; el total el dona el mateix script)
 #
 # Nota: l'auditoria lang="ca" cobreix només l'HTML que s'embala;
 # els fixtures de test (tests/) queden exclosos a posta.
@@ -164,7 +164,8 @@ git push origin vX.Y.Z   # el tag dispara release.yml (build + Release amb ZIPs)
 # https://github.com/xxxaau/resumir/releases
 ```
 
-> ⚠️ **Parany del pre-push hook:** el hook bloqueja el push si el *working
+> ⚠️ **Parany del pre-push hook** (hook local de `.git/hooks`, no versionat al repo;
+> només aplica si el tens instal·lat): el hook bloqueja el push si el *working
 > tree* està en mode DEV (icones taronges / name amb `(DEV)`). Si ja has
 > tornat a `npm run dev` per treballar en local, fes un stash temporal del
 > mode DEV mentre puges:
@@ -187,7 +188,7 @@ git push origin vX.Y.Z   # el tag dispara release.yml (build + Release amb ZIPs)
 
 #### 5.2 Pujar nova versió
 1. Clicar **Upload New Version**
-2. Seleccionar `resumir-contingut-v2.3.0-firefox.zip`
+2. Seleccionar `build/resumir-contingut-vX.Y.Z-firefox.zip`
 3. Clicar **Continue**
 
 #### 5.3 Revisar automàtic
@@ -202,6 +203,10 @@ Una vegada aprovat, es publica automàticament als usuaris via AMO.
 
 ### Fase 6: Submissió a Chrome Web Store (10-15 min)
 
+> ⚠️ **Procés futur:** avui l'extensió **no és al Chrome Web Store**; Chromium es
+> distribueix només amb el ZIP de la GitHub Release (vegeu README). Salta aquesta fase
+> fins que es publiqui al CWS.
+
 Veure [CHROME-STORE.md](CHROME-STORE.md) per a detalls complets.
 
 #### 6.1 Accedir al dashboard
@@ -210,12 +215,12 @@ Veure [CHROME-STORE.md](CHROME-STORE.md) per a detalls complets.
 
 #### 6.2 Pujar nova versió
 1. Clicar **Upload new package**
-2. Seleccionar `resumir-contingut-v2.3.0-chromium.zip`
+2. Seleccionar `build/resumir-contingut-vX.Y.Z-chromium.zip`
 
 #### 6.3 Actualitzar metadades (si cal)
 - Screenshots (si canviat UI)
 - Description (si canviat funcionalitats)
-- Release notes (CWS auto-detect de CHANGELOG)
+- Release notes (copiar a mà de MARKETS-COPY.md; el CWS no llegeix el CHANGELOG)
 
 #### 6.4 Submit for Review
 1. Clicar **Submit for review**
@@ -300,20 +305,20 @@ PRE-RELEASE:
 [ ] npm run check → 0 errors
 [ ] npm audit --omit=dev → 0 vulnerabilities
 [ ] (Opcional/recomanat) npm run smoke:connectors → detecta drift dels llocs externs (informatiu, no bloqueja)
-[ ] Enllaços públics al web propi: settings.html (guia clau API → https://xxxaau.github.io/resumir/guia/clau-api/), AMO (Pàgina d'inici → el web) i README. Vegeu BACKLOG.
+[ ] Enllaços públics al web propi: settings.html (guia clau API → https://xxxaau.github.io/resumir/guia/clau-api/), AMO (Pàgina d'inici → el web) i README.
 
 DURING RELEASE:
 [ ] npm run prod (dev mode OFF)
 [ ] git commit -am "chore: prepara vX.Y.Z (mode PROD + CHANGELOG)" (tree net; npm version avorta si no)
 [ ] npm version X.Y.Z (syncs everything)
 [ ] npm run build → 2 ZIPs < 4 MB
-[ ] npm run prerelease → 18/18 ✅
+[ ] npm run prerelease → tots els checks ✅
 [ ] git push origin main && git push origin vX.Y.Z (stash del mode DEV si cal)
 
 POST-RELEASE:
 [ ] Verificar GitHub release created automatically
 [ ] Submitir a AMO (Upload new version)
-[ ] Submitir a CWS (Upload new package)
+[ ] Submitir a CWS (Upload new package) — només quan es publiqui al CWS (Fase 6)
 [ ] Monitorizar email per a approvals
 [ ] Update GitHub release description (copy CHANGELOG)
 [ ] Tornar a mode DEV en local: npm run dev (l'extensió torna a mode desenvolupament; `npm run release` ja ho fa al pas 4/5). SEMPRE després del bump.
@@ -331,6 +336,6 @@ POST-RELEASE:
 
 ---
 
-**Última actualització:** 26 de juny de 2026 (revisat amb la release v2.6.0)  
+**Última actualització:** 14 d'octubre de 2026 (revisat per a la release v2.7.0)  
 **Versió:** 1.1  
 **Status:** ✅ Production Ready

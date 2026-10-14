@@ -19,11 +19,12 @@ S'ha implementat un sistema que **aïlla el storage per navigator i mode**:
 
 Cada versió té un storage **completament aïllat**.
 
-### Chromium ✓ (Nou)
-- **DEV**: Clau privada única per dev
-- **PROD**: Clau privada única per producció
+### Chromium
+- Els patches de Chromium **no porten cap `key`**: l'ID d'una extensió desempaquetada depèn de la carpeta carregada.
+- **DEV**: `build_chromium_dev/` (`npm run dev:chromium`) → ID propi
+- **PROD**: el ZIP de GitHub Releases descomprimit en una altra carpeta → un altre ID
 
-Cada versió té un storage **completament aïllat**.
+Cada carpeta té el seu storage; si tornes a carregar des d'una carpeta diferent, l'ID (i el storage) canvien.
 
 ## Com Usar
 
@@ -65,12 +66,12 @@ node scripts/backup-extension-data.mjs restore firefox-dev-2026-04-01T15-30-45 f
 ## Estructura de Storage
 
 **Firefox:**
-- **DEV**: `Resumir contingut (DEV)` + ID `sergi.dev@xaudiera.xyz` → Storage aïllat
-- **PROD**: `Resumir contingut` + ID `sergi@xaudiera.xyz` → Storage aïllat
+- **DEV**: `Resumir (DEV)` + ID `sergi.dev@xaudiera.xyz` → Storage aïllat
+- **PROD**: `Resumir` + ID `sergi@xaudiera.xyz` → Storage aïllat
 
 **Chromium:**
-- **DEV**: Clau privada DEV → Storage aïllat
-- **PROD**: Clau privada PROD → Storage aïllat
+- **DEV**: carpeta `build_chromium_dev/` → Storage aïllat
+- **PROD**: carpeta del ZIP de release → Storage aïllat
 
 ## Recomanacions
 
@@ -87,8 +88,7 @@ node scripts/backup-extension-data.mjs restore firefox-dev-2026-04-01T15-30-45 f
 
 - **manifest.firefox.patch.json** (DEV) - Extension ID dev: `sergi.dev@xaudiera.xyz`
 - **manifest.firefox.prod.patch.json** (PROD) - Extension ID prod: `sergi@xaudiera.xyz`
-- **manifest.chromium.patch.json** (DEV) - Clau privada de dev
-- **manifest.chromium.prod.patch.json** (PROD) - Clau privada de producció
+- **manifest.chromium.patch.json** (DEV) / **manifest.chromium.prod.patch.json** (PROD) - Sense `key`; l'aïllament ve de la carpeta carregada
 - **npm run dev / npm run prod** (`scripts/set-mode.mjs`) - Copia els parches correctes según el mode
 - **scripts/backup-extension-data.mjs** - Tool de backup/restore
 

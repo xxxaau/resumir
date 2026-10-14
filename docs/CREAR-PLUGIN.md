@@ -25,7 +25,7 @@ Cada plugin consta de:
 
 **Sidebar (toolbar + comportament):**
 1. Afegir botó a `sidebar/sidebar.html` (+ `<script>` si té fitxer JS propi) — la seva icona és la **font de veritat** (vegeu «la icona viu a 3 llocs»)
-2. Registrar ID a `sidebar/ui.js` → `extensionIdToButtonId`
+2. Registrar ID a `sidebar/ui.js` → `extensionIdToButtonId` i afegir el botó al seu grup de `TOOLBAR_GROUPS` (Generar | Exportar | Vista)
 3. Afegir visibilitat a `applyExtensionVisibility()` (`sidebar/ui.js`)
 4. **Registrar la clau `enable<Plugin>` a TOTES les llistes de config** (vegeu sota)
 5. Afegir l'ID a `DEFAULT_EXTENSION_ORDER` (`shared/defaults.js`) a la posició desitjada
@@ -33,9 +33,9 @@ Cada plugin consta de:
 
 **Opcions (toggle + ordre + persistència):**
 7. Afegir l'`extension-item` (toggle + moure amunt/avall) a `options/settings.html` — **mateixa icona** que la sidebar
-8. Afegir l'entrada a l'array `extensions` de `options/settings-sidebar.js` (nav lateral) — **mateixa icona** que la sidebar
-9. Registrar `enable<Plugin>` a `ALL_CONFIG_KEYS` i `extensionToggles` (`options/settings.js`)
-10. Save/restore de la clau a `options/settings-options.js`
+8. Afegir l'entrada a `PLUGIN_REGISTRY` de `options/plugin-registry.js` (id, grup, nom, `enableId`, icona; alimenta el nav lateral i els interruptors) — **mateixa icona** que la sidebar. `tests/plugin-registry.test.mjs` comprova que coincideix amb `settings.html` i amb `TOOLBAR_GROUPS`
+9. Registrar `enable<Plugin>` a `ALL_CONFIG_KEYS` (`options/settings.js`)
+10. Save/restore de la clau a `options/settings-options.js` (i, si té claus pròpies, al validador de `options/settings-backup.js`)
 
 **Si té prompt configurable** (com simple/science/deepdive): seguir també la
 guia de 9 passos de prompts a `shared/defaults.js` (constant `DEFAULT_*_PROMPT`,
@@ -49,9 +49,8 @@ comportament divergeix entre sidebar i settings):
 | Fitxer | Llista | Si falta… |
 |---|---|---|
 | `sidebar/sidebar.js` | `CONFIG_KEYS` | **el botó no surt a la sidebar** (símptoma del bug "simple") |
-| `sidebar/ui.js` | el `storage.sync.get([...])` inline del fallback dins `resetUI` | el botó no surt en el camí de refresc sense config |
 | `options/settings.js` | `ALL_CONFIG_KEYS` | el toggle no carrega bé a Settings |
-| `options/settings.js` | `extensionToggles` | el canvi del toggle no refresca la sidebar en viu |
+| `options/plugin-registry.js` | `PLUGIN_REGISTRY` (`enableId`; d'aquí surt `extensionToggles`) | el canvi del toggle no es desa sol ni refresca la sidebar en viu |
 
 ### L'altre pas que s'oblida — la icona viu a 3 llocs
 
@@ -64,10 +63,12 @@ comportament divergeix entre sidebar i settings):
 |---|---|---|
 | `sidebar/sidebar.html` | botó `#<plugin>Btn` del toolbar | barra de la sidebar — **FONT DE VERITAT** |
 | `options/settings.html` | `div.extension-icon` de l'`extension-item` (tab Plugins) | badge de la llista de plugins |
-| `options/settings-sidebar.js` | camp `icon` de l'objecte a l'array `extensions` | nav lateral "Plugins actius" de Settings |
+| `options/plugin-registry.js` | camp `icon` de l'entrada de `PLUGIN_REGISTRY` | nav lateral "Plugins actius" de Settings |
 
-A més, l'historial usa un **emoji** a part (`shared/content-types.js`, camp `icon`):
-NO és l'SVG, és un altre estil/context.
+A més, si el plugin és un tipus de contingut, l'historial, les pestanyes per tipus i el
+peu usen una icona de tipus a part: el path de `TYPE_ICON_PATHS` (`shared/icons.js`,
+via `typeIconSvg(id)`). L'emoji del camp `icon` de `shared/content-types.js` només és
+el fallback si `typeIconSvg` no està carregat.
 
 **Regla:** en canviar una icona, fes `grep` del path antic a `sidebar/` i `options/`
 per confirmar que no en queda cap còpia abans de tancar.
@@ -76,7 +77,7 @@ per confirmar que no en queda cap còpia abans de tancar.
 
 ### 1. Botó a `sidebar/sidebar.html`
 
-Afegir un `<button>` dins el bloc `<div id="toolbarButtons">` amb icona SVG:
+Afegir un `<button>` dins la `.toolbar` amb icona SVG:
 
 ```html
 <button id="elMeuPluginBtn" class="icon-btn" title="El meu plugin" aria-label="El meu plugin">
@@ -93,7 +94,7 @@ Afegir un `<button>` dins el bloc `<div id="toolbarButtons">` amb icona SVG:
 - Sempre incloure `title` i `aria-label`
 - SVG amb `viewBox="0 0 24 24"`, classe `icon`, `aria-hidden="true"`
 
-**Referència real** (conceptmap, `sidebar/sidebar.html:108`):
+**Referència real** (conceptmap, `sidebar/sidebar.html`):
 
 ```html
 <button id="conceptMapBtn" class="icon-btn" title="Mapa conceptual" aria-label="Mapa conceptual">
@@ -101,7 +102,7 @@ Afegir un `<button>` dins el bloc `<div id="toolbarButtons">` amb icona SVG:
 
 ### 2. Registrar ID a `sidebar/ui.js`
 
-Afegir l'entrada al mapa `extensionIdToButtonId` (`sidebar/ui.js:78`):
+Afegir l'entrada al mapa `extensionIdToButtonId` (dins `applyExtensionOrder`, `sidebar/ui.js`):
 
 ```javascript
 const extensionIdToButtonId = {
@@ -114,6 +115,7 @@ const extensionIdToButtonId = {
     "science": "scienceBtn",
     "conceptmap": "conceptMapBtn",
     "simple": "explainSimpleBtn",
+    "anki": "ankiBtn",
     "elmeuplugin": "elMeuPluginBtn",  // ← afegir aquí
 };
 ```
@@ -123,7 +125,7 @@ L'ID del botó (valor) ha de coincidir amb l'`id` de l'HTML.
 
 ### 3. Visibilitat a `applyExtensionVisibility()`
 
-Afegir un bloc dins la funció `applyExtensionVisibility(config)` a `sidebar/ui.js:17`:
+Afegir un bloc dins la funció `applyExtensionVisibility(config)` a `sidebar/ui.js`:
 
 ```javascript
 const elMeuPluginBtnEl = document.getElementById("elMeuPluginBtn");
@@ -141,7 +143,7 @@ if (elMeuPluginBtnEl) {
 posició desitjada:
 
 ```javascript
-const DEFAULT_EXTENSION_ORDER = ["resum", "selectpdf", "simple", "deepdive", "science", "conceptmap", "obsidian", "markdown", "bionic"];
+const DEFAULT_EXTENSION_ORDER = ["resum", "selectpdf", "simple", "deepdive", "science", "conceptmap", "obsidian", "markdown", "bionic", "anki"];
 ```
 
 Aquesta constant s'aplica com a fallback quan l'usuari no té cap ordre desat,
@@ -193,7 +195,9 @@ Afegir el `<script>` tag a `sidebar/sidebar.html` **abans** de `sidebar.js`:
 <script src="sidebar.js"></script>
 ```
 
-**Important:** L'ordre de càrrega importa. `sidebar.js` ha de ser l'últim.
+**Important:** L'ordre de càrrega importa. `sidebar.js` ha de ser l'últim. Afegeix
+també el fitxer, en el mateix ordre, a la llista de `scripts/build-sidebar-bundle.mjs`
+(el build de producció concatena els scripts en un bundle).
 
 Si el plugin exposa funcions globals, afegir-les a `eslint.config.mjs` dins `globals`:
 
@@ -213,7 +217,7 @@ Connectar el botó amb l'acció. Hi ha dos patrons:
 const elMeuPluginBtn = document.getElementById("elMeuPluginBtn");
 if (elMeuPluginBtn) {
     elMeuPluginBtn.addEventListener("click", () => {
-        doSummary(null, false, false, true, false, true); // afegir paràmetre
+        doSummary(null, false, false, true, false, false, false, true); // flag nou al final
     });
 }
 ```
@@ -229,11 +233,14 @@ if (elMeuPluginBtn) {
 }
 ```
 
-**Referència real** (conceptmap, `sidebar/sidebar.js:263`):
+**Referència real** (conceptmap, `sidebar/sidebar.js`; passa abans per
+`checkPromptUpdate` per avisar si hi ha una versió nova del prompt):
 
 ```javascript
 conceptMapBtn.addEventListener("click", () => {
-    doSummary(null, false, false, true, true);
+    checkPromptUpdate("mapa conceptual", "conceptMapPromptUpdateAvailable", () => {
+        doSummary(null, false, false, true, true);
+    });
 });
 ```
 
@@ -310,7 +317,7 @@ tria el prompt i etiqueta el `contentType` (s'usa per a la cache i les estadíst
 // signatura (afegir el flag nou AL FINAL)
 async function startSummary(ctx, overrideText = null,
     isDeepDive = false, isScience = false,
-    isUserInitiated = false, isConceptMap = false, isSimple = false, is<Plugin> = false)
+    isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false, is<Plugin> = false)
 
 // selecció del prompt
 let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
@@ -319,9 +326,11 @@ else if (is<Plugin>) systemPrompt = config.<id>Prompt || DEFAULT_<PLUGIN>_PROMPT
 
 // tag de contentType (cache + stats)
 const contentType = isConceptMap ? "conceptmap"
+    : isAnki ? "anki"
     : is<Plugin> ? "<id>"
     : isScience ? "science"
     : isDeepDive ? "deepdive"
+    : isSimple ? "simple"
     : "summary";
 ```
 
@@ -330,7 +339,7 @@ const contentType = isConceptMap ? "conceptmap"
 
 **3. Renderització.** Per defecte el resultat es pinta amb `formatTextToFragment`.
 Si el plugin necessita un renderitzador propi (com el mapa conceptual amb
-`renderMarkmapInteractive`), crea `sidebar/<id>.js` i afegeix-lo al bundle.
+`window.markmapNative.createMindMap`), crea `sidebar/<id>.js` i afegeix-lo al bundle.
 
 ## Consideracions addicionals
 
@@ -338,9 +347,11 @@ Si el plugin necessita un renderitzador propi (com el mapa conceptual amb
 
 Si el plugin necessita llibreries externes:
 
-1. Col·locar els fitxers `.js` al **directori arrel** de l'extensió
+1. Col·locar els fitxers `.js` a `vendor/` (com pdf.js) i registrar-los a `VENDORS.md`
+   i a `scripts/verify-vendor.mjs`
 2. Afegir-los a `sidebar/sidebar.html` com a `<script>` tags
-3. Si cal injectar-los a la pàgina web, afegir a `manifest.json`:
+3. Si cal injectar-los a la pàgina web, afegir a `manifest.base.json` (els
+   `manifest*.json` es generen amb `npm run manifests:gen`; no s'editen a mà):
 
 ```json
 "web_accessible_resources": [
@@ -391,18 +402,14 @@ await executeScriptSafe({
 
 - Botons toolbar: classe `icon-btn` (hereta estils de `sidebar/sidebar.css`)
 - Controls de plugin: classe `markmap-control-btn` per botons circulars estil Material
-- Usar variables CSS existents (`--text-color`, `--bg-color`, `--error-color`)
+- Usar variables CSS existents (`--text-color`, `--bg-color`, `--error-text`, `--error-bg`)
 - Assignar un color d'icona propi a `sidebar/sidebar.css` usant l'escala Flexoki (p.ex. `#conceptMapBtn { color: #bc5215; /* Flexoki Orange */ }`).
 
 ### Icones
 
 Totes les icones segueixen l'estil **Lucide**: 24×24, stroke-width 2, round caps/joins, `fill="none"`, `stroke="currentColor"`.
 
-Les icones compartides entre múltiples components van a **`shared/icons.js`** (carregat automàticament a la sidebar). Consulta la skill [`creating-icons`](../.opencode/skills/creating-icons/SKILL.md) per la guia completa de:
-- Patró `makeBtn()` per botons de control amb SVG
-- Com passar icones a funcions serialitzades (fullscreen overlay)
-- Diferència entre icones compartides vs inline
-- Checklist per afegir una icona nova
+Les icones compartides entre múltiples components van a **`shared/icons.js`** (carregat automàticament a la sidebar). Per als botons de control amb SVG, segueix el patró `makeBtn()` de `sidebar/conceptmap.js`; a les funcions serialitzades (overlay de pantalla completa) les icones es passen com a argument (vegeu `MARKMAP_ICONS`).
 
 ### Lint i tests
 
@@ -429,7 +436,7 @@ Un selector descendent sobre `svg` dins d'un contenidor amb botons (p.ex.
 `.markmap-container svg { background: ... }`) també atrapa els SVG de les icones
 dels botons de control. Escopa sempre el llenç amb el combinador de fill (`> svg`).
 Va passar amb els controls del mapa conceptual. Validar amb **tots els temes**
-(light/dark/solarized): un fons espuri pot ser invisible en un tema i evident en
+(system, flexoki, light, dark, solarized = «Flexoki clar», soft-gray): un fons espuri pot ser invisible en un tema i evident en
 un altre. Vegeu `docs/LEARNINGS.md`.
 
 ### `onclick` inline a les pàgines d'extensió = botó mort (CSP MV3)
@@ -473,7 +480,8 @@ l'inrevés. Si un fitxer exposa una util a `window`, crida-la sempre com a
 | `options/settings.html` | `extension-item` (toggle) + pestanyes de config |
 | `options/settings.js` | `ALL_CONFIG_KEYS`, `extensionToggles`, binds |
 | `options/settings-options.js` | Save/load/reset settings |
-| `options/settings-sidebar.js` | Array `extensions` del nav lateral + `checkboxId` |
+| `options/plugin-registry.js` | **`PLUGIN_REGISTRY`**: id, grup, nom, `enableId` i icona de cada plugin |
+| `options/settings-sidebar.js` | Nav lateral (llegeix `PLUGIN_REGISTRY`) |
 | `options/settings-order.js` | Drag & drop ordre |
-| `manifest.json` | Permisos, `web_accessible_resources` |
+| `manifest.base.json` (+ patches) | Permisos, `web_accessible_resources` (els `manifest*.json` es generen) |
 | `eslint.config.mjs` | Globals per funcions/constants exposades |

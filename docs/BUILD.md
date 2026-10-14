@@ -29,7 +29,7 @@ npm run build
 
 This produces:
 - `build/resumir-contingut-vX.Y.Z-firefox.zip` — submit to AMO
-- `build/resumir-contingut-vX.Y.Z-chromium.zip` — submit to Chrome Web Store
+- `build/resumir-contingut-vX.Y.Z-chromium.zip` — published on GitHub Releases (not on the Chrome Web Store today)
 
 ## AMO submission note
 
@@ -38,7 +38,7 @@ transformers in your extension?"* answer **Yes**. Reason:
 
 | Tool | What it does |
 |------|-------------|
-| **esbuild** | Minifies the sidebar bundle (18 files → `sidebar/sidebar.bundle.js`) and Chromium's background bundle |
+| **esbuild** | Minifies the sidebar bundle (`sidebar/*.js` → `sidebar/sidebar.bundle.js`) and Chromium's background bundle |
 | **merge-manifest.mjs** | Generates `manifest.json` from base + platform patches |
 
 Provide these URLs in the AMO form:
@@ -53,7 +53,7 @@ bundle is minified.
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| esbuild | `^0.27.3` | Bundles `background.js` and `sidebar/*.js` for Chromium |
+| esbuild | see `package.json` | Bundles `sidebar/*.js` (Firefox + Chromium) and `background.js` (Chromium) |
 
 ## Vendored files
 
@@ -61,7 +61,7 @@ Three files are vendored (pre-built) in the repository:
 
 | File | Source | Purpose |
 |------|--------|---------|
-| `sidebar/Readability.js` | [Mozilla/readability](https://github.com/mozilla/readability) | Article text extraction |
+| `Readability.js` (root) | [Mozilla/readability](https://github.com/mozilla/readability) | Article text extraction |
 | `vendor/pdf.min.js` | [pdf.js](https://mozilla.github.io/pdf.js/) v3.11.174 (legacy UMD) | PDF parsing (text layer extraction) |
 | `vendor/pdf.worker.min.js` | pdf.js v3.11.174 (legacy UMD) | PDF worker (CSP-safe, loaded via `runtime.getURL`) |
 
@@ -90,9 +90,9 @@ npm run build:chromium
 ## Running tests
 
 ```bash
-npm test          # 243 unit + E2E tests
+npm test          # Unit + integration tests (the runner prints the current count)
 npm run lint      # ESLint (0 warnings expected)
-npm run prerelease  # Full pre-release audit (17 checks)
+npm run prerelease  # Full pre-release audit
 ```
 
 ## Release workflow
@@ -110,11 +110,12 @@ This walks you through:
 1. ✓ Check you're on `main` branch
 2. ✓ Check working tree is clean (or let you commit)
 3. ✓ Switch to PROD mode
-4. ✓ Run prerelease audit (17 checks)
+4. ✓ Bump version (patch / minor / major — you choose)
 5. ✓ Build ZIPs
-6. ✓ Bump version (patch / minor / major — you choose)
+6. ✓ Run prerelease audit
 7. ✓ Create release commit + tag
 8. ✓ Push to GitHub
+9. ✓ Confirm the AMO upload
 
 Each step requires `s` confirmation — nothing happens automatically.
 
@@ -145,6 +146,6 @@ npm run release:chromium
 
 ### Git hooks
 
-The `pre-push` git hook blocks pushes while the manifest contains
+The local `pre-push` git hook (in `.git/hooks`, not versioned in the repo) blocks pushes while the manifest contains
 `"Resumir (DEV)"` to avoid accidentally publishing the DEV build.
 Note: the hook is a Bash script — on Windows, use `git-bash` or WSL.

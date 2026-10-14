@@ -21,7 +21,7 @@ Si ho pots obrir al navegador, ho pots aprofitar:
 - **YouTube** — transcripcions, també amb subtítols automàtics (3 vies de fallback per maximitzar compatibilitat)
 - **Twitter/X** — fils complets (scrape del DOM amb fallback a meta `og:description`)
 - **Hacker News** — article enllaçat + fil de comentaris
-- **PDFs** — remots (HTTPS, descàrrega automàtica) i locals (botó «Selecciona PDF local»). Cal capa de text; PDFs escanejats no suportats (sense OCR)
+- **PDFs** — remots (HTTPS, descàrrega automàtica) i locals (botó «Triar un PDF local»). Cal capa de text; PDFs escanejats no suportats (sense OCR)
 
 ## 🔍 Cinc lents per entendre
 
@@ -33,7 +33,7 @@ No un resum: la comprensió que necessites en cada moment. Amb streaming en temp
 | **Aprofundiment** | El context i els matisos que un resum no dona |
 | **Explica-ho fàcil** | Qualsevol tema en llenguatge planer |
 | **Validació científica** | Afirmacions verificades, fonts avaluades, biaixos detectats |
-| **Mapa conceptual** | Visualització interactiva (pan, zoom, plegat de branques, export PNG) amb renderitzador SVG propi de ~22 KB |
+| **Mapa conceptual** | Visualització interactiva (pan, zoom, plegat de branques, export PNG) amb renderitzador SVG propi |
 
 ## 📚 Coneixement que perdura
 
@@ -41,13 +41,14 @@ El que entens avui, ho trobes demà:
 
 - **Obsidian** — envia resums a la teva bóveda amb plantilla configurable
 - **Markdown** — copia net i reutilitzable
+- **Targetes Anki** — preguntes i respostes generades del contingut, exportables a Obsidian amb la sintaxi `obsidian_to_anki`
 - **Historial + memòria cau local** — els resums anteriors carreguen a l'instant (30 dies)
-- **Estadístiques** — tokens i cost per model, amb selector de període
+- **Estadístiques d'ús** — resums generats, tokens, temps de resposta i recompte per tipus i per model (a la configuració)
 
 ## 📖 Llegibilitat a la teva mida
 
 - **Lectura biònica** configurable (fixació, tipografia, mida, interlineat)
-- **5 temes**: sistema, clar, fosc, solarized i gris
+- **6 temes**: sistema, Flexoki (automàtic), clar, fosc, Flexoki clar i gris clar
 - **Accessible**: navegable per teclat, focus visible, contrast WCAG
 
 ---
@@ -86,7 +87,7 @@ L'extensió **no està al Chrome Web Store**. Per instal·lar-la:
 
 **Confiança radical**: el teu coneixement és teu. Literalment.
 
-- **Sense seguiment ni telemetria**: la clau API, les preferències, l'historial i la caché viuen només al teu navegador (`storage.local`)
+- **Sense seguiment ni telemetria**: la clau API, l'historial i les estadístiques viuen només al teu navegador (`storage.local`); les preferències es desen a `storage.sync` (només se sincronitzen al teu compte del navegador si hi tens la sincronització activada)
 - **Sense servidors propis**: el contingut s'envia directament a l'API de Google Gemini (HTTPS), i només quan tu cliques «Resumir»
 - **Permís d'accés a pàgines** (`<all_urls>`): es concedeix a la instal·lació perquè puguis resumir qualsevol pàgina sense un avís de permís a cada lloc. L'extensió només llegeix el contingut quan tu ho demanes — mai en segon pla
 - **Seguretat**: CSP restrictiva, protecció contra contingut no fiable als prompts, vendors verificats per hash (SHA-256)
@@ -122,7 +123,7 @@ sidebar/
   summary.js                # Lògica de generació
   api.js                    # Client de streaming Gemini (SSE)
   content.js                # Extracció de text (YouTube amb 3 vies, HN, Readability)
-  cache.js                  # Caché local i estadístiques
+  cache.js                  # Caché local (historial) i estadístiques
   history.js                # Historial de resums
   markmap-native.js         # Renderitzador SVG natiu del mapa conceptual
   conceptmap.js             # Orquestrador del mapa (sidebar + fullscreen)

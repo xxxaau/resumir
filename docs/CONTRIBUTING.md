@@ -98,6 +98,7 @@ npm run dev
 │   ├── cache.js            # Memòria local
 │   ├── history.js          # Historial de resums
 │   ├── pdf-viewer.html/js  # Visor PDF personalitzat
+│   ├── extractors.js       # Funcions injectades amb executeScript (extracció, ressaltat de cites)
 │   ├── markmap-native.js   # Renderitzador SVG natiu del mapa conceptual
 │   └── conceptmap*.js      # Orquestrador del mapa conceptual
 │
@@ -109,6 +110,9 @@ npm run dev
 │   ├── defaults.js         # Prompts per defecte
 │   ├── models.js           # Model curated array
 │   └── content-types.js    # Tipus de contingut centralitzats
+│
+├── icons/                  # Icona «Síntesi»: icons/src/icon-{prod,dev}.svg → PNG a prod/ i dev/
+│                           # (npm run icons:gen); npm run dev/prod les copia a icons/
 │
 ├── vendor/                 # Llibreries vendoritzades
 │   ├── pdf.min.js          # pdf.js (extracció de text PDF)

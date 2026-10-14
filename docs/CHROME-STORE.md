@@ -13,28 +13,23 @@ Guia completa per a publicar **Resumir contingut** al Chrome Web Store (CWS).
 
 - ✅ Account Google Developer (actiu i verificat)
 - ✅ Chrome Web Store Developer Account (€5 one-time registration fee)
-- ✅ Build production: `npm run build` → `resumir-contingut-v2.2.4-chromium.zip`
-- ✅ All pre-release checks passed: `npm run prerelease` → 18/18 ✅
+- ✅ Build production: `npm run build` → `build/resumir-contingut-vX.Y.Z-chromium.zip`
+- ✅ All pre-release checks passed: `npm run prerelease` → tots els checks ✅
 
 ## 🚀 Passos de Submissió
 
 ### Pas 1: Preparar Assets (ONE-TIME)
 
-Descarregar captures de pantalla (1280×800, JPG/PNG):
-
-| Fit | Descripció | Exemple |
-|-----|-----------|---------|
-| 1 screenshot | Extension main popup (summary generation) | `screenshots/cws-screenshot-1.png` |
-| 2 screenshot | Options panel (API key configuration) | `screenshots/cws-screenshot-2.png` |
-| 3 screenshot | History panel (cached summaries) | `screenshots/cws-screenshot-3.png` |
-
-**Expected location:** Create a `screenshots/` folder and save as `screenshots/cws-screenshot-*.png` (commit to repo)
+Preparar les captures de pantalla (1280×800, JPG/PNG). El set vigent (5 captures) i els
+seus textos són a [`MARKETS-COPY.md` §6](MARKETS-COPY.md); com capturar-les, a
+[`SCREENSHOTS-GUIDE.md`](SCREENSHOTS-GUIDE.md). Les captures no es versionen al repo
+(desa-les fora de git, p. ex. a `temp/`).
 
 ### Pas 2: Accedir al Developer Dashboard
 
 1. Anar a [chrome.google.com/webstore/developer/dashboard](https://chrome.google.com/webstore/developer/dashboard)
 2. Clicar **Create New Item**
-3. Seleccionar el ZIP: `resumir-contingut-v2.2.4-chromium.zip`
+3. Seleccionar el ZIP: `build/resumir-contingut-vX.Y.Z-chromium.zip`
 
 ### Pas 3: Omplir Metadades
 
@@ -51,7 +46,7 @@ Description:
   • YouTube i Hacker News — extracció intel·ligent de transcripcions
   • Lectura biònica — mode de lectura ràpida
   • Exporta a Markdown — copia o envia a Obsidian
-  • Múltiples temes — sistema, clar, fosc, solarized
+  • Múltiples temes — sistema, Flexoki, clar, fosc, Flexoki clar, gris clar
   • Privacesa total — tot local, sense servidor propi
 
   🔒 Seguretat:
@@ -100,7 +95,7 @@ Aquesta extensió NO:
 ❌ No recull dades personals
 ❌ No fa seguiment
 ❌ No envia dades a servidors (excepte a Gemini API)
-❌ No sincronitza dades entre dispositius
+❌ No sincronitza la clau d'API, l'historial ni les estadístiques (només les preferències, via el compte del navegador)
 
 Aquesta extensió SÍ:
 ✅ Emmagatzema API key localment en navegador
@@ -112,8 +107,8 @@ Per a detalls complets: https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY
 
 ### Pas 4: Pujar ZIP i Assets
 
-1. Clicar **Upload** i seleccionar `resumir-contingut-v2.2.4-chromium.zip`
-2. Clicar **Add images** i pujar 3 screenshots (1280×800 cada una)
+1. Clicar **Upload** i seleccionar `build/resumir-contingut-vX.Y.Z-chromium.zip`
+2. Clicar **Add images** i pujar les captures (1280×800 cada una; set a MARKETS-COPY.md §6)
 3. Esperar validació automàtica (~5 minuts)
 
 ### Pas 5: Revisar Permisos Automàtics
@@ -146,7 +141,7 @@ Host permissions (required):
 
 ### Pas 7 (Si rebutjat): Corregir i Reenviar
 
-Si AMO rebutja per:
+Si el CWS rebutja per:
 
 | Error | Solució |
 |-------|---------|
@@ -186,7 +181,7 @@ git push origin main --tags
 
 ### Changelog a CWS
 
-CWS extraurà automàticament la secció de CHANGELOG.md `## [X.Y.Z]` per a mostrar als usuaris.
+El CWS **no** llegeix el CHANGELOG.md: copia a mà les notes de versió de `MARKETS-COPY.md` (o de la secció `## [X.Y.Z]` del CHANGELOG) al dashboard.
 
 ---
 
@@ -215,9 +210,9 @@ CWS extraurà automàticament la secció de CHANGELOG.md `## [X.Y.Z]` per a most
 ```
 [ ] manifest.chromium.json té versió correcta (X.Y.Z)
 [ ] BUILD.md instructions executades
-[ ] npm run prerelease → 18/18 ✅
+[ ] npm run prerelease → tots els checks ✅
 [ ] npm run build → 2 ZIPs generats (< 4 MB cada)
-[ ] 3 screenshots en format 1280×800 JPG/PNG
+[ ] Captures en format 1280×800 JPG/PNG (set a MARKETS-COPY.md §6)
 [ ] PRIVACY_POLICY.md completada
 [ ] CHANGELOG.md té entrada `## [X.Y.Z]`
 [ ] No API keys al codi (`npm run prerelease` hauria detectat)

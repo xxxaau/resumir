@@ -22,7 +22,8 @@ body:
     id: version
     attributes:
       label: Versió de l'extensió
-      placeholder: ex. 2.2.4
+      description: La trobaràs a Configuració → Sobre l'extensió.
+      placeholder: ex. 2.7.0
     validations:
       required: true
 

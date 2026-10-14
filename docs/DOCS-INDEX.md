@@ -34,7 +34,7 @@ Tres categories:
 | `docs/README.md` | Índex de la carpeta `docs/` | Crees o mous un document |
 | `docs/DOCS-INDEX.md` | Aquest índex | Crees, mous, esborres o recategoritzes un document |
 | `docs/DEV-CONTEXT.md` | Context tècnic complet (arquitectura, comandes, flux de mòduls) per a assistents de codi | Canvia l'arquitectura, les comandes npm o el flux de mòduls |
-| `docs/ARCHITECTURE.md` | Graf de components i flux de dades | Canvia l'arquitectura ⚠️ (no cobreix el sistema de plugins) |
+| `docs/ARCHITECTURE.md` | Graf de components i flux de dades | Canvia l'arquitectura (el detall del sistema de plugins és a `CREAR-PLUGIN.md`) |
 | `docs/BUILD.md` | Com compilar i empaquetar | Canvia el build, els scripts npm o els requisits |
 | `docs/CONTRIBUTING.md` | Guia de contribució | Canvia el flux de contribució o de tests |
 | `docs/SECURITY.md` | Política de seguretat i permisos | Canvien permisos, CSP o vendors |

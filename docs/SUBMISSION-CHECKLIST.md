@@ -4,8 +4,11 @@
 > La distribució per a **Chromium (Chrome/Edge/Brave) es fa via
 > [GitHub Releases](https://github.com/xxxaau/resumir/releases)** i la submissió al
 > **Chrome Web Store està ajornada** (les seccions CWS d'aquest document es conserven per
-> a ús futur). Els números de versió i dates d'exemple (`v2.2.4`, «19 de maig») són
-> **il·lustratius**; consulta `package.json` / `CHANGELOG.md` per als valors reals.
+> a ús futur). Els números de versió d'exemple (`v2.2.4`) són **il·lustratius**;
+> consulta `package.json` / `CHANGELOG.md` per als valors reals. Els **textos i el set de
+> captures** vigents són a [`MARKETS-COPY.md`](MARKETS-COPY.md) (font única, només en
+> català); si aquest document hi discrepa, mana MARKETS-COPY.md. El flux de release
+> (bump, build, push) és a [`RELEASE-PROCESS.md`](RELEASE-PROCESS.md).
 
 Guia executiva de tots els artefactes, documentació i passos preparats per a submissió a Firefox Add-ons (AMO) i Chrome Web Store (CWS).
 
@@ -17,7 +20,7 @@ Guia executiva de tots els artefactes, documentació i passos preparats per a su
 
 | Fitxer | Propòsit | Status |
 |--------|----------|--------|
-| [README.md](README.md) | Overview del projecte | ✅ Complet |
+| [README.md](../README.md) | Overview del projecte | ✅ Complet |
 | [BUILD.md](BUILD.md) | Instructions build (node, npm, PowerShell) | ✅ Complet |
 | [SECURITY.md](SECURITY.md) | Política de seguretat i vulnerabilitats | ✅ Complet |
 | [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | Privacy policy (required by AMO/CWS) | ✅ Complet |
@@ -29,8 +32,8 @@ Guia executiva de tots els artefactes, documentació i passos preparats per a su
 
 | Fitxer | Propòsit | Status |
 |--------|----------|--------|
-| **[MARKETS-COPY.md](MARKETS-COPY.md)** | 📝 **TEXTOS PER ALS MARKETS** (CA + EN) | ✅ **NUEVO** |
-| **[SCREENSHOTS-GUIDE.md](SCREENSHOTS-GUIDE.md)** | 📸 **GUIA SCREENSHOTS** (1280×800) | ✅ **NUEVO** |
+| **[MARKETS-COPY.md](MARKETS-COPY.md)** | 📝 **TEXTOS PER ALS MARKETS** (CA) + set de captures | ✅ Complet |
+| **[SCREENSHOTS-GUIDE.md](SCREENSHOTS-GUIDE.md)** | 📸 **GUIA SCREENSHOTS** (1280×800) | ✅ Complet |
 | **[CHROME-STORE.md](CHROME-STORE.md)** | 🌐 **CHROME WEB STORE SUBMISSION** | ✅ Complet |
 | **[RELEASE-PROCESS.md](RELEASE-PROCESS.md)** | 🚀 **RELEASE WORKFLOW** (6 fases) | ✅ Complet |
 
@@ -38,11 +41,11 @@ Guia executiva de tots els artefactes, documentació i passos preparats per a su
 
 | Fitxer | Element | Status |
 |--------|---------|--------|
-| [package.json](package.json) | Node.js engines, lint max-warnings 0 | ✅ Actualitzat |
-| [manifest.base.json](manifest.base.json) | Base manifest (CA), CSP, metadata | ✅ Actualitzat |
-| [manifest.json](manifest.json) | Firefox manifest (generated) | ✅ Actualitzat |
-| [manifest.chromium.json](manifest.chromium.json) | Chrome manifest (generated) | ✅ Actualitzat |
-| [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI/CD pipeline (16 checks) | ✅ Operacional |
+| [package.json](../package.json) | Node.js engines, lint max-warnings 0 | ✅ Actualitzat |
+| [manifest.base.json](../manifest.base.json) | Base manifest (CA), CSP, metadata | ✅ Actualitzat |
+| [manifest.json](../manifest.json) | Firefox manifest (generated) | ✅ Actualitzat |
+| [manifest.chromium.json](../manifest.chromium.json) | Chrome manifest (generated) | ✅ Actualitzat |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | CI: lint, tests, build, prerelease, vendors, web-ext lint | ✅ Operacional |
 
 ---
 
@@ -53,14 +56,14 @@ Guia executiva de tots els artefactes, documentació i passos preparats per a su
 ```bash
 # 1. Run all checks
 npm run check              # lint + test
-npm run prerelease         # 18 automated checks
+npm run prerelease         # checks automàtics (scripts/pre-release-check.mjs)
 npm audit --omit=dev       # 0 vulnerabilities
 ```
 
 Expected:
 - ✅ ESLint: 0 warnings
-- ✅ Tests: 0 failures (207 total)
-- ✅ Pre-release: 18/18 ✅
+- ✅ Tests: 0 failures (el total el dona `npm test`)
+- ✅ Pre-release: tots els checks ✅
 - ✅ npm audit: 0 vulnerabilities
 
 ### ✅ Fase 2: Build & Packaging
@@ -73,8 +76,8 @@ npm run prod               # Remove DEV label
 npm run build              # Firefox + Chromium ZIPs
 
 # 4. Verify ZIPs
-ls -lh resumir-contingut-v*.zip
-# Expected: ~110-111 KB each, < 4 MB total
+ls -lh build/resumir-contingut-v*.zip
+# Expected: < 4 MB cadascun (ho comprova `npm run prerelease`)
 ```
 
 ### ✅ Fase 3: Metadades & Textos
@@ -82,25 +85,20 @@ ls -lh resumir-contingut-v*.zip
 Verificar que tens:
 
 ```
-✅ MARKETS-COPY.md
-   ├─ Firefox titles (CA + EN)
-   ├─ Firefox descriptions (~2,200 chars)
-   ├─ Chrome Web Store copy
-   ├─ Privacy statements
-   └─ Release notes v2.2.4
+✅ MARKETS-COPY.md (CA)
+   ├─ Títol, descripció breu i llarga
+   ├─ Justificació de permisos
+   ├─ Nota de versió (What's New) de la versió actual
+   ├─ Text de les 5 captures (§6)
+   └─ Categoria i metadades
 
 ✅ SCREENSHOTS-GUIDE.md
    ├─ Technical specs (1280×800)
-   ├─ 3 main screenshots
-   │  ├─ Screenshot 1: Main panel (resum)
-   │  ├─ Screenshot 2: Settings (config)
-   │  └─ Screenshot 3: History (cache)
-   ├─ Captions (CA + EN)
-   └─ Design guidelines
+   └─ Com capturar (el set vigent és el de MARKETS-COPY.md §6)
 
 ✅ PRIVACY_POLICY.md (linked in copy)
 
-✅ CHANGELOG.md (v2.2.4 entry dated 2026-04-27)
+✅ CHANGELOG.md (entrada `## [X.Y.Z]` de la versió actual)
 ```
 
 ### ✅ Fase 4: Documentació de Release
@@ -123,17 +121,13 @@ Verificar que tens:
 **Prerequisits:** ✅ All 4 phases above
 
 1. **Accedir a AMO Developer:** https://addons.mozilla.org/developers/
-2. **Upload ZIP:** `resumir-contingut-v2.2.4-firefox.zip`
+2. **Upload ZIP:** `build/resumir-contingut-vX.Y.Z-firefox.zip`
 3. **Omplir Metadades:**
-   - **Title:** "Resumir contingut" (from MARKETS-COPY.md)
-   - **Short desc:** [CA] 115 chars, [EN] 109 chars
-   - **Full desc:** [CA] ~2,200 chars, [EN] ~2,150 chars
-   - **Privacy statement:** Copy from MARKETS-COPY.md
-   - **Release notes:** v2.2.4 from MARKETS-COPY.md
-   - **Screenshots:** 3× (1280×800 PNG/JPG)
-     - Screenshot 1: Main panel
-     - Screenshot 2: Settings
-     - Screenshot 3: History
+   - **Title:** el `name` del manifest (vegeu MARKETS-COPY.md §1)
+   - **Short / full desc:** MARKETS-COPY.md §2 i §3
+   - **Permisos:** MARKETS-COPY.md §4
+   - **Release notes:** MARKETS-COPY.md §5
+   - **Screenshots:** set de MARKETS-COPY.md §6 (1280×800 PNG/JPG)
 4. **Submit for Review**
 5. **Status:** "Pending Review" (~30 min automated + manual if needed)
 
@@ -150,12 +144,10 @@ Verificar que tens:
 **Prerequisits:** ✅ All 4 phases above
 
 1. **Accedir a CWS Dashboard:** https://chrome.google.com/webstore/developer/dashboard
-2. **Upload ZIP:** `resumir-contingut-v2.2.4-chromium.zip`
+2. **Upload ZIP:** `build/resumir-contingut-vX.Y.Z-chromium.zip`
 3. **Omplir Store Listing:**
-   - **Title:** "Resumir contingut"
-   - **Short desc:** [CA] 84 chars, [EN] 80 chars
-   - **Full desc:** [CA] ~1,300 chars, [EN] ~1,280 chars (CWS és més strict)
-   - **Screenshots:** 3× (1280×800 PNG/JPG)
+   - **Title / descs:** MARKETS-COPY.md (descripció breu ≤ 132 caràcters al CWS)
+   - **Screenshots:** set de MARKETS-COPY.md §6 (1280×800 PNG/JPG)
    - **Privacy policy:** Link to full policy
 4. **Submit for Review**
 5. **Status:** "Pending Review" (1-3 days)
@@ -170,43 +162,9 @@ Verificar que tens:
 
 ## 🎯 TEXTUAL ASSETS — QUICK LOOKUP
 
-### Títols
-```
-"Resumir contingut" (17 chars) ✅ Aprovat per ambdós
-```
-
-### Descripcions Breus
-```
-Catalan (115 chars):
-"Resumeix pàgines web amb Google Gemini AI — sense rastreig, sense telemetria, privacesa total."
-
-English (109 chars):
-"Summarize any webpage with Google Gemini AI — no tracking, no telemetry, complete privacy."
-```
-
-### Full Descriptions
-```
-Veure MARKETS-COPY.md:
-- Firefox descriptions: ~2,200 chars
-- Chrome descriptions: ~1,300 chars (més concisos)
-- Both CA + EN versions
-```
-
-### Release Notes
-```
-Veure MARKETS-COPY.md secció "Release Notes / What's New"
-- v2.2.4 entry
-- Security, YouTube, UX improvements
-- CA + EN
-```
-
-### Privacy Statements
-```
-Veure MARKETS-COPY.md secció "Privacy & Security"
-- Justificació de permisos
-- API key security
-- Data usage
-```
+Tots els textos (títol, descripcions, permisos, nota de versió, text de les captures,
+metadades) són a **MARKETS-COPY.md**, seccions §1–§7. No els copiïs aquí: es
+desactualitzarien.
 
 ---
 
@@ -216,13 +174,10 @@ Veure MARKETS-COPY.md secció "Privacy & Security"
 ```
 ✅ Resolució: 1280×800 pixels exacta
 ✅ Format: PNG o JPG
-✅ Nombre: 3 screenshots (mín 1, màx 5)
+✅ Nombre: el set de MARKETS-COPY.md §6 (avui 5; mín 1, màx 5)
 ✅ Mida: < 5 MB cada
 
-Ordre recomanat:
-1. Main Panel (resum generat)
-2. Settings (API key, temes)
-3. History (cache local)
+Ordre: el de MARKETS-COPY.md §6.
 ```
 
 ### Com Capturar
@@ -236,8 +191,8 @@ Veure SCREENSHOTS-GUIDE.md:
 
 ### Captions
 ```
-Veure MARKETS-COPY.md secció "Screenshot Captions"
-- CA i EN versions
+Veure MARKETS-COPY.md §6 «Text de les captures de pantalla»
+- Només en català
 - Ús: Sota imatge al market
 ```
 
@@ -250,7 +205,7 @@ PRE-SUBMISSION CHECKLIST:
 
 CODE & BUILD:
 [ ] npm run check → 0 errors
-[ ] npm run prerelease → 18/18 ✅
+[ ] npm run prerelease → tots els checks ✅
 [ ] npm audit --omit=dev → 0 vulnerabilities
 [ ] npm run build → 2 ZIPs generated
 [ ] ZIPs < 4 MB each
@@ -259,26 +214,22 @@ METADATES:
 [ ] manifest.base.json updated (CSP, metadata)
 [ ] manifest.json generated (Firefox)
 [ ] manifest.chromium.json generated (Chrome)
-[ ] CHANGELOG.md has v2.2.4 entry
+[ ] CHANGELOG.md has `## [X.Y.Z]` entry for the current version
 [ ] PRIVACY_POLICY.md complete and accessible
 
 MARKETING:
-[ ] MARKETS-COPY.md complete (CA + EN)
+[ ] MARKETS-COPY.md complete (CA) — la seva pròpia llista de verificació
 [ ] Títols approved (no typos)
-[ ] Descripcions breves OK (115 CA, 109 EN)
-[ ] Full descriptions OK (~2,200 CA, ~1,300 Chrome)
-[ ] Release notes CA + EN ready
+[ ] Descripcions dins dels límits (vegeu MARKETS-COPY.md)
+[ ] Release notes ready
 [ ] Privacy statements formatted
 
 SCREENSHOTS:
-[ ] 3 screenshots captured (1280×800)
-[ ] Screenshot 1: Main panel (resum)
-[ ] Screenshot 2: Settings (config)
-[ ] Screenshot 3: History (cache)
+[ ] Captures del set de MARKETS-COPY.md §6 (1280×800)
 [ ] All in PNG/JPG format
 [ ] All < 5 MB each
-[ ] Captions written (CA + EN)
-[ ] Saved to screenshots/ folder
+[ ] Captions (MARKETS-COPY.md §6)
+[ ] Desades fora de git (p. ex. temp/; no es versionen)
 
 DOCUMENTATION:
 [ ] BUILD.md accessible (per AMO requirement)
@@ -292,7 +243,7 @@ FIREFOX (AMO):
 [ ] ZIP uploaded
 [ ] Metadates omplides
 [ ] Textos copiats de MARKETS-COPY.md
-[ ] 3 screenshots uploaded
+[ ] Screenshots uploaded
 [ ] Pre-release check passed
 [ ] Submit for review
 
@@ -301,7 +252,7 @@ CHROME WEB STORE:
 [ ] ZIP uploaded
 [ ] Store listing completed
 [ ] Textos (CWS shorter version)
-[ ] 3 screenshots uploaded
+[ ] Screenshots uploaded
 [ ] Privacy policy linked
 [ ] Submit for review
 
@@ -340,7 +291,7 @@ POST-SUBMISSION:
 | Code validation | 10 min | ✅ npm scripts |
 | Build & ZIP | 5 min | ✅ npm scripts |
 | Metadata prep | 15 min | ❌ Manual (1 cop) |
-| Screenshot capture | 20 min | ❌ Manual (3 images) |
+| Screenshot capture | 20 min | ❌ Manual (set de MARKETS-COPY.md §6) |
 | Textos translation | 15 min | ❌ Manual (1 cop) |
 | **TOTAL PRE-SUBMIT** | **~1 hour** | — |
 | AMO review | 30 min - 2 h | ✅ Automàtic |
@@ -349,28 +300,8 @@ POST-SUBMISSION:
 
 ---
 
-## 🎬 NEXT STEPS
-
-1. **Hoy (19 Maio):**
-   - ✅ Code validation (`npm run prerelease`)
-   - ✅ Build ZIPs (`npm run build`)
-   - ✅ Review all documentation
-
-2. **Mañana (20 Maio):**
-   - 📸 Capture 3 screenshots
-   - ✍️ Review textos (typos, tono)
-   - 📝 Prepare metadata
-
-3. **This week:**
-   - 🚀 Submit to AMO
-   - 🌐 Submit to Chrome Web Store
-   - 📧 Monitor for approvals
-
----
-
-**Document Version:** 1.0  
-**Last Updated:** 19 de maig de 2026  
-**Status:** ✅ Complete & Ready for Submission
+**Document Version:** 1.1  
+**Last Updated:** 14 d'octubre de 2026 (alineat amb RELEASE-PROCESS.md i MARKETS-COPY.md per a la v2.7.0)
 
 ---
 

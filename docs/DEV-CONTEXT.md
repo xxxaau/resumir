@@ -14,9 +14,12 @@ Browser extension (Firefox + Chromium, MV3) that summarizes web pages using Goog
 # Development
 npm run dev          # Switch manifests to development mode (adds DEV label to icons)
 npm run prod         # Switch manifests to production mode
+npm run dev:chromium # Build build_chromium_dev/ (unpacked DEV folder for Edge/Chrome)
+npm run icons:gen    # Regenerate icon PNGs (icons/prod/, icons/dev/) from icons/src/icon-{prod,dev}.svg
 
 # Build
-npm run build        # Full multi-target build (Firefox + Chromium ZIPs)
+npm run build        # Full multi-target build (Firefox + Chromium ZIPs); requires PROD mode
+npm run release      # prod mode + build + restore previous mode (backs up DEV data first)
 npm run build:firefox
 npm run build:chromium
 npm run manifests:gen   # Regenerate manifest.json + manifest.chromium.json from base + patches
@@ -55,21 +58,22 @@ The sidebar is the main UI. Module responsibilities:
 - `content.js` — extracts page text (detects YouTube/HN/standard via Readability.js)
 - `ui.js` — all DOM rendering and plugin visibility
 - `cache.js` — read/write cache to `storage.local`
-- `stats.js` — daily quota and token tracking
+- `stats.js` — daily request counts (quota) from `usageHistory`
+- `history.js` — saved-summaries panel; `conceptmap.js` / `markmap-native.js` — concept map; `anki.js` — Anki cards plugin
 - `utils.js` — Obsidian path/content templating, token estimation, Markdown helpers
 
-For **Chromium production builds**, `sidebar/*.js` is bundled into `sidebar.bundle.js` by esbuild (`scripts/build-sidebar-bundle.mjs`), and `sidebar.html` is patched to reference the bundle.
+For **production builds** (Firefox and Chromium), `sidebar/*.js` is bundled into `sidebar.bundle.js` by esbuild (`scripts/build-sidebar-bundle.mjs`), and `sidebar.html` is patched to reference the bundle.
 
 ### Shared State
-- `storage.sync` — user preferences, theme, plugins config, API key
-- `storage.local` — cache entries, usage stats, model favorites
+- `storage.sync` — user preferences, theme, plugins config, prompts, selected model, model favorites (`favoriteModels`)
+- `storage.local` — API key (never synced; migrated out of `sync`), summary cache/history, usage stats (`stats`, `usageHistory`, `dailyStats`)
 - `shared/models.js` — `CURATED_MODELS` array is the single source of truth for available Gemini models
 
 ### Background Service Worker
 `background.js` registers context menus and handles toolbar/menu triggers to open the sidebar. For Chromium, it is bundled to `background.bundle.js` (because `ext.js` uses `import`/`export` which requires bundling for service workers).
 
 ### Options Page
-`options/settings.js` orchestrates 8 sub-modules (models, plugins, order, stats, cache, etc.). Changes propagate to the sidebar via `storage.onChanged` listener.
+`options/settings.js` orchestrates the `options/settings-*.js` sub-modules (models, plugins, order, stats, cache, backup, etc.) and `options/plugin-registry.js`. Tabs: General, Resum, Plugins, Dades i privadesa, Sobre l'extensió; unsaved edits show a pending-changes bar. Changes propagate to the sidebar via `storage.onChanged` listener.
 
 ## Testing
 
@@ -78,7 +82,7 @@ Tests use Node.js built-in `node:test` — no external framework. Test files are
 ## Build Pipeline
 
 `node scripts/build.mjs all` (via `npm run build`), in Node.js — not PowerShell — orchestrates the full build:
-1. Runs `npm run prod` to switch to production manifests
+1. Aborts if the manifests are in DEV mode (run `npm run prod` first, or use `npm run release`, which switches and restores the mode)
 2. Runs esbuild bundling (background + sidebar)
 3. Runs `scripts/make-zip.mjs` to create AMO-compliant ZIPs with `/` path separators
 4. Outputs `resumir-contingut-vX.Y.Z-firefox.zip` and `resumir-contingut-vX.Y.Z-chromium.zip`

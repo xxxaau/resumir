@@ -7,6 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
+- YouTube SPA, timedtext i la targeta de Firefox — Sessió 2026-10-14
 - Fases B–E del pla UI/UX, revisió de prompts i prova de fum en navegador real — Sessió 2026-10-12
 - Fase A del pla UI/UX + harness d'integració i tests de qualitat — Sessió 2026-10-11
 - Auditoria funcional + catàleg de models — Sessió 2026-08-09
@@ -20,6 +21,49 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 - Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
 - Aprenentatges — Sessió v2.3.1+ (2026-06-05)
 - Aprenentatges — Sessió v2.2.10 (2026-05-22)
+
+---
+
+# YouTube SPA, timedtext i la targeta de Firefox — Sessió 2026-10-14
+
+## A YouTube, els globals `ytInitial*` poden ser del vídeo anterior
+
+YouTube navega sense recarregar (SPA): després de clicar un altre vídeo,
+`window.ytInitialPlayerResponse` i `ytInitialData` continuen sent els de la
+**primera** càrrega, i es resumia el vídeo equivocat sense cap error. La font
+fiable és `document.querySelector('#movie_player').getPlayerResponse()`
+(API privada, sempre del vídeo actual); els globals només s'accepten si el seu
+`videoId` coincideix amb el `?v=` de la URL (`readYoutubeCaptionMeta` a
+`sidebar/extractors.js`). El mateix filtre per vídeo s'aplica a les URL de
+timedtext.
+
+## `performance.getEntriesByType()` no veu la petició de timedtext
+
+YouTube buida el buffer de Resource Timing (`clearResourceTimings`) cada pocs
+segons, així que la URL de subtítols que ha demanat el reproductor ja no hi és.
+Un `PerformanceObserver` amb `{ type: 'resource', buffered: true }` rep les
+entrades que queden i les noves en viu. Si CC ja estava actiu no es genera cap
+petició nova: cal apagar-lo i tornar-lo a encendre per forçar-la
+(`sidebar/content.js`). Vegeu també `MANTENIMENT.md`.
+
+## Firefox: el quadre de la barra és opac i la targeta té el color del tema
+
+A Firefox el contingut de la barra lateral és un quadre **opac**: unes
+cantonades arrodonides fetes amb `border-radius` mostren el color del llenç, no
+el de la targeta del navegador. Per fer-les invisibles, l'`html` es pinta amb el
+color de la targeta (`--ff-card`), que es llegeix amb
+`browser.theme.getCurrent(windowId).colors.sidebar` (sense cap permís) i es
+torna a llegir a `theme.onUpdated` i quan canvia `prefers-color-scheme`.
+`getCurrent` només dona la variant **clara** del tema: amb el sistema fosc i un
+tema clar no ens en fiem i es cau a `Canvas` (`firefoxCardColor` a
+`sidebar/utils.js`).
+
+- **Propagació del fons:** si l'`html` no té fons, el del `body` es propaga al
+  llenç i pinta també les cantonades. Per això el fons de la targeta va a
+  l'`html`, i el desplaçament passa del document al `body` (`height: 100%`,
+  `overflow-y: auto`) perquè les cantonades no marxin en fer scroll.
+- **Només Firefox sense JS de detecció:** `@supports (-moz-appearance: none)`
+  aplica el bloc només a Gecko; a Chromium no hi ha targeta.
 
 ---
 

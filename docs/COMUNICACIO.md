@@ -36,7 +36,7 @@ La jerarquia narrativa és sempre: **què fa** (pipeline) → **per què confiar
 
 | Moment | Promesa | Funcionalitats que ho demostren |
 |---|---|---|
-| **📥 Captura universal** | «Si ho pots obrir al navegador, ho pots aprofitar» | Articles (Readability), YouTube (transcripcions amb 3 vies de fallback), Twitter/X (fils), Hacker News (article + comentaris), PDFs remots i locals |
+| **📥 Captura universal** | «Si ho pots obrir al navegador, ho pots aprofitar» | Articles (Readability), YouTube (transcripcions amb diverses vies de fallback), Twitter/X (fils), Hacker News (article + comentaris), PDFs remots i locals |
 | **🔍 Cinc lents per entendre** | «No un resum: la comprensió que necessites en cada moment» | Resum · Aprofundiment · Explica-ho fàcil · Validació científica · Mapa conceptual interactiu — amb prompts 100 % personalitzables |
 | **📚 Coneixement que perdura** | «El que entens avui, ho trobes demà» | Export a Obsidian i Markdown, historial, caché instantània, estadístiques d'ús |
 
@@ -110,15 +110,25 @@ Per evitar que el copy prometi coses que no hi són (o n'ometi):
 - Resum amb streaming en temps real (1 clic o menú contextual).
 - 5 tipus de contingut: Resum, Aprofundiment, Mapa conceptual, Validació
   (científica), Explica-ho fàcil — tots amb prompt editable.
-- Extractors especialitzats: YouTube (transcripcions, 3 fallbacks), Hacker
+- Extractors especialitzats: YouTube (transcripcions, vies en cascada —
+  vegeu `MANTENIMENT.md`), Hacker
   News (article + comentaris), Twitter/X (scrape + og:description), PDFs (pdf.js; HTTPS
   remots i locals; escanejats NO suportats — no prometre OCR).
 - Mapa conceptual interactiu: pan/zoom, plegat de branques, pantalla
   completa, export PNG. Renderitzador SVG propi.
 - Lectura biònica configurable (fixació, font, mida, interlineat).
-- Export: Obsidian (plantilla configurable) i Markdown.
-- Historial + caché local (30 dies) + estadístiques de tokens/cost.
-- 5 temes (sistema/clar/fosc/solarized/gris) + accessibilitat WCAG.
+- Cites clicables: «Punts clau» i «Cites» ressalten el passatge a la pàgina
+  (no en PDF ni YouTube); `(p. N)` als PDF web i `[m:ss]` als vídeos.
+- Línia de procedència sota el resum (paraules enviades, model, tokens, avís
+  de text tallat) amb «Veure el text enviat».
+- Export: Obsidian (plantilla configurable), Markdown i targetes Anki (cap a
+  Obsidian amb la sintaxi d'obsidian_to_anki).
+- Historial + caché local (30 dies) + estadístiques d'ús (resums, tokens,
+  temps de resposta).
+- Còpia de seguretat de la configuració (exportar/importar JSON) i drecera
+  Alt+Maj+S.
+- Temes: sistema, Flexoki (automàtic), clar, fosc, Flexoki clar i gris clar
+  + accessibilitat WCAG.
 - Firefox + Chrome/Edge/Brave (MV3). Cal API key gratuïta de Google Gemini.
 - NO té: OCR, suport de documents Office online, plugins propis, i18n (al
   backlog), publicació al Chrome Web Store.

@@ -185,7 +185,7 @@ async function getPageContent() {
     //  - Per a PDFs `file://` i `http://`, el fetch directe NO és possible
     //    (la CSP només permet `https:` per principi de mínim privilegi).
     //    L'usuari els resumeix amb el botó "Selecciona PDF local" del sidebar
-    //    (FileReader, sense xarxa). No demanem `<all_urls>` per a aquests casos.
+    //    (FileReader, sense xarxa), sense necessitar cap permís addicional.
     //  - No usem content script injection perquè a Firefox el fetch dels
     //    content scripts (ISOLATED o MAIN world) també està subjecte a CORS
     //    sense host_permissions explícites.

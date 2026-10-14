@@ -3,6 +3,10 @@
 Aquest fitxer conté el text que s'ha d'incloure a cada GitHub Release.
 Copia i enganxa al cos de la release, actualitzant la versió i els canvis.
 
+> Nota: `.github/workflows/release.yml` ja crea la release amb la secció
+> «Instal·lació» i les notes generades per GitHub; aquesta plantilla serveix per
+> completar «Novetats de la versió» a mà (a partir de `docs/CHANGELOG.md`).
+
 ---
 
 ## Instal·lació

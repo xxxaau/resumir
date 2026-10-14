@@ -196,8 +196,8 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
     }
   }
 
-  // Remove internal icon source subdirs from the build (dev/ and prod/ are not needed in the ZIP)
-  for (const sub of ["dev", "prod"]) {
+  // Remove internal icon source subdirs from the build (dev/, prod/ and src/ are not needed in the ZIP)
+  for (const sub of ["dev", "prod", "src"]) {
     const subPath = resolve(buildPath, "icons", sub);
     if (existsSync(subPath)) rmSync(subPath, { recursive: true, force: true });
   }

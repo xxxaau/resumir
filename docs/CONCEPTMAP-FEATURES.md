@@ -49,15 +49,21 @@ amb el text centrat verticalment al damunt (`dominant-baseline="central"`).
 
 ### Paleta de colors (jeràrquica i constant entre temes)
 
-Els pills tenen colors pastel **fixos**, independents del tema actiu (clar,
-fosc, sèpia, gris). Codifiquen profunditat, no aparença del tema.
+Els pills tenen colors pastel **fixos**, independents del tema actiu de
+l'extensió. Codifiquen profunditat, no aparença del tema. Cada pill es pinta
+amb un degradat vertical (`DEPTH_GRAD`); el color sòlid (`DEPTH_SOLID`) és el
+del cercle de plegat. Font: `sidebar/markmap-native.js` (i la còpia de
+`fullscreenOverlayFunc`).
 
-| Profunditat | Pill (background) | Edge (línia) |
-|-------------|-------------------|--------------|
-| 0 (root)    | `#c5c8f7` (lila)  | `#a5a8e0`    |
-| 1           | `#c5dff7` (blau)  | `#a5a8e0`    |
-| 2           | `#a8e6cf` (verd clar) | `#7fc8a9` |
-| 3+          | `#c8f0d5` (verd menta) | `#7fc8a9` |
+| Profunditat | Sòlid (`DEPTH_SOLID`) | Degradat (`DEPTH_GRAD`) |
+|-------------|-----------------------|-------------------------|
+| 0 (root)    | `#b1a8e6` (lavanda)   | `#c6c0f2` → `#a59ce0`   |
+| 1           | `#a7c6ef` (blau)      | `#c1d6f6` → `#97b8e8`   |
+| 2           | `#93d4b4` (verd)      | `#b9ebcd` → `#87cda8`   |
+| 3+          | `#c2ebd3` (verd clar) | `#d6f2e0` → `#b0e0c4`   |
+
+**Edges**: un sol color uniforme, `EDGE_COLOR = #858bb0` (3:1 sobre blanc,
+WCAG 1.4.11).
 
 **Text**: sempre `#1a1a1a` (negre suau) per garantir contrast sobre els
 pastels, sigui quin sigui el tema actiu de l'extensió.
@@ -71,31 +77,33 @@ etiquetes llargues o caràcters amples.
 
 ### Toggle de plegat (estil NotebookLM)
 
-Cada node amb fills mostra un cercle blanc al lateral dret amb un glyph
-tintat amb el color del pill del pare:
+Cada node amb fills mostra un cercle al lateral dret amb un chevron SVG
+(`<polyline>`, no un glyph de text):
 
 - `<` → branca **expandida** (clica per plegar)
 - `>` → branca **plegada** (clica per desplegar)
 
 ### Edges
 
-Els edges són línies rectes que connecten l'**extrem dret del pare** amb
-l'**extrem esquerre del fill**, amb opacitat plena per màxima llegibilitat.
+Els edges són corbes de Bézier (`curve()`) que surten de la dreta del cercle
+de plegat del pare i arriben a l'**extrem esquerre del fill**, amb opacitat
+plena per màxima llegibilitat.
 
 ---
 
-## Constants de layout
+## Opcions de layout
 
-Definides com a mòdul-level al renderitzador:
+Valors per defecte de les opcions de `createMindMap()` a
+`sidebar/markmap-native.js` (el radi de la cantonada, `min(12, height/2)`,
+és fix al render):
 
-| Constant      | Valor | Significat                                       |
-|---------------|-------|--------------------------------------------------|
-| `PAD_X`       | 14    | Padding horitzontal dins el pill                 |
-| `PAD_Y`       | 8     | Padding vertical dins el pill                    |
-| `SPACING_X`   | 50    | Distància horitzontal entre nivells              |
-| `SPACING_Y`   | 14    | Espai vertical entre germans                     |
-| `MAX_LABEL_W` | 280   | Amplada màxima del text abans de partir línia    |
-| `RX_MAX`      | 12    | Radi màxim de la cantonada del pill              |
+| Opció           | Valor | Significat                                       |
+|-----------------|-------|--------------------------------------------------|
+| `paddingX`      | 14    | Padding horitzontal dins el pill                 |
+| `paddingY`      | 8     | Padding vertical dins el pill                    |
+| `spacingX`      | 50    | Distància horitzontal entre nivells              |
+| `spacingY`      | 14    | Espai vertical entre germans                     |
+| `maxLabelWidth` | 280   | Amplada màxima del text abans de partir línia    |
 
 ---
 
@@ -106,6 +114,7 @@ Definides com a mòdul-level al renderitzador:
 | Pan (arrossegar)       | ✅      | ✅                |
 | Zoom (roda del ratolí) | ✅      | ✅                |
 | Plegar/desplegar branca| ✅      | ✅                |
+| Desplegar / plegar tot | ✅      | ✅                |
 | Ajustar a la vista     | ✅      | ✅                |
 | Exportar a PNG         | ✅      | ✅                |
 | Tancar amb `Esc`       | —       | ✅                |
@@ -118,7 +127,7 @@ Definides com a mòdul-level al renderitzador:
 amfitriona. No pot fer `import`, ni accedir al scope del sidebar. Per això
 duplica inline:
 
-- Constants de color (NODE_COLORS, EDGE_COLORS, TEXT_COLOR)
+- Constants de color (`DEPTH_SOLID`, `DEPTH_GRAD`, `EDGE_COLOR`, `TEXT_COLOR`)
 - Mesura amb canvas (`measureLabel`)
 - Walk del tree i render
 - Lògica del filename PNG
@@ -162,7 +171,7 @@ pestanya, que sovint és ambigu), normalitzat de la manera següent:
 | `` (buit) o només stop-words      | `20260522_mapa.png` (fallback)          |
 
 **Funció pura**: `sidebar/conceptmap-filename.js` exporta
-`buildConceptMapFilename(rootLabel, now?)` (15 tests unitaris a
+`buildConceptMapFilename(rootLabel, now?)` (tests unitaris a
 `tests/conceptmap-filename.test.mjs`).
 
 ---
@@ -174,7 +183,7 @@ pestanya, que sovint és ambigu), normalitzat de la manera següent:
 ```js
 window.markmapNative = {
     parseMarkdownTree(text)        // → root { label, children, depth, fold }
-    renderMarkmapInteractive(...)  // crea SVG dins un contenidor + pan/zoom
+    createMindMap(svg, root, opts) // → { fit, rescale, setFold, setData, getRoot } (pan/zoom inclosos)
     exportToPNG(svg, filename, opts) // descarrega PNG del SVG renderitzat
     serializeToSVG(svg)            // → string SVG amb estils inline
 };

@@ -3,7 +3,7 @@
 > **A partir de la v2.2.9**, les llibreries de tercers per al mapa conceptual
 > (`d3.min.js`, `markmap-lib.js`, `markmap-view.js`, ~627 KB) **han estat
 > eliminades** i substituïdes per un renderitzador SVG natiu propi
-> (`sidebar/markmap-native.js`, ~22 KB).
+> (`sidebar/markmap-native.js`).
 
 ## Vendors actius
 

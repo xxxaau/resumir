@@ -1,7 +1,7 @@
 # Architecture Overview
 
-**Document Version**: 1.1  
-**Last Updated**: 2026-07-03  
+**Document Version**: 1.2  
+**Last Updated**: 2026-10-14  
 **Audience**: Core developers, maintainers, security auditors  
 
 ---
@@ -11,7 +11,7 @@
 The **Resumir** extension is a privacy-first browser extension that summarizes web pages using Google Gemini AI.
 
 **Key Principles**:
-- 🔒 **Privacy**: All data stays on the user's device
+- 🔒 **Privacy**: No own servers; page text goes only to Gemini, everything else stays in the browser
 - 🚀 **Performance**: Content extraction and caching minimize API calls
 - 🌐 **Cross-browser**: Single codebase for Firefox, Chrome, Edge, Brave
 - 🧪 **Testability**: Modular architecture with clear boundaries
@@ -26,52 +26,36 @@ The **Resumir** extension is a privacy-first browser extension that summarizes w
 ┌─────────────────────────────────────────────────────────────┐
 │                  BROWSER USER                               │
 │           (Firefox / Chrome / Edge / Brave)                 │
-└─────────────────┬───────────────────────────────────────────┘
-                  │
-        ┌─────────┴──────────┬─────────────┐
-        │                    │             │
-        ▼                    ▼             ▼
-   ┌─────────┐          ┌────────┐    ┌─────────┐
-   │  POPUP  │          │SIDEBAR │    │SETTINGS │
-   │         │          │        │    │ (Options│
-   │ Quick   │          │ Main UI│    │  Page)  │
-   │ Summary │          │ History│    │         │
-   └────┬────┘          └────┬───┘    └────┬────┘
-        │                    │             │
-        └────────┬───────────┴─────────────┘
-                 │
-        ┌────────▼────────────────────────┐
-        │  BACKGROUND SCRIPT (Service    │
-        │  Worker) — ext.js, bg.js       │
-        │  ┌──────────────────────────┐  │
-        │  │ • Content Extraction     │  │
-        │  │ • Cache Management       │  │
-        │  │ • History Tracking       │  │
-        │  │ • Settings Sync          │  │
-        │  └──────────────────────────┘  │
-        └────────┬───────────────────────┘
-                 │
-        ┌────────┴──────────────┐
-        │                       │
-        ▼                       ▼
-   ┌────────────┐          ┌──────────────┐
-   │ CONTENT    │          │ GOOGLE       │
-   │ SCRIPTS    │          │ GEMINI API   │
-   │            │          │ (Public)     │
-   │ (Extract   │          │              │
-   │  text from │          │ REST API:    │
-   │  DOM)      │          │ POST /       │
-   └────────────┘          │ streamGenCont│
-                           └──────────────┘
-        
-        LOCAL STORAGE
-        ┌──────────────────────────────┐
-        │ • API Key (encrypted)        │
-        │ • Settings                   │
-        │ • Summary Cache              │
-        │ • History                    │
-        │ • Statistics                 │
-        └──────────────────────────────┘
+└──────┬───────────────────┬──────────────────────┬───────────┘
+       │ toolbar / menu /  │                      │
+       │ Alt+Shift+S       ▼                      ▼
+       │            ┌─────────────┐        ┌──────────────┐
+       │            │  SIDEBAR    │        │  SETTINGS    │
+       │            │ (sidebar/)  │        │ (options/)   │
+       │            │ Main UI,    │        │ Options page │
+       │            │ summaries,  │        │              │
+       │            │ history     │        │              │
+       │            └──┬───────┬──┘        └──────┬───────┘
+       ▼               │       │                  │
+┌──────────────────┐   │       │ storage.onChanged│
+│ BACKGROUND       │   │       └──────────┬───────┘
+│ ext.js +         │   │                  │
+│ background.js    │   │       ┌──────────▼───────────────────┐
+│ • context menus  │   │       │ ext.storage                  │
+│ • open sidebar   │   │       │ sync:  preferences, prompts, │
+│ • keyboard cmd   │   │       │        plugins, model, theme │
+└──────────────────┘   │       │ local: API key, cache /      │
+                       │       │        history, usage stats  │
+                       │       └──────────────────────────────┘
+        ┌──────────────┴──────────────┐
+        ▼                             ▼
+┌──────────────────┐         ┌──────────────────────┐
+│ ACTIVE TAB       │         │ GOOGLE GEMINI API    │
+│ scripting.       │         │ POST {model}:        │
+│ executeScript    │         │ streamGenerateContent│
+│ (extract text,   │         │ (SSE)                │
+│  highlight quote)│         └──────────────────────┘
+└──────────────────┘
 ```
 
 ---
@@ -89,8 +73,11 @@ The **Resumir** extension is a privacy-first browser extension that summarizes w
 - `summary.js` — Summarization orchestration
 - `history.js` — Summary history management
 - `cache.js` — Local storage caching
-- `stats.js` — Usage metrics
-- `ui.js` — UI event handlers
+- `stats.js` — Daily request counts (quota)
+- `ui.js` — DOM rendering and plugin visibility
+- `extractors.js` — Functions injected with `executeScript` (extraction, quote highlight)
+- `conceptmap.js` + `markmap-native.js` — Concept map (own SVG renderer)
+- `anki.js` — Anki cards plugin
 
 **Responsibilities**:
 - Display summaries to user
@@ -101,21 +88,21 @@ The **Resumir** extension is a privacy-first browser extension that summarizes w
 #### `options/`
 **Purpose**: Settings/Options page  
 **Key Files**:
-- `settings.js` — Main options controller
-- `settings-models.js` — Data models
-- `settings-defaults.js` — Default values
-- `settings-options.js` — Input constraints
+- `settings.js` — Main options controller (tabs, pending-changes bar)
+- `settings-*.js` — Sub-modules (models, defaults, options, order, cache, stats, backup, sidebar)
+- `plugin-registry.js` — Plugin list shown on the settings page
 
 **Responsibilities**:
 - Allow users to configure extension
-- Manage API key securely
+- Manage API key (`storage.local`, never synced)
 - Persist settings
 
 #### `shared/`
 **Purpose**: Shared utilities across modules  
 **Key Files**:
-- `models.js` — Shared data models
-- `defaults.js` — Global defaults
+- `models.js` — Curated Gemini models (`CURATED_MODELS`, `DEFAULT_MODEL_ID`)
+- `defaults.js` — Default prompts and plugin order
+- `content-types.js`, `api-key.js`, `icons.js` — Content types, API key checks, icons
 
 ---
 
@@ -134,9 +121,9 @@ plugin surfaces as a button in the sidebar toolbar and a section in the Settings
 | `simple` | Explica-ho fàcil (plain language) | Editable prompt |
 | `deepdive` | Aprofundiment (deep dive) | Editable prompt |
 | `science` | Validació científica (scientific review) | Editable prompt |
-| `conceptmap` | Mapa conceptual (concept map) | Markmap render + fullscreen |
+| `conceptmap` | Mapa conceptual (concept map) | Own SVG renderer (`markmap-native.js`) + fullscreen |
 | `obsidian` | Export to Obsidian | `obsidian://` URI; no prompt |
-| `markdown` | Download Markdown | No prompt |
+| `markdown` | Copiar Markdown (copy to clipboard) | No prompt |
 | `bionic` | Bionic reading | Client-side transform; no API call |
 | `anki` | Targetes Anki (flashcards) | Editable prompt; own vault; exports to Obsidian |
 
@@ -163,19 +150,19 @@ are not planned.
 ### Summarization Flow
 
 ```
-User clicks "Summarize Page"
+User clicks "Resumir" (or Alt+Shift+S / context menu)
         ↓
-Content Script extracts text (sidebar/content.js)
+sidebar/content.js extracts text (scripting.executeScript in the tab)
         ↓
 Check cache (sidebar/cache.js) — if found, return
         ↓
 Fetch from Gemini API (sidebar/api.js)
         ↓
-Format & display result (sidebar/sidebar.js)
+Format & display result (sidebar/ui.js, sidebar/summary.js)
         ↓
-Save to history (sidebar/history.js) + cache
+Save to cache/history (sidebar/cache.js, storage.local)
         ↓
-Update stats (sidebar/stats.js)
+Record usage stats (sidebar/cache.js → usageHistory)
 ```
 
 ### Settings Flow
@@ -183,13 +170,11 @@ Update stats (sidebar/stats.js)
 ```
 User changes setting in Options page (options/settings.js)
         ↓
-Validate input (settings-options.js)
+Pending-changes bar → "Desa"
         ↓
-Save to localStorage (settings-cache.js)
+Save to ext.storage.sync (preferences) / ext.storage.local (API key)
         ↓
-Message background script (messaging API)
-        ↓
-Broadcast to all tabs (sidebar updates immediately)
+Sidebar reacts via storage.onChanged (no background messaging)
 ```
 
 ---
@@ -203,12 +188,12 @@ Broadcast to all tabs (sidebar updates immediately)
 - **Privacy**: Requests originate from user's browser; Gemini may log requests per Google's privacy policy
 
 ### Browser Messaging API
-- Used to communicate between sidebar, options, and background script
-- Ensures only the extension can read/write settings
+- The background script sends context-menu/shortcut triggers to the sidebar (`runtime.sendMessage`)
 
-### localStorage & sessionStorage
-- **localStorage**: API key (encrypted), settings, cache, history
-- **sessionStorage**: Temporary state during current session
+### ext.storage (sync & local)
+- **storage.sync**: preferences, prompts, plugin config, selected model, favourite models
+- **storage.local**: API key (not encrypted, never synced), summary cache/history, usage stats
+- Web `localStorage` is not used for extension data
 
 ---
 
@@ -218,28 +203,27 @@ See [`SECURITY.md`](./SECURITY.md) for detailed analysis.
 
 **Key Points**:
 - API key stored locally, not transmitted to any server (except Gemini)
-- Content Script tagged with `<UNTRUSTED_CONTENT>` to prevent XSS
-- CSP policy restricts `connect-src` to only Gemini API
+- Page text is wrapped in `<UNTRUSTED_CONTENT>` to mitigate prompt injection
+- CSP: `script-src 'self'`; `connect-src` allows Gemini and `https:` (remote PDFs, linked HN articles)
 - No third-party analytics or tracking
 
 ---
 
 ## 🧪 Testing Architecture
 
-See the testing strategy notes for details.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for details.
 
 **Layers**:
-- **Unit Tests**: Individual modules (cache, content, api)
-- **Integration Tests**: Content Script + API
-- **E2E Tests**: Full flow (summarization)
+- **Unit Tests**: Individual modules (`tests/*.test.mjs`, `npm test`)
+- **Integration Tests**: sidebar/settings harnesses with jsdom (`tests/helpers/`)
+- **Smoke tests**: real Chromium (`npm run smoke:e2e`) and live connectors (`npm run smoke:connectors`)
 
 ---
 
 ## 📈 Scalability & Performance
 
 ### Caching Strategy
-- **Summary Cache**: Store summaries for 7 days
-- **Hit Rate Target**: 60–70% (reduce API costs)
+- **Summary Cache**: Store summaries for 30 days (`CACHE_TTL_DAYS` in `sidebar/cache.js`)
 - **Cache Invalidation**: Manual clear or time-based
 
 ### API Rate Limiting
@@ -252,11 +236,11 @@ See the testing strategy notes for details.
 ## 🔗 Related Documentation
 
 - **Security**: [SECURITY.md](./SECURITY.md)
-- **Storage**: Storage strategy
-- **API Integration**: API integration
-- **Development**: Development guide
+- **Storage**: [STORAGE_ISOLATION.md](./STORAGE_ISOLATION.md)
+- **Plugins**: [CREAR-PLUGIN.md](./CREAR-PLUGIN.md)
+- **Development**: [DEV-CONTEXT.md](./DEV-CONTEXT.md), [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
 **Owner**: Sergi Xaudiera  
-**Last Updated**: 2026-07-03
+**Last Updated**: 2026-10-14

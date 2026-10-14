@@ -49,12 +49,8 @@ mínim per defecte.
 Un commit i un test de regressió per bug (`CLAUDE.md`: el test ha de fallar sense
 el fix). Els marcats ✔ s'han verificat directament al codi; la resta porten
 referència de línia dels auditors. **Els bugs 0.1–0.15 ja estan corregits** (vegeu
-`git log` i `LEARNINGS.md`); aquí només queda el que en penja:
-
-- **0.2 (navegació de l'historial):** la integritat de dades ja està resolta
-  (Copiar/Obsidian exporten l'entrada visible); queda redissenyar la navegació
-  (barra d'eines visible en veure una entrada, «Tornar a l'historial» només si
-  s'hi ha vingut). Es fa amb les pestanyes per tipus del Nivell 3.
+`git log` i `LEARNINGS.md`), inclosa la navegació de l'historial (0.2), resolta amb
+les pestanyes per tipus. No queda res pendent.
 
 ## Nivell 1 — Guanys ràpids (resta)
 
@@ -98,7 +94,6 @@ convertit en mínim el xat de seguiment i els segells de temps, i la diferència
 
 | Idea | Què veu l'usuari | Per què | Referència | Esforç |
 | --- | --- | --- | --- | --- |
-| Cites clicables | Fet: «Cites» i «Punts clau» ressalten el passatge a la pàgina en clicar (decisió: la insígnia ✓/⚠ de verificació es va treure, no aportava) | Permet comprovar el fragment en context | Perplexity Comet | — |
 | Llengua de sortida independent | Els prompts ja forcen el català; només queda la sortida en altres llengües, que pertany a l'entrada d'i18n del backlog | Ajuda el posicionament «català primer» | Kagi Universal Summarizer | S |
 
 **Relació amb el backlog:** els prompts editables, els proveïdors alternatius i la
@@ -112,9 +107,8 @@ l'abast d'una millora d'UI.
 Cinc fases; cada una deixa l'extensió publicable i no depèn de les següents,
 excepte on s'indica.
 
-1. **Fase A — Integritat del resultat: feta** (queden només els tres ítems
-   enllaçats a la secció del Nivell 0, que van amb les fases B i D).
-2. **Fase B — Configuració que no perd canvis: feta** (desat automàtic d'interruptors, ordre i tema; avisos de prompt per pestanya; historial de canvis; avís en buidar la memòria cau). Del 2.4 queda el desat automàtic dels camps de text i sliders, amb indicador de canvis pendents.
+1. **Fase A — Integritat del resultat: feta.**
+2. **Fase B — Configuració que no perd canvis: feta** (desat automàtic d'interruptors, ordre i tema; avisos de prompt per pestanya; historial de canvis; avís en buidar la memòria cau). Els camps de text i els sliders no es desen sols per decisió (vegeu 2.4).
 3. **Fase C — Contrast i accessibilitat: feta** (la resta, a la secció del Nivell 1). Falta una revisió amb lector de pantalla real durant el streaming.
 4. **Fase D — Estructura (en bona part feta; vegeu el Nivell 2)** (2.1 barra d'eines, 2.2 onboarding, 2.3 estats, la resta
    de 2.4 (ordre, selector de models, revelació progressiva, enllaços profunds,
@@ -137,8 +131,7 @@ regressió cadascun) i no van al backlog; en passar els Nivells 2–3 a
 
 Documents que caldrà tocar a mesura que s'avanci: `docs/user-guide/GUIA-INICI.md`
 (diu «Clica «Resum»» però és una icona; no esmenta el menú contextual ni
-l'historial), `docs/CONCEPTMAP-FEATURES.md` (descriu un botó d'ajustar a la vista
-que no existeix i una paleta antiga), `README.md` i `docs/SCREENSHOTS-GUIDE.md`.
+l'historial), `README.md` i `docs/SCREENSHOTS-GUIDE.md`.
 
 ## Annex — Altres troballes per superfície
 
@@ -146,9 +139,7 @@ Troballes que no surten als nivells de dalt, per no perdre-les. (El cost en € 
 
 | Superfície | Troballa | On | Sev. | Esforç |
 | --- | --- | --- | --- | --- |
-| Configuració | «Restaurar» sobreescriu un prompt llarg sense confirmació i, des de l'avís, desa tota la pàgina | `settings-options.js:168-212`, `settings.js:69-71` | Mitjana | S |
-| Configuració | HTML de plugins duplicat; un registre únic de plugins evitaria la deriva | `settings.html`, `settings-sidebar.js` | Baixa | M |
-| Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial (ara diu el nom del fitxer/pàgina, però continua saltant) | `conceptmap.js:398-405` | Baixa | S |
+| Mapa conceptual | `confirm()` d'origen diferent salta gairebé sempre que es ve de l'historial (ara diu el nom del fitxer/pàgina, però continua saltant) | `conceptmap.js` (`openFullPageView`) | Baixa | S |
 
 ## Fonts
 

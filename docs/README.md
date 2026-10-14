@@ -30,6 +30,10 @@ L'inventari complet amb categories i fonts de veritat és a
   **CHROME-STORE.md** · **RELEASE-PROCESS.md** · **SUBMISSION-CHECKLIST.md** ·
   **SCREENSHOTS-GUIDE.md**
 
+### Manteniment i comunitat
+- **MANTENIMENT.md** (revisions recurrents, YouTube cada mes) · **SPONSORS.md** ·
+  **CODE_OF_CONDUCT.md**
+
 ### Registres i backlog
 - **PLA-UI-UX.md** (pla de millora d'interfícies, només pendent) ·
   **BACKLOG.md** (idees pendents, no històric) · **CHANGELOG.md** (canvis
