@@ -279,8 +279,12 @@
       </div>
       <!-- Estat en repòs: només es veu quan res més ocupa el panell (vegeu CSS) -->
       <div id="idle-state" hidden>
+        <p class="idle-eyebrow">Pàgina actual</p>
         <p id="idle-title" class="idle-title"></p>
-        <button id="idle-summarize" type="button" class="btn-primary">Resumir aquesta pàgina</button>
+        <button id="idle-summarize" type="button" class="btn-primary idle-cta">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          Resumir aquesta pàgina
+        </button>
         <div id="idle-saved" class="idle-saved"></div>
       </div>
       <!-- Pestanya sense pàgina web (about:, chrome://…): missatge en lloc d'un panell en blanc -->

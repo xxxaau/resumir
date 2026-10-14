@@ -409,16 +409,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Estat del botó: l'etiqueta accessible és fixa (aria-pressed diu si és activat); el títol
+    // (el que surt en passar-hi el ratolí) diu en clar l'estat i què passarà en prémer-lo.
+    function setBionicButton(on) {
+        bionicBtn.classList.toggle("active", on);
+        bionicBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        bionicBtn.title = on ? "Lectura biònica: activada (clica per desactivar-la)" : "Lectura biònica: desactivada (clica per activar-la)";
+    }
+
     bionicBtn.addEventListener("click", async () => {
         isBionicEnabled = !isBionicEnabled;
         ext.storage.local.set({ isBionicActive: isBionicEnabled });
         if (isBionicEnabled) {
-            bionicBtn.classList.add("active");
-            bionicBtn.setAttribute("aria-pressed", "true");
+            setBionicButton(true);
             applyBionicToContent();
         } else {
-            bionicBtn.classList.remove("active");
-            bionicBtn.setAttribute("aria-pressed", "false");
+            setBionicButton(false);
             applyBionicStyles(contentDiv, false);
             if (currentMetadata.summary && isProseType(currentMetadata.type)) {
                contentDiv.replaceChildren(formatTextToFragment(currentMetadata.summary, false));
@@ -972,10 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (localData.isBionicActive === true) {
                 isBionicEnabled = true;
-                if (bionicBtn) {
-                    bionicBtn.classList.add("active");
-                    bionicBtn.setAttribute("aria-pressed", "true");
-                }
+                if (bionicBtn) setBionicButton(true);
             }
             
             // Show footer immediately (model select always visible)
