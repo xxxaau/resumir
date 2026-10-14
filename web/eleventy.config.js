@@ -30,11 +30,15 @@ export default function (eleventyConfig) {
   eleventyConfig.setUseGitIgnore(false);
   eleventyConfig.ignores.add("node_modules/**");
 
-  // Assets estàtics. Les imatges són font única a docs/user-guide/img/ i
+  // Assets estàtics. Les imatges de les guies són font única a docs/user-guide/img/ i
   // sync-content.mjs les copia a src/_generated/img.
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/js": "js" });
   eleventyConfig.addPassthroughCopy({ "src/_generated/img": "img" });
+  // Captures pròpies del web (portada) i favicon. Separades de /img (guies)
+  // perquè no xoquin amb les imatges de docs/user-guide/img.
+  eleventyConfig.addPassthroughCopy({ "src/shots": "shots" });
+  eleventyConfig.addPassthroughCopy({ "src/favicon.svg": "favicon.svg" });
 
   return {
     pathPrefix: "/resumir/",

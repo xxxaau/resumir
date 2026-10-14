@@ -1,23 +1,39 @@
 ---
 layout: base.njk
-title: "Preguntes més freqüents"
+title: "Preguntes freqüents"
+description: "Respostes breus sobre Resumir: preu, clau de Gemini, privacitat, navegadors, PDF, vídeos i idiomes."
 permalink: /pmf/
 ---
-<article class="prose">
-  <h1>Preguntes més freqüents (PMF)</h1>
+<article class="prose wrap">
+  <h1>Preguntes freqüents</h1>
 
   <h2>Quant costa?</h2>
-  <p>Resumir és gratuït i de codi obert. Només necessites una clau d'API de Google Gemini, també gratuïta i sense targeta de crèdit per al nivell gratuït.</p>
+  <p>Resumir és gratuït i de codi obert. Només necessites una clau d'API de Google Gemini, que també és gratuïta: el nivell gratuït no demana targeta de crèdit i té uns límits d'ús que per a un ús personal solen ser suficients. Mira <a href="/guia/clau-api/">com obtenir la clau</a>.</p>
 
   <h2>Les meves dades són privades?</h2>
-  <p>Sí. La clau i les dades es desen només al teu navegador. No hi ha servidors propis ni telemetria: el text va directament del teu navegador a Google.</p>
+  <p>Resumir no té cap servidor propi, ni telemetria, ni comptes. El text de la pàgina només surt del navegador quan demanes un resum, i va directament a Google Gemini amb la teva clau.</p>
+  <ul>
+    <li>La <strong>clau d'API</strong>, l'<strong>historial</strong> de resums i les <strong>estadístiques</strong> es desen només en aquest ordinador.</li>
+    <li>Les <strong>preferències</strong> (prompts, plugins, tema…) es desen al navegador; si hi tens la sincronització activada, el navegador també les guarda al teu compte.</li>
+  </ul>
+  <p>A la configuració, la pàgina «Dades i privadesa» t'ho mostra tot. Detall complet a la <a href="https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md">política de privadesa</a>.</p>
+  <p>Tingues en compte que Google tracta el text que li envies segons les seves condicions: si fas servir una clau de pagament, no l'utilitza per entrenar els seus models; amb una clau gratuïta, consulta les <a href="https://ai.google.dev/terms">condicions de Google</a>.</p>
 
-  <h2>Quins navegadors suporta?</h2>
-  <p>Firefox (via Mozilla Add-ons) i Chrome/Edge/Brave (des de GitHub Releases). Vegeu la <a href="/guia/inici/">guia d'inici</a>.</p>
+  <h2>Puc fiar-me del resum?</h2>
+  <p>Un model d'IA es pot equivocar, i Resumir t'ajuda a comprovar-ho: els punts clau acaben amb cites literals que pots clicar perquè la pàgina les ressalti en groc, i sota cada resum veus de quant text parteix i amb quin model s'ha fet. Si el text s'ha hagut de tallar, també t'ho diu.</p>
 
-  <h2>Funciona amb PDFs?</h2>
-  <p>Sí, amb PDFs remots (HTTPS) i locals. Els PDFs escanejats (sense text) no estan suportats: no fa OCR.</p>
+  <h2>Quins navegadors funcionen?</h2>
+  <p>Firefox, des de Mozilla Add-ons, i Chrome, Edge o Brave, des de GitHub Releases (no és a la Chrome Web Store). Ho tens pas a pas a la <a href="/guia/inici/">guia d'inici</a>.</p>
 
-  <h2>Està en altres idiomes?</h2>
-  <p>De moment la interfície és en català. La versió en anglès arribarà més endavant.</p>
+  <h2>Com l'obro més ràpid?</h2>
+  <p>Amb <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd> s'obre Resumir i resumeix la pàgina. També pots fer clic amb el botó dret i triar «Resumir aquesta pàgina» o, si has seleccionat text, «Resumir la selecció».</p>
+
+  <h2>Funciona amb PDF i vídeos?</h2>
+  <p>Sí. Amb PDF de la web i del teu ordinador (els escanejats, que són només imatge, no es poden llegir) i amb vídeos de YouTube que tinguin transcripció. Als vídeos, les marques de temps són enllaços; als PDF de la web, els números de pàgina també. Les cites clicables, en canvi, només funcionen a les pàgines web.</p>
+
+  <h2>En quins idiomes funciona?</h2>
+  <p>Pot resumir contingut en qualsevol idioma i et respon en català. La interfície, de moment, és només en català.</p>
+
+  <h2>He trobat un error o tinc una idea</h2>
+  <p>Explica-ho a <a href="https://github.com/xxxaau/resumir/issues">GitHub</a>. Totes les novetats són a <a href="/changelog/">Novetats</a>.</p>
 </article>

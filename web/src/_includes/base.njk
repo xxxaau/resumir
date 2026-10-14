@@ -1,35 +1,66 @@
+{%- set siteUrl = "https://xxxaau.github.io/resumir" -%}
+{%- set pageTitle = (title + " · Resumir") if title else "Resumir — Del contingut al coneixement, en un clic" -%}
+{%- set pageDesc = description or "Extensió de navegador gratuïta i de codi obert que resumeix pàgines, vídeos de YouTube, fils i PDFs amb Google Gemini. Privada, al teu navegador i en català." -%}
 <!doctype html>
 <html lang="ca">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% if title %}{{ title }} · Resumir{% else %}Resumir — del contingut al coneixement{% endif %}</title>
-    <meta name="description" content="{{ description or 'Resumir converteix articles, vídeos, fils i PDFs en coneixement estructurat. Al navegador, amb la teva clau, sense intermediaris.' }}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b5cf0'/><g fill='%23fff'><rect x='8' y='10' width='16' height='2.6' rx='1.3'/><rect x='8' y='15' width='16' height='2.6' rx='1.3'/><rect x='8' y='20' width='10' height='2.6' rx='1.3'/></g></svg>">
+    <title>{{ pageTitle }}</title>
+    <meta name="description" content="{{ pageDesc }}">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#FFFCF0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#100F0F" media="(prefers-color-scheme: dark)">
+    <link rel="canonical" href="{{ siteUrl }}{{ page.url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Resumir">
+    <meta property="og:locale" content="ca_ES">
+    <meta property="og:title" content="{{ pageTitle }}">
+    <meta property="og:description" content="{{ pageDesc }}">
+    <meta property="og:url" content="{{ siteUrl }}{{ page.url }}">
+    <meta property="og:image" content="{{ siteUrl }}/shots/og.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Resumir: «Del contingut al coneixement, en un clic», al costat d'un resum a la barra lateral">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/shots/icona-256.png">
     <link rel="stylesheet" href="/css/style.css">
   </head>
   <body>
     <a class="skip-link" href="#contingut">Salta al contingut</a>
     <header class="site-header">
-      <a class="brand" href="/">Resumir</a>
-      <nav aria-label="Principal">
-        <a href="/guia/inici/">Guia</a>
-        <a href="/guia/plugins/">Plugins</a>
-        <a href="/pmf/">PMF</a>
-        <a href="/changelog/">Novetats</a>
-        <a href="https://github.com/xxxaau/resumir">GitHub</a>
-      </nav>
+      <div class="wrap header-inner">
+        <a class="brand" href="/" aria-label="Resumir, pàgina d'inici">
+          <img src="/favicon.svg" alt="" width="28" height="28">
+          <span>Resumir</span>
+        </a>
+        <nav class="site-nav" aria-label="Principal">
+          <a class="nav-extra" href="/#com-funciona">Com funciona</a>
+          <a class="nav-extra" href="/#privacitat">Privacitat</a>
+          <a href="/guia/inici/"{% if page.url == "/guia/inici/" %} aria-current="page"{% endif %}>Guia</a>
+          <a href="/pmf/"{% if page.url == "/pmf/" %} aria-current="page"{% endif %}>PMF</a>
+          <a class="nav-extra" href="/changelog/"{% if page.url == "/changelog/" %} aria-current="page"{% endif %}>Novetats</a>
+          <a class="nav-cta" href="/#instal-la">Instal·la</a>
+        </nav>
+      </div>
     </header>
-    <main id="contingut">
+    <main id="contingut" tabindex="-1">
       {{ content | safe }}
     </main>
     <footer class="site-footer">
-      <p>Resumir · codi obert (MPL-2.0) · fet a Banyoles.</p>
-      <nav aria-label="Peu">
-        <a href="https://addons.mozilla.org/firefox/addon/resumir">Firefox</a>
-        <a href="https://github.com/xxxaau/resumir/releases">Chrome/Edge</a>
-        <a href="https://github.com/xxxaau/resumir">Codi</a>
-      </nav>
+      <div class="wrap footer-inner">
+        <p class="footer-brand"><img src="/favicon.svg" alt="" width="22" height="22"> Resumir · gratuïta i de codi obert · Fet a Banyoles.</p>
+        <nav aria-label="Peu de pàgina">
+          <ul class="footer-links">
+            <li><a href="https://github.com/xxxaau/resumir">Codi a GitHub</a></li>
+            <li><a href="https://github.com/xxxaau/resumir/issues">Errors i suggeriments</a></li>
+            <li><a href="https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md">Política de privadesa</a></li>
+            <li><a href="https://github.com/xxxaau/resumir/blob/main/LICENSE">Llicència MPL-2.0</a></li>
+            <li><a href="/changelog/">Novetats</a></li>
+          </ul>
+        </nav>
+      </div>
     </footer>
     <dialog id="zoom" class="zoom" aria-label="Captura ampliada">
       <button type="button" class="zoom-close" data-zoom-close aria-label="Tanca">×</button>
