@@ -956,7 +956,11 @@ body {
 
 /* ── Toolbar button colors & initial visibility ───────────── */
 #obsidianBtn {
-  color: #a855f7;
+  color: #7c3aed; /* violeta d'Obsidian */
+}
+
+[data-actual-theme="dark"] #obsidianBtn {
+  color: #a78bfa;
 }
 
 #bionicBtn {

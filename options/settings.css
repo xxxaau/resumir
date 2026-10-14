@@ -812,7 +812,8 @@ button:disabled,
 /* Icon Color Classes */
 .icon-blue { color: var(--icon-blue); }
 .icon-green { color: #047857; } /* fosc per contrast ≥3:1 sobre fons clar */
-.icon-purple { color: #a855f7; }
+.icon-purple { color: #7c3aed; }
+[data-actual-theme="dark"] .icon-purple { color: #a78bfa; }
 .icon-gray { color: var(--text-muted); }
 .icon-teal { color: #24837b; }
 .icon-amber { color: #b45309; } /* fosc per contrast ≥3:1 sobre fons clar */
