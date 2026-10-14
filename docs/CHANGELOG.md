@@ -80,6 +80,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Configuració que valida abans de desar:** un nombre de targetes fora de rang o uns
+  idiomes de YouTube il·legibles ja no es desen (ni es descarten en silenci); un prompt
+  buit d'una altra pestanya et porta al camp, n'obre el desplegable i el marca.
 - **Pàgines de plugin més netes:** l'ajuda («Què fa i com configurar-lo») surt tancada,
   «Desar» i «Restaurar» són dins del desplegable del prompt, «Restaurar» avisa quan ja
   és el prompt per defecte, i Resum (el nucli) ja no porta «← Plugins» ni interruptor.

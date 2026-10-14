@@ -883,11 +883,11 @@ test("YouTube - els idiomes preferits de les transcripcions es poden escriure a 
     try {
         const input = h.document.getElementById("youtubePreferredLangs");
         assert.equal(input.value, "ca, es");
-        input.value = " es , EN,, xx-yy-zz-no, pt-BR ";
+        input.value = " es , EN,, pt-BR ";
         h.document.querySelector("#saveCustom").click();
         await h.flush(20);
         const stored = (await h.storage.sync.get("youtubePreferredLangs")).youtubePreferredLangs;
-        assert.equal(JSON.stringify(stored), JSON.stringify(["es", "en", "pt-BR"]), "minúscules, sense buits ni codis invàlids");
+        assert.equal(JSON.stringify(stored), JSON.stringify(["es", "en", "pt-BR"]), "minúscules i sense buits (els codis invàlids ja es rebutgen en desar)");
     } finally { h.close(); }
 });
 
@@ -980,5 +980,45 @@ test("«Restaurar» amb el prompt ja per defecte ho diu, no es queda mut", async
         h.document.getElementById("resetDeepDive").click();
         await h.flush?.(10);
         assert.match(h.document.getElementById("status").textContent, /ja és el valor per defecte/);
+    } finally { h.close(); }
+});
+
+test("desar - un valor fora de rang no es desa i porta al camp (no «Desat.» en fals)", async () => {
+    const h = await loadSettings();
+    try {
+        h.document.getElementById("ankiPacket").value = "50";
+        h.document.getElementById("saveAnki").click();
+        await h.flush?.(10);
+        const st = h.document.getElementById("status").textContent;
+        assert.match(st, /entre 1 i 20/);
+        assert.doesNotMatch(st, /Desat/);
+        assert.equal(h.document.getElementById("ankiPacket").getAttribute("aria-invalid"), "true");
+        assert.equal(h.document.activeElement.id, "ankiPacket");
+        assert.equal((await h.storage.sync.get("ankiPacket")).ankiPacket, undefined, "no s'ha desat");
+    } finally { h.close(); }
+});
+
+test("desar - uns idiomes il·legibles es diuen, no es buiden en silenci", async () => {
+    const h = await loadSettings();
+    try {
+        h.document.getElementById("youtubePreferredLangs").value = "català, es";
+        h.document.getElementById("save").click();
+        await h.flush?.(10);
+        assert.match(h.document.getElementById("status").textContent, /No reconec «català»/);
+        assert.equal((await h.storage.sync.get("youtubePreferredLangs")).youtubePreferredLangs, undefined);
+    } finally { h.close(); }
+});
+
+test("desar - un prompt buit d'una altra pestanya porta a aquella pestanya i n'obre el desplegable", async () => {
+    const h = await loadSettings();
+    try {
+        const ta = h.document.getElementById("deepDivePrompt");
+        ta.value = "  ";
+        h.document.getElementById("save").click(); // «Desar» de General
+        await h.flush?.(10);
+        assert.ok(h.document.getElementById("tab-deepdive").classList.contains("active"), "mostra la pestanya del camp");
+        assert.equal(h.document.getElementById("deepDivePromptDetails").open, true);
+        assert.equal(h.document.activeElement.id, "deepDivePrompt");
+        assert.match(h.document.getElementById("status").textContent, /no pot estar buit/);
     } finally { h.close(); }
 });

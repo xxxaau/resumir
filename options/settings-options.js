@@ -39,6 +39,23 @@ function updatePromptBadges() {
   }
 }
 
+/**
+ * Un camp invàlid: porta l'usuari a la pestanya del camp (pot ser una altra que la del botó
+ * que ha premut), n'obre el desplegable, el marca i hi posa el focus, i diu què cal fer.
+ */
+function failField(el, message) {
+  const pane = el.closest(".tab-pane");
+  if (pane && !pane.classList.contains("active") && typeof navigateToTab === "function") {
+    navigateToTab(pane.id.replace(/^tab-/, ""));
+  }
+  for (let d = el.closest("details"); d; d = d.parentElement && d.parentElement.closest("details")) d.open = true;
+  el.setAttribute("aria-invalid", "true");
+  el.addEventListener("input", () => el.removeAttribute("aria-invalid"), { once: true });
+  showStatus(message);
+  el.focus();
+  if (el.scrollIntoView) el.scrollIntoView({ block: "center" });
+}
+
 function saveOptions(e) {
   if(e) e.preventDefault();
 
@@ -48,12 +65,30 @@ function saveOptions(e) {
     if (el && !el.value.trim()) {
       const label = document.querySelector(`label[for="${id}"]`);
       const name = label ? label.textContent.replace(/\s+/g, " ").trim() : id;
-      showStatus(`«${name}» no pot estar buit. Escriu-hi instruccions o prem «Restaurar».`);
-      el.focus();
+      failField(el, `«${name}» no pot estar buit. Escriu-hi instruccions o prem «Restaurar».`);
       return;
     }
   }
-  
+
+  // Valors fora de rang o il·legibles: abans es desaven (o es descartaven en silenci) i
+  // l'error sortia, si de cas, en intentar resumir.
+  const packetEl = document.querySelector("#ankiPacket");
+  if (packetEl && packetEl.value.trim() !== "") {
+    const n = Number(packetEl.value), min = Number(packetEl.min) || 1, max = Number(packetEl.max) || 20;
+    if (!Number.isInteger(n) || n < min || n > max) {
+      failField(packetEl, `Les targetes per petició han de ser un nombre entre ${min} i ${max}.`);
+      return;
+    }
+  }
+  const langsEl = document.querySelector("#youtubePreferredLangs");
+  if (langsEl && langsEl.value.trim() !== "") {
+    const bad = langsEl.value.split(",").map(t => t.trim()).filter(t => t && parseLangList(t).length === 0);
+    if (bad.length) {
+      failField(langsEl, `No reconec «${bad.join("», «")}»: usa codis d'idioma separats per comes (ca, es, en).`);
+      return;
+    }
+  }
+
   // Sense espais, cometes ni prefix «Bearer» (errors habituals en enganxar-la)
   const apiKeyValue = normalizeApiKey(document.querySelector("#apiKey").value);
   const settings = {
