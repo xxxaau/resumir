@@ -25,7 +25,7 @@
   --toggle-off: #878580;
   --star-on: #a16207;
   --icon-blue: #0060df;
-  --icon-anki: #205ea6;
+  --icon-anki: #a02f6f;
 }
 
 [data-actual-theme="dark"] {
@@ -54,7 +54,7 @@
   --toggle-off: #878580;
   --star-on: #f0c040;
   --icon-blue: #4385be;
-  --icon-anki: #4385be;
+  --icon-anki: #ce5d97;
 }
  
 [data-actual-theme="solarized"] {
@@ -83,7 +83,7 @@
   --toggle-off: #878580;
   --star-on: #a16207;
   --icon-blue: #0060df;
-  --icon-anki: #205ea6;
+  --icon-anki: #a02f6f;
 }
  
 [data-actual-theme="soft-gray"] {
@@ -112,7 +112,7 @@
   --toggle-off: #878580;
   --star-on: #a16207;
   --icon-blue: #0060df;
-  --icon-anki: #205ea6;
+  --icon-anki: #a02f6f;
 }
 
 body {
@@ -814,9 +814,9 @@ button:disabled,
 .icon-green { color: #047857; } /* fosc per contrast ≥3:1 sobre fons clar */
 .icon-purple { color: #a855f7; }
 .icon-gray { color: var(--text-muted); }
-.icon-orange { color: #bc5215; }
+.icon-teal { color: #24837b; }
 .icon-amber { color: #b45309; } /* fosc per contrast ≥3:1 sobre fons clar */
-.icon-anki { color: var(--icon-anki); } /* Flexoki Blue: igual que el botó Anki de la sidebar */
+.icon-anki { color: var(--icon-anki); } /* Flexoki Magenta: igual que el botó Anki de la sidebar */
 
 /* Version History Section */
 .version-entry {

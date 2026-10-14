@@ -986,10 +986,16 @@ body {
 }
 
 #conceptMapBtn {
-  color: #bc5215; /* Flexoki Orange */
+  color: #24837b; /* Flexoki Cyan: es distingeix de l'ambre d'«Explica-ho fàcil» */
 }
 
-#ankiBtn { color: #205EA6; /* Flexoki Blue */ }
+[data-actual-theme="dark"] #conceptMapBtn {
+  color: #3aa99f;
+}
+
+#ankiBtn { color: #a02f6f; /* Flexoki Magenta: el blau ja és de Resum i Aprofundiment */ }
+
+[data-actual-theme="dark"] #ankiBtn { color: #ce5d97; }
 
 
 /* ── Footer history/cache group ───────────────────────────── */
