@@ -1,96 +1,89 @@
 # Guia d'inici de Resumir
 
-Resumir converteix qualsevol cosa que llegeixes o mires —articles, vídeos, fils,
-PDFs— en coneixement estructurat. Al navegador, amb la teva clau, sense
-intermediaris: cap servidor propi, cap telemetria, codi obert.
-
-Aquesta guia et posa en marxa en pocs minuts.
+Resumir et fa un resum clar de qualsevol pàgina, vídeo de YouTube, fil o PDF, amb
+cites que pots comprovar a l'original. En tres passos ho tens a punt.
 
 ---
 
 ## 1. Instal·la l'extensió
 
-**Firefox**
-Vés a [addons.mozilla.org/firefox/addon/resumir](https://addons.mozilla.org/firefox/addon/resumir/),
-clica **«Afegeix a Firefox»** i accepta els permisos.
+**Firefox:** a [addons.mozilla.org/firefox/addon/resumir](https://addons.mozilla.org/firefox/addon/resumir/),
+clica **«Afegeix a Firefox»**.
 
-**Chrome / Edge / Brave**
-Descarrega l'últim paquet des de
-[Releases](https://github.com/xxxaau/resumir/releases) i segueix-hi
-les instruccions d'instal·lació.
+**Chrome, Edge o Brave:** baixa el fitxer `…-chromium.zip` de
+l'[última versió](https://github.com/xxxaau/resumir/releases/latest) i
+descomprimeix-lo. Obre `chrome://extensions`, activa el **«Mode de
+desenvolupador»**, clica **«Carrega extensió desempaquetada»** i tria la carpeta.
 
 ---
 
-## 2. Posa la teva clau d'API de Google
+## 2. Posa la teva clau de Gemini
 
 Resumir funciona amb Google Gemini i necessita una **clau d'API**, gratuïta i sense
-targeta de crèdit. La crees a [aistudio.google.com](https://aistudio.google.com/),
-la copies i l'enganxes a **Configuració (⚙️) → Claus i models**.
+targeta. Crea-la a [aistudio.google.com](https://aistudio.google.com/app/apikey) i
+enganxa-la a **Configuració (⚙️) → General → Claus i models**. El botó
+**«Comprovar»** et diu si funciona.
 
-👉 Pas a pas: **[guia per obtenir la clau](./API-KEY-GOOGLE.md)**.
-
-La clau es desa **només al teu ordinador**.
-
----
-
-## 3. El teu primer resum
-
-1. Obre una pàgina amb text: un article, un vídeo de YouTube, un fil de Hacker
-   News, un PDF…
-2. Obre Resumir des de la icona de l'extensió.
-3. Clica **«Resum»**. En uns segons el tindràs.
-
-Drecera: **Alt+Maj+S** obre Resumir i resumeix la pàgina actual (la pots canviar
-des de la gestió de dreceres del navegador). Sota cada resum veuràs de quant text
-parteix i amb quin model; als
-vídeos i als PDF, les marques de temps i de pàgina són enllaços, i les cites de la
-secció «Cites» i dels punts clau són clicables: la pàgina les ressalta en groc i hi
-desplaça la vista (no en PDF ni en vídeos).
+👉 Pas a pas: **[com obtenir la clau](./API-KEY-GOOGLE.md)**.
 
 ---
 
-## Què pots fer
+## 3. Fes el primer resum
 
-Resumir segueix tres moments —captures, entens, conserves— repartits en plugins
-que actives i reordenes al teu gust:
+1. Obre un article, un vídeo de YouTube, un fil o un PDF.
+2. Obre Resumir amb la icona de l'extensió i clica **«Resumir aquesta pàgina»**,
+   o prem **Alt+Maj+S**. També pots fer clic amb el botó dret i triar «Resumir
+   aquesta pàgina» o, amb text seleccionat, «Resumir la selecció».
+3. En pocs segons tens l'essencial, els punts clau, els aprenentatges i les cites.
 
-- **Captura:** pàgines web, YouTube, Hacker News i Twitter/X (automàtic) i PDFs locals.
-- **Cinc lents per entendre:** Resum, Explica-ho fàcil, Aprofundiment, Validació
-  científica i Mapa conceptual —totes amb prompt editable.
-- **Conserva:** exporta a Obsidian o Markdown; historial i caché locals.
-- **Llegeix millor:** lectura biònica.
+![Resum d'un article a la barra lateral: paràgraf inicial, punts clau acabats amb cites enllaçades, aprenentatges i cites, amb pestanyes per als altres resums de la pàgina](./img/resum.webp)
 
-👉 Què fa cada eina i quan usar-la: **[guia de plugins](./PLUGINS.md)**.
+**Comprova-ho.** Cada punt clau acaba amb una cita literal: clica-la i la pàgina la
+ressalta en groc i hi va (no en PDF ni en vídeos). Als vídeos, les marques de temps
+fan saltar el vídeo a aquell moment, i als PDF de la web, els números de pàgina són
+enllaços. Sota el resum veus de quantes paraules parteix, amb quin model s'ha fet i
+l'enllaç **«Veure el text enviat»**.
+
+Si fas més d'un resum de la mateixa pàgina (Resum, Mapa conceptual…), surten en
+**pestanyes** a dalt, i tornar-hi no gasta res. A baix pots canviar de **model** i
+obrir l'**historial**.
+
+👉 Què més pots fer: **[guia de plugins](./PLUGINS.md)**.
 
 ---
 
-## Configuració
+## La configuració
 
-Tot es controla des de **Configuració (⚙️)**:
+Obre-la amb l'engranatge (⚙️) de la barra lateral:
 
-| Apartat | Què hi trobes |
-|---|---|
-| **Claus i models** | La teva clau d'API i el model de Gemini a fer servir |
-| **Aparença** | Tema visual de l'extensió |
-| **Dades i privadesa → Historial** | Els resums desats en aquest ordinador i com esborrar-los |
-| **Dades i privadesa → Ús** | Quants resums has generat, amb quins models i tokens (només en aquest navegador) |
-| **Dades i privadesa → Còpia de seguretat** | Exportar i importar la configuració (prompts personalitzats, plantilles, plugins) en un fitxer JSON; la clau d'API no s'inclou tret que ho demanis |
-| **Plugins** | Activar, reordenar i configurar cada eina (i editar-ne els prompts) |
+- **General:** la clau d'API, el model i el tema (Flexoki clar, fosc o automàtic,
+  que segueix el sistema).
+- **Resum:** el format i la llargada del resum, i les instruccions si vols anar més
+  enllà.
+- **Plugins:** quines eines surten a la barra i en quin ordre.
+- **Dades i privadesa:** on es desa cada dada, l'historial, les estadístiques d'ús i
+  la **còpia de seguretat** (exporta i importa la configuració en un fitxer; la
+  clau només hi va si ho demanes).
+
+**Privadesa:** la clau i l'historial es queden en aquest ordinador. Les
+preferències es poden sincronitzar amb el teu navegador. El text de la pàgina i les
+instruccions només van a Google Gemini quan demanes un resum. Resumir no té cap
+servidor propi ni telemetria.
 
 ---
 
 ## Si alguna cosa no va
 
-**«API Key invàlida»** — Revisa que la clau estigui sencera i sense espais. Més detall
-a la [guia de la clau](./API-KEY-GOOGLE.md#problemes-habituals).
+**«La clau no és vàlida»:** torna-la a copiar sencera, sense espais. Més detall a
+la [guia de la clau](./API-KEY-GOOGLE.md#problemes-habituals).
 
-**No surt la icona** — A Firefox, `about:addons` → Resumir → fixa-la a la barra. A
-Chrome/Edge, clica la icona de peça (Extensions) i fixa Resumir.
+**No veig la icona:** fixa Resumir a la barra des del botó d'extensions (la peça
+del trencaclosques).
 
-**El resum va lent o dóna error de límit** — El nivell gratuït de Gemini limita les
-peticions per minut. Espera uns segons i torna-ho a provar.
+**Error de límit:** el nivell gratuït de Gemini limita les peticions per minut.
+Espera uns segons i torna-ho a provar.
 
-**Un plugin no surt a la barra** — Comprova que estigui activat a Configuració → Plugins.
+**Falta un botó a la barra:** activa'l a Configuració → Plugins.
 
 ---
 

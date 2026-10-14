@@ -1,39 +1,30 @@
 ---
 layout: base.njk
 title: "Preguntes freqüents"
-description: "Respostes breus sobre Resumir: preu, clau de Gemini, privacitat, navegadors, PDF, vídeos i idiomes."
+description: "Respostes breus sobre Resumir: preu, privacitat, navegadors, PDF, vídeos i idiomes."
 permalink: /pmf/
 ---
 <article class="prose wrap">
   <h1>Preguntes freqüents</h1>
 
   <h2>Quant costa?</h2>
-  <p>Resumir és gratuït i de codi obert. Només necessites una clau d'API de Google Gemini, que també és gratuïta: el nivell gratuït no demana targeta de crèdit i té uns límits d'ús que per a un ús personal solen ser suficients. Mira <a href="/guia/clau-api/">com obtenir la clau</a>.</p>
+  <p>Res. Resumir és gratuït i de codi obert. Necessites una clau de Google Gemini, que també és gratuïta i no demana targeta. Mira <a href="/guia/clau-api/">com obtenir-la</a>.</p>
 
   <h2>Les meves dades són privades?</h2>
-  <p>Resumir no té cap servidor propi, ni telemetria, ni comptes. El text de la pàgina només surt del navegador quan demanes un resum, i va directament a Google Gemini amb la teva clau.</p>
-  <ul>
-    <li>La <strong>clau d'API</strong>, l'<strong>historial</strong> de resums i les <strong>estadístiques</strong> es desen només en aquest ordinador.</li>
-    <li>Les <strong>preferències</strong> (prompts, plugins, tema…) es desen al navegador; si hi tens la sincronització activada, el navegador també les guarda al teu compte.</li>
-  </ul>
-  <p>A la configuració, la pàgina «Dades i privadesa» t'ho mostra tot. Detall complet a la <a href="https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md">política de privadesa</a>.</p>
-  <p>Tingues en compte que Google tracta el text que li envies segons les seves condicions: si fas servir una clau de pagament, no l'utilitza per entrenar els seus models; amb una clau gratuïta, consulta les <a href="https://ai.google.dev/terms">condicions de Google</a>.</p>
+  <p>Resumir no té servidor propi, ni telemetria, ni comptes. El text de la pàgina i els prompts només surten del navegador quan demanes un resum, i van directament a Google Gemini amb la teva clau. La clau i l'historial es queden en aquest ordinador; les preferències es poden sincronitzar amb el teu navegador. Google tracta el text segons <a href="https://ai.google.dev/terms">les seves condicions</a>. Més detall a la <a href="https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md">política de privadesa</a>.</p>
 
   <h2>Puc fiar-me del resum?</h2>
-  <p>Un model d'IA es pot equivocar, i Resumir t'ajuda a comprovar-ho: els punts clau acaben amb cites literals que pots clicar perquè la pàgina les ressalti en groc, i sota cada resum veus de quant text parteix i amb quin model s'ha fet. Si el text s'ha hagut de tallar, també t'ho diu.</p>
+  <p>Una IA es pot equivocar. Per això els punts clau acaben amb cites que pots clicar per veure-les ressaltades a la pàgina, i sota el resum veus de quant text parteix i amb quin model s'ha fet.</p>
 
   <h2>Quins navegadors funcionen?</h2>
-  <p>Firefox, des de Mozilla Add-ons, i Chrome, Edge o Brave, des de GitHub Releases (no és a la Chrome Web Store). Ho tens pas a pas a la <a href="/guia/inici/">guia d'inici</a>.</p>
-
-  <h2>Com l'obro més ràpid?</h2>
-  <p>Amb <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd> s'obre Resumir i resumeix la pàgina. També pots fer clic amb el botó dret i triar «Resumir aquesta pàgina» o, si has seleccionat text, «Resumir la selecció».</p>
+  <p>Firefox, des de Mozilla Add-ons, i Chrome, Edge o Brave, des de <a href="https://github.com/xxxaau/resumir/releases/latest">GitHub</a>. Ho tens pas a pas a la <a href="/guia/inici/">guia d'inici</a>.</p>
 
   <h2>Funciona amb PDF i vídeos?</h2>
-  <p>Sí. Amb PDF de la web i del teu ordinador (els escanejats, que són només imatge, no es poden llegir) i amb vídeos de YouTube que tinguin transcripció. Als vídeos, les marques de temps són enllaços; als PDF de la web, els números de pàgina també. Les cites clicables, en canvi, només funcionen a les pàgines web.</p>
+  <p>Sí, amb PDF de la web o del teu ordinador (no els escanejats) i amb vídeos de YouTube que tinguin transcripció. Les cites clicables només funcionen a les pàgines web.</p>
 
-  <h2>En quins idiomes funciona?</h2>
-  <p>Pot resumir contingut en qualsevol idioma i et respon en català. La interfície, de moment, és només en català.</p>
+  <h2>En quins idiomes?</h2>
+  <p>Resumeix contingut en qualsevol idioma i respon en català.</p>
 
   <h2>He trobat un error o tinc una idea</h2>
-  <p>Explica-ho a <a href="https://github.com/xxxaau/resumir/issues">GitHub</a>. Totes les novetats són a <a href="/changelog/">Novetats</a>.</p>
+  <p>Explica-ho a <a href="https://github.com/xxxaau/resumir/issues">GitHub</a>. Les novetats de cada versió són a <a href="/changelog/">Novetats</a>.</p>
 </article>

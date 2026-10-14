@@ -1,96 +1,64 @@
-# Com obtenir una clau d'API de Google Gemini (pas a pas)
+# Com obtenir la clau d'API de Google Gemini
 
-Resumir funciona amb la IA **Google Gemini**. Per fer-la servir necessites una
-**clau d'API**: una contrasenya personal que connecta l'extensió amb Google.
+Resumir fa els resums amb **Google Gemini**. Per connectar-s'hi necessita una
+**clau d'API**: una mena de contrasenya personal entre l'extensió i Google.
 
-> **És gratuïta** i sense targeta de crèdit. El nivell gratuït de Google té límits
-> generosos, més que suficients per a un ús normal.
+> **És gratuïta** i no demana targeta. El nivell gratuït sol bastar per a un ús
+> personal.
 >
-> **És privada.** La clau es desa **només al teu ordinador**. Resumir no té
-> servidors propis: el text va directament del teu navegador a Google.
+> **És privada.** La clau es desa només en aquest ordinador i només s'envia a
+> Google. Resumir no té cap servidor propi.
 
-Es fa **una sola vegada** i triga un parell de minuts.
-
----
-
-## Abans de començar
-
-Necessites un **compte de Google** (el mateix del Gmail o YouTube). Si no en tens,
-en pots crear un a [accounts.google.com](https://accounts.google.com/signup).
+Es fa una sola vegada i triga un parell de minuts. Només cal un compte de Google
+(el del Gmail o YouTube).
 
 ---
 
-## Pas 1 — Obre Google AI Studio
+## Pas 1 — Crea la clau
 
-Vés a **[aistudio.google.com](https://aistudio.google.com/)** i clica **«Get
-started»**, a dalt a la dreta.
+1. Obre **[aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)**
+   i inicia sessió amb Google. La primera vegada potser hauràs d'acceptar les
+   condicions.
+2. Clica **«Create API key»**. Si et demana un projecte, accepta el que t'ofereix.
+3. Apareixerà la clau, un text llarg que comença per `AIza`. **Copia-la.**
 
----
-
-## Pas 2 — Inicia sessió amb Google
-
-Si encara no ho has fet, Google et demanarà el correu i la contrasenya. La primera
-vegada pot ser que hagis d'**acceptar les condicions** de Google AI Studio.
-
----
-
-## Pas 3 — Vés a la pàgina de claus d'API
-
-Obre directament **[aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)**
-(o, al menú lateral esquerre, **«Get API key»**).
+> Tracta-la com una contrasenya: no la comparteixis. Si cal, la pots esborrar i
+> crear-ne una de nova a la mateixa pàgina.
 
 ---
 
-## Pas 4 — Crea la clau
+## Pas 2 — Enganxa-la a Resumir
 
-1. Clica **«Create API key»**.
-2. Si et demana un **projecte**, accepta el que t'ofereix o crea'n un de nou (el nom
-   és igual; només serveix per organitzar).
-3. En uns segons apareixerà la clau: un text llarg que **comença per `AIza...`**.
+Obre **Resumir → Configuració (⚙️) → General → Claus i models**, enganxa la clau i
+clica **«Comprovar»**. Si surt «Clau vàlida i desada», ja ho tens.
 
 ---
 
-## Pas 5 — Copia la clau
+## Pas 3 — Prova-ho
 
-Clica la icona de copiar (o selecciona-la i Ctrl+C / Cmd+C).
-
-> Tracta-la com una contrasenya: **no la comparteixis**. Si cal, la pots esborrar i
-> crear-ne una de nova des de la mateixa pàgina sempre que vulguis.
-
----
-
-## Pas 6 — Enganxa-la a Resumir
-
-Obre **Resumir → Configuració (⚙️) → Claus i models**, enganxa la clau al camp de la
-**clau d'API** i desa.
-
----
-
-## Pas 7 — Comprova que va
-
-Obre un article qualsevol, obre Resumir i clica **«Resum»**. Si al cap d'uns segons
-apareix el resum, ja ho tens tot a punt.
+Obre un article, obre Resumir i clica **«Resumir aquesta pàgina»** (o prem
+**Alt+Maj+S**). Si al cap d'uns segons tens el resum, ja està.
 
 ---
 
 ## Problemes habituals
 
-**«API Key invàlida» o error d'autenticació**
-Revisa que has copiat la clau sencera, sense espais al davant o al darrere.
-Comprova-la a [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey);
-si cal, esborra-la i crea'n una de nova.
+**«La clau no és vàlida»**
+Torna-la a copiar sencera, sense espais al davant ni al darrere. Si continua
+fallant, esborra-la a [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+i crea'n una de nova.
 
-**El resum va lent o dóna error de límit**
-El nivell gratuït té un límit de peticions per minut: espera uns segons i torna-ho a
+**Error de límit o va lent**
+El nivell gratuït limita les peticions per minut: espera uns segons i torna-ho a
 provar. Si en fas un ús intensiu, pots activar la facturació al teu projecte de
-Google per pujar els límits (opcional, de pagament).
+Google (opcional, de pagament).
 
 **He perdut la clau**
-Torna a [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey): hi
-tens totes les teves claus. Si no la pots recuperar, esborra-la i crea'n una de nova
-(recorda enganxar la nova a la Configuració de Resumir).
+A [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) hi tens
+totes les teves claus. Si no la recuperes, crea'n una de nova i enganxa-la a
+Resumir.
 
 ---
 
-I ara, mira què pots fer amb cada eina a la **[guia de plugins](./PLUGINS.md)**, o
-torna a la **[guia d'inici](./GUIA-INICI.md)**.
+I ara, mira què pots fer a la **[guia de plugins](./PLUGINS.md)**, o torna a la
+**[guia d'inici](./GUIA-INICI.md)**.
