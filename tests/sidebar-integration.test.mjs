@@ -1279,6 +1279,22 @@ test("text enviat - el focus entra al panell i, en tancar-lo, torna al botó del
 // Cites clicables: la cita de «Cites» i la final de cada punt clau és un enllaç que,
 // en clicar-lo, la ressalta a la pàgina (sense insígnies de verificació)
 // ---------------------------------------------------------------------------
+test("cites clicables - tolera variants del títol («Cites literals») i cometes tipogràfiques", async () => {
+    const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: `${real} ` + "Més text de la pàgina. ".repeat(20),
+        modelReply: `Resum.\n\n### Cites literals\n- “${real}”\n\n### Punts clau (resum)\n- Idea «${real}»`,
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const links = [...h.document.querySelectorAll("#content a.quote-jump")];
+        assert.equal(links.length, 2);
+        assert.equal(links[0].dataset.quote, real);
+    } finally { h.close(); }
+});
+
 test("cites clicables - «Cites» i «Punts clau» porten un enllaç per cita, sense insígnies ✓/⚠", async () => {
     const real = "La fusió nuclear imita el procés que alimenta les estrelles.";
     const h = await loadSidebar({

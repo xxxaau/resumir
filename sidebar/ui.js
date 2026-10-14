@@ -823,7 +823,13 @@ function linkQuotes(container, url) {
     const work = [];
     let mode = null;
     for (const el of container.children) {
-        if (/^H[1-6]$/.test(el.tagName)) { mode = SECTIONS[el.textContent.trim().toLowerCase()] || null; continue; }
+        if (/^H[1-6]$/.test(el.tagName)) {
+            // Tolerant: «Cites», «Cites literals», «Punts clau (resum)»…
+            const title = el.textContent.trim().toLowerCase();
+            const key = Object.keys(SECTIONS).find(k => title === k || title.startsWith(k + " ") || title.startsWith(k + ":"));
+            mode = key ? SECTIONS[key] : null;
+            continue;
+        }
         if (!mode) continue;
         for (const li of el.matches("li") ? [el] : el.querySelectorAll("li")) work.push({ li, mode });
     }
@@ -831,14 +837,14 @@ function linkQuotes(container, url) {
         const found = [];
         const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT);
         for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-            for (const m of n.nodeValue.matchAll(/«([^»]{8,})»/g)) found.push({ node: n, m });
+            for (const m of n.nodeValue.matchAll(/«([^»]{8,})»|“([^”]{8,})”/g)) found.push({ node: n, m });
         }
         if (!found.length) continue;
         const { node, m } = which === "last" ? found[found.length - 1] : found[0];
         const a = document.createElement("a");
         a.href = "#";
         a.className = "quote-jump";
-        a.dataset.quote = m[1].trim();
+        a.dataset.quote = (m[1] || m[2]).trim();
         a.title = "Mostra-la a la pàgina";
         a.textContent = m[0];
         const tail = node.splitText(m.index);

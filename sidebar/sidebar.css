@@ -1592,8 +1592,8 @@ body {
 /* Codi intern d'un error, al final i atenuat */
 .error-code { opacity: 0.7; font-size: 0.85em; white-space: nowrap; }
 
-/* Cites verificades */
-a.quote-jump { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+/* Cites clicables: es veuen com un enllaç (color primari i subratllat), que es nota a primer cop d'ull */
+a.quote-jump { color: var(--primary-color); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; cursor: pointer; }
 a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, #ffe14d 45%, transparent); }
 
 .prompt-update-banner .btn-link {
