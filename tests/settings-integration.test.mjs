@@ -1046,7 +1046,7 @@ test("plugins - la llista té els grups de la barra d'eines i només es reordena
 });
 
 test("menú - els plugins actius surten agrupats per categoria (Generar, Exportar, Vista) amb l'ordre de cada grup", async () => {
-    const h = await loadSettings({ sync: { extensionOrder: ["resum", "bionic", "obsidian", "markdown", "simple", "deepdive"] } });
+    const h = await loadSettings({ sync: { enableSimple: true, enableDeepdive: true, enableObsidian: true, enableMarkdown: true, enableBionic: true, extensionOrder: ["resum", "bionic", "obsidian", "markdown", "simple", "deepdive"] } });
     try {
         const list = h.document.getElementById("activeExtensionsList");
         const rows = [...list.children].map(e => e.classList.contains("nav-group-label") ? "#" + e.textContent : e.dataset.tab);
