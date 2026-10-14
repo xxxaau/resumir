@@ -43,7 +43,7 @@ if (!existsSync(iconsSrcDir)) {
 }
 
 function readJson(p)        { return JSON.parse(readFileSync(p, "utf8").replace(/^\uFEFF/, "")); }
-function writeJson(p, obj)  { writeFileSync(p, JSON.stringify(obj, null, 4), "utf8"); }
+function writeJson(p, obj)  { writeFileSync(p, JSON.stringify(obj, null, 4) + "\n", "utf8"); }
 
 const base = readJson(basePath);
 

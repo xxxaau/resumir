@@ -5,6 +5,18 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.1] - 2026-10-14
+
+### Arreglat
+- **Barra lateral de Firefox a Windows i Linux:** la cantonada de dalt a l'esquerra arrodonida
+  només s'aplica a macOS, on la barra lateral de Firefox és una targeta arrodonida; a
+  Windows i Linux torna a quedar quadrada, com abans.
+
+### Canviat
+- Procés de publicació més sòlid: la versió publicada ha de coincidir amb l'etiqueta, es revisa
+  el paquet real que es puja a Firefox i el mode de desenvolupament ja no toca els fitxers del
+  repositori. (dev)
+
 ## [2.7.0] - 2026-10-14
 
 ### Afegit
