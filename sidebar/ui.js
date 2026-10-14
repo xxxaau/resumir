@@ -854,7 +854,7 @@ function linkQuotes(container, url) {
 }
 
 /**
- * Amaga el que penja del resultat acabat de generar (procedència, refinadors, avís de
+ * Amaga el que penja del resultat acabat de generar (procedència, avís de
  * model): en canviar la vista (historial, entrada desada, text enviat) deixaria de
  * correspondre a allò que es veu.
  */

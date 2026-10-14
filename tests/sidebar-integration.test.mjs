@@ -1449,7 +1449,7 @@ test("pestanyes per tipus - canviar de pestanya NO entra en mode historial (la b
     } finally { h.close(); }
 });
 
-test("procedència i refinadors s'amaguen en veure una entrada desada o l'historial", async () => {
+test("la procedència s'amaga en veure una entrada desada o l'historial", async () => {
     const h = await loadSidebar({
         local: { apiKey: "AIza_test", ...seedHistoryEntry() },
         pageText: "Un article. ".repeat(30),
@@ -1576,7 +1576,7 @@ test("memòria cau - una còpia generada amb un altre estil no es reutilitza", a
     } finally { h.close(); }
 });
 
-test("camí desat - també enllaça [m:ss], mostra la procedència i els refinadors, i enllaça les cites", async () => {
+test("camí desat - també enllaça [m:ss], mostra la procedència i enllaça les cites", async () => {
     const yt = "https://www.youtube.com/watch?v=abc123XYZ_0";
     const local = { summary_cache_index: [] };
     const key = `summary_cache:${yt}:summary`;

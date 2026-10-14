@@ -1,7 +1,7 @@
 /**
  * scripts/smoke-e2e.mjs
  * Prova de fum en un Chromium REAL amb l'extensió carregada (build_chromium_dev):
- * resum complet contra un Gemini simulat, línia de procedència, refinadors,
+ * resum complet contra un Gemini simulat, línia de procedència,
  * pestanyes per tipus, historial amb botó de tornar fix i pàgina de configuració.
  * Falla (exit 1) si hi ha errors de consola o alguna comprovació no es compleix.
  *

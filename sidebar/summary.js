@@ -325,7 +325,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 // El selector de model NO es toca: mostraria un model que la propera petició no
                 // usarà (usa el desat). El de la còpia consta a la línia de procedència.
 
-                // Mateix post-procés que en generar: enllaços (p. N)/[m:ss], procedència i refinadors
+                // Mateix post-procés que en generar: enllaços (p. N)/[m:ss], procedència
                 const proseCached = !isCachedConceptMap && !isCachedAnki && isProseType(requestedType);
                 if (proseCached) {
                     if (typeof linkYoutubeTimes === "function") linkYoutubeTimes(contentDiv, currentMetadata.url);
