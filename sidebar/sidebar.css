@@ -1605,3 +1605,28 @@ a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, 
 
 .anki-card-sent { opacity: 0.7; }
 .anki-sent-badge { font-size: 0.8em; color: var(--success); margin-right: auto; }
+
+/* Firefox: el contingut de la barra és una peça amb les cantonades arrodonides (com la targeta
+   de la barra lateral del navegador), que deixa veure el fons del navegador a les cantonades.
+   Per això el fons és al body (no al canvas) i el desplaçament passa del document al body: així
+   les cantonades segueixen arrodonides encara que es faci scroll. Només Firefox
+   (@supports -moz-appearance): al panell de Chromium el fons de fora és un altre i quedaria un rebaix. */
+@supports (-moz-appearance: none) {
+  html {
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    scroll-padding-top: 0;
+  }
+  body {
+    height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    border-radius: 12px;
+    scroll-padding-top: calc(var(--toolbar-height, 0px) + var(--backbar-height, 0px) + 44px);
+    scroll-padding-bottom: 48px;
+  }
+  .toolbar,
+  #history-back-bar { border-radius: 12px 12px 0 0; }
+  #footer-status { border-radius: 0 0 12px 12px; }
+}
