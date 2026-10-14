@@ -719,6 +719,14 @@ input:checked + .slider:before {
     margin-top: 15px;
 }
 
+.nav-group-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 8px 24px 2px;
+}
+
 .nav-item.dynamic-extension {
     padding-left: 24px; 
     font-size: 13px;

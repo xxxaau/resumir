@@ -1045,6 +1045,19 @@ test("plugins - la llista té els grups de la barra d'eines i només es reordena
     } finally { h.close(); }
 });
 
+test("menú - els plugins actius surten agrupats per categoria (Generar, Exportar, Vista) amb l'ordre de cada grup", async () => {
+    const h = await loadSettings({ sync: { extensionOrder: ["resum", "bionic", "obsidian", "markdown", "simple", "deepdive"] } });
+    try {
+        const list = h.document.getElementById("activeExtensionsList");
+        const rows = [...list.children].map(e => e.classList.contains("nav-group-label") ? "#" + e.textContent : e.dataset.tab);
+        const gi = (g) => rows.indexOf("#" + g);
+        assert.ok(gi("Generar") < gi("Exportar") && gi("Exportar") < gi("Vista"), JSON.stringify(rows));
+        assert.ok(rows.indexOf("simple") < rows.indexOf("deepdive"));
+        assert.ok(rows.indexOf("obsidian") < rows.indexOf("markdown"));
+        assert.ok(rows.indexOf("simple") < gi("Exportar") && rows.indexOf("markdown") < gi("Vista"));
+    } finally { h.close(); }
+});
+
 test("Dades i privadesa - historial, ús i còpia de seguretat són a la seva pestanya (General en queda lleugera) i la casella de la clau va abans dels botons", async () => {
     const h = await loadSettings();
     try {

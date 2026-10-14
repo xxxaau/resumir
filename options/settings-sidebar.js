@@ -176,21 +176,25 @@ function updateSidebar() {
     list.replaceChildren(); // Clear
 
     const extensions = PLUGIN_REGISTRY.filter(p => p.icon);
-
+    // Categories en l'ordre de la barra d'eines (Generar → Exportar → Vista); dins de cadascuna,
+    // l'ordre que l'usuari ha triat a la pàgina de plugins
     const currentOrder = getCurrentExtensionOrder();
-    extensions.sort((a, b) => {
-        const indexA = currentOrder.indexOf(a.id);
-        const indexB = currentOrder.indexOf(b.id);
-        const posA = indexA === -1 ? 999 : indexA;
-        const posB = indexB === -1 ? 999 : indexB;
-        return posA - posB;
-    });
+    const pos = (id) => { const i = currentOrder.indexOf(id); return i === -1 ? 999 : i; };
 
     let count = 0;
-    extensions.forEach(extension => {
-        const checkbox = document.getElementById(extension.enableId);
+    for (const group of PLUGIN_GROUPS) {
+        const active = extensions
+            .filter(e => e.group === group)
+            .filter(e => { const cb = document.getElementById(e.enableId); return cb && cb.checked; })
+            .sort((a, b) => pos(a.id) - pos(b.id));
+        if (!active.length) continue;
 
-        if (checkbox && checkbox.checked) {
+        const label = document.createElement("div");
+        label.className = "nav-group-label";
+        label.textContent = group;
+        list.appendChild(label);
+
+        active.forEach(extension => {
             count++;
             const btn = document.createElement("button");
             btn.className = "nav-item dynamic-extension";
@@ -205,8 +209,8 @@ function updateSidebar() {
             }
 
             list.appendChild(btn);
-        }
-    });
+        });
+    }
 
     if (count > 0) {
         header.style.display = "block";
