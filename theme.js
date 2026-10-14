@@ -13,9 +13,11 @@
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
 
-        if (theme === 'system') {
+        if (theme === 'system' || theme === 'flexoki') {
+            // «Flexoki (automàtic)»: Flexoki clar o fosc segons el sistema; «Sistema»: Clar o Fosc
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-actual-theme', isDark ? 'dark' : 'light');
+            const light = theme === 'flexoki' ? 'solarized' : 'light';
+            document.documentElement.setAttribute('data-actual-theme', isDark ? 'dark' : light);
         } else {
             document.documentElement.setAttribute('data-actual-theme', theme);
         }
@@ -44,7 +46,7 @@
         // Listen for system preference changes
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
              const currentTheme = document.documentElement.getAttribute('data-theme');
-             if (currentTheme === 'system') applyTheme('system');
+             if (currentTheme === 'system' || currentTheme === 'flexoki') applyTheme(currentTheme);
         });
     }
 

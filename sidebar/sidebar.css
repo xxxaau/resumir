@@ -25,51 +25,50 @@
 
 [data-actual-theme="dark"] {
   color-scheme: dark;
-  /* Flexoki Dark Theme */
-  --bg-color: #100f0f; /* Flexoki Base-00/Black */
-  --text-color: #cecdc3; /* Flexoki Base-100/Paper */
-  --text-muted: #878580; /* Flexoki Base-70 */
-  --border-color: #282726; /* Flexoki Base-30 */
+  /* Flexoki Fosc (com Obsidian + Minimal: accent cian) */
+  --bg-color: #100f0f;
+  --text-color: #cecdc3;
+  --text-muted: #878580;
+  --border-color: #282726;
   --toolbar-bg: #100f0f;
-  --button-hover: #1c1b1a; /* Flexoki Base-20 */
-  --button-text: #cecdc3;
-  --primary-color: #4385be; /* Flexoki Dark Blue */
-  --primary-hover: #6fa0d1;
+  --button-hover: #1c1b1a;
+  --button-text: #878580;
+  --primary-color: #3aa99f;
+  --primary-hover: #5abdac;
   --primary-text: #100f0f;
-  --secondary-bg: #282726;
-  --secondary-hover: #343331;
+  --secondary-bg: #1c1b1a;
+  --secondary-hover: #282726;
   --error-bg: #1c1b1a;
-  --error-text: #e0675c; /* Flexoki Dark Red */
+  --error-text: #e0675c;
   --footer-bg: #100f0f;
   --footer-border: #282726;
   --footer-text: #878580;
   --success: #879a39;
-  --active-bg: rgba(206, 205, 195, 0.14);
+  --active-bg: rgba(254, 252, 240, 0.05);
 }
 
 [data-actual-theme="solarized"] {
   color-scheme: light;
-  /* Solarized/Sepia adapted with Flexoki Warmth.
-     text/muted enfosquits per complir WCAG AA (abans 4,45:1 i 3,2:1 sobre #f2f0e5). */
-  --bg-color: #f2f0e5;
-  --text-color: #403e3c; /* Flexoki warm ~9:1 sobre el fons */
-  --text-muted: #66655f; /* ~4,6:1 — AA per a text secundari */
+  /* Flexoki Clar (paper; com Obsidian + Minimal: accent cian) */
+  --bg-color: #fffcf0;
+  --text-color: #100f0f;
+  --text-muted: #6f6e69;
   --border-color: #e6e4d9;
-  --toolbar-bg: #f2f0e5;
-  --button-hover: #e6e4d9;
-  --button-text: #806000; /* Flexoki Yellow */
-  --primary-color: #806000;
-  --primary-hover: #a8450f; /* Flexoki Orange */
+  --toolbar-bg: #fffcf0;
+  --button-hover: #f2f0e5;
+  --button-text: #6f6e69;
+  --primary-color: #1c6c66;
+  --primary-hover: #164f4a;
   --primary-text: #fffcf0;
-  --secondary-bg: #e6e4d9;
-  --secondary-hover: #dad8ce;
-  --error-bg: #f2f0e5;
+  --secondary-bg: #f2f0e5;
+  --secondary-hover: #e6e4d9;
+  --error-bg: #fffcf0;
   --error-text: #af3029;
   --footer-bg: #f2f0e5;
   --footer-border: #e6e4d9;
   --footer-text: #66655f;
   --success: #5c7309;
-  --active-bg: rgba(16, 15, 15, 0.08);
+  --active-bg: rgba(16, 15, 15, 0.05);
 }
 
 [data-actual-theme="soft-gray"] {
@@ -1633,3 +1632,10 @@ a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, 
   .toolbar,
   #history-back-bar { border-radius: 12px 0 0 0; }
 }
+
+/* ── Aspecte Obsidian + Minimal: text de lectura una mica més gran, enllaços suaus ── */
+#content { --content-base-size: 15px; }
+#content h3 { font-size: 1em; font-weight: 600; }
+#content blockquote { border-left-width: 1px; border-left-color: var(--secondary-hover); }
+#content a { text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--primary-color) 22%, transparent); }

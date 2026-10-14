@@ -30,59 +30,59 @@
 
 [data-actual-theme="dark"] {
   color-scheme: dark;
-  /* Flexoki Dark Theme */
-  --primary-color: #CECDC3; /* Flexoki Base-100 Light */
-  --primary-hover: #FFFCF0;
-  --button-color: #2F6FAE; /* Flexoki Blue Dark */
-  --button-hover-bg: #205EA6;
-  --bg-color: #100F0F; /* Flexoki Black */
-  --sidebar-bg: #1C1B1A; /* Surface */
+  /* Flexoki Fosc (com Obsidian + Minimal: accent cian) */
+  --primary-color: #3AA99F;
+  --primary-hover: #5ABDAC;
+  --button-color: #24837B;
+  --button-hover-bg: #1C6C66;
+  --bg-color: #100F0F;
+  --sidebar-bg: #1C1B1A;
   --text-color: #CECDC3;
-  --text-muted: #878580; /* Flexoki Base-70 */
-  --border-color: #282726; /* Flexoki Base-30 */
+  --text-muted: #878580;
+  --border-color: #282726;
   --input-bg: #100F0F;
-  --input-border: #403E3C; /* Flexoki Base-40 */
-  --nav-hover: rgba(206,205,195,0.08);
-  --nav-active-bg: rgba(206,205,195,0.12);
+  --input-border: #343331;
+  --nav-hover: rgba(254,252,240,0.05);
+  --nav-active-bg: rgba(254,252,240,0.08);
   --card-bg: #100F0F;
-  --shadow-color: rgba(0,0,0,0.5);
+  --shadow-color: rgba(0,0,0,0.3);
   --table-header-bg: #1C1B1A;
   --table-border: #282726;
-  --toast-bg: #343331; /* Flexoki Base-35 */
+  --toast-bg: #343331;
   --success: #879a39;
   --danger: #e0675c;
   --toggle-off: #878580;
-  --star-on: #f0c040;
+  --star-on: #D0A215;
   --icon-blue: #4385be;
   --icon-anki: #ce5d97;
 }
  
 [data-actual-theme="solarized"] {
   color-scheme: light;
-  /* Solarized via Flexoki */
-  --primary-color: #806000; /* Yellow */
-  --primary-hover: #BC5215; /* Orange */
-  --button-color: #806000;
-  --button-hover-bg: #BC5215;
-  --bg-color: #FFFCF0; /* Flexoki's paper naturally warm */
+  /* Flexoki Clar (paper; com Obsidian + Minimal: accent cian) */
+  --primary-color: #1C6C66;
+  --primary-hover: #164F4A;
+  --button-color: #24837B;
+  --button-hover-bg: #1C6C66;
+  --bg-color: #FFFCF0;
   --sidebar-bg: #F2F0E5; 
-  --text-color: #403E3C;
+  --text-color: #100F0F;
   --text-muted: #66655F;
   --border-color: #E6E4D9;
-  --input-bg: #F2F0E5;
+  --input-bg: #FFFCF0;
   --input-border: #DAD8CE;
-  --nav-hover: rgba(175,48,41,0.04);
-  --nav-active-bg: rgba(175,48,41,0.06);
+  --nav-hover: rgba(16,15,15,0.05);
+  --nav-active-bg: rgba(16,15,15,0.08);
   --card-bg: #FFFCF0;
-  --shadow-color: rgba(16,15,15,0.02);
+  --shadow-color: rgba(16,15,15,0.05);
   --table-header-bg: #F2F0E5;
   --table-border: #E6E4D9;
-  --toast-bg: #6F6E69;
+  --toast-bg: #403E3C;
   --success: #5c7309;
   --danger: #af3029;
   --toggle-off: #878580;
   --star-on: #a16207;
-  --icon-blue: #0060df;
+  --icon-blue: #205EA6;
   --icon-anki: #a02f6f;
 }
  
@@ -1200,7 +1200,7 @@ button:disabled,
 
 /* Grups de plugins: els mateixos que la barra d'eines (Generar | Exportar | Vista) */
 .extension-group-title {
-  margin: 8px 0 -4px;
+  margin: 20px 0 6px;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1211,7 +1211,7 @@ button:disabled,
 .extension-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
 }
 
 .changelog-older { margin-top: 12px; }
@@ -1238,3 +1238,34 @@ button:disabled,
 
 /* Els botons del camp del model no es parteixen en dues línies («Triar model…») */
 .model-input-group .btn { white-space: nowrap; }
+
+/* ── Aspecte Obsidian + Minimal ───────────────────────────────────────────────
+   Navegació compacta, plugins com a files planes, controls de 32px i un toggle petit.
+   Va al final perquè afina les regles de dalt (només variables de tema). */
+body { font-size: 14px; }
+.sidebar { width: 220px; padding: 12px; }
+.sidebar-header { padding: 8px; margin-top: 8px; font-size: 12px; text-transform: none; letter-spacing: 0; }
+.nav-item { padding: 5px 8px; border-left: 0; border-radius: 4px; color: var(--text-muted); font-size: 14px; margin-bottom: 1px; }
+.nav-item:hover { color: var(--text-color); background-color: var(--nav-hover); }
+.nav-item.active { background-color: var(--button-color); color: white; font-weight: 500; }
+.main-content { padding: 32px 48px; }
+.tab-pane { max-width: 720px; }
+.page-title { font-size: 22px; font-weight: 600; margin-bottom: 20px; }
+.section h2, .section h3 { font-size: 15px; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+label { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.help-text { font-size: 12px; }
+.form-control { padding: 5px 10px; min-height: 32px; font-size: 14px; border-radius: 5px; border-color: var(--border-color); }
+.form-control:hover { border-color: var(--input-border); }
+.btn { padding: 6px 12px; min-height: 32px; border-radius: 5px; font-size: 13px; font-weight: 500; }
+.btn-secondary { background-color: var(--sidebar-bg); border-color: var(--border-color); }
+.extensions-list { gap: 0; }
+.extension-item { background: transparent; border: 0; border-top: 1px solid var(--border-color); border-radius: 0; padding: 12px 0; }
+.extension-item:hover { box-shadow: none; }
+.extension-icon { width: 32px; height: 32px; border-radius: 6px; margin-right: 12px; }
+.extension-icon svg { width: 18px; height: 18px; }
+.extension-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+.extension-desc { font-size: 12px; }
+.switch { width: 40px; height: 22px; }
+.slider:before { width: 18px; height: 18px; left: 2px; bottom: 2px; }
+input:checked + .slider:before { transform: translateX(18px); }
+.slider.round { border-radius: 18px; }

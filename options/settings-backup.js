@@ -16,7 +16,7 @@ const _isStrList = (v) => Array.isArray(v) && v.length <= 60 && v.every(x => typ
 const _oneOf = (list) => (v) => typeof v === "string" && list.includes(v);
 
 const CONFIG_VALIDATORS = {
-    modelName: _isStr, theme: _oneOf(["system", "light", "dark", "solarized", "soft-gray"]),
+    modelName: _isStr, theme: _oneOf(["system", "flexoki", "light", "dark", "solarized", "soft-gray"]),
     systemPrompt: _isStr, summaryFormat: _oneOf(["default", "bullets", "tldr", "prose"]),
     summaryLength: _oneOf(["short", "medium", "long"]), youtubePreferredLangs: _isStrList,
     enableMarkdown: _isBool, markdownTemplate: _isStr,
