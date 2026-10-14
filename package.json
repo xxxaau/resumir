@@ -24,6 +24,7 @@
   "scripts": {
     "test": "node scripts/run-tests.mjs",
     "coverage": "c8 --reporter=text --reporter=lcov node scripts/run-tests.mjs",
+    "icons:gen": "node scripts/icons-gen.mjs",
     "lint": "eslint . --ext .js,.mjs --max-warnings 0 --no-warn-ignored",
     "check": "npm run lint && npm test",
     "build": "node scripts/build.mjs all",
