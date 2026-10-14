@@ -7,65 +7,67 @@ values layer).
 ## Short Description (≤132 characters — CWS limit)
 
 ```
-Turn articles, YouTube videos, threads and PDFs into structured knowledge: summaries, concept maps, science checks. Private.
+Summarize web pages, YouTube videos, threads and PDFs with Gemini, and understand them better. Private, in your browser.
 ```
-(124 chars ✓)
+(120 chars ✓)
 
 ---
 
 ## Long Description (English)
 
-**Resumir** turns anything you read or watch — articles, YouTube videos, Twitter/X threads, Hacker News discussions, PDFs — into structured, lasting knowledge. Right in your browser sidebar, with your own Gemini API key, with no servers in between.
+**Resumir** gives you a clear summary of any web page, YouTube video, thread or PDF — and lets you go deeper when you want more. Everything runs in your browser, with your own Google Gemini API key.
 
-### 📥 Capture any content
+### How it works
 
-If you can open it in your browser, you can use it:
+1. Open a page and click **Summarize** (or press Alt+Shift+S).
+2. Read the summary in the side panel as it is generated.
+3. Click a quote and the page highlights it in yellow and scrolls to it, like Ctrl+F.
 
-- **Articles and web pages** — clean text extraction (Readability)
-- **YouTube** — transcripts, including auto-generated captions
-- **Twitter/X threads** and **Hacker News** (article + comments)
-- **PDF files** — remote and local, with a text layer (pdf.js)
+### What you can summarize
 
-### 🔍 Five lenses to understand
+- Articles and web pages
+- YouTube videos (with clickable timestamps)
+- Twitter/X threads and Hacker News discussions
+- PDFs, from the web or from your computer (with linked page numbers)
 
-Not just a summary — the understanding you need right now:
+### Five ways to understand it
 
-- **Summary** — the essentials, structured, streamed in real time
+- **Summary** — the essentials, with key points and literal quotes
 - **Deep dive** — the context and nuance a summary leaves out
-- **Explain it simply** — any topic in plain language
-- **Science check** — claims verified, sources assessed, biases flagged
-- **Concept map** — interactive visualization with zoom, collapsible branches, and PNG export
+- **Explain it simply** — the same, in plain language
+- **Science check** — what the text claims versus what the consensus says
+- **Concept map** — an interactive map you can zoom, fold and download
 
-Every prompt is 100% customizable.
+Every summary says how much text it is based on and which model made it, so you know how far to trust it. All prompts are editable.
 
-### 📚 Knowledge that lasts
+### Keep it
 
-- **Obsidian export** with a configurable template
-- **Markdown copy** — clean and reusable
-- **History + local cache** — previously summarized pages load instantly
-- **Usage statistics** — token and cost tracking per Gemini model
+- Save the summary to **Obsidian** with your own template
+- Copy it as **Markdown**
+- Reopen any summary from the **history**, at no cost
+- Generate **Anki** flashcards
+- Export and import your settings as a file
 
-### 📖 Readability, your way
+### Your way
 
-- **Bionic Reading** — configurable fixation, font, size, and line height
-- **Multiple themes** — system, light, dark, solarized, gray
-- Keyboard-navigable, WCAG-minded contrast
+- Optional Bionic Reading
+- Light, dark, Flexoki and gray themes, or follow your system
+- Keyboard-friendly, with careful contrast
 
-### 🔒 Radical trust
+### Your privacy
 
-- Your API key and all your data stay in your browser (`storage.local`)
-- Page content goes directly to the Google Gemini API — no third-party servers, ever
-- No telemetry, no analytics, no account, no ads
+- No server of ours, no telemetry, no account, no ads
+- Your API key stays in this browser only
+- Page text leaves your browser only for Google Gemini, when you ask for a summary
+- The "Data and privacy" page in Settings shows you where everything is stored
 - Open source (MPL-2.0)
-
-### 🙏 Built on the shoulders of giants
-
-Resumir exists thanks to these open source projects: **Readability.js** (Mozilla, Apache-2.0) for article extraction, and **pdf.js** (Mozilla, Apache-2.0) for PDF reading.
 
 ### Requirements
 
-- A free Google Gemini API key (from [Google AI Studio](https://aistudio.google.com/)) — no credit card needed
+- A free Google Gemini API key from [Google AI Studio](https://aistudio.google.com/) — no credit card needed
 - Firefox 142+ or Chrome/Edge/Brave (Manifest V3)
+
+Resumir uses Readability.js and pdf.js from Mozilla (Apache-2.0).
 
 ---
 

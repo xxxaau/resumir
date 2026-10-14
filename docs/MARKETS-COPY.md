@@ -20,14 +20,13 @@ de valors).
 
 ### 2. Descripció breu
 
-**Límit:** ~160 caràcters
+**Límit:** ~160 caràcters (AMO) · 132 (Chrome)
 
 ```
-Converteix articles, vídeos de YouTube, fils i PDFs en coneixement: resums,
-mapes conceptuals i validació científica. Privat, local i en català.
+Resumeix pàgines, vídeos de YouTube, fils i PDFs amb Gemini i entén-los millor. Privat, al teu navegador i en català.
 ```
 
-**Caràcters:** 144 ✅
+**Caràcters:** 117 ✅
 
 ---
 
@@ -36,96 +35,72 @@ mapes conceptuals i validació científica. Privat, local i en català.
 **Límit:** ~3.000 caràcters
 
 ```
-📝 Resumir — Del contingut al coneixement, en un clic
+Resumir — Entén el que llegeixes i mires, en un clic
 
-Cada dia obres més pestanyes de les que pots llegir. Resumir converteix
-qualsevol cosa que llegeixes o mires — articles, vídeos, fils, PDFs — en
-coneixement estructurat, comprensible i teu. Al teu navegador, amb la teva
-clau de Gemini, sense intermediaris.
+Cada dia obres més pestanyes de les que pots llegir. Resumir et dona un resum clar de qualsevol pàgina, vídeo de YouTube, fil o PDF, i et deixa aprofundir-hi quan en vols més. Tot al teu navegador, amb la teva pròpia clau de Google Gemini.
 
-═══════════════════════════════
+COM FUNCIONA
 
-📥 CAPTURA QUALSEVOL CONTINGUT
+1. Obre una pàgina i clica «Resumir» (o prem Alt+Maj+S).
+2. Llegeix el resum al panell lateral mentre es genera.
+3. Clica una cita i la pàgina la ressalta en groc i hi va, com un Ctrl+F.
 
-Si ho pots obrir al navegador, ho pots aprofitar:
-• Articles i pàgines web (extracció neta del text)
-• Vídeos de YouTube (transcripcions, també automàtiques)
-• Fils de Twitter/X i discussions de Hacker News (article + comentaris)
-• PDFs remots i locals (amb capa de text)
+QUÈ POTS RESUMIR
 
-🔍 CINC LENTS PER ENTENDRE
+• Articles i pàgines web
+• Vídeos de YouTube (amb les marques de temps clicables)
+• Fils de Twitter/X i discussions de Hacker News
+• PDFs, de la web o del teu ordinador (amb números de pàgina enllaçats)
 
-No un resum: la comprensió que necessites en cada moment.
-• Resum — l'essencial, estructurat i en temps real (streaming)
-• Aprofundiment — el context i els matisos que un resum no dona
-• Explica-ho fàcil — qualsevol tema en llenguatge planer
-• Validació científica — afirmacions verificades, fonts avaluades,
-  biaixos detectats
-• Mapa conceptual — visualització interactiva amb zoom, plegat de
-  branques i exportació a PNG
+CINC MANERES D'ENTENDRE-HO
 
-Tots els prompts són 100 % personalitzables.
+• Resum: l'essencial, amb punts clau i cites literals
+• Aprofundiment: el context i els matisos que un resum deixa fora
+• Explica-ho fàcil: el mateix, en llenguatge planer
+• Validació científica: què diu el text i què en diu el consens
+• Mapa conceptual: un mapa interactiu que pots ampliar, plegar i descarregar
 
-📚 CONEIXEMENT QUE PERDURA
+Cada resum diu de quant text parteix i amb quin model s'ha fet, perquè sàpigues què pots creure. Els prompts els pots canviar tots.
 
-El que entens avui, ho trobes demà:
-• Envia resums a Obsidian amb plantilla configurable
-• Copia en Markdown net i reutilitzable
-• Historial i memòria cau local: resums anteriors a l'instant
-• Estadístiques de tokens i cost per model
+CONSERVA-HO
 
-📖 LLEGIBILITAT A LA TEVA MIDA
+• Desa el resum a Obsidian amb la teva plantilla
+• Copia'l en Markdown
+• Torna a veure qualsevol resum a l'historial, sense gastar res
+• Genera targetes de memòria per a Anki
+• Exporta i importa la configuració en un fitxer
 
-• Lectura biònica configurable (fixació, tipografia, mida, interlineat)
-• 5 temes: sistema, clar, fosc, solarized i gris
-• Navegable per teclat i amb contrast acurat (WCAG)
+A LA TEVA MIDA
 
-═══════════════════════════════
+• Lectura biònica opcional
+• Temes clar, fosc, Flexoki i gris, o el del sistema
+• Es pot fer servir amb el teclat i té contrast acurat
 
-🔒 CONFIANÇA RADICAL
+LA TEVA PRIVACITAT
 
-Aquesta extensió NO fa:
-❌ No recull dades personals ni fa telemetria
-❌ No envia dades a servidors propis (no en té)
-❌ No demana cap compte ni subscripció
-❌ No té anuncis
+• No hi ha servidor nostre, ni telemetria, ni compte, ni anuncis
+• La clau d'API es queda només en aquest navegador
+• El text de la pàgina només surt cap a Google Gemini quan tu demanes un resum
+• La pàgina «Dades i privadesa» de la configuració t'ho mostra tot
+• Codi obert (MPL-2.0)
 
-Aquesta extensió SÍ:
-✅ Guarda la clau API i totes les dades només al teu navegador
-✅ Envia el contingut només a l'API de Google Gemini (HTTPS), quan tu ho demanes
-✅ Codi obert (MPL-2.0), auditable per qualsevol
+Política de privacitat: https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md
 
-Política de privacitat completa:
-https://github.com/xxxaau/resumir/blob/main/docs/PRIVACY_POLICY.md
+COM COMENÇAR
 
-═══════════════════════════════
+1. Instal·la l'extensió.
+2. Crea una clau d'API gratuïta de Google Gemini, sense targeta de crèdit: https://aistudio.google.com/app/apikey
+3. Enganxa-la a la barra lateral i comença a resumir.
 
-🚀 COM COMENÇAR
+Resumir fa servir Readability.js i pdf.js de Mozilla (Apache-2.0).
 
-1. Instal·la l'extensió
-2. Obtén una clau API gratuïta de Google Gemini (sense targeta de crèdit):
-   https://aistudio.google.com/app/apikey
-3. Enganxa-la a Configuració › Clau API Gemini
-4. Obre qualsevol pàgina i clica «Resumir»
+Errors i suggeriments: https://github.com/xxxaau/resumir/issues
+Codi font: https://github.com/xxxaau/resumir
 
-═══════════════════════════════
-
-🙏 CONSTRUÏT SOBRE ESPATLLES DE GEGANTS
-
-Resumir existeix gràcies a aquests projectes open source:
-• Readability.js (Mozilla, Apache-2.0) — extracció d'articles
-• pdf.js (Mozilla, Apache-2.0) — lectura de PDFs
-
-🐛 Errors i suggeriments:
-https://github.com/xxxaau/resumir/issues
-
-📄 Llicència MPL-2.0 — codi font:
-https://github.com/xxxaau/resumir
-
-Fet a Banyoles ❤️
+Fet a Banyoles.
 ```
 
-**Caràcters:** 2957 ✅ (dins del límit de 3.000)
+**Caràcters:** 2384 ✅ (dins del límit de 3.000)
 
 ---
 
@@ -170,35 +145,31 @@ de Google Gemini, i només quan tu ho demanes.
 
 ### 5. Nota de versió (What's New)
 
-Esborrany per a la **propera versió** (número pendent de bump; els canvis ja
-són a `main`).
+Esborrany per a la **propera versió** (la xifra l'assigna el pas de release;
+els canvis ja són a `main`). Ha de coincidir amb «Sobre l'extensió» (vegeu
+`docs/CHANGELOG.md`).
 
 ```
-🔖 Resumir — propera versió
+Resumir — novetats
 
-🛠 Edge i Chrome, ara de debò
-• Arreglat el bug que feia que la icona no obrís el panell lateral
-  (Chromium/Edge moderns exposen un global `browser` que confonia la
-  detecció de navegador)
-• Selector de models llegible a la barra inferior, amb focus de teclat
-  visible
-• L'extracció de fils de Twitter/X funciona també als paquets publicats
+Cites clicables
+• Clica una cita o un punt clau i la pàgina el ressalta en groc, com un Ctrl+F.
+• Les marques de temps dels vídeos de YouTube i els números de pàgina dels PDF també són enllaços.
 
-🔑 Permisos més simples
-• L'accés a les pàgines es concedeix una sola vegada a la instal·lació:
-  adéu a l'avís de permís a cada lloc nou
-• ⚠️ En actualitzar, el navegador et demanarà re-aprovar els permisos:
-  és normal i només passa aquesta vegada
+Més clar què has llegit
+• Cada resum diu de quant text parteix i amb quin model s'ha fet, i avisa si el text s'ha tallat.
+• Pestanyes per tipus amb els resums que ja tens d'aquella pàgina.
+• Drecera Alt+Maj+S per obrir Resumir i resumir.
 
-📖 Llegibilitat
-• La lectura biònica manté la mida coherent a tot arreu (en generar,
-  a l'historial i en canviar la configuració)
-• El mapa conceptual s'obre amb l'enquadrament ideal, sense haver
-  d'allunyar el zoom a mà
+Configuració renovada
+• Nova pàgina «Dades i privadesa»: on es desa cada dada, quant ocupa l'historial i còpia de seguretat de la configuració.
+• Selector de model més clar, plugins agrupats com la barra d'eines i canvis pendents sempre visibles.
+• Nou aspecte Flexoki (clar, fosc o segons el sistema) i una icona nova.
 
-💬 Errors més clars
-• Les pàgines restringides del navegador ara expliquen el motiu real
-  en lloc de suggerir recarregar
+Arreglat
+• El botó «Atura» ara atura de veritat.
+• Un PDF local ja no es barreja amb resums d'altres pestanyes.
+• Prompts per defecte revisats: no inventen i avisen quan no hi ha prou contingut.
 ```
 
 ---
@@ -206,20 +177,20 @@ són a `main`).
 ### 6. Text de les captures de pantalla
 
 ```
-Captura 1 — Panell principal:
-"Del contingut al coneixement — resum estructurat generat en temps real"
+Captura 1 — Resum amb cites clicables:
+"Un resum clar, amb cites que la pàgina ressalta en groc"
 
 Captura 2 — Mapa conceptual:
-"Mapa conceptual interactiu — zoom, plegat de branques i exportació a PNG"
+"Mapa conceptual interactiu: amplia, plega i descarrega"
 
-Captura 3 — Historial:
-"El que entens avui, ho trobes demà — historial amb memòria cau local"
+Captura 3 — YouTube:
+"De la transcripció del vídeo al resum, amb marques de temps clicables"
 
 Captura 4 — Configuració:
-"Cinc lents personalitzables — cada prompt és teu"
+"Cinc maneres d'entendre un text, i els prompts són teus"
 
-Captura 5 — YouTube:
-"YouTube — de la transcripció del vídeo al resum en segons"
+Captura 5 — Dades i privadesa:
+"Veus on es desa cada dada: res no surt del teu navegador, tret de Gemini"
 ```
 
 ---
@@ -260,7 +231,7 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 ```
 [ ] Títol correcte
 [ ] Descripció breu dins del límit de caràcters
-[ ] Descripció llarga dins del límit (~2.600 / 3.000)
+[ ] Descripció llarga dins del límit (2.384 / 3.000)
 [ ] Enllaços funcionen (GitHub, issues, privacitat)
 [ ] Permisos justificats (⚠️ <all_urls> ara és REQUERIT — text actualitzat)
 [ ] Release notes actualitzades (inclou avís de re-aprovació de permisos)
@@ -274,6 +245,6 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 
 ---
 
-**Última actualització:** 12 de juny de 2026
-**Versió:** 3.0 (alineat amb docs/COMUNICACIO.md)
+**Última actualització:** 14 d'octubre de 2026
+**Versió:** 4.0 (copy més clar i curt; alineat amb docs/COMUNICACIO.md i «Sobre l'extensió»)
 **Status:** ✅ Llest per a la propera submissió (pendent de número de versió)
