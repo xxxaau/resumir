@@ -1068,3 +1068,23 @@ test("navegació - en canviar de pestanya, l'entrada activa del menú es porta a
         assert.deepEqual(seen, ["about"]);
     } finally { h.close(); }
 });
+
+test("barra de canvis pendents - «Desar» desa i «Descartar» torna al valor desat", async () => {
+    const h = await loadSettings({ sync: { obsidianVault: "Vell" } });
+    try {
+        const vault = h.document.getElementById("obsidianVault");
+        const input = (v) => { vault.value = v; vault.dispatchEvent(new h.window.Event("input", { bubbles: true })); };
+        input("Nou");
+        const bar = h.document.getElementById("dirtyNote");
+        assert.equal(bar.hidden, false);
+        h.document.getElementById("dirtyDiscard").click();
+        await h.flush(20);
+        assert.equal(vault.value, "Vell", "descartat");
+        assert.equal(bar.hidden, true);
+        input("Nou");
+        h.document.getElementById("dirtySave").click();
+        await h.flush(20);
+        assert.equal((await h.storage.sync.get("obsidianVault")).obsidianVault, "Nou", "desat des de la barra");
+        assert.equal(bar.hidden, true);
+    } finally { h.close(); }
+});

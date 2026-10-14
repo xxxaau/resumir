@@ -80,6 +80,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   cos de l'streaming.
 
 ### Canviat
+- **Barra de canvis pendents** a la configuració, amb «Desar» i «Descartar»: es veu
+  sempre que hi ha text a mig editar, sigui quina sigui la pestanya.
 - **Configuració en pantalles estretes:** el menú ja no queda inabastable (els plugins
   actius s'obren des de «Plugins») i l'entrada activa sempre es veu.
 - **Pestanya «Dades i privadesa»** a la configuració: l'historial, l'ús i la còpia de

@@ -132,6 +132,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindClick("verifyApiKey", checkApiKey);
     bindClick("toggleApiKey", toggleApiKeyVisibility);
 
+    // Barra de canvis pendents: desa tot el que hi ha a mig editar o ho torna al que hi ha desat
+    bindClick("dirtySave", saveOptions);
+    bindClick("dirtyDiscard", async () => {
+        if (!confirm("Descartar els canvis sense desar?")) return;
+        const [syncData, localData] = await Promise.all([ext.storage.sync.get(null), ext.storage.local.get(["apiKey"])]);
+        restoreOptions(syncData, localData);
+        setDirty(false);
+        showStatus("Canvis descartats.");
+    });
+
     // Bind all save buttons to saveOptions
     ["save", "saveCustom", "saveObsidian", "saveMarkdown", "saveDeepDive", "saveBionic", "saveScience", "saveConceptMap", "saveSimple", "saveAnki"].forEach(id => {
         bindClick(id, saveOptions);
