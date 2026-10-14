@@ -172,12 +172,11 @@ body {
   background-color: var(--active-bg);
 }
 
-/* Botons d'estat (activat/desactivat), com la lectura biònica: activat = color primari, fons i
-   vora; l'ull s'omple. Desactivat = gris i només el contorn. Es nota sense dependre només del color. */
+/* Botons d'estat (activat/desactivat), com la lectura biònica: activat = color primari i fons suau;
+   l'ull s'omple. Desactivat = gris i només el contorn. Es nota sense dependre només del color. */
 .toolbar button[aria-pressed="true"] {
   color: var(--primary-color);
   background-color: var(--active-bg);
-  box-shadow: inset 0 0 0 1.5px var(--primary-color);
 }
 .toolbar button[aria-pressed="true"] svg path:first-of-type { fill: currentColor; }
 
@@ -1500,15 +1499,18 @@ body {
 .history-filter:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
 
 /* Estat en repòs: només es veu si no hi ha contingut, càrrega, error ni panells */
-#idle-state { padding: 32px 16px 24px; text-align: center; }
+#idle-state { padding: 24px 16px 16px; text-align: center; }
 #idle-state[hidden], #idle-unsupported[hidden] { display: none; }
 #idle-unsupported { padding: 16px 12px; text-align: center; }
 #container:has(#content:not(.hidden), #loading:not(.hidden), #error:not(.hidden), #history-panel:not(.hidden), #source-panel:not(.hidden)) :is(#idle-state, #idle-unsupported) { display: none; }
 .idle-eyebrow { margin: 0 0 6px; font-size: 0.72em; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
-.idle-title { margin: 0 0 24px; font-size: 1.05em; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.idle-cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 260px; min-height: 44px; padding: 12px 20px; border-radius: 10px; font-size: 0.95em; }
+.idle-title { margin: 0 0 16px; font-size: 0.95em; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* Acció discreta: només el contorn, perquè no cridi més que el contingut de la pàgina */
+.idle-cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 7px 16px; border-radius: 8px; font-size: 0.9em; background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); }
+.btn-primary.idle-cta:hover:not(:disabled) { background: var(--active-bg); }
 .idle-cta svg { flex-shrink: 0; }
-.idle-saved { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; }
+.idle-saved:empty { display: none; }
+.idle-saved { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; }
 .idle-saved-label { flex-basis: 100%; margin: 0; font-size: 0.85em; color: var(--text-muted); }
 .idle-saved-btn { min-height: 24px; padding: 4px 10px; font: inherit; font-size: 0.9em; color: var(--text-color); background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
 .idle-saved-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
