@@ -989,6 +989,29 @@ test("pàgines de PDF - una pàgina web normal no porta enllaços ni instrucció
 // ---------------------------------------------------------------------------
 // Segells de temps a YouTube (Fase E): [m:ss] al resum porta el vídeo a l'instant
 // ---------------------------------------------------------------------------
+test("YouTube - les marques [m:ss] també són enllaços amb la lectura biònica activada i en activar-la/desactivar-la", async () => {
+    const url = "https://www.youtube.com/watch?v=abc123XYZ_0";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test", isBionicActive: true },
+        sync: { enableBionic: true },
+        tabs: [{ id: 1, url, title: "Vídeo", active: true }],
+        pageText: "[TRANSCRIPT: ca]\n\n[0:00] " + "hola ".repeat(80) + "[1:05] " + "adéu ".repeat(80),
+        modelReply: "Primera idea [1:05]. Segona [1:02:03].\n\n### Punts clau\n- Un punt important [0:35] i un altre [12:40].",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const times = () => [...h.document.querySelectorAll("#content a[data-yt-time]")].map(a => a.dataset.ytTime);
+        assert.deepEqual(times(), ["65", "3723", "35", "760"], "amb la biònica activada");
+        h.document.getElementById("bionicBtn").click();
+        await h.flush(10);
+        assert.deepEqual(times(), ["65", "3723", "35", "760"], "en desactivar-la");
+        h.document.getElementById("bionicBtn").click();
+        await h.flush(10);
+        assert.deepEqual(times(), ["65", "3723", "35", "760"], "i en tornar-la a activar");
+    } finally { h.close(); }
+});
+
 test("YouTube - les marques [m:ss] són enllaços, el prompt les demana i el clic fa seek", async () => {
     const url = "https://www.youtube.com/watch?v=abc123XYZ_0";
     const h = await loadSidebar({

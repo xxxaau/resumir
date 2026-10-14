@@ -728,37 +728,57 @@ function looksLikeCookieBanner(text) {
 }
 
 /**
+ * Converteix en enllaços les coincidències d'una expressió curta (p. ex. «[1:05]», «(p. 3)») dins
+ * d'un contenidor, encara que quedin repartides entre diversos nodes de text: amb la lectura biònica
+ * cada paraula va partida en <b> i «[1:05]» es converteix en «[1:» + «05]». `build(match)` torna
+ * l'<a> (buit) o null. Es treballa sobre el text sencer i d'enrere cap endavant perquè els
+ * desplaçaments dels nodes anteriors no canviïn.
+ */
+function linkTextMatches(container, re, build) {
+    const nodes = [];
+    let full = "";
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (n.parentElement && n.parentElement.closest("a")) continue;
+        nodes.push({ node: n, start: full.length });
+        full += n.nodeValue;
+    }
+    const locate = (offset, atEnd) => {
+        for (const { node, start } of nodes) {
+            const end = start + node.nodeValue.length;
+            if (atEnd ? (offset > start && offset <= end) : (offset >= start && offset < end)) return [node, offset - start];
+        }
+        return null;
+    };
+    const matches = [...full.matchAll(new RegExp(re.source, "g"))].reverse();
+    for (const m of matches) {
+        const a = build(m);
+        const from = locate(m.index, false), to = locate(m.index + m[0].length, true);
+        if (!a || !from || !to) continue;
+        const range = document.createRange();
+        range.setStart(from[0], from[1]);
+        range.setEnd(to[0], to[1]);
+        a.appendChild(range.extractContents());
+        range.insertNode(a);
+    }
+}
+
+/**
  * Converteix les cites «(p. N)» d'un resum de PDF web en enllaços a `url#page=N`
  * (el visor de PDF del navegador entén #page=N). No fa res si no és un PDF.
  */
 function linkPdfPages(container, url) {
     if (!container || !/^https?:/i.test(url || "") || typeof isPdfUrl !== "function" || !isPdfUrl(url)) return;
     const base = url.split("#")[0];
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) {
-        const n = walker.currentNode;
-        if (/\(p\. \d+\)/.test(n.nodeValue) && !n.parentElement.closest("a")) nodes.push(n);
-    }
-    for (const node of nodes) {
-        const frag = document.createDocumentFragment();
-        let last = 0;
-        node.nodeValue.replace(/\(p\. (\d+)\)/g, (m, num, idx) => {
-            frag.append(node.nodeValue.slice(last, idx));
-            const a = document.createElement("a");
-            a.href = `${base}#page=${num}`;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.dataset.pdfPage = num;
-            a.title = `Obre el PDF a la pàgina ${num}`;
-            a.textContent = m;
-            frag.append(a);
-            last = idx + m.length;
-            return m;
-        });
-        frag.append(node.nodeValue.slice(last));
-        node.replaceWith(frag);
-    }
+    linkTextMatches(container, /\(p\. (\d+)\)/, (m) => {
+        const a = document.createElement("a");
+        a.href = `${base}#page=${m[1]}`;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.dataset.pdfPage = m[1];
+        a.title = `Obre el PDF a la pàgina ${m[1]}`;
+        return a;
+    });
 }
 
 /** ID del vídeo d'una URL de YouTube (watch?v=), o null. */
@@ -777,33 +797,14 @@ function youtubeVideoId(url) {
 function linkYoutubeTimes(container, url) {
     const id = youtubeVideoId(url);
     if (!container || !id) return;
-    const re = /\[(?:(\d+):)?(\d{1,2}):(\d{2})\]/g;
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) {
-        const n = walker.currentNode;
-        re.lastIndex = 0;
-        if (re.test(n.nodeValue) && !n.parentElement.closest("a")) nodes.push(n);
-    }
-    for (const node of nodes) {
-        const frag = document.createDocumentFragment();
-        let last = 0;
-        re.lastIndex = 0;
-        node.nodeValue.replace(re, (m, h, mi, se, idx) => {
-            const secs = (Number(h || 0) * 3600) + Number(mi) * 60 + Number(se);
-            frag.append(node.nodeValue.slice(last, idx));
-            const a = document.createElement("a");
-            a.href = `https://www.youtube.com/watch?v=${encodeURIComponent(id)}&t=${secs}s`;
-            a.dataset.ytTime = String(secs);
-            a.title = "Anar a aquest moment del vídeo";
-            a.textContent = m;
-            frag.append(a);
-            last = idx + m.length;
-            return m;
-        });
-        frag.append(node.nodeValue.slice(last));
-        node.replaceWith(frag);
-    }
+    linkTextMatches(container, /\[(?:(\d+):)?(\d{1,2}):(\d{2})\]/, (m) => {
+        const secs = (Number(m[1] || 0) * 3600) + Number(m[2]) * 60 + Number(m[3]);
+        const a = document.createElement("a");
+        a.href = `https://www.youtube.com/watch?v=${encodeURIComponent(id)}&t=${secs}s`;
+        a.dataset.ytTime = String(secs);
+        a.title = "Anar a aquest moment del vídeo";
+        return a;
+    });
 }
 
 /**
