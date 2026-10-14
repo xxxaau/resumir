@@ -1640,3 +1640,6 @@ a.quote-jump:hover, a.quote-jump:focus-visible { background: color-mix(in srgb, 
 #content blockquote { border-left-width: 1px; border-left-color: var(--secondary-hover); }
 #content a { text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 2px; }
 ::selection { background: color-mix(in srgb, var(--primary-color) 22%, transparent); }
+
+/* Clau d'API: camp de text emmascarat (no type="password", perquè el navegador no ofereixi desar-la). */
+.secret-mask:not(.secret-shown) { -webkit-text-security: disc; }

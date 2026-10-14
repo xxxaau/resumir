@@ -130,6 +130,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderUsageStats();
     if (typeof renderHistoryInfo === 'function') renderHistoryInfo();
 
+    const keyField = document.getElementById("apiKey");
+    if (keyField) hardenSecretInput(keyField);
     bindClick("verifyApiKey", checkApiKey);
     bindClick("toggleApiKey", toggleApiKeyVisibility);
 

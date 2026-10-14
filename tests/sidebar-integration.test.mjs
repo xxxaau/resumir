@@ -1426,6 +1426,46 @@ test("cites clicables - si no es troba a la pàgina o el resum és d'una altra p
     } finally { h.close(); }
 });
 
+test("cites clicables - a Hacker News, una cita de l'article enllaçat obre l'article amb fragment de text", async () => {
+    const hn = "https://news.ycombinator.com/item?id=123";
+    const quote = "Una frase de l'article enllaçat que no surt als comentaris de Hacker News.";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url: hn, title: "HN", active: true }],
+        pageText: "Title: x\n\nARTICLE:\n" + quote + " " + "Més text. ".repeat(30),
+        modelReply: `Resum.\n\n### Cites\n- «${quote}»`,
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        const created = [];
+        h.window.chrome.tabs.create = async (o) => { created.push(o); return {}; };
+        let n = 0;
+        h.window.chrome.scripting.executeScript = async () => (++n === 1 ? [{ result: { found: false } }] : [{ result: "https://exemple.org/article-llarg" }]);
+        h.document.querySelector("#content a.quote-jump").click();
+        await h.flush(10);
+        assert.equal(created.length, 1);
+        assert.match(created[0].url, /^https:\/\/exemple\.org\/article-llarg#:~:text=Una%20frase%20de%20l'article,/);
+        assert.match(h.document.getElementById("model-notice").textContent, /de l'article enllaçat/);
+    } finally { h.close(); }
+});
+
+test("YouTube - el resum demana la secció «Cites» amb marca de temps, també amb transcripció automàtica", async () => {
+    const url = "https://www.youtube.com/watch?v=abc123XYZ_0";
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        tabs: [{ id: 1, url, title: "Vídeo", active: true }],
+        pageText: "[TRANSCRIPT: ca (Auto)]\n\n[0:00] " + "hola ".repeat(80) + "[1:05] " + "adéu ".repeat(80),
+        modelReply: "Resum.\n\n### Cites\n- [1:05] «adéu adéu adéu adéu»",
+    });
+    try {
+        h.document.getElementById("summarizeBtn").click();
+        await h.flush(30);
+        assert.match(h.calls.fetches[0].body, /omple també la secció «Cites», encara que la transcripció sigui automàtica/);
+        assert.deepEqual([...h.document.querySelectorAll("#content a[data-yt-time]")].map(a => a.dataset.ytTime), ["65"], "la marca de la cita és un enllaç");
+    } finally { h.close(); }
+});
+
 test("cites clicables - no s'enllacen en un PDF (el visor és una altra pàgina)", async () => {
     const pdf = "https://example.com/doc.pdf";
     const key = `summary_cache:${pdf}:summary`;

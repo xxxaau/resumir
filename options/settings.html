@@ -48,13 +48,19 @@
           <div class="form-group">
             <label for="apiKey">Clau d'API de Google Gemini</label>
             <div class="model-input-group">
+              <!-- Camp de text emmascarat per CSS (no type="password") perquè el navegador no ofereixi
+                   desar la clau com a contrasenya; shared/api-key.js (hardenSecretInput) ho confirma. -->
               <input
-                type="password"
+                type="text"
                 id="apiKey"
-                class="form-control"
+                class="form-control secret-mask"
                 placeholder="AIza…"
                 autocomplete="off"
                 spellcheck="false"
+                data-lpignore="true"
+                data-1p-ignore
+                data-bwignore="true"
+                data-form-type="other"
               />
               <button id="toggleApiKey" type="button" class="btn btn-secondary" aria-pressed="false" aria-label="Mostrar la clau">
                 Mostrar

@@ -50,6 +50,48 @@ async function verifyApiKey(rawKey) {
     }
 }
 
+/**
+ * Camp de la clau d'API sense que el navegador ofereixi desar-la com a contrasenya. Els gestors de
+ * contrasenyes (Firefox, Chrome, 1Password, LastPass…) actuen sobre <input type="password">; la clau
+ * no és cap contrasenya d'usuari, així que es fa servir un camp de text emmascarat amb CSS
+ * (`-webkit-text-security`, que Firefox i Chromium accepten) i se'n desactiven les ajudes. Si el
+ * navegador no admet l'emmascarament per CSS es manté type="password" (la clau no es pot veure mai).
+ */
+function secretInputSupportsTextMask() {
+    try { return typeof CSS !== "undefined" && !!CSS.supports && CSS.supports("-webkit-text-security", "disc"); }
+    catch { return false; }
+}
+
+function hardenSecretInput(input) {
+    input.setAttribute("autocomplete", "off");
+    input.setAttribute("autocapitalize", "off");
+    input.setAttribute("autocorrect", "off");
+    input.setAttribute("spellcheck", "false");
+    input.setAttribute("data-lpignore", "true");   // LastPass
+    input.setAttribute("data-1p-ignore", "");      // 1Password
+    input.setAttribute("data-bwignore", "true");   // Bitwarden
+    input.setAttribute("data-form-type", "other"); // Dashlane
+    if (secretInputSupportsTextMask()) {
+        input.type = "text";
+        input.classList.add("secret-mask");
+    } else {
+        input.type = "password";
+        input.classList.remove("secret-mask");
+    }
+}
+
+/** Mostra/amaga el camp; retorna true si ara es veu. */
+function toggleSecretInput(input) {
+    if (input.classList.contains("secret-mask")) {
+        const show = !input.classList.contains("secret-shown");
+        input.classList.toggle("secret-shown", show);
+        return show;
+    }
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    return show;
+}
+
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { normalizeApiKey, looksLikeGeminiKey, describeKeyCheck, verifyApiKey };
+    module.exports = { normalizeApiKey, looksLikeGeminiKey, describeKeyCheck, verifyApiKey, secretInputSupportsTextMask, hardenSecretInput, toggleSecretInput };
 }

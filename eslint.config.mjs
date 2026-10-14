@@ -23,6 +23,7 @@ const extensionGlobals = {
     formatMarkdownContent: "readonly",
     estimateTokens: "readonly",
     firefoxCardColor: "readonly",
+    textFragmentUrl: "readonly",
     // shared/models.js
     CURATED_MODELS: "readonly",
     DEFAULT_MODEL_ID: "readonly",
@@ -33,6 +34,8 @@ const extensionGlobals = {
     normalizeApiKey: "readonly",
     looksLikeGeminiKey: "readonly",
     verifyApiKey: "readonly",
+    hardenSecretInput: "readonly",
+    toggleSecretInput: "readonly",
     callGeminiStream: "readonly",
     loadModels: "readonly",
     // shared/defaults.js

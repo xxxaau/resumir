@@ -115,6 +115,25 @@ function formatMarkdownContent(template, metadata) {
 }
 
 // Token Estimation (Simple char count / 4)
+/**
+ * URL amb fragment de text (`#:~:text=`) perquè el navegador ressalti la cita i hi vagi tot sol.
+ * Les cites llargues es donen com «inici,final» (primeres i últimes paraules), com demana l'especificació;
+ * `-`, `,` i `&` s'han d'escapar dins del fragment.
+ */
+function textFragmentUrl(url, quote) {
+    const clean = String(quote || "").replace(/[«»“”"]/g, "").replace(/\s+/g, " ").trim().replace(/[.…]+$/, "");
+    const enc = (t) => encodeURIComponent(t).replace(/-/g, "%2D");
+    const words = clean.split(" ").filter(Boolean);
+    const frag = words.length > 8
+        ? `${enc(words.slice(0, 4).join(" "))},${enc(words.slice(-4).join(" "))}`
+        : enc(words.join(" "));
+    let base = url, hash = "";
+    const i = url.indexOf("#");
+    if (i !== -1) { base = url.slice(0, i); hash = url.slice(i); }
+    if (hash.includes(":~:")) hash = hash.slice(0, hash.indexOf(":~:"));
+    return `${base}${hash || "#"}:~:text=${frag}`;
+}
+
 /** Color CSS d'un tema de Firefox ("#rgb", "#rrggbb", "rgb()/rgba()" o [r,g,b]) → [r,g,b] o null. */
 function parseThemeColor(value) {
     if (Array.isArray(value) && value.length >= 3) return value.slice(0, 3).map(Number);
@@ -161,6 +180,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getSourceHttpUrl,
         extractExecutiveSummary,
         estimateTokens,
+        textFragmentUrl,
         parseThemeColor,
         firefoxCardColor
     };

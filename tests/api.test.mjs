@@ -157,3 +157,24 @@ test("verifyApiKey - un error de xarxa dona el missatge de connexió", async () 
     assert.equal(r.ok, false);
     assert.match(r.message, /connexió/);
 });
+
+test("camp de la clau: text emmascarat per CSS quan el navegador ho admet (el gestor de contrasenyes no el veu) i password si no", () => {
+    const { hardenSecretInput, toggleSecretInput } = require("../shared/api-key.js");
+    const mk = () => { const attrs = {}; const cls = new Set(); return { type: "password", attrs, cls,
+        setAttribute(k, v) { attrs[k] = v; },
+        classList: { add: (c) => cls.add(c), remove: (c) => cls.delete(c), contains: (c) => cls.has(c), toggle: (c, on) => { on ? cls.add(c) : cls.delete(c); } } }; };
+    const prev = global.CSS;
+    try {
+        global.CSS = { supports: (p) => p === "-webkit-text-security" };
+        const a = mk(); hardenSecretInput(a);
+        assert.equal(a.type, "text"); assert.ok(a.cls.has("secret-mask")); assert.equal(a.attrs.autocomplete, "off");
+        assert.equal(a.attrs["data-lpignore"], "true"); assert.ok("data-1p-ignore" in a.attrs);
+        assert.equal(toggleSecretInput(a), true); assert.ok(a.cls.has("secret-shown"));
+        assert.equal(toggleSecretInput(a), false); assert.ok(!a.cls.has("secret-shown"));
+        global.CSS = { supports: () => false };
+        const b = mk(); b.type = "text"; hardenSecretInput(b);
+        assert.equal(b.type, "password", "sense emmascarament per CSS, es manté password");
+        assert.equal(toggleSecretInput(b), true); assert.equal(b.type, "text");
+        assert.equal(toggleSecretInput(b), false); assert.equal(b.type, "password");
+    } finally { global.CSS = prev; }
+});

@@ -932,6 +932,7 @@ function renderApiKeyWarning(contentDiv) {
     keyInput.autocomplete = "off";
     keyInput.spellcheck = false;
     keyInput.placeholder = "AIza…";
+    if (typeof hardenSecretInput === "function") hardenSecretInput(keyInput);
     keyInput.setAttribute("aria-label", "Clau d'API de Gemini");
     keyInput.setAttribute("aria-describedby", "apiKeyStatus apiKeyPrivacy");
     const showBtn = document.createElement("button");
@@ -941,8 +942,7 @@ function renderApiKeyWarning(contentDiv) {
     showBtn.setAttribute("aria-pressed", "false");
     showBtn.setAttribute("aria-label", "Mostrar la clau");
     showBtn.addEventListener("click", () => {
-        const show = keyInput.type === "password";
-        keyInput.type = show ? "text" : "password";
+        const show = toggleSecretInput(keyInput);
         showBtn.textContent = show ? "Amagar" : "Mostrar";
         showBtn.setAttribute("aria-pressed", String(show));
         showBtn.setAttribute("aria-label", show ? "Amagar la clau" : "Mostrar la clau");

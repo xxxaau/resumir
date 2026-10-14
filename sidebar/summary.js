@@ -381,6 +381,11 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // Vídeo amb marques de temps: el resum cita [m:ss] i enllaça amb el moment.
         if (isProseType(requestedType) && /\[\d+:\d{2}(?::\d{2})?\] /.test(String(pageData.text || ""))) {
             systemPrompt += "\n\nEl text conté marques de temps [m:ss]. Quan una idea provingui d'un moment concret del vídeo, afegeix al final del punt la marca on comença, copiada tal com surt al text. Una sola marca per punt, sense intervals; no n'inventis cap.";
+            // La secció «Cites» no s'ha d'ometre en vídeos (tampoc amb transcripció automàtica): cada cita
+            // porta la marca on apareix, que l'extensió converteix en un enllaç al moment del vídeo.
+            if (requestedType === "summary") {
+                systemPrompt += "\n\nInstrucció addicional (vídeo): omple també la secció «Cites», encara que la transcripció sigui automàtica: tria 2-3 fragments clars (si un sembla mal transcrit, en tries un altre) i comença cada cita amb la marca de temps on apareix, copiada de la transcripció, p. ex. «- [12:40] «fragment literal»». No ometis la secció.";
+            }
         }
         // PDF amb marques de pàgina: demanem citar-les perquè el resum enllaci amb el document.
         if (isProseType(requestedType) && /^\[Pàgina 1\]/.test(String(pageData.text || ""))) {

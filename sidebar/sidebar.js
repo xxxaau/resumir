@@ -625,8 +625,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 func: highlightQuoteInPage,
                 args: [link.dataset.quote],
             });
-            if (res && res[0] && res[0].result && res[0].result.found) showModelNotice("");
-            else showModelNotice("No s'ha trobat aquesta cita a la pàgina (pot haver canviat o ser en una part que no és visible).");
+            if (res && res[0] && res[0].result && res[0].result.found) { showModelNotice(""); return; }
+            // Hacker News: el resum barreja l'article enllaçat i els comentaris. Si la cita no és als
+            // comentaris (la pàgina), és de l'article: s'obre l'article amb un fragment de text
+            // (#:~:text=…) i el navegador la ressalta i hi va tot sol.
+            if (/^https?:\/\/news\.ycombinator\.com\/item/i.test(tab.url)) {
+                const art = await ext.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => { const a = document.querySelector(".titleline a"); return a ? a.href : null; },
+                });
+                const articleUrl = art && art[0] && art[0].result;
+                if (articleUrl && !/ycombinator\.com/i.test(articleUrl)) {
+                    await ext.tabs.create({ url: textFragmentUrl(articleUrl, link.dataset.quote) });
+                    showModelNotice("Aquesta cita és de l'article enllaçat: s'ha obert en una pestanya nova.");
+                    return;
+                }
+            }
+            showModelNotice("No s'ha trobat aquesta cita a la pàgina (pot haver canviat o ser en una part que no és visible).");
         } catch (err) {
             console.warn("[cites] highlight failed:", err);
             showModelNotice("No s'ha pogut ressaltar la cita en aquesta pàgina.");

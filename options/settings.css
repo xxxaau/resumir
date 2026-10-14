@@ -1270,3 +1270,6 @@ label { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
 .slider:before { width: 18px; height: 18px; left: 2px; bottom: 2px; }
 input:checked + .slider:before { transform: translateX(18px); }
 .slider.round { border-radius: 18px; }
+
+/* Clau d'API: camp de text emmascarat (no type="password", perquè el navegador no ofereixi desar-la). */
+.secret-mask:not(.secret-shown) { -webkit-text-security: disc; }

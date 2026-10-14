@@ -249,8 +249,7 @@ async function checkApiKey() {
 function toggleApiKeyVisibility() {
   const input = document.querySelector("#apiKey");
   const btn = document.querySelector("#toggleApiKey");
-  const show = input.type === "password";
-  input.type = show ? "text" : "password";
+  const show = toggleSecretInput(input);
   btn.textContent = show ? "Amagar" : "Mostrar";
   btn.setAttribute("aria-pressed", String(show));
   btn.setAttribute("aria-label", show ? "Amagar la clau" : "Mostrar la clau");
