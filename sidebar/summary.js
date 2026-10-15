@@ -61,20 +61,16 @@ function buildFallbackList(preferredModel, favoriteIds) {
 
 // Únic punt on s'apliquen els estils biònics a #content. La mida ve en 'em'
 // del select d'opcions, però com a font-size inline l''em' seria relatiu al
-// PARE (#container), no als 14px de #content — per això s'ancora en px sobre
-// la base real de #content (--content-base-size, sidebar.css). Tots els camins
+// PARE (#container), no a la base de #content — per això s'ancora sobre la
+// base real de #content (--content-base-size, sidebar.css), que escala amb
+// l'amplada del panell: calc() la manté viva en redimensionar. Tots els camins
 // que estilen #content (toggle, streaming, historial) han de passar per aquí.
 function applyBionicStyles(element, isEnabled, config = {}) {
     if (!element) return;
     if (isEnabled) {
         element.style.fontFamily = config.bionicFont || DEFAULT_BIONIC.font;
-        let basePx = 14; // fallback: #content { font-size } a sidebar.css
-        try {
-            const v = parseFloat(getComputedStyle(element).getPropertyValue("--content-base-size"));
-            if (v > 0) basePx = v;
-        } catch (_e) { /* entorn de test sense getComputedStyle */ }
         const factor = parseFloat(config.bionicFontSize || DEFAULT_BIONIC.fontSize) || 1;
-        element.style.fontSize = (basePx * factor) + "px";
+        element.style.fontSize = `calc(var(--content-base-size) * ${factor})`;
         element.style.lineHeight = config.bionicLineHeight || DEFAULT_BIONIC.lineHeight;
         element.style.setProperty("--bionic-weight", config.bionicWeight || DEFAULT_BIONIC.weight);
     } else {
