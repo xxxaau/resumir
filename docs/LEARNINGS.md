@@ -7,6 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
+- Lletra responsiva de la barra lateral i captures/animació del web — Sessió 2026-10-15
 - YouTube SPA, timedtext, la targeta de Firefox, la lectura biònica i la prova a Firefox real — Sessió 2026-10-14
 - Fases B–E del pla UI/UX, revisió de prompts i prova de fum en navegador real — Sessió 2026-10-12
 - Fase A del pla UI/UX + harness d'integració i tests de qualitat — Sessió 2026-10-11
@@ -21,6 +22,65 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 - Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
 - Aprenentatges — Sessió v2.3.1+ (2026-06-05)
 - Aprenentatges — Sessió v2.2.10 (2026-05-22)
+
+---
+
+# Lletra responsiva de la barra lateral i captures/animació del web — Sessió 2026-10-15
+
+## Un límit en `ch` amb lletra fixa no s'adapta en ampliar el panell
+
+`#content > p, ul…` tenia `max-width: 72ch` (llegibilitat) amb la lletra a 15px
+fixos: en una barra lateral ampla la columna s'aturava a ~600px i quedava un
+buit. Solució: la base de lletra escala amb l'amplada del panell
+(`--content-base-size: clamp(15px, calc(15px + (100vw - 500px) / 100), 20px)`);
+com que el límit és en `ch`, la columna creix amb la lletra i no s'allarga la
+línia. A la barra lateral `100vw` és l'amplada del panell, no cal cap *container query*.
+
+## No llegeixis en px una variable CSS que conté `clamp()`
+
+`applyBionicStyles` feia `parseFloat(getComputedStyle(el).getPropertyValue("--content-base-size"))`
+i ho fixava en px inline. Amb `clamp()` el valor d'una propietat personalitzada
+no es resol (surt el text `clamp(...)`), `parseFloat` dona `NaN` i cau al
+fallback; i encara que funcionés, el px quedaria congelat en redimensionar.
+Ara s'usa `calc(var(--content-base-size) * factor)`, que segueix l'amplada.
+
+## Les captures del web: la barra d'eines necessita ≥ ~500px o es parteix en dues files
+
+Els 11 botons de la barra necessiten ~480px; amb un panell de ~420px (com les
+captures antigues) baixen de línia (`flex-wrap: wrap`). Captura la barra lateral
+a 500px i **comprova-ho per codi**: tots els `.toolbar button` visibles han de
+tenir el mateix `top` (el script falla si no). Afecta `hero.webp`, `mapa.webp` i `og.jpg`.
+
+## Com es regeneren les captures (el generador antic es va esborrar)
+
+`scripts/take-screenshots.mjs` es va treure (cap ús) i les captures actuals no
+tenien generador. Recepta que va funcionar (no és al repo; es va fer a una
+carpeta temporal):
+
+- `npm ci`, `npm run dev:chromium` i `npx playwright install chromium` (Chrome
+  estable ignora `--load-extension`; cal el Chromium de Playwright).
+- Com a `smoke-e2e.mjs`: context persistent amb l'extensió, Gemini simulat amb
+  `ctx.route`, article servit a un domini fals (`https://quadern.example/…`) i la
+  barra lateral oberta com a pestanya amb `chrome.tabs.query` pedaçat. Cal activar
+  tots els plugins a `chrome.storage.sync` (`enableSimple`, `enableDeepdive`,
+  `enableScience`, `enableConceptMap`, `enablePdf`, `enableAnki`, `enableObsidian`,
+  `enableMarkdown`, `enableBionic`) i `theme: "solarized"` (fons crema).
+- `page.screenshot()` **ignora** `Emulation.setDeviceMetricsOverride`: per a un
+  DPR concret fes servir `cdp.send("Page.captureScreenshot")`.
+- Composició en un `<canvas>` del mateix Chromium damunt la finestra antiga
+  amb `globalCompositeOperation = "source-atop"` (respecta les cantonades
+  arrodonides); sortida WebP/JPEG amb `canvas.toDataURL`.
+- Amaga la barra de desplaçament (`scrollbar-width: none`) o surt a `og.jpg`.
+- Mapa conceptual: «Desplegar / plegar tot» → «Ajustar a la vista» → «Reduir»
+  (si no, els controls tapen nodes). El cronòmetre del peu surt a 0.0s si la
+  resposta simulada és instantània: afegeix ~400ms de retard.
+- Animació del hero: fotogrames amb `Page.captureScreenshot` (JPEG) de l'article
+  i de la barra lateral, cursor dibuixat al canvas, i `ffmpeg` amb `concat` +
+  `libwebp_anim` (`-fps_mode vfr -loop 3`). Per clicar un enllaç que es parteix en
+  dues línies, clica el centre de l'**última** `getClientRects()`; el centre del
+  `boundingBox` cau al forat entre línies i el clic no fa res.
+- El bucle és finit (3 voltes) perquè s'aturi al darrer fotograma (accessibilitat);
+  pesa ~1,5 MB, força més que l'estàtic (~200 KB) i el hero és la imatge principal.
 
 ---
 
