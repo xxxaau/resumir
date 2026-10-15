@@ -288,7 +288,7 @@ sips -z 800 1280 input.png --out output.png
 Les captures de les botigues **no es versionen** al repo (`icons/` només conté les
 icones de l'extensió). Desa-les fora de git (p. ex. `temp/`, que és a `.gitignore`).
 Les captures del web viuen a `web/src/shots/` (la barra lateral s'hi captura a ≥500px perquè
-la barra d'eines no es parteixi en dues files; recepta a `LEARNINGS.md`, sessió 2026-10-15)
+la barra d'eines no es parteixi en dues files; `npm run web:captures` i `npm run web:hero`; detalls a `LEARNINGS.md`, sessió 2026-10-15)
 i les de les guies d'usuari a
 `docs/user-guide/img/`.
 

@@ -54,8 +54,9 @@ tenir el mateix `top` (el script falla si no). Afecta `hero.webp`, `mapa.webp` i
 ## Com es regeneren les captures (el generador antic es va esborrar)
 
 `scripts/take-screenshots.mjs` es va treure (cap ús) i les captures actuals no
-tenien generador. Recepta que va funcionar (no és al repo; es va fer a una
-carpeta temporal):
+tenien generador. Ara hi ha `npm run web:captures` (mapa.webp + og.jpg) i
+`npm run web:hero` (hero.webp animat; necessita `ffmpeg` amb `libwebp_anim`, o la
+variable `FFMPEG`), sobre `scripts/web-captures-lib.mjs`. Recepta que hi ha al darrere:
 
 - `npm ci`, `npm run dev:chromium` i `npx playwright install chromium` (Chrome
   estable ignora `--load-extension`; cal el Chromium de Playwright).

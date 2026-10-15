@@ -69,3 +69,6 @@ tests/pdf-flow-*.png
 test-results/
 playwright-report/
 .Rhistory
+
+# Captures temporals (carpeta de treball, no es versiona)
+tmp/
