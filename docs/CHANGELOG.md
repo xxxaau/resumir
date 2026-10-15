@@ -7,6 +7,11 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 
 ## [Sense publicar]
 
+### Canviat
+- **Lletra del resum adaptable:** en ampliar la barra lateral, la lletra creix (de 15 a 20 px) i la
+  columna de text s'ajusta a l'amplada, sense deixar un buit a la dreta ni allargar massa les línies.
+  També segueix l'amplada amb la lectura biònica activada.
+
 ### Arreglat
 - **La clau d'API ja no fa saltar el gestor de contrasenyes:** el navegador deixa d'oferir desar-la
   com a contrasenya quan surts de la configuració.
