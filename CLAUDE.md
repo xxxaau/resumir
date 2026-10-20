@@ -83,6 +83,21 @@ es duplica aquí per evitar que les dues còpies es desincronitzin.
   ser per a l'usuari final; el que és intern es marca `(dev)` i el detall menor `(minor)`.
   `npm test` falla si no està sincronitzat.
 
+## Docs de cara al públic: alinear a cada versió
+
+Abans de cada release, i en acabar qualsevol canvi visible per a l'usuari, revisa que
+**quatre superfícies** diguin el mateix que el codi (només `npm test` vigila la 2a):
+
+1. `README.md` (llista de funcionalitats, instal·lació, privadesa, dreceres).
+2. «Sobre l'extensió» (`options/settings.html`, regenerat del CHANGELOG).
+3. `docs/CHANGELOG.md` (entrada per a l'usuari final de cada canvi).
+4. El **web** (`web/src/*.njk`: funcionalitats, privadesa, instal·lació, navegadors) i
+   `docs/MARKETS-COPY.md` (What's New i textos de botiga).
+
+Una funcionalitat nova no està acabada fins que surt a aquestes superfícies. Si un
+canvi toca privadesa o permisos, també `docs/PRIVACY_POLICY.md`. Checklist a
+`docs/RELEASE-PROCESS.md` (secció «PRE-RELEASE»).
+
 ## Referències
 
 - Context tècnic i arquitectura: `docs/DEV-CONTEXT.md`

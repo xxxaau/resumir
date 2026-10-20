@@ -266,6 +266,7 @@ PRE-RELEASE:
 [ ] Main branch net (git status clean)
 [ ] Revisar fitxers esborrables abans del bump (p. ex. buidar tmp/ —captures compartides—, artefactes de build antics)
 [ ] CHANGELOG.md actualitzat i «Sobre l'extensió» regenerada (`node scripts/update-changelog-html.mjs`; `npm test` ho vigila)
+[ ] README.md, web (`web/src/*.njk`) i MARKETS-COPY.md (What's New) diuen el mateix que el codi: funcionalitats, privadesa, navegadors, dreceres (només el CHANGELOG/«Sobre l'extensió» tenen test; la resta es revisa a mà)
 [ ] Totes les features tested
 [ ] npm run check → 0 errors
 [ ] npm audit --omit=dev → 0 vulnerabilities
