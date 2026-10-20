@@ -27,7 +27,7 @@ L'inventari complet amb categories i fonts de veritat és a
 
 ### Marca, store i release
 - **COMUNICACIO.md** · **MARKETS-COPY.md** · **listing-texts.md** ·
-  **CHROME-STORE.md** · **RELEASE-PROCESS.md** · **SUBMISSION-CHECKLIST.md** ·
+  **RELEASE-PROCESS.md** · **SUBMISSION-CHECKLIST.md** ·
   **SCREENSHOTS-GUIDE.md**
 
 ### Manteniment i comunitat

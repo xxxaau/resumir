@@ -1,6 +1,6 @@
 # Screenshots Guide — Captura i Optimització
 
-Guia pràctica per a crear screenshots de qualitat professional per a Firefox Add-ons i Chrome Web Store.
+Guia pràctica per a crear screenshots de qualitat professional per a Firefox Add-ons.
 
 > **Set vigent (v2.7.0):** el set de captures i els seus textos es defineixen a
 > [`MARKETS-COPY.md` §6](MARKETS-COPY.md) (font única): **5 captures** — 1) resum amb cites
@@ -22,10 +22,7 @@ Guia pràctica per a crear screenshots de qualitat professional per a Firefox Ad
 | **Nombre** | 5 screenshots (set vigent a MARKETS-COPY §6) |
 | **Aspect ratio** | 16:10 (1280÷800 = 1.6) |
 
-### Chrome Web Store
-
-| Aspect | Especificació |
-|--------|--------------|
+--------|--------------|
 | **Resolució** | 1280×800 pixels (OBLIGATORI) |
 | **Format** | PNG, JPG |
 | **Mida màxima** | 5 MB per fitxer |
@@ -229,7 +226,7 @@ English:
    - ❌ Cons: Crop manual potser
 
 2. **Extensions:**
-   - "Nimbus Screenshot" (Chrome Web Store)
+   - "Nimbus Screenshot"
    - "FireShot" (Firefox + Chrome)
 
 ### Generic Tools
@@ -301,12 +298,6 @@ i les de les guies d'usuari a
 2. Vés a Edit › Add images
 3. Upload les 5 PNG/JPG (1280×800 cada)
 4. **Orden important:** Mostren en aquest ordre als llistats
-
-### Chrome Web Store
-1. Accedir a chrome.google.com/webstore/devconsole
-2. Vés a Store listing › Images
-3. Upload les 5 screenshots
-4. **CWS reordena per preview** (primera com a hero)
 
 ---
 

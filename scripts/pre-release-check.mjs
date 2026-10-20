@@ -16,6 +16,7 @@ import { resolve, dirname, relative, extname, posix } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 import { inflateRawSync } from "zlib";
+import { extractReleaseNotes } from "./changelog-lib.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -295,8 +296,8 @@ check("CHANGELOG: conté entrada per a la versió actual", () => {
     const pkg  = readJson(resolve(root, "package.json"));
     const ver  = pkg.version;
     const changelog = readText(resolve(root, "docs/CHANGELOG.md"));
-    if (!changelog.includes(`## [${ver}]`)) {
-        throw new Error(`docs/CHANGELOG.md no té entrada '## [${ver}]'. Afegeix-la abans de publicar.`);
+    if (extractReleaseNotes(changelog, ver) === null) {
+        throw new Error(`docs/CHANGELOG.md no té la capçalera exacta '## [${ver}] - AAAA-MM-DD' (guionet ASCII i data ISO; sinó l'entrada no surt a «Sobre l'extensió»).`);
     }
     pass("CHANGELOG: conté entrada per a la versió actual");
 });

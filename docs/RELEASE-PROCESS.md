@@ -9,7 +9,6 @@ Guia pas a pas per a lançar una nova versió de **Resumir contingut** a producc
 - ✅ Pre-release validation: `npm run prerelease` → tots els checks ✅
 - ✅ Access a [GitHub](https://github.com/xxxaau/resumir)
 - ✅ Access a [Firefox Add-ons (AMO)](https://addons.mozilla.org/)
-- ✅ Access a [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/developer/dashboard)
 
 ---
 
@@ -178,9 +177,14 @@ git push origin vX.Y.Z   # el tag dispara release.yml (build + Release amb ZIPs)
 1. Clicar **Upload New Version**
 2. Seleccionar `build/resumir-contingut-vX.Y.Z-firefox.zip`
 3. Clicar **Continue**
+4. AMO demana el **codi font a cada pujada** (el bundle va minificat): adjunta
+   `build/resumir-source-vX.Y.Z.zip` (el crea la CI i va adjunt a la GitHub Release; en local:
+   `npm run release:source`). Les instruccions de build són a [BUILD.md](BUILD.md).
+5. «Notes per al revisor» / novetats: copia la sortida de `npm run release:notes` (també surt
+   sola en acabar `npm version`).
 
 #### 5.3 Revisar automàtic
-- **Source code review** (si primer upload): 5-10 dies
+- **Source code review**: cada pujada porta el codi font; la primera pot trigar 5-10 dies
 - **Automated review** (updates): ~30 minuts
 - **Manual review**: ~2-3 hores (si changes criticals)
 
@@ -188,32 +192,6 @@ git push origin vX.Y.Z   # el tag dispara release.yml (build + Release amb ZIPs)
 Una vegada aprovat, es publica automàticament als usuaris via AMO.
 
 **Status:** Monitoritzar notificacions AMO per email
-
-### Fase 6: Submissió a Chrome Web Store (10-15 min)
-
-> ⚠️ **Procés futur:** avui l'extensió **no és al Chrome Web Store**; Chromium es
-> distribueix només amb el ZIP de la GitHub Release (vegeu README). Salta aquesta fase
-> fins que es publiqui al CWS.
-
-Veure [CHROME-STORE.md](CHROME-STORE.md) per a detalls complets.
-
-#### 6.1 Accedir al dashboard
-1. [chrome.google.com/webstore/developer/dashboard](https://chrome.google.com/webstore/developer/dashboard)
-2. Seleccionar "Resumir contingut"
-
-#### 6.2 Pujar nova versió
-1. Clicar **Upload new package**
-2. Seleccionar `build/resumir-contingut-vX.Y.Z-chromium.zip`
-
-#### 6.3 Actualitzar metadades (si cal)
-- Screenshots (si canviat UI)
-- Description (si canviat funcionalitats)
-- Release notes (copiar a mà de MARKETS-COPY.md; el CWS no llegeix el CHANGELOG)
-
-#### 6.4 Submit for Review
-1. Clicar **Submit for review**
-2. Acepta termes
-3. **Status:** "Pending Review" (~1-3 dies)
 
 ---
 
@@ -226,8 +204,7 @@ Veure [CHROME-STORE.md](CHROME-STORE.md) per a detalls complets.
 | Commit & Tag | 5 min | Git |
 | GitHub Push | 5 min | Git |
 | AMO Submissió | 15 min + 30 min review | Automàtic |
-| CWS Submissió | 15 min + 1-3 dies review | Automàtic |
-| **TOTAL** | **~1.5 hores + 1-3 dies** | — |
+| **TOTAL** | **~1.5 hores** | — |
 
 ---
 
@@ -305,10 +282,9 @@ DURING RELEASE:
 
 POST-RELEASE:
 [ ] Verificar GitHub release created automatically
-[ ] Submitir a AMO (Upload new version)
-[ ] Submitir a CWS (Upload new package) — només quan es publiqui al CWS (Fase 6)
+[ ] Submitir a AMO (Upload new version + ZIP del codi font; novetats: `npm run release:notes`)
 [ ] Monitorizar email per a approvals
-[ ] Completar «Novetats de la versió» a la GitHub Release (RELEASE-NOTES-TEMPLATE.md, a partir de la secció `## [X.Y.Z]` del CHANGELOG)
+[ ] Revisar la GitHub Release: les «Novetats» es generen soles del CHANGELOG (`release.yml`)
 [ ] Regenerar les carpetes dev: npm run dev (build_firefox_dev/ i build_chromium_dev/ a la versió nova; evita carregar codi/versió vells als navegadors).
 ```
 
@@ -319,7 +295,6 @@ POST-RELEASE:
 - **Issues:** [github.com/xxxaau/resumir/issues](https://github.com/xxxaau/resumir/issues)
 - **Author:** [sergi@xaudiera.xyz](mailto:sergi@xaudiera.xyz)
 - **AMO Help:** [support.mozilla.org](https://support.mozilla.org)
-- **CWS Help:** [support.google.com/chromewebstore](https://support.google.com/chromewebstore)
 
 ---
 

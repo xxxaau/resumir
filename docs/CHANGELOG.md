@@ -19,6 +19,12 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   transcripció sigui automàtica) i cada cita té el minut i segon clicables.
 - **Fils de Hacker News:** una cita de l'article enllaçat obre l'article amb la frase ressaltada.
 
+### Canviat (dev)
+- Procés de release: les novetats de la versió es generen del CHANGELOG (`npm run release:notes`,
+  també en acabar `npm version` i a la GitHub Release), la capçalera de versió es valida amb format
+  exacte i el ZIP del codi font per a AMO s'adjunta a cada release. (dev)
+- Chrome Web Store descartat: retirats els seus docs i la prova manual del PDF local. (dev)
+
 ## [2.7.1] - 2026-10-14
 
 ### Arreglat

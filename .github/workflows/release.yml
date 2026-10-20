@@ -46,24 +46,38 @@ jobs:
           unzip -q "build/resumir-contingut-${GITHUB_REF_NAME}-firefox.zip" -d build/lint-firefox
           npx --yes web-ext@10.7.0 lint --source-dir build/lint-firefox
 
+      - name: ZIP del codi font (AMO el demana a cada pujada)
+        run: npm run release:source
+
+      - name: Notes de la release (del CHANGELOG)
+        run: |
+          {
+            cat <<'EOF'
+          ## Instal·lació
+
+          ### Firefox
+          L'extensió es distribueix via Mozilla Add-ons:
+          https://addons.mozilla.org/en-US/firefox/addon/resumir
+
+          ### Chrome / Edge / Brave
+          1. Baixa el fitxer `resumir-contingut-vX.Y.Z-chromium.zip` dels fitxers adjunts
+          2. Descomprimeix-lo en una carpeta
+          3. Obre `chrome://extensions`, activa el «Mode de desenvolupador»
+          4. Fes clic a «Carrega extensió desempaquetada» i selecciona la carpeta
+
+          ---
+
+          ## Novetats de la versió
+          EOF
+            node scripts/release-notes.mjs --out build/novetats.md
+            cat build/novetats.md
+          } | sed -e "s/vX.Y.Z/${GITHUB_REF_NAME}/" > build/release-body.md
+          cat build/novetats.md
+
       - name: Crear GitHub Release amb els ZIPs
         uses: softprops/action-gh-release@v3
         with:
-          files: build/resumir-contingut-*.zip
-          body: |-
-            ## Instal·lació
-
-            ### Firefox
-            L'extensió es distribueix via Mozilla Add-ons:
-            https://addons.mozilla.org/en-US/firefox/addon/resumir
-
-            ### Chrome / Edge / Brave
-            1. Baixa el fitxer `resumir-contingut-${{ github.ref_name }}-chromium.zip` dels fitxers adjunts
-            2. Descomprimeix-lo en una carpeta
-            3. Obre `chrome://extensions`, activa el «Mode de desenvolupador»
-            4. Fes clic a «Carrega extensió desempaquetada» i selecciona la carpeta
-
-            ---
-
-            ## Novetats de la versió
-          generate_release_notes: true
+          files: |
+            build/resumir-contingut-*.zip
+            build/resumir-source-*.zip
+          body_path: build/release-body.md

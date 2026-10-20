@@ -7,7 +7,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseChangelog, generateHtml, mdInlineToHtml } from "../scripts/changelog-lib.mjs";
+import { parseChangelog, generateHtml, mdInlineToHtml, extractReleaseNotes } from "../scripts/changelog-lib.mjs";
 
 const MD = [
     "# Changelog",
@@ -102,4 +102,25 @@ test("historial de canvis de la configuració - està sincronitzat amb docs/CHAN
     assert.equal(norm(block), norm(generateHtml(parseChangelog(md))), "«Sobre l'extensió» no reflecteix el CHANGELOG");
     const top = parseChangelog(md)[0].version;
     assert.ok(block.includes(`v${top}`), `la versió més nova (v${top}) ha de ser a «Sobre l'extensió»`);
+});
+
+// Notes de release (GitHub Release / AMO): només el que veu l'usuari, i la
+// capçalera ha de tenir el format exacte (si no, la versió queda invisible).
+test("extractReleaseNotes - agafa la secció de la versió, amb continuacions, sense (dev)/(minor)", () => {
+    const notes = extractReleaseNotes(MD, "2.0.0");
+    assert.match(notes, /^### Afegit/);
+    assert.match(notes, /ara se n'extreu també el contingut de l'article\n {2}i no només els comentaris\./);
+    assert.match(notes, /Segon canvi simple/);
+    assert.doesNotMatch(notes, /Corregit|UNTRUSTED|CI/);
+    assert.doesNotMatch(notes, /1\.9\.0|sense secció/);
+});
+
+test("extractReleaseNotes - una capçalera amb guió llarg o sense data no compta (null)", () => {
+    assert.equal(extractReleaseNotes("## [2.1.0] \u2013 2026-10-20\n### Afegit\n- x\n", "2.1.0"), null);
+    assert.equal(extractReleaseNotes("## [2.1.0]\n### Afegit\n- x\n", "2.1.0"), null);
+    assert.equal(extractReleaseNotes(MD, "9.9.9"), null);
+});
+
+test("extractReleaseNotes - 2.1.0 no coincideix amb 2.1.00 ni amb 2x1x0 (punts literals)", () => {
+    assert.equal(extractReleaseNotes("## [2x1x0] - 2026-10-20\n### A\n- x\n", "2.1.0"), null);
 });

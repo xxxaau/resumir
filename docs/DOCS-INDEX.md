@@ -38,7 +38,7 @@ Tres categories:
 | `docs/BUILD.md` | Com compilar i empaquetar | Canvia el build, els scripts npm o els requisits |
 | `docs/CONTRIBUTING.md` | Guia de contribució | Canvia el flux de contribució o de tests |
 | `docs/SECURITY.md` | Política de seguretat i permisos | Canvien permisos, CSP o vendors |
-| `docs/PRIVACY_POLICY.md` | Tractament de dades (requisit AMO/CWS) | Canvia què es desa/envia o els permisos |
+| `docs/PRIVACY_POLICY.md` | Tractament de dades (requisit AMO) | Canvia què es desa/envia o els permisos |
 | `docs/STORAGE_ISOLATION.md` | Arquitectura d'aïllament de storage | Canvia el model de storage o el mode DEV/prod |
 | `docs/CREAR-PLUGIN.md` | Guia completa (CA) per crear un plugin | Canvia el sistema de plugins / passos |
 | `docs/CONCEPTMAP-FEATURES.md` | Disseny del mapa conceptual | Canvia el renderitzador/funcions del mapa |
@@ -47,8 +47,7 @@ Tres categories:
 | `docs/user-guide/API-KEY-GOOGLE.md` | Guia d'usuari: obtenir la clau d'API | Canvia el flux d'aistudio o de configuració |
 | `docs/COMUNICACIO.md` | Veu de marca i pla de comunicació (**font del to**) | Redefineixes el missatge o l'inventari de funcions |
 | `docs/MARKETS-COPY.md` | Copy per a les stores (**font única**) | Canvia el copy públic |
-| `docs/listing-texts.md` | Textos de listing AMO/CWS | Canvia el copy de listing |
-| `docs/CHROME-STORE.md` | Procediment de publicació al CWS | ⚠️ Procés futur (avui Chromium només via GitHub Releases) |
+| `docs/listing-texts.md` | Textos de listing AMO | Canvia el copy de listing |
 | `docs/RELEASE-PROCESS.md` | SOP de release | Canvia el flux de release |
 | `docs/SUBMISSION-CHECKLIST.md` | Checklist de submissió | ⚠️ Revisar que segueixi alineada amb RELEASE-PROCESS.md a cada release |
 | `docs/SCREENSHOTS-GUIDE.md` | Especificació de captures | Canvia el set de captures |

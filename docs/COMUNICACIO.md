@@ -94,7 +94,6 @@ carta de presentació). Estratègia d'idioma: **català primer, anglès després
 - Versió EN del web (després de l'i18n de la UI, vegeu BACKLOG).
 - Comunitat Obsidian (fòrum, Discord) amb l'angle PKM.
 - «Show HN» a Hacker News i Product Hunt.
-- Valorar publicació al Chrome Web Store (avui només GitHub Releases).
 
 ### Mesura d'èxit (credibilitat, no volum)
 
@@ -131,4 +130,4 @@ Per evitar que el copy prometi coses que no hi són (o n'ometi):
   + accessibilitat WCAG.
 - Firefox + Chrome/Edge/Brave (MV3). Cal API key gratuïta de Google Gemini.
 - NO té: OCR, suport de documents Office online, plugins de tercers, i18n (al
-  backlog), publicació al Chrome Web Store.
+  backlog); Chromium només via GitHub Releases (el Chrome Web Store està descartat).

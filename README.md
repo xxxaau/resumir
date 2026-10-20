@@ -64,7 +64,7 @@ L'extensió es distribueix **exclusivament** via Mozilla Add-ons:
 
 ### Chrome / Edge / Brave (142+)
 
-L'extensió **no està al Chrome Web Store**. Per instal·lar-la:
+L'extensió **no es publica al Chrome Web Store** (descartat). Per instal·lar-la:
 
 1. Ves a la secció **Releases** del GitHub:
    https://github.com/xxxaau/resumir/releases
@@ -106,7 +106,7 @@ Resumir existeix gràcies a aquests projectes open source, que mereixen tot el c
 | [pdf.js](https://github.com/mozilla/pdf.js) | Mozilla | Apache-2.0 | La lectura de PDFs al navegador |
 | [markmap](https://markmap.js.org/) + [D3](https://d3js.org/) | markmap team / Mike Bostock | MIT / ISC | La inspiració del mapa conceptual (avui substituïts per un renderitzador SVG propi, però en van ser la llavor) |
 
-I en el desenvolupament: [esbuild](https://esbuild.github.io/), [ESLint](https://eslint.org/), [Playwright](https://playwright.dev/), [jsdom](https://github.com/jsdom/jsdom), [c8](https://github.com/bcoe/c8) i [PDFKit](https://pdfkit.org/).
+I en el desenvolupament: [esbuild](https://esbuild.github.io/), [ESLint](https://eslint.org/), [Playwright](https://playwright.dev/), [jsdom](https://github.com/jsdom/jsdom) i [c8](https://github.com/bcoe/c8).
 
 Les versions exactes i els hashes de verificació són a [`VENDORS.md`](VENDORS.md).
 

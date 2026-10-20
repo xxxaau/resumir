@@ -29,7 +29,7 @@ npm run build
 
 This produces:
 - `build/resumir-contingut-vX.Y.Z-firefox.zip` — submit to AMO
-- `build/resumir-contingut-vX.Y.Z-chromium.zip` — published on GitHub Releases (not on the Chrome Web Store today)
+- `build/resumir-contingut-vX.Y.Z-chromium.zip` — published on GitHub Releases (not on the Chrome Web Store, which is ruled out)
 
 ## AMO submission note
 

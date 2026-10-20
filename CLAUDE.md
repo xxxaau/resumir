@@ -34,6 +34,15 @@ es duplica aquí per evitar que les dues còpies es desincronitzin.
   són generats des de `manifest.base.json` + patches amb
   `npm run manifests:gen`.
 
+## Publicació: sempre amb confirmació
+
+- **Mai fer `git push` del tag de versió, ni pujar res a AMO o crear/editar una
+  GitHub Release, sense confirmació explícita de l'usuari en aquell moment**, encara
+  que s'hagi autoritzat commit+push en altres contexts. Pujar el tag dispara
+  `release.yml` i publica; l'aprovació d'una release no s'estén a la següent.
+- AMO demana el codi font a cada pujada: `npm run release:source` (o el ZIP adjunt
+  a la GitHub Release). Les novetats per enganxar-hi: `npm run release:notes`.
+
 ## Abans de donar per fet un canvi
 
 - `npm test` i `npm run lint` han de passar (0 warnings).

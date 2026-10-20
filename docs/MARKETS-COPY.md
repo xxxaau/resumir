@@ -105,18 +105,17 @@ de Google Gemini, i només quan tu ho demanes.
 
 ### 5. Nota de versió (What's New)
 
-Esborrany per a la **propera versió** (la xifra l'assigna el pas de release;
-els canvis ja són a `main`). Ha de coincidir amb «Sobre l'extensió» (vegeu
-`docs/CHANGELOG.md`).
+Per a la **darrera versió publicada** (`npm run release:notes` imprimeix la secció
+completa del CHANGELOG, a punt per enganxar). Ha de coincidir amb «Sobre l'extensió»
+(vegeu `docs/CHANGELOG.md`). Text curt per a AMO (v2.7.2):
 
 ```
 Resumir — novetats
 
-• Cites clicables: clica una cita i la pàgina la ressalta en groc, com un Ctrl+F.
-• Cada resum diu de quant text parteix i amb quin model s'ha fet.
-• Marques de temps de YouTube i números de pàgina de PDF clicables.
-• Nova pàgina «Dades i privadesa» a la configuració, i aspecte Flexoki.
-• El botó «Atura» ara atura de veritat, i la transcripció automàtica de YouTube és més fiable.
+• La lletra del resum creix amb l'amplada de la barra lateral, també amb la lectura biònica.
+• Als vídeos de YouTube, la secció «Cites» porta minut i segon clicables, també amb transcripció automàtica.
+• Als fils de Hacker News, una cita de l'article enllaçat obre l'article amb la frase ressaltada.
+• La clau d'API ja no fa saltar el gestor de contrasenyes.
 ```
 
 ---
@@ -158,7 +157,7 @@ Captura 5 — Dades i privadesa:
 
 ## 🌐 CHROME — Instal·lació manual
 
-L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrome, Edge o Brave, cal instal·lar-la manualment:
+L'extensió **no es publica al Chrome Web Store**. Per utilitzar-la a Chrome, Edge o Brave, cal instal·lar-la manualment:
 
 1. Baixa el fitxer `resumir-contingut-vX.X.X-chromium.zip` de la secció **Releases** del GitHub:
    https://github.com/xxxaau/resumir/releases
@@ -181,7 +180,7 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 [ ] Descripció llarga dins del límit (~1.000 / 3.000)
 [ ] Enllaços funcionen (GitHub, issues, privacitat)
 [ ] Permisos justificats (⚠️ <all_urls> ara és REQUERIT — text actualitzat)
-[ ] Release notes actualitzades (inclou avís de re-aprovació de permisos)
+[ ] Release notes actualitzades (`npm run release:notes`)
 [ ] 5 captures de pantalla 1280×800 PNG
 [ ] Textos de les captures preparats
 [ ] Català correcte (sense errors)
@@ -194,4 +193,4 @@ L'extensió **no està publicada al Chrome Web Store**. Per utilitzar-la a Chrom
 
 **Última actualització:** 14 d'octubre de 2026
 **Versió:** 4.0 (copy més clar i curt; alineat amb docs/COMUNICACIO.md i «Sobre l'extensió»)
-**Status:** ✅ Llest per a la propera submissió (pendent de número de versió)
+**Status:** ✅ Alineat amb la v2.7.2

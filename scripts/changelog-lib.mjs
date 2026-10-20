@@ -155,3 +155,39 @@ export function generateHtml(versions) {
         `${ind}</details>`,
     ].join("\n");
 }
+
+/**
+ * Notes de la versió en Markdown (el que va a la GitHub Release i a AMO):
+ * la secció `## [X.Y.Z] - AAAA-MM-DD` del CHANGELOG sense les entrades
+ * internes `(dev)` / `(minor)`. Retorna null si la capçalera no existeix amb
+ * el format exacte (un guió llarg o una data absent la fan invisible).
+ */
+export function extractReleaseNotes(md, version) {
+    const lines = md.split("\n");
+    const header = new RegExp(`^## \\[${version.replace(/\./g, "\\.")}\\] - \\d{4}-\\d{2}-\\d{2}\\s*$`);
+    const start = lines.findIndex(l => header.test(l));
+    if (start === -1) return null;
+    let end = lines.findIndex((l, i) => i > start && l.startsWith("## "));
+    if (end === -1) end = lines.length;
+
+    const out = [];
+    let section = [];
+    let item = null;
+    const flushItem = () => { if (item) { section.push(item.join("\n")); item = null; } };
+    const flushSection = (title) => {
+        flushItem();
+        const kept = section.filter(it => !isHidden(it.replace(/\s*\n\s*/g, " ")));
+        if (title && kept.length) out.push(`### ${title}`, ...kept, "");
+        section = [];
+    };
+    let title = null;
+    for (const line of lines.slice(start + 1, end)) {
+        const sec = line.match(/^### (.+)/);
+        if (sec) { flushSection(title); title = sec[1]; continue; }
+        if (/^- /.test(line)) { flushItem(); item = [line]; continue; }
+        if (item && /^\s+\S/.test(line)) { item.push(line); continue; }
+        flushItem();
+    }
+    flushSection(title);
+    return out.join("\n").trim();
+}

@@ -40,6 +40,9 @@
     "manifests:gen": "node scripts/merge-manifest.mjs firefox manifest.json && node scripts/merge-manifest.mjs chromium manifest.chromium.json",
     "version:sync": "node scripts/bump-version.mjs",
     "version": "node scripts/bump-version.mjs && node scripts/update-changelog-html.mjs && git add manifest.base.json manifest.json manifest.chromium.json options/settings.html docs/CHANGELOG.md",
+    "postversion": "node scripts/release-notes.mjs",
+    "release:notes": "node scripts/release-notes.mjs",
+    "release:source": "mkdir -p build && git archive --format=zip --prefix=resumir-source/ -o build/resumir-source-v$npm_package_version.zip HEAD",
     "prerelease": "node scripts/pre-release-check.mjs",
     "vendor:verify": "node scripts/verify-vendor.mjs",
     "models:check": "node scripts/update-models-check.mjs",
@@ -56,8 +59,7 @@
     "esbuild": "^0.27.3",
     "eslint": "^9.18.0",
     "globals": "^15.14.0",
-    "jsdom": "^29.0.1",
-    "pdfkit": "^0.18.0"
+    "jsdom": "^29.0.1"
   },
   "allowScripts": {
     "esbuild@0.27.3": true,

@@ -120,11 +120,10 @@ Pendent, per prioritat:
 
 - **Provar el ZIP real descomprimit** amb `smoke-e2e.mjs` (ara prova `build_chromium_dev`, sense minificar) i fer que `findChromium` funcioni fora de macOS.
 - **Prova de fum de Firefox real** (`scripts/smoke-firefox.mjs`): converteix en script el mètode de BiDi de `LEARNINGS.md` (sidebar, cites, YouTube/HN amb Gemini simulat).
-- **Notes de release generades** de la secció `## [X.Y.Z]` del CHANGELOG (`changelog-lib.mjs`), tant la GitHub Release com la nota de `MARKETS-COPY.md` §5.
-- **Pujada a AMO automatitzada** (`web-ext sign --channel=listed` amb secrets JWT): verificar abans si suporta pujar el codi font i les notes per al revisor.
+- **Nota de `MARKETS-COPY.md` §5 generada** de la secció `## [X.Y.Z]` del CHANGELOG (la GitHub Release i `npm run release:notes` ja ho fan).
+- **Pujada a AMO automatitzada** (`web-ext sign --channel=listed` amb secrets JWT): AMO exigeix el codi font a cada pujada (`npm run release:source`); verificar si l'API permet adjuntar-lo i les notes per al revisor.
 - **Seguretat de la cadena:** Dependabot (npm i github-actions) i accions fixades per SHA; `npm audit` també de devDeps (esbuild genera el codi publicat); Node 20 a la matriu de CI (`engines` diu >=20).
 - **Build determinista comprovat:** construir dues vegades a CI i comparar SHA-256 (BUILD.md diu «byte-identical»).
 - **Captures de botiga automàtiques** a partir del smoke e2e (les 5 de `MARKETS-COPY.md` §6, 1280×800).
-- **Decisions obertes:** si el Chrome Web Store continua sent futur (CHROME-STORE.md, COMUNICACIO.md); si es manté la prova manual del PDF local (`tests/e2e-pdf-local.mjs` + `generate-test-pdf.mjs` + `fixtures/hello.pdf` + devDep `pdfkit`).
 - **Petits:** `run-tests.mjs` fa `status || 0` (un procés mort per senyal surt com a passat); `eslint.config.mjs` ignora `scripts/**` i el bloc de regles per a `scripts/` no s'aplica mai; `build.mjs` té missatges amb caràcters corromputs.
 

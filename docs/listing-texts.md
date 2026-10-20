@@ -1,6 +1,6 @@
 # Store Listing Texts
 
-> Nota: el Chrome Web Store està ajornat (vegeu `CHROME-STORE.md`); les seccions CWS són per a ús futur. Avui només es publica a AMO.
+> Nota: el Chrome Web Store està descartat; les seccions «CWS» són històriques. Només es publica a AMO.
 
 Aligned with the value proposition in `docs/COMUNICACIO.md` (knowledge
 pipeline: capture → five lenses → consolidation; radical trust as the
@@ -91,7 +91,6 @@ the extension — this is expected and only happens once.
 
 | Store | Category |
 |-------|----------|
-| Chrome Web Store | Productivity |
 | Firefox Add-ons (AMO) | Productivity |
 
 ---
