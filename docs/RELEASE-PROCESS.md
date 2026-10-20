@@ -22,8 +22,8 @@ Guia pas a pas per a lançar una nova versió de **Resumir contingut** a producc
 # Verificar què canviarà
 git log origin/main..HEAD --oneline
 
-# Si cal, agrupar commits
-git rebase -i origin/main
+# (No agrupis commits amb `git rebase -i`: és interactiu i no es pot fer des de Claude Code;
+# els commits atòmics ja són la convenció.)
 ```
 
 #### 1.2 Decidir versió (Semantic Versioning)
@@ -99,7 +99,7 @@ grep '"name"' manifest.base.json
 > run 27414599296 — es va haver de moure el tag).
 
 ```bash
-npm version minor -m "chore: release v%s"  # o patch/major
+npm version X.Y.Z -m "chore: release v%s"  # X.Y.Z = versió de la capçalera del CHANGELOG
 
 # Aquesta comanda:
 # ✅ Actualitza package.json
@@ -250,8 +250,8 @@ git commit -m "fix: Critical bug description"
 git checkout main
 git merge hotfix/critical-bug
 
-# 5. Bump PATCH version
-npm version patch
+# 5. Bump PATCH version (versió explícita, la mateixa que la capçalera del CHANGELOG)
+npm version X.Y.Z -m "chore: release v%s"
 
 # 6. Build + submit (repetir Fase 2-6)
 ```
@@ -287,7 +287,7 @@ git commit -m "chore: Sync manifests after version bump"
 ```
 PRE-RELEASE:
 [ ] Main branch net (git status clean)
-[ ] Revisar fitxers esborrables abans del bump (p. ex. buidar temp/ —captures compartides—, artefactes de build antics)
+[ ] Revisar fitxers esborrables abans del bump (p. ex. buidar tmp/ —captures compartides—, artefactes de build antics)
 [ ] CHANGELOG.md actualitzat i «Sobre l'extensió» regenerada (`node scripts/update-changelog-html.mjs`; `npm test` ho vigila)
 [ ] Totes les features tested
 [ ] npm run check → 0 errors
@@ -298,7 +298,7 @@ PRE-RELEASE:
 DURING RELEASE:
 [ ] npm run prod (dev mode OFF)
 [ ] git commit -am "chore: prepara vX.Y.Z (mode PROD + CHANGELOG)" (tree net; npm version avorta si no)
-[ ] npm version X.Y.Z (syncs everything)
+[ ] npm version X.Y.Z -m "chore: release v%s" (el hook `version` sincronitza manifests + «Sobre l'extensió»)
 [ ] npm run build → 2 ZIPs < 4 MB
 [ ] npm run prerelease → tots els checks ✅
 [ ] git push origin main && git push origin vX.Y.Z (el tag ha de coincidir amb la versió; release.yml ho comprova)
@@ -308,7 +308,7 @@ POST-RELEASE:
 [ ] Submitir a AMO (Upload new version)
 [ ] Submitir a CWS (Upload new package) — només quan es publiqui al CWS (Fase 6)
 [ ] Monitorizar email per a approvals
-[ ] Update GitHub release description (copy CHANGELOG)
+[ ] Completar «Novetats de la versió» a la GitHub Release (RELEASE-NOTES-TEMPLATE.md, a partir de la secció `## [X.Y.Z]` del CHANGELOG)
 [ ] Regenerar les carpetes dev: npm run dev (build_firefox_dev/ i build_chromium_dev/ a la versió nova; evita carregar codi/versió vells als navegadors).
 ```
 
@@ -323,6 +323,6 @@ POST-RELEASE:
 
 ---
 
-**Última actualització:** 14 d'octubre de 2026 (revisat per a la release v2.7.0)  
+**Última actualització:** 14 d'octubre de 2026  
 **Versió:** 1.1  
 **Status:** ✅ Production Ready

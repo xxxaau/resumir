@@ -324,7 +324,8 @@ let systemPrompt = config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 if (isDeepDive) systemPrompt = config.deepDivePrompt || DEFAULT_DEEP_DIVE_PROMPT;
 else if (is<Plugin>) systemPrompt = config.<id>Prompt || DEFAULT_<PLUGIN>_PROMPT;
 
-// tag de contentType (cache + stats)
+// tag de contentType (cache + stats). Atenció: la mateixa cadena de ternaris existeix
+// a dos llocs de `sidebar/summary.js` (`requestedType` i `contentType`); actualitza-les totes dues
 const contentType = isConceptMap ? "conceptmap"
     : isAnki ? "anki"
     : is<Plugin> ? "<id>"

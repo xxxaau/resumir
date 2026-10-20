@@ -183,7 +183,7 @@ pestanya, que sovint és ambigu), normalitzat de la manera següent:
 ```js
 window.markmapNative = {
     parseMarkdownTree(text)        // → root { label, children, depth, fold }
-    createMindMap(svg, root, opts) // → { fit, rescale, setFold, setData, getRoot } (pan/zoom inclosos)
+    createMindMap(svg, root, opts) // → { fit, rescale, setFoldAll, setData, getRoot } (pan/zoom inclosos)
     exportToPNG(svg, filename, opts) // descarrega PNG del SVG renderitzat
     serializeToSVG(svg)            // → string SVG amb estils inline
 };

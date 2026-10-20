@@ -12,7 +12,7 @@ Sponsorships help cover:
 
 - Development time for new features and bug fixes
 - Infrastructure costs (CI/CD, testing)
-- Browser marketplace fees (AMO, Chrome Web Store)
+- Store fees (e.g. the Chrome Web Store developer registration, if it is published there)
 - Maintenance of documentation and community support
 
 ## Thank you

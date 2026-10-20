@@ -107,9 +107,6 @@ npm run dev
 
 # Make changes, test in browser...
 
-# Bump patch version (also regenerates manifests + updates settings.html changelog)
-npm version patch --no-git-tag-version
-
 # Verify everything is green
 npm run build
 npm run prerelease
@@ -121,7 +118,9 @@ npm run release
 npm run release:firefox
 npm run release:chromium
 
-# Commit, tag, push, GitHub release
+# La versió i el tag es creen amb `npm version X.Y.Z -m "chore: release v%s"`
+# (el hook `version` sincronitza manifests + settings.html); el push del tag
+# dispara release.yml. Procés complet: docs/RELEASE-PROCESS.md
 ```
 
 ### DEV safety

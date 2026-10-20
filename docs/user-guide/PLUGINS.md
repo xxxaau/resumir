@@ -85,7 +85,7 @@ exemple, amb el títol i l'enllaç de la font).
 
 ### Lectura biònica
 Posa en negreta l'inici de cada paraula per guiar la vista. Pots ajustar-ne la
-intensitat, la tipografia, la mida i l'interlineat, amb una vista prèvia.
+intensitat, la tipografia, la mida, el gruix i l'interlineat, amb una vista prèvia.
 
 ---
 

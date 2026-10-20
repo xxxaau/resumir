@@ -19,7 +19,7 @@ Guia pràctica per a crear screenshots de qualitat professional per a Firefox Ad
 | **Resolució** | 1280×800 pixels (OBLIGATORI) |
 | **Format** | PNG, JPG, JPEG |
 | **Mida màxima** | 5 MB per fitxer |
-| **Nombre** | 1-5 screenshots (recomanat 3) |
+| **Nombre** | 5 screenshots (set vigent a MARKETS-COPY §6) |
 | **Aspect ratio** | 16:10 (1280÷800 = 1.6) |
 
 ### Chrome Web Store
@@ -286,7 +286,7 @@ sips -z 800 1280 input.png --out output.png
 ### Organització al repo
 
 Les captures de les botigues **no es versionen** al repo (`icons/` només conté les
-icones de l'extensió). Desa-les fora de git (p. ex. `temp/`, que és a `.gitignore`).
+icones de l'extensió). Desa-les fora de git (p. ex. `tmp/`, que és a `.gitignore`).
 Les captures del web viuen a `web/src/shots/` (la barra lateral s'hi captura a ≥500px perquè
 la barra d'eines no es parteixi en dues files; `npm run web:captures` i `npm run web:hero`; detalls a `LEARNINGS.md`, sessió 2026-10-15)
 i les de les guies d'usuari a
@@ -297,15 +297,15 @@ i les de les guies d'usuari a
 ## 🚀 SUBMISSIÓ
 
 ### Firefox Add-ons (AMO)
-1. Accedir a developer.mozilla.org/firefox
+1. Accedir a addons.mozilla.org/developers/
 2. Vés a Edit › Add images
-3. Upload 3 PNG/JPG (1280×800 cada)
+3. Upload les 5 PNG/JPG (1280×800 cada)
 4. **Orden important:** Mostren en aquest ordre als llistats
 
 ### Chrome Web Store
-1. Accedir a developer.chrome.com/webstore
+1. Accedir a chrome.google.com/webstore/devconsole
 2. Vés a Store listing › Images
-3. Upload 3-5 screenshots
+3. Upload les 5 screenshots
 4. **CWS reordena per preview** (primera com a hero)
 
 ---
@@ -328,6 +328,6 @@ i les de les guies d'usuari a
 
 ---
 
-**Última actualització:** 19 de maig de 2026  
-**Versió:** 1.0  
+**Última actualització:** 20 d'octubre de 2026  
+**Versió:** 1.1  
 **Status:** ✅ Ready to capture

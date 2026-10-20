@@ -78,6 +78,9 @@ The **Resumir** extension is a privacy-first browser extension that summarizes w
 - `extractors.js` — Functions injected with `executeScript` (extraction, quote highlight)
 - `conceptmap.js` + `markmap-native.js` — Concept map (own SVG renderer)
 - `anki.js` — Anki cards plugin
+- `pdf-extract.js`, `pdf-viewer.js` / `pdf-viewer.html`, `pdf-zoom.js` — PDF extraction and own PDF viewer
+- `youtube-track-select.js` — YouTube caption-track selection
+- `conceptmap-filename.js`, `utils.js` — Helpers
 
 **Responsibilities**:
 - Display summaries to user
@@ -227,9 +230,8 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for details.
 - **Cache Invalidation**: Manual clear or time-based
 
 ### API Rate Limiting
-- Free tier: ~10–15 requests/minute
-- Paid tier: Higher limits
-- Fallback: User is notified and can retry
+- Quotes: those of the Google Gemini API (see Google's documentation; they change)
+- Fallback: if a model exceeds its quota, the next one is tried automatically (favourites and `fallback: true` models of `CURATED_MODELS`); if all fail, the user is notified
 
 ---
 

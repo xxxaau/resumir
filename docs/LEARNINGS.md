@@ -7,6 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
+- Revisió del procés de release (passos, capçalera del CHANGELOG, §8 superada) — Sessió 2026-10-20
 - Lletra responsiva de la barra lateral i captures/animació del web — Sessió 2026-10-15
 - YouTube SPA, timedtext, la targeta de Firefox, la lectura biònica i la prova a Firefox real — Sessió 2026-10-14
 - Fases B–E del pla UI/UX, revisió de prompts i prova de fum en navegador real — Sessió 2026-10-12
@@ -22,6 +23,30 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 - Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
 - Aprenentatges — Sessió v2.3.1+ (2026-06-05)
 - Aprenentatges — Sessió v2.2.10 (2026-05-22)
+
+---
+
+# Revisió del procés de release — Sessió 2026-10-20
+
+## La capçalera del CHANGELOG mal escrita falla en silenci
+`changelog-lib.mjs` exigeix `## [X.Y.Z] - AAAA-MM-DD` (guionet ASCII, data ISO). Amb un guió
+llarg (–) o sense data, la secció es tracta com «Sense publicar» i se salta: la versió nova no surt
+a «Sobre l'extensió» i ni `npm test` ni `prerelease` (que només mira `includes("## [X.Y.Z]")`) ho
+detecten. A més, cal passar `npm version X.Y.Z` explícit (no `patch`/`minor`): el tag el crea
+`npm version`, així que el risc no és que el tag no coincideixi, sinó que la capçalera i l'argument
+divergeixin.
+
+## §8 de la sessió anterior queda superada
+El «Workflow recomanat» (§8, més avall) té `npm run prod` duplicat i parla d'un pre-push hook i
+d'un stash del mode DEV: ja no apliquen (els fitxers versionats són sempre PROD). El procés vigent
+és `docs/RELEASE-PROCESS.md`; els passos: capçalera CHANGELOG → `update-changelog-html.mjs` →
+`npm run check` + `npm audit --omit=dev` → commit de preparació → `npm version X.Y.Z -m
+"chore: release v%s"` → build + prerelease + vendor:verify → verificar tag → push main + tag →
+AMO manual.
+
+## Pendent de confirmar
+AMO: el bundle de la barra lateral va minificat; potser cal adjuntar el codi font a **cada**
+pujada, no només a la primera (`RELEASE-PROCESS.md` §5.3 només ho diu del primer upload).
 
 ---
 

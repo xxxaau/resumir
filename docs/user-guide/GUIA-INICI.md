@@ -56,8 +56,8 @@ obrir l'**historial**.
 
 Obre-la amb l'engranatge (⚙️) de la barra lateral:
 
-- **General:** la clau d'API, el model i el tema (Flexoki clar, fosc o automàtic,
-  que segueix el sistema).
+- **General:** la clau d'API, el model i el tema (Sistema, Flexoki automàtic, Clar,
+  Fosc, Flexoki clar o Gris clar).
 - **Resum:** el format i la llargada del resum, i les instruccions si vols anar més
   enllà.
 - **Plugins:** quines eines surten a la barra i en quin ordre.

@@ -28,18 +28,14 @@ Cada carpeta té el seu storage; si tornes a carregar des d'una carpeta diferent
 
 ## Com Usar
 
-### 1️⃣ Canviar Mode (Sense Perdre Dades)
+### 1️⃣ DEV i PROD són instal·lacions separades
 
-**Abans de canviar de DEV a PROD (o viceversa):**
+No cal «canviar de mode»: `npm run dev` genera les carpetes DEV (`build_firefox_dev/`,
+`build_chromium_dev/`) i el PROD és el ZIP de release. Cada carpeta/ID té el seu storage.
+Abans de desinstal·lar o recarregar des d'una altra carpeta, fes backup:
 
-```powershell
-# Fer backup de les dades actuals
+```bash
 node scripts/backup-extension-data.mjs firefox dev   # Si estàs en DEV
-
-# Después canviar de mode
-npm run prod
-
-# L'extensió tindrà storage nou i aïllat
 ```
 
 ### 2️⃣ Fer Backup Manual
@@ -94,4 +90,4 @@ node scripts/backup-extension-data.mjs restore firefox-dev-2026-04-01T15-30-45 f
 
 ---
 
-**Aprovat**: 2026-04-01 | **Versió**: 2.1.0
+**Aprovat**: 2026-04-01

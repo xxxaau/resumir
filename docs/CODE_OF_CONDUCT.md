@@ -34,7 +34,7 @@ Aquest Codi de Conducta s'aplica en tots els espais de la comunitat, i també qu
 
 ## Aplicació
 
-Els casos de comportament abusiu, assetjador o d'altra manera inacceptable es poden comunicar als líders de la comunitat responsables de l'aplicació a través dels Issues de GitHub. Totes les queixes seran revisades i investigades de manera ràpida i justa.
+Els casos de comportament abusiu, assetjador o d'altra manera inacceptable es poden comunicar als líders de la comunitat responsables de l'aplicació a través dels Issues de GitHub o, si es vol confidencialitat, per correu a sergi@xaudiera.xyz. Totes les queixes seran revisades i investigades de manera ràpida i justa.
 
 ## Atribució
 

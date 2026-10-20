@@ -116,7 +116,7 @@ si es reprèn aquesta idea.
 
 ## Procés i publicació (idees de la revisió d'Opus, 2026-10-14)
 
-Ja fet: una sola via de release, tag = versió, `web-ext lint` del paquet real, llista de fitxers prohibits al ZIP, mode DEV en carpetes ignorades. Pendent, per prioritat:
+Pendent, per prioritat:
 
 - **Provar el ZIP real descomprimit** amb `smoke-e2e.mjs` (ara prova `build_chromium_dev`, sense minificar) i fer que `findChromium` funcioni fora de macOS.
 - **Prova de fum de Firefox real** (`scripts/smoke-firefox.mjs`): converteix en script el mètode de BiDi de `LEARNINGS.md` (sidebar, cites, YouTube/HN amb Gemini simulat).

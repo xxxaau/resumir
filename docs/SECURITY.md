@@ -49,7 +49,7 @@ A partir de la v2.3.0, l'extensió pot resumir PDFs amb capa de text mitjançant
   - Cap `eval()`, `Function()`, ni `innerHTML` sobre dades externes (verificat al codi).
   - pdf.js configurat amb `isEvalSupported: false`, `disableFontFace: true`, `useSystemFonts: false`.
   - Tot el text extret es passa a Gemini embolcallat amb `<UNTRUSTED_CONTENT>`.
-- **PDFs locals (`file://`) i HTTP:** No es descarreguen via `fetch` (la CSP no inclou `file:` ni `http:` per principi de mínim privilegi). L'usuari els selecciona manualment via el botó «Triar un PDF local» (`<input type="file">`) i el contingut es llegeix amb `FileReader`/`ArrayBuffer` sense cap accés de xarxa.
+- **PDFs locals (`file://`) i HTTP:** No es descarreguen via `fetch` (la CSP no inclou `file:` ni `http:` per principi de mínim privilegi). L'usuari els selecciona manualment via el botó «Triar un PDF de l'ordinador» (`<input type="file">`) i el contingut es llegeix amb `FileReader`/`ArrayBuffer` sense cap accés de xarxa.
 - **PDFs escanejats (sense capa de text):** No suportats (no s'incorpora OCR). Es retorna `[PDF-012]`.
 - **Worker pdf.js:** Carregat des de `vendor/pdf.worker.min.js` via `runtime.getURL()` (origen extensió, no remot).
 - **Hashes SHA-256 de binaris vendoritzats:** Verificats al PR i registrats a `scripts/verify-vendor.mjs` (`npm run vendor:verify`).

@@ -23,7 +23,7 @@ Guia completa per a publicar **Resumir contingut** al Chrome Web Store (CWS).
 Preparar les captures de pantalla (1280×800, JPG/PNG). El set vigent (5 captures) i els
 seus textos són a [`MARKETS-COPY.md` §6](MARKETS-COPY.md); com capturar-les, a
 [`SCREENSHOTS-GUIDE.md`](SCREENSHOTS-GUIDE.md). Les captures no es versionen al repo
-(desa-les fora de git, p. ex. a `temp/`).
+(desa-les fora de git, p. ex. a `tmp/`).
 
 ### Pas 2: Accedir al Developer Dashboard
 
@@ -164,7 +164,7 @@ npm run build
 
 ```bash
 # 1. Bump versió
-npm version minor  # o patch/major
+npm version X.Y.Z -m "chore: release v%s"  # vegeu RELEASE-PROCESS.md (arbre net i CHANGELOG `## [X.Y.Z] - AAAA-MM-DD`)
 
 # 2. Build
 npm run build
@@ -176,7 +176,7 @@ npm run build
 # (CWS mostrarà la nova versió als "What's new")
 
 # 5. Push a GitHub
-git push origin main --tags
+git push origin main && git push origin vX.Y.Z
 ```
 
 ### Changelog a CWS

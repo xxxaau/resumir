@@ -65,7 +65,7 @@ Objectiu principal: **credibilitat del projecte** (entitat pròpia, marca,
 carta de presentació). Estratègia d'idioma: **català primer, anglès després**
 (quan arribi l'i18n del backlog).
 
-### Fase 1 — Fonaments (projecte següent: el web propi)
+### Fase 1 — Fonaments (web propi: fet, vegeu `web/`)
 
 - Domini propi + web estàtic **en català**:
   - Hero amb el claim 1 + demo visual (GIF del mapa conceptual i del streaming).
@@ -130,5 +130,5 @@ Per evitar que el copy prometi coses que no hi són (o n'ometi):
 - Temes: sistema, Flexoki (automàtic), clar, fosc, Flexoki clar i gris clar
   + accessibilitat WCAG.
 - Firefox + Chrome/Edge/Brave (MV3). Cal API key gratuïta de Google Gemini.
-- NO té: OCR, suport de documents Office online, plugins propis, i18n (al
+- NO té: OCR, suport de documents Office online, plugins de tercers, i18n (al
   backlog), publicació al Chrome Web Store.

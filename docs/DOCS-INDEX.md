@@ -102,9 +102,9 @@ escrit a 3 docs mentre la suite real ja en tenia 293):
 - **Nombre de tests**: NO escriguis un número. Font real: `npm test`.
 - **Versió**: NO la fixis als docs de release/store. Font real:
   `package.json` / manifests.
-- **Model per defecte** (avui `gemini-3.1-flash-lite`): font real:
+- **Model per defecte**: font real:
   `DEFAULT_MODEL_ID` a `shared/models.js`.
-- **Versió de Node** (avui `>=20.0.0`): font real: `package.json`
+- **Versió de Node**: font real: `package.json`
   (`engines.node`).
 
 ## Pendents coneguts (no bloquejants)

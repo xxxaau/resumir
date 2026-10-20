@@ -89,7 +89,7 @@ Resumir necessita aquests permisos per funcionar:
    Per extreure el text net de les pàgines (Readability, YouTube, PDF)
 
 🔹 tabs
-   Per obtenir la URL i el títol de la pàgina (claus de la memòria cau)
+   Per llegir la URL i el títol de la pestanya activa i detectar canvis de pestanya o navegació (memòria cau, pestanyes per tipus i estat en repòs)
 
 🔹 menus
    Per afegir «Resumir aquesta pàgina» i «Resumir la selecció» al menú contextual

@@ -1,5 +1,7 @@
 # Store Listing Texts
 
+> Nota: el Chrome Web Store està ajornat (vegeu `CHROME-STORE.md`); les seccions CWS són per a ús futur. Avui només es publica a AMO.
+
 Aligned with the value proposition in `docs/COMUNICACIO.md` (knowledge
 pipeline: capture → five lenses → consolidation; radical trust as the
 values layer).
@@ -28,7 +30,7 @@ No server of ours, no telemetry, no account, no ads. Your API key stays in your 
 ### Requirements
 
 - A free Google Gemini API key from [Google AI Studio](https://aistudio.google.com/) — no credit card needed
-- Firefox 142+ or Chrome/Edge/Brave (Manifest V3)
+- Firefox 142+ or Chrome/Edge/Brave 142+ (Manifest V3)
 
 Resumir uses Readability.js and pdf.js from Mozilla (Apache-2.0).
 
@@ -61,7 +63,7 @@ Required to inject the content extraction script into the active tab to read pag
 Required to persist user settings (API key, theme, plugin configuration, model preferences) and the local summary cache. All data stays on the user's device.
 
 ### `tabs`
-Required to open the sidebar panel and to detect tab navigation (so the extension can show the cached badge when a previously summarized page is revisited).
+Required to read the URL and title of the active tab and to detect tab switches and navigation (cache keys, per-type tabs with saved summaries, and the idle state).
 
 ### `sidePanel` / `sidebar_action`
 Required to display the summary in the browser sidebar without opening a new tab or popup.

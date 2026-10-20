@@ -23,6 +23,13 @@ es duplica aquí per evitar que les dues còpies es desincronitzin.
 - Després de tocar codi de `sidebar/*.js` o `background.js`, torna a córrer
   `npm run dev` (o `dev:firefox` / `dev:chromium`) perquè les carpetes dev
   reflecteixin el codi actual (els navegadors no agafen canvis sols).
+- **Mai pujar la versió ni crear el tag a mà** (ni a `package.json` ni a
+  `manifest.base.json`): sempre `npm version X.Y.Z -m "chore: release v%s"`,
+  que via el hook `version` sincronitza manifests i «Sobre l'extensió» dins
+  del commit taggejat. La capçalera del CHANGELOG ha de ser exactament
+  `## [X.Y.Z] - AAAA-MM-DD` amb la mateixa X.Y.Z (si no, l'entrada no surt a
+  «Sobre l'extensió» i cap test ho detecta). Procés complet:
+  `docs/RELEASE-PROCESS.md`.
 - **Mai editar `manifest.json` ni `manifest.chromium.json` directament** —
   són generats des de `manifest.base.json` + patches amb
   `npm run manifests:gen`.

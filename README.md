@@ -62,7 +62,7 @@ L'extensió es distribueix **exclusivament** via Mozilla Add-ons:
 1. Visita [addons.mozilla.org/en-US/firefox/addon/resumir](https://addons.mozilla.org/en-US/firefox/addon/resumir/)
 2. Fes clic a «Afegir a Firefox»
 
-### Chrome / Edge / Brave
+### Chrome / Edge / Brave (142+)
 
 L'extensió **no està al Chrome Web Store**. Per instal·lar-la:
 

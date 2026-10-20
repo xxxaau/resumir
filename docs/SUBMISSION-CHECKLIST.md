@@ -21,7 +21,7 @@ Guia executiva de tots els artefactes, documentació i passos preparats per a su
 | Fitxer | Propòsit | Status |
 |--------|----------|--------|
 | [README.md](../README.md) | Overview del projecte | ✅ Complet |
-| [BUILD.md](BUILD.md) | Instructions build (node, npm, PowerShell) | ✅ Complet |
+| [BUILD.md](BUILD.md) | Instructions build (Node.js, npm) | ✅ Complet |
 | [SECURITY.md](SECURITY.md) | Política de seguretat i vulnerabilitats | ✅ Complet |
 | [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | Privacy policy (required by AMO/CWS) | ✅ Complet |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Guia contribucions, TDD requirements | ✅ Complet |
@@ -229,7 +229,7 @@ SCREENSHOTS:
 [ ] All in PNG/JPG format
 [ ] All < 5 MB each
 [ ] Captions (MARKETS-COPY.md §6)
-[ ] Desades fora de git (p. ex. temp/; no es versionen)
+[ ] Desades fora de git (p. ex. tmp/; no es versionen)
 
 DOCUMENTATION:
 [ ] BUILD.md accessible (per AMO requirement)
@@ -301,7 +301,7 @@ POST-SUBMISSION:
 ---
 
 **Document Version:** 1.1  
-**Last Updated:** 14 d'octubre de 2026 (alineat amb RELEASE-PROCESS.md i MARKETS-COPY.md per a la v2.7.0)
+**Last Updated:** 14 d'octubre de 2026 (alineat amb RELEASE-PROCESS.md i MARKETS-COPY.md)
 
 ---
 

@@ -23,13 +23,16 @@ El text de la pàgina que es processa no es desa externament per l'extensió mat
 
 Per a generar els resums, l'extensió envia el contingut de text de la pàgina web que estàs visitant (i que explícitament demanes resumir) als servidors de Google.
 
-- **Què s'envia**: El text i títol de la pàgina web activa quan prems el botó "Resumir". Aquesta informació s'envia a Google Gemini per generar el resum.
+- **Què s'envia**: El text i títol de la pàgina web activa quan demanes un resum o qualsevol altra acció que generi text (mapa conceptual, targetes d'Anki, aprofundiment…), amb les instruccions corresponents. Aquesta informació s'envia a Google Gemini; si un model supera la quota, l'extensió pot reenviar el mateix text a un altre model de Gemini.
 - **A on s'envia**: Al servei `generativelanguage.googleapis.com` (Google Gemini API).
 - **Com s'envia**: L'API Key s'envia via header HTTP (`x-goog-api-key`), mai en una URL.
 - **Tractament de Google**: L'ús d'aquestes dades es regeix per la [Política de Privadesa de Google](https://policies.google.com/privacy) i els [Termes de Servei de la API de Generative AI](https://ai.google.dev/terms).
 - **No entrenament**: Si fas servir una API Key de pagament o enterprise, Google no utilitza les teves dades per entrenar els seus models. Amb claus gratuïtes, consulta les condicions específiques de Google.
 
 ## 3. YouTube i contingut de tercers
+
+Quan resumeixes un fil de Hacker News, l'extensió descarrega (sense galetes ni credencials) l'article enllaçat; quan resumeixes un PDF remot, el descarrega des de la seva URL. Són peticions GET del teu navegador cap a aquest lloc; no s'hi envia cap dada teva.
+
 
 - Quan resums vídeos de **YouTube**, l'extensió executa un petit script en el context de la pàgina (`world: "MAIN"`) per llegir les dades del reproductor ja carregades al navegador i obtenir-ne la transcripció (també l'automàtica).
 - Per obtenir-la, l'extensió pot fer les mateixes peticions que fa el reproductor de YouTube (subtítols i transcripció) **a youtube.com, amb la teva sessió del navegador**. Mai fa peticions a tercers i no s'hi envia cap dada teva més enllà del que ja envia el reproductor.
