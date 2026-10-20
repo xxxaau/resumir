@@ -21,7 +21,14 @@ Si ho pots obrir al navegador, ho pots aprofitar:
 - **YouTube** — transcripcions, també amb subtítols automàtics (3 vies de fallback per maximitzar compatibilitat)
 - **Twitter/X** — fils complets (scrape del DOM amb fallback a meta `og:description`)
 - **Hacker News** — article enllaçat + fil de comentaris
-- **PDFs** — remots (HTTPS, descàrrega automàtica) i locals (botó «Triar un PDF local»). Cal capa de text; PDFs escanejats no suportats (sense OCR)
+- **PDFs** — remots (HTTPS, descàrrega automàtica) i locals (botó «Triar un PDF de l'ordinador»). Cal capa de text; PDFs escanejats no suportats (sense OCR)
+
+## 🎯 Confia, però comprova
+
+- **Cites clicables** — cada punt clau acaba amb un fragment literal del text; en clicar-lo, la pàgina el ressalta en groc i hi desplaça la vista, com un Ctrl+F (no als PDF ni als vídeos de YouTube)
+- **Orígens enllaçats** — `(p. N)` als PDF web i `[m:ss]` als vídeos de YouTube, que salten a aquell moment
+- **Procedència sota el resum** — quantes paraules s'han enviat, amb quin model i quants tokens, amb l'enllaç «Veure el text enviat»
+- **Drecera de teclat** — Alt+Maj+S obre Resumir i resumeix la pàgina
 
 ## 🔍 Cinc lents per entendre
 
@@ -42,13 +49,15 @@ El que entens avui, ho trobes demà:
 - **Obsidian** — envia resums a la teva bóveda amb plantilla configurable
 - **Markdown** — copia net i reutilitzable
 - **Targetes Anki** — preguntes i respostes generades del contingut, exportables a Obsidian amb la sintaxi `obsidian_to_anki`
-- **Historial + memòria cau local** — els resums anteriors carreguen a l'instant (30 dies)
+- **Historial + memòria cau local** — els resums anteriors carreguen a l'instant (30 dies), amb pestanyes per tipus per a cada pàgina
 - **Estadístiques d'ús** — resums generats, tokens, temps de resposta i recompte per tipus i per model (a la configuració)
+- **Còpia de seguretat** — exporta i importa la configuració (prompts, plantilles, plugins) en un fitxer; la clau d'API només si ho demanes
 
 ## 📖 Llegibilitat a la teva mida
 
-- **Lectura biònica** configurable (fixació, tipografia, mida, interlineat)
+- **Lectura biònica** configurable (fixació, tipografia, mida, gruix, interlineat)
 - **6 temes**: sistema, Flexoki (automàtic), clar, fosc, Flexoki clar i gris clar
+- **Lletra adaptable**: el text del resum creix amb l'amplada de la barra lateral
 - **Accessible**: navegable per teclat, focus visible, contrast WCAG
 
 ---
@@ -88,7 +97,7 @@ L'extensió **no es publica al Chrome Web Store** (descartat). Per instal·lar-l
 **Confiança radical**: el teu coneixement és teu. Literalment.
 
 - **Sense seguiment ni telemetria**: la clau API, l'historial i les estadístiques viuen només al teu navegador (`storage.local`); les preferències es desen a `storage.sync` (només se sincronitzen al teu compte del navegador si hi tens la sincronització activada)
-- **Sense servidors propis**: el contingut s'envia directament a l'API de Google Gemini (HTTPS), i només quan tu cliques «Resumir»
+- **Sense servidors propis**: el contingut s'envia directament a l'API de Google Gemini (HTTPS), i només quan tu ho demanes (resumir, mapa, targetes…). Per resumir un fil de Hacker News o un PDF remot, el navegador també en descarrega l'article o el PDF, sense enviar-hi cap dada teva
 - **Permís d'accés a pàgines** (`<all_urls>`): es concedeix a la instal·lació perquè puguis resumir qualsevol pàgina sense un avís de permís a cada lloc. L'extensió només llegeix el contingut quan tu ho demanes — mai en segon pla
 - **Seguretat**: CSP restrictiva, protecció contra contingut no fiable als prompts, vendors verificats per hash (SHA-256)
 
