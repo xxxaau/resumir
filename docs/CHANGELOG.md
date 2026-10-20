@@ -5,7 +5,7 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
-## [Sense publicar]
+## [2.7.2] - 2026-10-20
 
 ### Canviat
 - **Lletra del resum adaptable:** en ampliar la barra lateral, la lletra creix (de 15 a 20 px) i la
