@@ -33,7 +33,7 @@ function patchFile(relPath, replacements) {
 
     for (const { oldStr, newStr, desc } of replacements) {
         if (!content.includes(oldStr)) {
-            console.error(`✗ ${relPath}: no s'ha trobat "${desc}". El vendor pot haver canviat — revisa THIRD_PARTY.md.`);
+            console.error(`✗ ${relPath}: no s'ha trobat "${desc}". El vendor pot haver canviat — revisa VENDORS.md.`);
             process.exit(1);
         }
         content = content.replace(oldStr, newStr);

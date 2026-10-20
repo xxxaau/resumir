@@ -20,7 +20,7 @@ const root = resolve(__dirname, "..");
 
 // Hashes SHA-256 esperats (dels fitxers JA pedaçats per patch-vendor-amo.mjs).
 // Actualitza després d'actualitzar manualment un vendor i executar
-// node scripts/patch-vendor-amo.mjs. Consulta THIRD_PARTY.md per a versions i fonts.
+// node scripts/patch-vendor-amo.mjs. Consulta VENDORS.md per a versions i fonts.
 const EXPECTED = {
     "Readability.js": "ea5ea61230d96011b5902414973e50511aa93edfc5ec982464c656f9e7326e7e",
     "vendor/pdf.min.js":        "e7104cd3620b7ac7189743605cfaa8ac8a3cb32035bf303bdee3d91379524001",

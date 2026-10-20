@@ -4,7 +4,7 @@
  * Parseja CHANGELOG.md i injecta les entrades de versió a settings.html
  * entre els marcadors CHANGELOG_START / CHANGELOG_END.
  *
- * S'executa automàticament via el hook `postversion` de npm.
+ * S'executa automàticament via el hook `version` de npm (dins del commit taggejat).
  * Ús manual: node scripts/update-changelog-html.mjs
  */
 
