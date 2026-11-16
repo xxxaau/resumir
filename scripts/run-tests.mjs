@@ -9,6 +9,7 @@ import { readdirSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { resolve, join } from 'path';
 import { fileURLToPath } from 'url';
+import { exitCodeFor } from './run-tests-exit.mjs';
 
 import { dirname } from 'path'; const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -33,10 +34,12 @@ if (testFiles.length === 0) {
 console.log(`🧪 Running ${testFiles.length} test file(s)...\n`);
 
 // Run tests with node --test
-const result = spawnSync('node', ['--test', ...testFiles], { 
+const result = spawnSync(process.execPath, ['--test', ...testFiles], { 
   stdio: 'inherit',
   cwd: root 
 });
 
-process.exit(result.status || 0);
+if (result.error) console.error(`❌ No s'ha pogut executar node: ${result.error.message}`);
+if (result.signal) console.error(`❌ Els tests s'han interromput pel senyal ${result.signal}`);
+process.exit(exitCodeFor(result));
 
