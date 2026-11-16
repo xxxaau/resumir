@@ -225,7 +225,8 @@ function createModelRow(model, isFavorite, currentModel, favoriteIds, allModels,
  */
 async function refreshModels(e) {
     e.preventDefault();
-    const apiKey = document.querySelector("#apiKey").value;
+    // Mateixa neteja que la resta de l'app (espais, cometes, prefix «Bearer»).
+    const apiKey = normalizeApiKey(document.querySelector("#apiKey").value);
     const btn = document.querySelector("#refreshModels");
     const statusDiv = document.getElementById("refreshModelsStatus");
 
@@ -242,17 +243,30 @@ async function refreshModels(e) {
     statusDiv.classList.add("hidden");
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
-            headers: { "x-goog-api-key": apiKey }
-        });
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(`[011] ${err.error?.message || response.statusText}`);
-        }
-        const data = await response.json();
+        // L'API pagina (50 per defecte): sense seguir nextPageToken la llista quedava
+        // incompleta i els favorits de les pàgines següents s'esborraven com a obsolets.
+        const MAX_PAGES = 20;
+        const apiModelList = [];
+        let pageToken = null;
+        let pages = 0;
+        do {
+            const qs = `?pageSize=1000${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`;
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models${qs}`, {
+                headers: { "x-goog-api-key": apiKey }
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(`[011] ${err.error?.message || response.statusText}`);
+            }
+            const data = await response.json();
+            apiModelList.push(...(data.models || []));
+            pageToken = data.nextPageToken || null;
+        } while (pageToken && ++pages < MAX_PAGES);
+        // Si queda pàgina per llegir, la llista és parcial: no es pot saber què és obsolet.
+        const listComplete = !pageToken;
 
         const curatedIds = new Set(CURATED_MODELS.map(m => m.id));
-        const apiModels = (data.models || [])
+        const apiModels = apiModelList
             .filter(m =>
                 m.supportedGenerationMethods?.includes("generateContent") &&
                 !/embedding|aqa|robotics|vision|image/i.test(m.name)
@@ -277,18 +291,20 @@ async function refreshModels(e) {
         const validIds = new Set(mergedModels.map(m => m.id));
         const syncData = await ext.storage.sync.get({ favoriteModels: [] });
         const currentFavorites = syncData.favoriteModels || [];
-        const cleanedFavorites = currentFavorites.filter(id => validIds.has(id));
-        if (cleanedFavorites.length !== currentFavorites.length) {
+        const removed = listComplete ? currentFavorites.filter(id => !validIds.has(id)) : [];
+        const cleanedFavorites = currentFavorites.filter(id => !removed.includes(id));
+        if (removed.length > 0) {
             if (!cleanedFavorites.includes(DEFAULT_MODEL_ID) && validIds.has(DEFAULT_MODEL_ID)) {
                 cleanedFavorites.unshift(DEFAULT_MODEL_ID);
             }
             await ext.storage.sync.set({ favoriteModels: cleanedFavorites });
         }
-        const removedCount = currentFavorites.length - cleanedFavorites.length;
+        const removedCount = removed.length;
 
         statusDiv.classList.remove("hidden");
         statusDiv.style.color = "var(--success)";
         statusDiv.textContent = `✓ ${mergedModels.length} models disponibles (${CURATED_MODELS.length} recomanats + ${apiModels.length} addicionals)`
+            + (!listComplete ? " · llista parcial: no s'ha eliminat cap favorit" : "")
             + (removedCount > 0 ? ` · ${removedCount} favorit${removedCount > 1 ? "s" : ""} eliminat${removedCount > 1 ? "s" : ""} per obsolets` : "");
 
         // Si el panell de selecció està obert, actualitza'l

@@ -646,6 +646,56 @@ test("actualitzar models sense clau - missatge al costat del camp, sense alert()
     } finally { h.close(); }
 });
 
+function modelsPage(models, nextPageToken) {
+    const body = { models: models.map(([id, label]) => ({ name: "models/" + id, displayName: label, supportedGenerationMethods: ["generateContent"] })) };
+    if (nextPageToken) body.nextPageToken = nextPageToken;
+    return { ok: true, status: 200, json: async () => body };
+}
+
+test("actualitzar models - normalitza la clau, pagina la llista i no esborra favorits de la 2a pàgina", async () => {
+    const pages = [
+        modelsPage([["gemini-exp-pagina1", "Exp 1"]], "tok2"),
+        modelsPage([["gemini-exp-pagina2", "Exp 2"]]),
+    ];
+    const h = await loadSettings({
+        sync: { favoriteModels: ["gemini-exp-pagina2", "gemini-exp-desapareguda"] },
+        fetchHandler: async () => pages.shift(),
+    });
+    try {
+        h.document.querySelector("#apiKey").value = "  AIzaTEST  \n";
+        h.document.querySelector("#refreshModels").click();
+        await h.flush(30);
+
+        assert.equal(h.calls.fetches.length, 2, "una petició per pàgina");
+        assert.equal(h.calls.fetches[0].headers["x-goog-api-key"], "AIzaTEST", "clau sense espais");
+        assert.match(h.calls.fetches[0].url, /pageSize=1000/);
+        assert.match(h.calls.fetches[1].url, /pageToken=tok2/);
+
+        const ids = (await h.storage.local.get("availableModels")).availableModels.map(m => m.id);
+        assert.ok(ids.includes("gemini-exp-pagina1") && ids.includes("gemini-exp-pagina2"));
+
+        const favs = (await h.storage.sync.get("favoriteModels")).favoriteModels;
+        assert.ok(favs.includes("gemini-exp-pagina2"), "el favorit de la 2a pàgina és vàlid i es conserva");
+        assert.ok(!favs.includes("gemini-exp-desapareguda"), "l'obsolet s'elimina");
+        assert.match(h.document.getElementById("refreshModelsStatus").textContent, /1 favorit eliminat/);
+    } finally { h.close(); }
+});
+
+test("actualitzar models - si la llista és incompleta (massa pàgines) no s'esborra cap favorit", async () => {
+    let n = 0;
+    const h = await loadSettings({
+        sync: { favoriteModels: ["gemini-exp-qualsevol"] },
+        fetchHandler: async () => modelsPage([[`gemini-exp-${n}`, `Exp ${n++}`]], "seguent"),
+    });
+    try {
+        h.document.querySelector("#apiKey").value = "AIzaTEST";
+        h.document.querySelector("#refreshModels").click();
+        await h.flush(60);
+        const favs = (await h.storage.sync.get("favoriteModels")).favoriteModels;
+        assert.ok(favs.includes("gemini-exp-qualsevol"), "amb la llista truncada no es pot saber què és obsolet");
+    } finally { h.close(); }
+});
+
 test("desar - el missatge és «Desat.»", async () => {
     const h = await loadSettings({});
     try {
