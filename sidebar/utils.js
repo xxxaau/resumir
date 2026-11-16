@@ -92,26 +92,38 @@ function applyUrlToTemplate(template, rawUrl) {
     return { template: base, url };
 }
 
+/**
+ * Substitueix {{title}}, {{url}}, {{summary}} i {{summary_executive}} en UNA sola
+ * passada i amb una funció de reemplaçament: els valors es copien literals.
+ * (Amb strings, `$$`, `$&` o `$1` d'un resum —p. ex. LaTeX— s'interpretaven com a
+ * patrons, i un valor que contingués «{{summary}}» es tornava a substituir.)
+ */
+function fillTemplate(tpl, values) {
+    return tpl.replace(/\{\{(title|url|summary_executive|summary)\}\}/g, (_m, key) => values[key]);
+}
+
 function formatObsidianContent(template, metadata) {
     const execSummary = extractExecutiveSummary(metadata.summary);
     const { template: tpl, url } = applyUrlToTemplate(template, metadata.url);
 
-    return tpl
-        .replace(/{{title}}/g, metadata.title || "")
-        .replace(/{{url}}/g, url)
-        .replace(/{{summary}}/g, metadata.summary || "")
-        .replace(/{{summary_executive}}/g, execSummary).trim();
+    return fillTemplate(tpl, {
+        title: metadata.title || "",
+        url,
+        summary: metadata.summary || "",
+        summary_executive: execSummary,
+    }).trim();
 }
 
 function formatMarkdownContent(template, metadata) {
     const execSummary = extractExecutiveSummary(metadata.summary);
     const { template: tpl, url } = applyUrlToTemplate(template, metadata.url);
 
-    return tpl
-        .replace(/{{title}}/g, metadata.title || "")
-        .replace(/{{url}}/g, url)
-        .replace(/{{summary}}/g, metadata.summary || "")
-        .replace(/{{summary_executive}}/g, execSummary);
+    return fillTemplate(tpl, {
+        title: metadata.title || "",
+        url,
+        summary: metadata.summary || "",
+        summary_executive: execSummary,
+    });
 }
 
 // Token Estimation (Simple char count / 4)

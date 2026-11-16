@@ -224,3 +224,15 @@ test("firefoxCardColor - color de la targeta de Firefox a partir del tema", () =
     assert.equal(firefoxCardColor({ sidebar: "#f2f0e5", sidebar_text: "#100f0f" }, true), null, "sistema fosc i tema clar: la variant fosca no la veiem");
     assert.equal(firefoxCardColor({ sidebar: "#1c1b1a", sidebar_text: "#ffffff" }, true), "rgb(28,27,26)", "tema fosc amb sistema fosc: fiable");
 });
+
+test("formatObsidianContent/formatMarkdownContent - els valors es copien literals ($, {{…}})", () => {
+    const meta = {
+        title: "Preu {{summary}} $&",
+        url: "https://example.com/a",
+        summary: "Cost $$5 i $& i $1 i {{title}}",
+    };
+    for (const fn of [formatObsidianContent, formatMarkdownContent]) {
+        const out = fn("# {{title}}\n{{summary}}", meta);
+        assert.equal(out, "# Preu {{summary}} $&\nCost $$5 i $& i $1 i {{title}}", fn.name);
+    }
+});
