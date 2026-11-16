@@ -139,6 +139,10 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
         let buffer = "";
         let lastUsageMeta = null;
         let totalBytes = 0;
+        // Per distingir «resposta buida/bloquejada» d'un resum real (vegeu [012]).
+        let gotText = false;
+        let blockReason = null;
+        let finishReason = null;
 
         function processLine(line) {
             if (line.trim() === "") return;
@@ -151,8 +155,10 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
                 const parts = data.candidates?.[0]?.content?.parts ?? [];
                 for (const part of parts) {
                     if (part.thought) continue; // thinking models: skip reasoning tokens
-                    if (part.text) onChunk(part.text);
+                    if (part.text) { gotText = true; onChunk(part.text); }
                 }
+                if (data.promptFeedback?.blockReason) blockReason = data.promptFeedback.blockReason;
+                if (data.candidates?.[0]?.finishReason) finishReason = data.candidates[0].finishReason;
                 if (data.usageMetadata) {
                     lastUsageMeta = data.usageMetadata;
                     if (typeof onUsage === "function") {
@@ -193,6 +199,17 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
             processLine(buffer);
         } finally {
             try { reader.releaseLock(); } catch (_e) {}
+        }
+
+        // Una resposta 200 sense cap text (petició bloquejada per seguretat, tot
+        // raonament, resposta buida) no és un resum: sense això es desava un
+        // resum buit i s'anunciava «Resum complet». Si ja ha arribat text i el
+        // model s'atura per MAX_TOKENS, el resum parcial es manté.
+        if (!gotText) {
+            const reason = blockReason || finishReason;
+            throw new Error(reason
+                ? `[012] Gemini no ha retornat cap resum (motiu: ${reason}). Prova amb un altre contingut o un altre model.`
+                : "[012] Gemini no ha retornat cap text. Torna-ho a provar o prova amb un altre model.");
         }
 
         return {

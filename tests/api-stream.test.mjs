@@ -144,6 +144,48 @@ test("callGeminiStream - sense usageMetadata retorna zeros", async () => {
 });
 
 // ---------------------------------------------------------------------------
+// Resposta sense text (bloquejada / buida): ha de ser un error, no un èxit buit
+// ---------------------------------------------------------------------------
+test("callGeminiStream - petició bloquejada (promptFeedback.blockReason) llança [012] amb el motiu", async () => {
+    mockFetch(makeStream(dataLine({ promptFeedback: { blockReason: "PROHIBITED_CONTENT" } })));
+    await assert.rejects(
+        callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "", "", ABORT, () => {}, null),
+        err => err.message.includes("[012]") && err.message.includes("PROHIBITED_CONTENT")
+    );
+});
+
+test("callGeminiStream - finishReason SAFETY sense text llança [012] amb el motiu", async () => {
+    mockFetch(makeStream(dataLine({ candidates: [{ finishReason: "SAFETY" }] })));
+    await assert.rejects(
+        callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "", "", ABORT, () => {}, null),
+        err => err.message.includes("[012]") && err.message.includes("SAFETY")
+    );
+});
+
+test("callGeminiStream - stream sense cap text (ni motiu) llança [012]", async () => {
+    mockFetch(makeStream(""));
+    await assert.rejects(
+        callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "", "", ABORT, () => {}, null),
+        err => err.message.includes("[012]")
+    );
+});
+
+test("callGeminiStream - només raonament (thought) sense text visible llança [012]", async () => {
+    mockFetch(makeStream(dataLine({ candidates: [{ content: { parts: [{ text: "pensant", thought: true }] }, finishReason: "MAX_TOKENS" }] })));
+    await assert.rejects(
+        callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "", "", ABORT, () => {}, null),
+        err => err.message.includes("[012]") && err.message.includes("MAX_TOKENS")
+    );
+});
+
+test("callGeminiStream - text parcial amb finishReason MAX_TOKENS NO és error", async () => {
+    mockFetch(makeStream(dataLine({ candidates: [{ content: { parts: [{ text: "resum tallat" }] }, finishReason: "MAX_TOKENS" }] })));
+    const chunks = [];
+    await callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "", "", ABORT, t => chunks.push(t), null);
+    assert.deepEqual(chunks, ["resum tallat"]);
+});
+
+// ---------------------------------------------------------------------------
 // Error HTTP 401 llança missatge classificable
 // ---------------------------------------------------------------------------
 test("callGeminiStream - HTTP 401 llança error amb codi [007]", async () => {
