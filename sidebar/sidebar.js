@@ -599,6 +599,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (typeof typeIconSvg === "function") tab.appendChild(typeIconSvg(ct.id));
                 tab.append(ct.label);
                 tab.addEventListener("click", async () => {
+                    // Carregar una entrada trepitjaria currentMetadata mentre la
+                    // generació en curs hi va afegint text (es desaria barrejat).
+                    if (isGenerating) return;
                     const entry = await getSummaryCache(url, ct.id);
                     if (entry) await loadHistoryEntry(entry, { historyMode: false });
                     updateTypeTabs(url);

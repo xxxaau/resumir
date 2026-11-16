@@ -5,6 +5,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { ReadableStream } from "node:stream/web";
 import { loadSidebar } from "./helpers/sidebar-harness.mjs";
 
 test("harness - la barra lateral es carrega i mostra la targeta d'onboarding sense clau", async () => {
@@ -869,6 +870,48 @@ test("pestanyes per tipus - llisten els resums desats i en canvien el contingut"
         const after = [...bar.querySelectorAll(".type-tab")];
         assert.equal(after.find(t => t.dataset.type === "deepdive").getAttribute("aria-pressed"), "true");
         assert.equal(after.find(t => t.dataset.type === "summary").getAttribute("aria-pressed"), "false");
+    } finally { h.close(); }
+});
+
+test("pestanyes per tipus - clicar-ne una durant la generació no barreja els textos", async () => {
+    const enc = new TextEncoder();
+    const frame = (text) => enc.encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] })}
+
+`);
+    let release;
+    const h = await loadSidebar({
+        sync: { enableDeepdive: true },
+        local: { apiKey: "AIza_test", ...seedTypes("https://example.com/article", ["summary"]) },
+        pageText: "Un article. ".repeat(30),
+        // Stream que no acaba fins que el test ho decideix.
+        fetchHandler: async () => ({
+            ok: true, status: 200, statusText: "OK",
+            headers: { get: (n) => n.toLowerCase() === "content-type" ? "text/event-stream" : null },
+            body: new ReadableStream({
+                start(c) {
+                    c.enqueue(frame("PARCIAL "));
+                    release = () => { c.enqueue(frame("FINAL")); c.close(); };
+                },
+            }),
+        }),
+    });
+    try {
+        await h.flush(30);
+        await sleep(250);
+        h.document.getElementById("deepDiveBtn").click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("content").textContent, /PARCIAL/);
+
+        h.document.querySelector('#type-tabs [data-type="summary"]').click();
+        await h.flush(30);
+        assert.match(h.document.getElementById("content").textContent, /PARCIAL/, "la generació en curs continua visible");
+        assert.doesNotMatch(h.document.getElementById("content").textContent, /Text de summary/);
+
+        release();
+        await h.flush(30);
+        const key = "summary_cache:https://example.com/article:deepdive";
+        const stored = (await h.window.chrome.storage.local.get(key))[key];
+        assert.equal(stored && stored.summary, "PARCIAL FINAL", "el deepdive es desa net, sense el text del resum");
     } finally { h.close(); }
 });
 
