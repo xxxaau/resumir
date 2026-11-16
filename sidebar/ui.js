@@ -1005,9 +1005,12 @@ function renderApiKeyWarning(contentDiv) {
             keyInput.focus();
             return;
         }
-        status.textContent = looksLikeGeminiKey(result.key)
-            ? "Clau vàlida. Desant…"
-            : "Clau acceptada. Desant…";
+        // Amb el límit gratuït esgotat la clau és vàlida, però cal que l'usuari sàpiga per què no resumirà ara.
+        status.textContent = result.rateLimited
+            ? result.message
+            : looksLikeGeminiKey(result.key)
+                ? "Clau vàlida. Desant…"
+                : "Clau acceptada. Desant…";
         // Desar-la dispara la recàrrega de la barra (storage.onChanged) i ja es pot resumir
         await ext.storage.local.set({ apiKey: result.key });
     }

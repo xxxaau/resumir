@@ -130,7 +130,9 @@ test("describeKeyCheck - cada codi dona un missatge accionable en català", () =
     assert.match(_api.describeKeyCheck(429).message, /límit gratuït/);
     assert.match(_api.describeKeyCheck(503).message, /no està disponible/);
     assert.match(_api.describeKeyCheck(null).message, /connexió/);
-    for (const code of [400, 403, 429, 503, null, 418]) assert.equal(_api.describeKeyCheck(code).ok, false);
+    for (const code of [400, 403, 503, null, 418]) assert.equal(_api.describeKeyCheck(code).ok, false);
+    // Un 429 és la resposta d'una clau RECONEGUDA que ha esgotat la quota: és vàlida i s'ha de poder desar.
+    assert.equal(_api.describeKeyCheck(429).ok, true);
 });
 
 test("verifyApiKey - una clau buida no fa cap petició", async () => {
@@ -149,6 +151,14 @@ test("verifyApiKey - envia la clau neta per capçalera i retorna ok amb un 200",
     assert.equal(r.key, "AIzaABC");
     assert.equal(seen.opts.headers["x-goog-api-key"], "AIzaABC");
     assert.ok(!seen.url.includes("AIzaABC"), "La clau no ha d'anar a la URL");
+});
+
+test("verifyApiKey - un 429 (quota esgotada) accepta la clau: demostra que Google la reconeix", async () => {
+    global.fetch = async () => ({ status: 429 });
+    const r = await _api.verifyApiKey("AIzaABC");
+    assert.equal(r.ok, true);
+    assert.equal(r.key, "AIzaABC");
+    assert.match(r.message, /límit gratuït/);
 });
 
 test("verifyApiKey - un error de xarxa dona el missatge de connexió", async () => {

@@ -28,7 +28,9 @@ function describeKeyCheck(status) {
     if (status >= 200 && status < 300) return { ok: true, message: "Clau vàlida." };
     if (status === 400) return { ok: false, message: "La clau no és vàlida. Torna-la a copiar de Google AI Studio." };
     if (status === 401 || status === 403) return { ok: false, message: "Google ha rebutjat la clau (sense permís o l'API de Gemini no està habilitada). Crea'n una de nova a AI Studio." };
-    if (status === 429) return { ok: false, message: "Has arribat al límit gratuït de peticions. Espera uns minuts i torna-ho a provar." };
+    // Un 429 vol dir que Google ha RECONEGUT la clau (una de falsa dona 400): és vàlida i s'ha de
+    // poder desar; només cal esperar que es renovi el límit abans de resumir.
+    if (status === 429) return { ok: true, rateLimited: true, message: "Clau vàlida, però has arribat al límit gratuït de peticions. Espera uns minuts abans de resumir." };
     if (status >= 500) return { ok: false, message: "El servei de Gemini no està disponible ara mateix. Prova-ho d'aquí a uns minuts." };
     return { ok: false, message: `Google ha respost amb un error inesperat (${status}).` };
 }

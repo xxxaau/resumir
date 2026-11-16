@@ -421,10 +421,12 @@ test("onboarding - una clau incorrecta (400) NO es desa i diu què fer", async (
 });
 
 test("onboarding - límit gratuït (429) i error de xarxa donen missatges diferents i accionables", async () => {
+    // Un 429 vol dir que Google reconeix la clau: es desa (N13), però s'avisa del límit.
     let h = await loadSidebar({ fetchHandler: async () => ({ status: 429 }) });
     try {
         await typeKeyAndVerify(h, "AIzaX");
         assert.match(h.document.getElementById("apiKeyStatus").textContent, /límit gratuït/);
+        assert.equal((await h.storage.local.get("apiKey")).apiKey, "AIzaX");
     } finally { h.close(); }
     h = await loadSidebar({ fetchHandler: async () => { throw new TypeError("offline"); } });
     try {
