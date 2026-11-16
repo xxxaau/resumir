@@ -70,7 +70,7 @@ global.ext = makeExt({ tabs: [DEFAULT_TAB], scriptResult: "Some page text" });
 const { selectYoutubeTrack } = require("../sidebar/youtube-track-select.js");
 global.selectYoutubeTrack = selectYoutubeTrack;
 
-const { executeScriptSafe, getPageContent } = require("../sidebar/content.js");
+const { executeScriptSafe, getPageContent, isBlockedArticleHost } = require("../sidebar/content.js");
 
 // ---------------------------------------------------------------------------
 // executeScriptSafe
@@ -244,6 +244,40 @@ test("getPageContent - HN bloqueja SSRF quan la redirecció acaba en host intern
     assert.ok(!result.text.includes("ARTICLE:"), "No ha d'incloure ARTICLE si la URL final és interna");
     assert.ok(!result.text.includes("contingut intern"), "No ha d'exfiltrar contingut intern");
     assert.ok(result.text.includes("Top Discussion Comments"), "Ha de retornar la discussió sola");
+});
+
+test("isBlockedArticleHost - rebutja IP literals (v4 i v6), hosts sense punt i sufixos locals", () => {
+    // Es passa pel parser d'URL, com al codi real: el hostname IPv6 porta claudàtors
+    // i les formes abreujades d'IPv4 ja arriben normalitzades.
+    const hostOf = (u) => new URL(u).hostname;
+    const blocked = [
+        "http://[::1]/", "http://[::]/", "http://[fe80::1]/", "http://[fc00::1]/", "http://[fd12::1]/",
+        "http://[ff02::1]/", "http://[::ffff:127.0.0.1]/", "http://[::ffff:169.254.169.254]/",
+        "http://[64:ff9b::a9fe:a9fe]/", "http://[::7f00:1]/", "http://[64:ff9b:1::a9fe:a9fe]/",
+        "http://[2606:4700:4700::1111]/",                       // IP pública: també fora (un article no n'usa)
+        "http://127.0.0.1/", "http://10.0.0.1/", "http://169.254.169.254/", "http://8.8.8.8/",
+        "http://2130706433/", "http://127.1/", "http://0x7f.0.0.1/", "http://0177.0.0.1/",
+        "http://localhost/", "http://localhost./", "http://foo.localhost/", "http://metadata/",
+        "http://metadata.google.internal/", "http://impressora.local/", "http://nas.lan/",
+        "http://intranet/", "http://router.home.arpa/",
+    ];
+    for (const u of blocked) assert.equal(isBlockedArticleHost(hostOf(u)), true, u);
+    for (const u of ["https://example.com/", "https://www.nytimes.com/a", "https://blog.exemple.cat/x", "https://xn--bcher-kva.example/"]) {
+        assert.equal(isBlockedArticleHost(hostOf(u)), false, u);
+    }
+});
+
+test("getPageContent - HN no fa fetch d'un article amb URL IPv6 literal (SSRF)", async () => {
+    const hnTab = { id: 2, url: "https://news.ycombinator.com/item?id=12345", title: "HN Thread" };
+    let fetched = false;
+    global.fetch = async () => { fetched = true; return { ok: false }; };
+    global.ext = makeExt({
+        tabs: [hnTab],
+        scriptResult: { title: "Article Title", articleUrl: "https://[::1]/intern", comments: "- Comentari" },
+    });
+    const result = await getPageContent();
+    assert.equal(fetched, false, "No s'ha de fer cap petició a un literal IPv6");
+    assert.ok(result.text.includes("Top Discussion Comments"));
 });
 
 test("getPageContent - HN degrada gracefully quan l'article retorna error HTTP", async () => {

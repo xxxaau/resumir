@@ -80,35 +80,34 @@ function urlIsOnSite(url, domain, pathPrefix) {
 }
 
 /**
- * Comprova si un hostname és una IP privada/reservada (guard SSRF).
- * Comparació per octets (clara i correcta) en lloc de màscares de bits.
+ * Guard SSRF del fetch d'articles enllaçats (Hacker News): decideix si un
+ * hostname NO és apte per descarregar-lo.
+ *
+ * Un enllaç d'article és un nom de domini públic. En lloc de classificar rangs
+ * d'IP (el parser IPv6 complet té massa casos límit: mapped, NAT64, 6to4…),
+ * es rebutja el que un article legítim no usa mai:
+ *  - qualsevol IP literal (v4 o v6; l'URL parser ja normalitza 2130706433,
+ *    127.1, 0x7f.0.0.1… a dotted-quad, i l'IPv6 hi arriba entre claudàtors);
+ *  - hosts sense punt (localhost, metadata, noms de xarxa interna);
+ *  - sufixos de xarxa local: .localhost, .local, .internal, .lan…
+ *
+ * Risc residual acceptat: un nom DNS públic que resol a una IP privada
+ * (p. ex. *.nip.io) no es detecta des del navegador sense resoldre DNS.
+ *
+ * @param {string} hostname Hostname ja normalitzat per `new URL(...)`.
+ * @returns {boolean} true si s'ha de rebutjar.
  */
-function isPrivateOrReservedIP(hostname) {
-    const m = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-    if (m) {
-        const octets = m.slice(1).map(Number);
-        if (octets.some(n => n > 255)) return true;        // malformat → rebutja
-        const [a, b] = octets;
-        if (a === 0) return true;                          // 0.0.0.0/8
-        if (a === 10) return true;                         // 10.0.0.0/8 privat
-        if (a === 127) return true;                        // 127.0.0.0/8 loopback
-        if (a === 169 && b === 254) return true;           // 169.254.0.0/16 link-local
-        if (a === 172 && b >= 16 && b <= 31) return true;  // 172.16.0.0/12 privat
-        if (a === 192 && b === 168) return true;           // 192.168.0.0/16 privat
-        if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 CGNAT
-        if (a >= 224) return true;                         // multicast/reservat/broadcast
-        return false;
-    }
-    if (hostname.includes(":")) {
-        const lower = hostname.toLowerCase();
-        // Loopback (::1), IPv4-mapped loopback, link-local (fe80::), ULA (fc../fd..)
-        // i multicast (ff..). Qualsevol IPv6 literal no rutable pública.
-        if (lower === "::1" || lower.startsWith("::ffff:127.") ||
-            lower.startsWith("fe80:") || lower.startsWith("fc") ||
-            lower.startsWith("fd") || lower.startsWith("ff")) return true;
-    }
-    return /^(localhost|metadata|internal)$/i.test(hostname);
+function isBlockedArticleHost(hostname) {
+    const h = String(hostname || "").toLowerCase().replace(/\.+$/, "");
+    if (!h) return true;
+    if (h.startsWith("[") || h.includes(":")) return true;          // IPv6 literal
+    const labels = h.split(".");
+    if (labels.length < 2) return true;                              // sense punt
+    if (/^\d+$/.test(labels[labels.length - 1])) return true;       // IPv4 literal
+    return LOCAL_HOST_SUFFIXES.some(suf => h === suf || h.endsWith("." + suf));
 }
+
+const LOCAL_HOST_SUFFIXES = ["localhost", "local", "internal", "lan", "localdomain", "intranet", "home.arpa"];
 
 /**
  * Descarrega i extreu (Readability) el text de l'article enllaçat des d'una
@@ -124,8 +123,8 @@ async function fetchLinkedArticleText(articleUrl) {
     if (!articleUrl || articleUrl.includes("ycombinator.com")) return "";
     let u;
     try { u = new URL(articleUrl); } catch { return ""; }
-    // Guard SSRF: només https, sense port explícit, host no privat/reservat.
-    if (u.protocol !== "https:" || u.port !== "" || isPrivateOrReservedIP(u.hostname)) return "";
+    // Guard SSRF: només https, sense port explícit, i un host que sembli de domini públic.
+    if (u.protocol !== "https:" || u.port !== "" || isBlockedArticleHost(u.hostname)) return "";
 
     const doFetch = () => fetch(articleUrl, {
         credentials: "omit",
@@ -157,7 +156,7 @@ async function fetchLinkedArticleText(articleUrl) {
         // (GET sense credencials, resposta descartada) és baix.
         try {
             const finalU = new URL(resp.url);
-            if (finalU.protocol !== "https:" || finalU.port !== "" || isPrivateOrReservedIP(finalU.hostname)) return "";
+            if (finalU.protocol !== "https:" || finalU.port !== "" || isBlockedArticleHost(finalU.hostname)) return "";
         } catch { return ""; }
         const contentType = resp.headers.get("content-type") || "";
         if (!contentType.includes("text/html")) return "";
@@ -890,5 +889,5 @@ async function getPageContent() {
 
 // Export per a entorn Node.js (tests unitaris). Ignorat al navegador.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { executeScriptSafe, getPageContent };
+    module.exports = { executeScriptSafe, getPageContent, isBlockedArticleHost };
 }
