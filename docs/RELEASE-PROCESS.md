@@ -53,6 +53,10 @@ git log origin/main..HEAD --oneline
 
 **Format:** Usa [Keep a Changelog](https://keepachangelog.com)
 
+> **Entrades a mesura que es treballa:** cada canvi visible per a l'usuari s'anota a la secció
+> `## [Pendent de publicar]` del CHANGELOG (al principi, sense data: no surt a «Sobre l'extensió»).
+> En preparar la release, aquesta capçalera es renomena a `## [X.Y.Z] - AAAA-MM-DD`.
+
 > **«Sobre l'extensió» s'ha d'actualitzar a CADA versió.** L'historial que veu l'usuari a
 > la configuració es genera d'aquest fitxer:
 >

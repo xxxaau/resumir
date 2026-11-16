@@ -5,6 +5,40 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
+## [Pendent de publicar]
+
+> Secció de treball: a cada canvi s'hi afegeix l'entrada. En preparar la release es renomena a
+> `## [X.Y.Z] - AAAA-MM-DD` (mentre no tingui data, no surt a «Sobre l'extensió»).
+
+### Arreglat
+- **Llocs que contenen «x.com» al nom** (vox.com, dropbox.com, linux.com…): ja no es resumeixen com
+  si fossin X, que feia que només es resumís la metadescripció. Ara es llegeix l'article sencer.
+- **Resposta buida o bloquejada de Gemini:** ara surt un error amb el motiu (codi `[012]`) en lloc
+  d'un «Resum complet» buit que es desava a l'Historial.
+- **Aturar un resum i començar-ne un altre** (per exemple, el d'una selecció) ja no barreja textos
+  ni desa a la memòria cau un resum de la pàgina equivocada. Mentre es genera, tampoc no es carreguen
+  les pestanyes de tipus.
+- **Targetes Anki desades:** en reobrir-les ja no surten «Generar més» i «Afinar», que no
+  funcionaven o feien servir el text d'una altra pàgina.
+- **«Desfer» a l'Historial** torna a deixar el resum amb el seu format, llargada i tokens.
+- **Actualitzar la llista de models:** segueix totes les pàgines de Google, accepta la clau enganxada
+  amb espais i ja no esborra com a «obsolets» favorits que sí que existeixen.
+- **Comprovar la clau amb el límit gratuït esgotat:** es desa igualment (Google l'ha reconeguda) i
+  t'avisa que has d'esperar uns minuts abans de resumir.
+- **Exportar a Obsidian o copiar com a Markdown:** els resums amb `$$…$$` (fórmules) o `$&` es copien
+  tal com són, sense alterar-los.
+- **Enllaços d'article dels fils de Hacker News:** més protecció; ja no es descarreguen adreces
+  internes (IP, `localhost`, xarxa local).
+- **PDF local gran (més de 7 MB):** el visor propi no s'obre (no hi cap), però el resum es genera
+  igualment i sense bloquejar la pàgina.
+- **Tokens sense dades de Google:** quan l'API no els envia, s'estimen en lloc de comptar 0. (minor)
+- **Tema:** si s'esborra la preferència, torna al tema per defecte en lloc de deixar l'aparença
+  trencada. (minor)
+
+### Canviat (dev)
+- El runner de tests ja no pot acabar «en verd» si `node` no s'executa. (dev)
+- `docs/SECURITY.md` descriu el guard SSRF real i el camp de clau amb màscara CSS. (dev)
+
 ## [2.7.2] - 2026-10-20
 
 ### Canviat
