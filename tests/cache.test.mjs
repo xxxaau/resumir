@@ -15,7 +15,7 @@ global.CONTENT_TYPES = [
     { id: "science",    icon: "\u{1F4CA}", label: "Validaci\u00F3",   order: 4 },
 ];
 
-const { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, getAvailableTypes, deleteSummaryCache, getCacheKey } = require("../sidebar/cache.js");
+const { getSummaryCache, saveSummaryCache, saveUsageStats, purgeStaleCacheEntries, getAvailableTypes, deleteSummaryCache, getCacheKey, listCachedSummaries, restoreSummaryCacheEntries } = require("../sidebar/cache.js");
 
 function clearStorage() { storageMock._clear(); }
 
@@ -320,4 +320,22 @@ test("saveUsageStats - dailyStats preserva comptadors d'altres dies", async () =
     const data = await storageMock.get("dailyStats");
     assert.equal(data.dailyStats[yesterdayKey], 5, "El comptador d'ahir s'ha de preservar");
     assert.equal(data.dailyStats[todayKey], 1, "El comptador d'avui ha de ser 1");
+});
+
+test("cache: desfer l'Historial restaura style i stats", async () => {
+    clearStorage();
+    await saveSummaryCache("https://x.com", "T", "R", "m", 11, 22, "summary", "bullets|long");
+    const [entry] = await listCachedSummaries();
+    assert.equal(entry.style, "bullets|long");
+    assert.equal(entry.stats.input, 11);
+    assert.equal(entry.stats.output, 22);
+
+    await deleteSummaryCache("https://x.com", "summary");
+    assert.equal(await getSummaryCache("https://x.com", "summary"), null);
+    await restoreSummaryCacheEntries([entry]);
+
+    const back = await getSummaryCache("https://x.com", "summary");
+    assert.equal(back.style, "bullets|long");
+    assert.equal(back.stats.input, 11);
+    assert.equal(back.stats.output, 22);
 });

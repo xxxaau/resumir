@@ -186,6 +186,8 @@ async function listCachedSummaries() {
                 timestamp: value.timestamp,
                 summary: value.summary,
                 type: type,
+                style: value.style,
+                stats: value.stats,
             });
         }
         entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -260,6 +262,8 @@ async function restoreSummaryCacheEntries(entries) {
                 toSet[key] = {
                     url: e.url, title: e.title, summary: e.summary, model: e.model,
                     timestamp: e.timestamp, version: "1.0", stats: e.stats || { input: 0, output: 0 }, type,
+                    // Sense l'estil, un resum «bullets|long» es reutilitzaria com a «default|medium».
+                    ...(e.style ? { style: e.style } : {}),
                 };
                 if (!cacheIndex.includes(key)) cacheIndex.push(key);
             }
