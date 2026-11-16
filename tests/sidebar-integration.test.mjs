@@ -2069,3 +2069,16 @@ test("Anki - el text d'«Afinar», el mode d'edició i el focus sobreviuen a un 
         assert.ok(h.document.activeElement.classList.contains("anki-select-all"), "el focus continua al botó premut");
     } finally { h.close(); }
 });
+
+test("tema - si s'esborra la preferència torna al tema per defecte (no 'undefined')", async () => {
+    const h = await loadSidebar({ sync: { theme: "dark" }, local: { apiKey: "AIza_test" } });
+    try {
+        await h.flush(30);
+        const root = h.document.documentElement;
+        assert.equal(root.getAttribute("data-theme"), "dark");
+
+        h.window.chrome.storage.onChanged._fire({ theme: { oldValue: "dark" } }, "sync");
+        assert.equal(root.getAttribute("data-theme"), "system");
+        assert.notEqual(root.getAttribute("data-actual-theme"), "undefined");
+    } finally { h.close(); }
+});

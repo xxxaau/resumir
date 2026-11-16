@@ -15,6 +15,7 @@
             : null;
 
     function applyTheme(theme) {
+        theme = theme || DEFAULT_THEME;
         document.documentElement.setAttribute('data-theme', theme);
 
         if (theme === 'system' || theme === 'flexoki') {
@@ -40,7 +41,7 @@
             // Listen for changes in sync storage
             storageApi.onChanged.addListener((changes, area) => {
                 if (area === 'sync' && changes[STORAGE_KEY]) {
-                    applyTheme(changes[STORAGE_KEY].newValue);
+                    applyTheme(changes[STORAGE_KEY].newValue || DEFAULT_THEME);
                 }
             });
         } else {
