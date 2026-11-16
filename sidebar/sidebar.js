@@ -1,11 +1,18 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  * If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+// storage.session té ~10 MB a Chrome i el base64 n'infla el contingut un 33 %:
+// per sobre d'aquesta mida el visor no hi cap i no val la pena ni codificar-lo.
+const MAX_PDF_VIEWER_BYTES = 7 * 1024 * 1024;
+
 function arrayBufferToBase64(buffer) {
     const bytes = new Uint8Array(buffer);
+    // Per blocs: String.fromCharCode amb tots els bytes de cop desborda la pila,
+    // i concatenar d'un en un fa còpies de tot el text acumulat.
+    const CHUNK = 0x8000;
     let binary = "";
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
+    for (let i = 0; i < bytes.byteLength; i += CHUNK) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
     }
     return btoa(binary);
 }
@@ -269,7 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const buffer = await file.arrayBuffer();
                 // Clonar el buffer abans de passar-lo a extractPdfText: pdf.js el pot
                 // transferir al worker (via postMessage) i detachar l'original.
-                const viewerBuffer = buffer.slice(0);
+                const viewerFits = file.size <= MAX_PDF_VIEWER_BYTES;
+                const viewerBuffer = viewerFits ? buffer.slice(0) : null;
                 if (typeof extractPdfText !== "function") {
                     throw new Error("pdf-extract no carregat (vendor/pdf.min.js)");
                 }
@@ -282,23 +290,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Obre el PDF en una pestanya per consultar-lo via visor personalitzat.
                 // Usem storage.session (compartit entre pàgines d'extensió) per passar
                 // el buffer, ja que blob: URLs no funcionen al visor nadiu de Firefox.
-                let viewerKey = `pdfViewer:${Date.now()}`;
-                const b64 = arrayBufferToBase64(viewerBuffer);
-                try {
-                    // El visor ja no neteja en tancar-se per Ctrl+W/la X (recarregar ha de poder
-                    // reobrir-lo): els PDF de visors anteriors s'esborren aquí perquè no
-                    // s'acumulin i esgotin la quota de storage.session (~10 MB a Chrome).
+                let viewerKey = viewerFits ? `pdfViewer:${Date.now()}` : null;
+                if (viewerKey) {
                     try {
-                        const all = await ext.storage.session.get(null);
-                        const stale = Object.keys(all || {}).filter(k => k.startsWith("pdfViewer:"));
-                        if (stale.length) await ext.storage.session.remove(stale);
-                    } catch { /* sense neteja: es desa igualment */ }
-                    await ext.storage.session.set({ [viewerKey]: b64 });
-                } catch (sessionErr) {
-                    console.warn("[PDF picker] storage.session.set failed, skipping viewer:", sessionErr);
-                    // Si storage.session no pot desar-lo (límit de mida), simplement no
-                    // obrim el visor. El resum es genera igualment.
-                    viewerKey = null;
+                        const b64 = arrayBufferToBase64(viewerBuffer);
+                        // El visor ja no neteja en tancar-se per Ctrl+W/la X (recarregar ha de poder
+                        // reobrir-lo): els PDF de visors anteriors s'esborren aquí perquè no
+                        // s'acumulin i esgotin la quota de storage.session (~10 MB a Chrome).
+                        try {
+                            const all = await ext.storage.session.get(null);
+                            const stale = Object.keys(all || {}).filter(k => k.startsWith("pdfViewer:"));
+                            if (stale.length) await ext.storage.session.remove(stale);
+                        } catch { /* sense neteja: es desa igualment */ }
+                        await ext.storage.session.set({ [viewerKey]: b64 });
+                    } catch (sessionErr) {
+                        console.warn("[PDF picker] storage.session.set failed, skipping viewer:", sessionErr);
+                        // Si storage.session no pot desar-lo (límit de mida), simplement no
+                        // obrim el visor. El resum es genera igualment.
+                        viewerKey = null;
+                    }
                 }
                 if (viewerKey) {
                     ext.tabs.create({

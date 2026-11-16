@@ -1702,6 +1702,29 @@ test("PDF local - en obrir un segon PDF, el del visor anterior s'esborra de stor
     } finally { h.close(); }
 });
 
+test("PDF local - un fitxer massa gran per a storage.session se salta el visor però es resumeix", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true }, modelReply: "Resum." });
+    try {
+        h.window.extractPdfText = async () => ({ title: "Gran", text: "Text. ".repeat(40) });
+        await pickPdf(h, "gran.pdf", 8 * 1024 * 1024);
+        await h.flush(30);
+        const keys = Object.keys(await h.storage.session.get(null)).filter(k => k.startsWith("pdfViewer:"));
+        assert.equal(keys.length, 0, "no s'ha de codificar ni desar un PDF que no hi cap");
+        assert.equal(h.calls.tabsCreate.length, 0, "sense visor");
+        assert.equal(h.calls.fetches.filter(f => String(f.url).includes("generativelanguage")).length, 1, "el resum es genera igualment");
+    } finally { h.close(); }
+});
+
+test("PDF local - un fitxer petit continua obrint el visor", async () => {
+    const h = await loadSidebar({ local: { apiKey: "AIza_test" }, sync: { enablePdf: true }, modelReply: "Resum." });
+    try {
+        h.window.extractPdfText = async () => ({ title: "Petit", text: "Text. ".repeat(40) });
+        await pickPdf(h, "petit.pdf", 100);
+        await h.flush(30);
+        assert.equal(h.calls.tabsCreate.length, 1);
+    } finally { h.close(); }
+});
+
 // ---------------------------------------------------------------------------
 // Revisió: memòria cau i preferències d'estil, refinats, i post-procés del camí desat
 // ---------------------------------------------------------------------------
