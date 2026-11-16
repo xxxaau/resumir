@@ -22,7 +22,7 @@ Tractaré el report amb confidencialitat i faré un esforç per abordar-lo ràpi
 
 - **Ubicació:** `storage.local` (no sincronitzada entre dispositius)
 - **Transmissió:** Únicament a través de header `x-goog-api-key` a `generativelanguage.googleapis.com`
-- **Visibilitat:** Mascarada als inputs de configuració (`type="password"`)
+- **Visibilitat:** Mascarada als camps de configuració amb CSS (`-webkit-text-security`) sobre un camp de text, no `type="password"`: així el navegador no ofereix desar la clau al seu gestor de contrasenyes
 - **NO:** Mai no es registra, no entra en URLs, no es sintetitza a l'IA
 
 ### Contingut de la pàgina
@@ -39,7 +39,9 @@ Tractaré el report amb confidencialitat i faré un esforç per abordar-lo ràpi
   - `https://*` (article fetch per a Hacker News — opcional, user-triggered; també PDFs remots HTTPS — vegeu secció PDF)
   - Obsidian: no és una connexió de xarxa — s'obre l'URI local `obsidian://`
 
-- **Proteccions SSRF:** Denylist de rangs privats (localhost, RFC1918, link-local) en fetches d'articles
+- **Proteccions SSRF (enllaç d'article de Hacker News):** només `https:` i sense port explícit; es rebutgen les IP literals (IPv4 i IPv6), els hosts sense punt (`localhost`, `metadata`…) i els sufixos de xarxa local (`.localhost`, `.local`, `.internal`, `.lan`, `.localdomain`, `.intranet`, `.home.arpa`). La URL final després de les redireccions es torna a validar amb la mateixa regla.
+  - **Risc residual acceptat:** un nom DNS públic que resol a una IP privada (p. ex. `*.nip.io`) no es detecta, perquè el navegador no permet resoldre DNS. El fetch va sense credencials i el resultat no torna a l'origen: només alimenta el resum de l'usuari. Una redirecció pot fer un GET intermedi a un host intern abans de la validació (el cos no es llegeix).
+  - Els PDFs de la pestanya no passen per aquest guard: la URL ve de la pestanya que l'usuari ha obert.
 
 ### Suport PDF i política CSP
 
