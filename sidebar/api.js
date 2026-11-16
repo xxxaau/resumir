@@ -212,10 +212,12 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
                 : "[012] Gemini no ha retornat cap text. Torna-ho a provar o prova amb un altre model.");
         }
 
+        // null (no 0) quan l'API no envia usageMetadata: així el cridant sap que ha
+        // d'estimar en lloc de registrar un ús de 0 tokens.
         return {
-            inputTokens:  lastUsageMeta?.promptTokenCount           ?? 0,
-            outputTokens: lastUsageMeta?.candidatesTokenCount        ?? 0,
-            cacheTokens:  lastUsageMeta?.cachedContentTokenCount     ?? 0,
+            inputTokens:  lastUsageMeta?.promptTokenCount           ?? null,
+            outputTokens: lastUsageMeta?.candidatesTokenCount        ?? null,
+            cacheTokens:  lastUsageMeta?.cachedContentTokenCount     ?? null,
         };
     } finally {
         clearTimeout(idleTimeoutId);

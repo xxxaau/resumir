@@ -338,6 +338,28 @@ test("startSummary - una generació aturada que es desperta tard no trepitja l'e
     assert.deepEqual(saved, [{ url: "seleccio:https://example.com", summary: "AB" }]);
 });
 
+test("startSummary - sense usageMetadata s'estimen tokens enters (no 0 ni decimals)", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let stats = null;
+    setupGlobals({
+        saveUsageStats: async (input, output) => { stats = { input, output }; return {}; },
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk) => {
+            onChunk("Un resum de longitud 33 caracters.");   // sense onUsage
+            return { inputTokens: null, outputTokens: null, cacheTokens: null };
+        },
+    });
+
+    await startSummary(makeCtx(), null, false, false, true);
+
+    assert.ok(stats, "saveUsageStats ha de ser cridada");
+    for (const v of [stats.input, stats.output]) {
+        assert.ok(Number.isInteger(v) && v > 0, `s'esperava un enter > 0, és ${v}`);
+    }
+});
+
 // ---------------------------------------------------------------------------
 // Golden path: genera resum i desa a caché
 // ---------------------------------------------------------------------------

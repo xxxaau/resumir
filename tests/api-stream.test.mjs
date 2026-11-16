@@ -131,16 +131,16 @@ test("callGeminiStream - usageMetadata crida onUsage correctament", async () => 
 });
 
 // ---------------------------------------------------------------------------
-// usageMetadata absent → retorna zeros
+// usageMetadata absent → retorna null (el cridant estima; un 0 es desaria com a ús real)
 // ---------------------------------------------------------------------------
-test("callGeminiStream - sense usageMetadata retorna zeros", async () => {
+test("callGeminiStream - sense usageMetadata retorna null, no zeros", async () => {
     const payload = dataLine({ candidates: [{ content: { parts: [{ text: "x" }] } }] });
     mockFetch(makeStream(payload));
 
     const result = await callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "", "", ABORT, () => {}, null);
-    assert.equal(result.inputTokens, 0);
-    assert.equal(result.outputTokens, 0);
-    assert.equal(result.cacheTokens, 0);
+    assert.equal(result.inputTokens, null);
+    assert.equal(result.outputTokens, null);
+    assert.equal(result.cacheTokens, null);
 });
 
 // ---------------------------------------------------------------------------
