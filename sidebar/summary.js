@@ -296,9 +296,12 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 if (isCachedConceptMap) {
                     contentDiv.replaceChildren(renderMarkmapInteractive(displayText, currentMetadata.title, currentMetadata.url));
                 } else if (isCachedAnki) {
-                    // Restaura l'estat Anki des de caché
+                    // Restaura l'estat Anki des de caché. El text original de la pàgina
+                    // no es persisteix: regenerar amb contingut equivocat (o sense) seria
+                    // pitjor que no oferir-ho, així que amaguem els controls, com fa
+                    // l'Historial (history.js).
                     setAnkiCards(parseAnkiCards(displayText));
-                    renderAnkiPanel(buildAnkiCtx(ctx));
+                    renderAnkiPanel({ ...buildAnkiCtx(ctx), canGenerateMore: false });
                 } else {
                     contentDiv.replaceChildren(formatTextToFragment(displayText));
                 }

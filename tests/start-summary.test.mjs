@@ -226,6 +226,68 @@ test("startSummary - retorna el resum de caché si existeix", async () => {
     assert.equal(ctx.currentMetadata.summary, "Resum de la caché");
 });
 
+test("startSummary - Anki des de memòria cau: renderAnkiPanel amb canGenerateMore:false", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let captured = null;
+    setupGlobals({
+        getSummaryCache: async () => ({
+            title: "T",
+            url: "https://example.com",
+            type: "anki",
+            summary: '<!--anki-->\n[{"q":"pregunta","a":"resposta"}]',
+            model: "gemini-2.0-flash",
+            timestamp: new Date().toISOString(),
+        }),
+    });
+    global.DEFAULT_ANKI_PACKET = 5;
+    global.DEFAULT_ANKI_LANG = "ca";
+    global.DEFAULT_ANKI_PROMPT = "Targetes {{lang}} {{count}}.";
+    global.parseAnkiCards = () => [{ q: "pregunta", a: "resposta" }];
+    global.setAnkiCards = () => {};
+    global.renderAnkiPanel = (c) => { captured = c; };
+
+    await startSummary(makeCtx(), null, false, false, true, false, false, true);
+
+    assert.ok(captured, "renderAnkiPanel ha d'haver-se cridat");
+    // Sense el text original de la pàgina (no es persisteix) no es pot regenerar.
+    assert.equal(captured.canGenerateMore, false);
+});
+
+test("startSummary - Anki en viu: el panell conserva «Generar més» i guarda el text de la pàgina", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let captured = null;
+    setupGlobals({
+        getSummaryCache: async () => null,
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk) => {
+            onChunk('[{"q":"pregunta","a":"resposta"}]');
+            return { inputTokens: 1, outputTokens: 1, cacheTokens: 0 };
+        },
+    });
+    global.DEFAULT_ANKI_PACKET = 5;
+    global.DEFAULT_ANKI_LANG = "ca";
+    global.DEFAULT_ANKI_PROMPT = "Targetes {{lang}} {{count}}.";
+    global.parseAnkiCards = () => [{ q: "pregunta", a: "resposta" }];
+    global.setAnkiCards = () => {};
+    global.renderAnkiPanel = (c) => { captured = c; };
+    const prevWindow = global.window;
+    global.window = {};
+    try {
+        await startSummary(makeCtx(), null, false, false, true, false, false, true);
+        assert.ok(captured, "renderAnkiPanel ha d'haver-se cridat");
+        assert.notEqual(captured.canGenerateMore, false);
+        assert.equal(typeof captured.onGenerateMore, "function");
+        assert.equal(global.window.__ankiPageText, "Contingut de la pàgina de prova.");
+    } finally {
+        if (prevWindow === undefined) delete global.window; else global.window = prevWindow;
+    }
+});
+
 // ---------------------------------------------------------------------------
 // Golden path: genera resum i desa a caché
 // ---------------------------------------------------------------------------
