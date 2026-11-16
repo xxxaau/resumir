@@ -545,6 +545,32 @@ test("getPageContent - Twitter/X usa el scrape de tweets com a via primària", a
     assert.ok(!result.text.includes("NO-S-HA-D-USAR"), "No ha d'usar og:description si el scrape té contingut");
 });
 
+test("getPageContent - dominis que només contenen 'x.com' (vox.com, dropbox.com…) usen Readability, no el connector de X", async () => {
+    for (const url of ["https://www.vox.com/a/1", "https://www.dropbox.com/blog/x", "https://linux.com/news/y", "https://example.com/?next=x.com"]) {
+        const tab = { id: 22, url, title: "Pàgina" };
+        const ext = makeTwitterExt(tab, { scrape: null, og: "NOMES-METADESCRIPCIO" });
+        // Readability (cap dels dos extractors de X) retorna l'article complet.
+        const base = ext.scripting.executeScript;
+        ext.scripting.executeScript = async (inj) => {
+            const src = inj.func ? inj.func.toString() : "";
+            if (src.includes("tweetText") || src.includes("og:description")) return base(inj);
+            return inj.func ? [{ result: "ARTICLE COMPLET" }] : [{ result: undefined }];
+        };
+        global.ext = ext;
+        const result = await getPageContent();
+        assert.equal(result.text, "ARTICLE COMPLET", `${url} no ha de passar pel connector de X`);
+    }
+});
+
+test("getPageContent - subdominis de x.com i twitter.com continuen usant el connector de X", async () => {
+    for (const url of ["https://mobile.twitter.com/u/status/1", "https://www.x.com/u/status/2"]) {
+        const tab = { id: 23, url, title: "Fil" };
+        global.ext = makeTwitterExt(tab, { scrape: "tweet scrapejat" });
+        const result = await getPageContent();
+        assert.ok(result.text.includes("tweet scrapejat"), url);
+    }
+});
+
 test("getPageContent - YouTube: si timedtext torna buit (sense pot), agafa els subtítols de la petició del reproductor", async () => {
     // Cas real (2026): els subtítols automàtics ja no es descarreguen amb la baseUrl (200 sense cos);
     // el reproductor sí que els demana amb pot. La Via B2 en reutilitza la URL des de la pàgina.

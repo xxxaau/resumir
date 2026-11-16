@@ -62,6 +62,24 @@ async function executeScriptSafe(injection) {
 }
 
 /**
+ * Comprova si una URL pertany a un lloc (hostname igual o subdomini) i,
+ * opcionalment, a una ruta. Evita els falsos positius de `includes()`: p. ex.
+ * "vox.com" o "dropbox.com" contenen "x.com" però no són X.
+ *
+ * @param {string} url
+ * @param {string} domain Domini sense subdomini (p. ex. "x.com").
+ * @param {string} [pathPrefix] Prefix de ruta requerit (p. ex. "/watch").
+ * @returns {boolean}
+ */
+function urlIsOnSite(url, domain, pathPrefix) {
+    let u;
+    try { u = new URL(url); } catch { return false; }
+    const host = u.hostname.toLowerCase();
+    if (host !== domain && !host.endsWith("." + domain)) return false;
+    return !pathPrefix || u.pathname.startsWith(pathPrefix);
+}
+
+/**
  * Comprova si un hostname és una IP privada/reservada (guard SSRF).
  * Comparació per octets (clara i correcta) en lloc de màscares de bits.
  */
@@ -280,7 +298,7 @@ async function getPageContent() {
     }
 
     // HACKER NEWS SPECIAL LOGIC
-    if (tabUrl.includes("news.ycombinator.com/item")) {
+    if (urlIsOnSite(tabUrl, "news.ycombinator.com", "/item")) {
         try {
             const hnResult = await executeScriptSafe({
                 target: { tabId: tabId },
@@ -305,7 +323,7 @@ async function getPageContent() {
     }
     
     // YOUTUBE SPECIAL LOGIC
-    else if (tabUrl.includes("youtube.com/watch")) {
+    else if (urlIsOnSite(tabUrl, "youtube.com", "/watch")) {
         let noTranscript = false;
         try {
             let transcriptText = "";
@@ -791,7 +809,7 @@ async function getPageContent() {
     }
     
     // LINKEDIN SPECIAL LOGIC
-    else if (tabUrl.includes("linkedin.com/posts/") || tabUrl.includes("linkedin.com/feed/update/")) {
+    else if (urlIsOnSite(tabUrl, "linkedin.com", "/posts/") || urlIsOnSite(tabUrl, "linkedin.com", "/feed/update/")) {
         try {
             const linkedinResult = await executeScriptSafe({
                 target: { tabId: tabId },
@@ -809,7 +827,7 @@ async function getPageContent() {
     }
 
     // TWITTER / X SPECIAL LOGIC
-    else if (tabUrl.includes("twitter.com") || tabUrl.includes("x.com")) {
+    else if (urlIsOnSite(tabUrl, "twitter.com") || urlIsOnSite(tabUrl, "x.com")) {
         try {
             // Via primària: scrape directe dels tweets renderitzats. Captura el fil
             // sencer que el DOM tingui carregat (X virtualitza i carrega tweets a
