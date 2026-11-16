@@ -288,6 +288,56 @@ test("startSummary - Anki en viu: el panell conserva «Generar més» i guarda e
     }
 });
 
+test("startSummary - una generació aturada que es desperta tard no trepitja l'estat de la nova", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
+    const slowPage = deferred();   // extracció lenta de la generació 1
+    const gate = deferred();       // la generació 2 espera a mig stream
+
+    const saved = [];
+    const generating = [];
+    setupGlobals({
+        saveSummaryCache: async (url, _t, summary) => { saved.push({ url, summary }); return true; },
+        callGeminiStream: async (_k, _m, _p, _t, _s, onChunk) => {
+            onChunk("A");
+            await gate.promise;
+            onChunk("B");
+            return { inputTokens: 1, outputTokens: 1, cacheTokens: 0 };
+        },
+    });
+    global.setGeneratingState = (g) => { generating.push(g); };
+    global.getPageContent = () => slowPage.promise;
+
+    const ctx = makeCtx();
+    let ctrl1 = null;
+    ctx.setAbortController = (c) => { ctrl1 = ctrl1 || c; };
+
+    // Generació 1: «Resumir» la pàgina; es queda esperant l'extracció.
+    const p1 = startSummary(ctx, null, false, false, true);
+    await new Promise(r => setTimeout(r, 5));
+    // L'usuari l'atura i llança «Resumir la selecció» (generació 2).
+    ctrl1.abort();
+    const p2 = startSummary(ctx, "text seleccionat", false, false, true);
+    await new Promise(r => setTimeout(r, 5));
+    const generatingAtStart = generating.length;
+
+    // L'extracció de la generació 1 acaba ara, amb la 2 a mig stream.
+    slowPage.resolve({ title: "Pàgina", url: "https://example.com", text: "text de la pàgina" });
+    await p1;
+    assert.equal(ctx.currentMetadata.url, "seleccio:https://example.com", "la generació 1 no ha de canviar la URL");
+    assert.equal(ctx.currentMetadata.summary, "A", "la generació 1 no ha d'esborrar el resum de la 2");
+    assert.equal(generating.length, generatingAtStart, "la generació 1 no ha de tocar l'estat «generant» de la 2");
+
+    gate.resolve();
+    await p2;
+    assert.equal(ctx.currentMetadata.summary, "AB");
+    assert.equal(ctx.currentMetadata.type, "summary");
+    assert.deepEqual(saved, [{ url: "seleccio:https://example.com", summary: "AB" }]);
+});
+
 // ---------------------------------------------------------------------------
 // Golden path: genera resum i desa a caché
 // ---------------------------------------------------------------------------

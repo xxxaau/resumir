@@ -130,6 +130,11 @@ const STYLE_INSTRUCTIONS = {
     },
 };
 
+// Generació en curs (la darrera que ha començat). `currentMetadata` i la UI són
+// compartits: una generació aturada que es desperta tard (p. ex. esperant
+// l'extracció) no els pot trepitjar si ja n'ha començat una de nova.
+let _activeSummaryGeneration = null;
+
 async function startSummary(ctx, overrideText = null, isDeepDive = false, isScience = false, isUserInitiated = false, isConceptMap = false, isSimple = false, isAnki = false) {
     if (!overrideText && !isDeepDive && !isScience && !isConceptMap && !isSimple && !isAnki && !isUserInitiated) {
         return null;
@@ -161,6 +166,8 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
     
     const abortController = new AbortController();
     const signal = abortController.signal;
+    _activeSummaryGeneration = abortController;
+    const isSuperseded = () => _activeSummaryGeneration !== abortController;
     let receivedChunks = false; // ja ha arribat text d'aquesta generació?
     if (typeof ctx.setAbortController === "function") ctx.setAbortController(abortController);
 
@@ -227,7 +234,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
         if (signal.aborted) {
-            showUserAbort(ctx, false);
+            if (!isSuperseded()) showUserAbort(ctx, false);
             return abortController;
         }
 
@@ -269,6 +276,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // el primer clic regenerava sempre i gastava tokens); només els PDF locals en queden fora.
         if (!isRefresh && !hasLocalPdf && !overrideText) {
             const cachedEntry = await getSummaryCache(currentUrl, requestedType);
+            if (isSuperseded()) return abortController;
             // Una còpia generada amb un altre format/llargada (o sense estil = el per defecte) no val
             const sameStyle = requestedType !== "summary" || (cachedEntry && (cachedEntry.style || "default|medium") === styleKey);
             if (cachedEntry && cachedEntry.summary && sameStyle) {
@@ -358,6 +366,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         } else if (!pageData) {
             pageData = await getPageContent();
         }
+        if (isSuperseded()) return abortController;
 
         currentMetadata.title = pageData.title;
         // Mark selection URLs uniquely so they don't conflict with the full page cache logic
@@ -394,7 +403,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         if (typeof window !== "undefined") window.__ankiPageText = pageData.text;
 
         if (signal.aborted) {
-            showUserAbort(ctx, false);
+            if (!isSuperseded()) showUserAbort(ctx, false);
             return abortController;
         }
 
@@ -478,6 +487,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     if (loadingDiv && !loadingDiv.classList.contains("hidden")) {
                         loadingDiv.classList.add("hidden");
                     }
+                    if (isSuperseded()) return;
                     receivedChunks = true;
                     currentMetadata.summary += chunkText;
                     const now = Date.now();
@@ -565,7 +575,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // per si un futur canvi introdueix un await entre iteracions del bucle
         // — sense això, cauria en un render+cache d'un resum buit en silenci.
         if (signal.aborted) {
-            showUserAbort(ctx, receivedChunks);
+            if (!isSuperseded()) showUserAbort(ctx, receivedChunks);
             return abortController;
         }
 
@@ -643,6 +653,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         }
 
     } catch (err) {
+        if (isSuperseded()) return abortController;
         // Només és una aturada de l'usuari si el SEU signal s'ha avortat: un
         // AbortError sense això ve del timeout d'inactivitat (o de la xarxa).
         if (signal.aborted) {
@@ -681,7 +692,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             }
         }
     } finally {
-        setGeneratingState(false, !!currentMetadata.summary);
+        if (!isSuperseded()) setGeneratingState(false, !!currentMetadata.summary);
     }
 
     return abortController;
