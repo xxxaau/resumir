@@ -22,6 +22,7 @@ const require = createRequire(import.meta.url);
  * @param {boolean} [opts.passwordRequired]       Llança PasswordException a getDocument().promise
  * @param {boolean} [opts.corrupt]                Llança Error genèric a getDocument().promise
  * @param {number}  [opts.loadingDelayMs]         Delay artificial per testejar timeouts
+ * @param {number}  [opts.pageDelayMs]            Delay artificial a cada getPage
  * @param {string}  [opts.title]                  Títol retornat per getMetadata
  */
 function makePdfjsMock({
@@ -30,13 +31,16 @@ function makePdfjsMock({
     passwordRequired = false,
     corrupt = false,
     loadingDelayMs = 0,
+    pageDelayMs = 0,
     title = "Mocked Doc",
 } = {}) {
     let destroyed = false;
+    let taskDestroyed = false;
     return {
         version: "3.11.174-mock",
         GlobalWorkerOptions: { workerSrc: null },
         getDocument: () => ({
+            destroy: async () => { taskDestroyed = true; },
             promise: (async () => {
                 if (loadingDelayMs > 0) await new Promise(r => setTimeout(r, loadingDelayMs));
                 if (passwordRequired) {
@@ -48,17 +52,21 @@ function makePdfjsMock({
                 return {
                     numPages,
                     getMetadata: async () => ({ info: { Title: title } }),
-                    getPage: async (i) => ({
-                        getTextContent: async () => ({
-                            items: (pageTexts[i - 1] || []).map(s => ({ str: s }))
-                        }),
-                        cleanup: () => {}
-                    }),
+                    getPage: async (i) => {
+                        if (pageDelayMs > 0) await new Promise(r => setTimeout(r, pageDelayMs));
+                        return {
+                            getTextContent: async () => ({
+                                items: (pageTexts[i - 1] || []).map(s => ({ str: s }))
+                            }),
+                            cleanup: () => {}
+                        };
+                    },
                     destroy: () => { destroyed = true; },
                     _wasDestroyed: () => destroyed,
                 };
             })()
-        })
+        }),
+        _wasTaskDestroyed: () => taskDestroyed,
     };
 }
 
@@ -201,13 +209,35 @@ test("extractPdfText: massa pàgines → code=TOO_LARGE", async () => {
     cleanupMocks();
 });
 
-test("extractPdfText: timeout durant loading → code=TIMEOUT", async () => {
+test("extractPdfText: timeout durant loading → code=TIMEOUT i destrueix la tasca", async () => {
+    const mock = makePdfjsMock({ loadingDelayMs: 200 });
+    const { extractPdfText } = installMocks(mock);
+    await assert.rejects(
+        extractPdfText(new ArrayBuffer(8), { timeoutMs: 50 }),
+        (err) => err.code === "TIMEOUT"
+    );
+    assert.equal(mock._wasTaskDestroyed(), true, "loadingTask.destroy() s'ha de cridar");
+    cleanupMocks();
+});
+
+test("extractPdfText: timeout durant el bucle de pàgines → code=TIMEOUT", async () => {
     const { extractPdfText } = installMocks(makePdfjsMock({
-        loadingDelayMs: 200
+        numPages: 3,
+        pageTexts: [["hola"], ["hola"], ["hola"]],
+        pageDelayMs: 120,
     }));
     await assert.rejects(
         extractPdfText(new ArrayBuffer(8), { timeoutMs: 50 }),
         (err) => err.code === "TIMEOUT"
+    );
+    cleanupMocks();
+});
+
+test("extractPdfText: fitxer més gran que maxBytes → code=TOO_BIG_FILE", async () => {
+    const { extractPdfText } = installMocks(makePdfjsMock());
+    await assert.rejects(
+        extractPdfText(new Uint8Array(16), { maxBytes: 8 }),
+        (err) => err.code === "TOO_BIG_FILE" && err.bytes === 16
     );
     cleanupMocks();
 });

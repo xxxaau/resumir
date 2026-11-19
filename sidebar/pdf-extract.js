@@ -13,7 +13,19 @@
 //   INVALID       → PDF corrupt o no és un PDF
 //   SCANNED       → PDF sense capa de text (escanejat)
 //   TOO_LARGE     → Supera MAX_PAGES
+//   TOO_BIG_FILE  → El fitxer supera MAX_BYTES (mida, no pàgines)
 //   TIMEOUT       → El parsing ha excedit timeoutMs
+
+// Límit de memòria del fitxer sencer: 100 MB. Per sobre, el navegador pot
+// quedar-se sense memòria abans d'arribar al límit de pàgines.
+const MAX_PDF_BYTES = 100 * 1024 * 1024;
+
+function _tooBigError(bytes, maxBytes = MAX_PDF_BYTES) {
+    return Object.assign(
+        new Error(`PDF massa gran (${Math.round(bytes / 1024 / 1024)} MB, màxim ${maxBytes / 1024 / 1024} MB)`),
+        { code: "TOO_BIG_FILE", bytes, maxBytes }
+    );
+}
 
 // Estat intern: worker inicialitzat una sola vegada per sessió de sidebar
 let _pdfWorkerInitialized = false;
@@ -111,6 +123,7 @@ async function extractPdfText(urlOrBuffer, options = {}) {
 
     const MAX_PAGES = options.maxPages || 500;
     const MAX_CHARS = options.maxChars || 2_000_000;
+    const MAX_BYTES = options.maxBytes || MAX_PDF_BYTES;
     const TIMEOUT_MS = options.timeoutMs || 60_000;
     const FETCH_TIMEOUT_MS = options.fetchTimeoutMs || 15_000;
 
@@ -130,9 +143,15 @@ async function extractPdfText(urlOrBuffer, options = {}) {
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             // Nota: no validem content-type — alguns servidors retornen tipus
             // genèrics per a PDFs i el header binari serà l'única validació real.
+            const declared = Number(resp.headers?.get?.("content-length"));
+            if (Number.isFinite(declared) && declared > MAX_BYTES) {
+                throw _tooBigError(declared, MAX_BYTES);
+            }
             const arr = await resp.arrayBuffer();
+            if (arr.byteLength > MAX_BYTES) throw _tooBigError(arr.byteLength, MAX_BYTES);
             data = new Uint8Array(arr);
         } catch (e) {
+            if (e?.code === "TOO_BIG_FILE") throw e;
             throw Object.assign(
                 new Error("No s'ha pogut descarregar el PDF: " + (e.message || e)),
                 { code: "FETCH_FAILED", cause: e }
@@ -145,10 +164,13 @@ async function extractPdfText(urlOrBuffer, options = {}) {
         );
     }
 
+    if (data.byteLength > MAX_BYTES) throw _tooBigError(data.byteLength, MAX_BYTES);
+
     // ---- Pas 2: parsing amb timeout global ----
+    let loadingTask = null;
     let pdfDoc;
     try {
-        const loadingTask = pdfjsLib.getDocument({
+        loadingTask = pdfjsLib.getDocument({
             data,
             disableFontFace: true,    // Evita carregar fonts (només extraiem text)
             isEvalSupported: false,   // CSP-friendly: no eval() ni Function()
@@ -168,6 +190,7 @@ async function extractPdfText(urlOrBuffer, options = {}) {
             clearTimeout(timeoutHandle);
         }
     } catch (e) {
+        try { await loadingTask?.destroy(); } catch { /* ignore */ }
         if (e?.code === "TIMEOUT") throw e;
         if (e?.name === "PasswordException") {
             throw Object.assign(new Error("PDF protegit amb contrasenya"), { code: "PASSWORD" });
@@ -197,11 +220,17 @@ async function extractPdfText(urlOrBuffer, options = {}) {
     } catch { /* sense metadades — no és fatal */ }
 
     // ---- Pas 5: extracció pàgina a pàgina ----
+    // El timeout de dalt només cobreix l'obertura; una pàgina pesada podia
+    // deixar el bucle penjat. Comprovem el termini a cada iteració.
+    const deadline = Date.now() + TIMEOUT_MS;
     const pageTexts = [];
     let totalChars = 0;
     let truncated = false;
     try {
         for (let i = 1; i <= totalPages; i++) {
+            if (Date.now() > deadline) {
+                throw Object.assign(new Error("Timeout"), { code: "TIMEOUT" });
+            }
             const page = await pdfDoc.getPage(i);
             const content = await page.getTextContent();
             const pageText = content.items

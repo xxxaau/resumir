@@ -36,6 +36,10 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   l'altra finestra. Un trigger vell (si la barra no s'havia pogut obrir) ja no es reprèn sol.
 - **Enllaços d'article dels fils de Hacker News:** més protecció; ja no es descarreguen adreces
   internes (IP, `localhost`, xarxa local).
+- **PDF molt gran (més de 100 MB):** es rebutja amb un missatge clar en lloc de carregar-lo sencer
+  a memòria. (minor)
+- **PDF que triga massa:** l'extracció s'atura de debò (també durant el bucle de pàgines) i
+  n'allibera els recursos. (minor)
 - **PDF local gran (més de 7 MB):** el visor propi no s'obre (no hi cap), però el resum es genera
   igualment i sense bloquejar la pàgina.
 - **Tokens sense dades de Google:** quan l'API no els envia, s'estimen en lloc de comptar 0. (minor)

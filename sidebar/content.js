@@ -9,11 +9,15 @@
  */
 // Missatges dels errors d'extracció de PDF (una sola taula: abans n'hi havia dues de divergents).
 // Els límits reals són a pdf-extract.js (500 pàgines, 2 M de caràcters).
+// Límit del fitxer sencer, abans de passar-lo a pdf.js (100 MB).
+const MAX_PDF_DOWNLOAD_BYTES = 100 * 1024 * 1024;
+
 const PDF_ERROR_MESSAGES = {
     PASSWORD: "[PDF-010] PDF protegit amb contrasenya. No es pot resumir.",
     INVALID: "[PDF-011] El fitxer no és un PDF vàlid o està corromput.",
     SCANNED: "[PDF-012] PDF escanejat sense capa de text. OCR no suportat encara.",
     TOO_LARGE: "[PDF-013] PDF massa gran: el límit són 500 pàgines.",
+    TOO_BIG_FILE: "[PDF-017] El PDF és massa gran: el límit són 100 MB.",
     TIMEOUT: "[PDF-014] S'ha esgotat el temps en extreure el PDF. Prova amb un fitxer més petit.",
     FETCH_FAILED: "[PDF-015] No s'ha pogut descarregar el PDF.",
     NON_HTTPS: "[PDF-016] PDFs locals i HTTP no es poden descarregar directament. Usa el botó 'Triar un PDF de l'ordinador' de la barra lateral.",
@@ -237,8 +241,22 @@ async function getPageContent() {
                         { code: "FETCH_FAILED" }
                     );
                 }
+                const declared = Number(resp.headers?.get?.("content-length"));
+                if (Number.isFinite(declared) && declared > MAX_PDF_DOWNLOAD_BYTES) {
+                    throw Object.assign(
+                        new Error(`PDF massa gran (${Math.round(declared / 1024 / 1024)} MB)`),
+                        { code: "TOO_BIG_FILE" }
+                    );
+                }
                 buffer = await resp.arrayBuffer();
+                if (buffer.byteLength > MAX_PDF_DOWNLOAD_BYTES) {
+                    throw Object.assign(
+                        new Error(`PDF massa gran (${Math.round(buffer.byteLength / 1024 / 1024)} MB)`),
+                        { code: "TOO_BIG_FILE" }
+                    );
+                }
             } catch (fetchErr) {
+                if (fetchErr?.code === "TOO_BIG_FILE") throw fetchErr;
                 // Intent 2: demanar permís d'amplitud total (<all_urls>) i
                 // reintentar el fetch directe. A Firefox, amb host_permissions,
                 // el fetch() des del sidebar NO té restriccions CORS.
@@ -275,6 +293,12 @@ async function getPageContent() {
                         { code: isLocal ? "NON_HTTPS" : "FETCH_FAILED" }
                     );
                 }
+            }
+            if (buffer.byteLength > MAX_PDF_DOWNLOAD_BYTES) {
+                throw Object.assign(
+                    new Error(`PDF massa gran (${Math.round(buffer.byteLength / 1024 / 1024)} MB)`),
+                    { code: "TOO_BIG_FILE" }
+                );
             }
             console.debug("[PDF] Bytes descarregats:", buffer.byteLength);
 
