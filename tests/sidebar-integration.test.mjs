@@ -1667,6 +1667,69 @@ test("drecera - amb el resum de la pàgina ja a la vista no el torna a generar",
     } finally { h.close(); }
 });
 
+test("drecera - un trigger d'una altra finestra s'ignora", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.window.chrome.runtime.onMessage._fire(
+            { action: "trigger_summary", data: { type: "page", url: "https://example.com/x", windowId: 2, ts: Date.now() } },
+            { id: h.window.chrome.runtime.id }
+        );
+        await sleep(300);
+        assert.equal(h.calls.fetches.length, 0, "no ha de resumir la pàgina d'una altra finestra");
+    } finally { h.close(); }
+});
+
+test("drecera - un trigger caducat s'ignora", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.window.chrome.runtime.onMessage._fire(
+            { action: "trigger_summary", data: { type: "page", url: "https://example.com/x", windowId: 1, ts: Date.now() - 20000 } },
+            { id: h.window.chrome.runtime.id }
+        );
+        await sleep(300);
+        assert.equal(h.calls.fetches.length, 0, "un trigger de fa 20 s no s'ha de processar");
+    } finally { h.close(); }
+});
+
+test("en obrir - un pendingSummary caducat no es resumeix", async () => {
+    const h = await loadSidebar({
+        local: {
+            apiKey: "AIza_test",
+            pendingSummary: { type: "page", url: "https://example.com/x", windowId: 1, ts: Date.now() - 20000 },
+        },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        await sleep(300);
+        assert.equal(h.calls.fetches.length, 0, "no s'ha de reprendre un trigger de fa 20 s");
+    } finally { h.close(); }
+});
+
+test("drecera - un trigger recent de la finestra pròpia sí que es processa", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        h.window.chrome.runtime.onMessage._fire(
+            { action: "trigger_summary", data: { type: "page", url: "https://example.com/x", windowId: 1, ts: Date.now() } },
+            { id: h.window.chrome.runtime.id }
+        );
+        await sleep(400);
+        assert.equal(h.calls.fetches.length, 1, "el trigger vàlid ha de generar el resum");
+    } finally { h.close(); }
+});
+
 test("aturar i tornar a generar - la generació antiga, en acabar tard, no deixa el botó sense poder aturar la nova", async () => {
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },

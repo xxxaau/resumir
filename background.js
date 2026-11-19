@@ -75,7 +75,8 @@ ext.menus.onClicked.addListener(async (info, tab) => {
       if (!text) return;
 
       // 2. Store text for sidebar to pick up if it opens
-      await ext.storage.local.set({ pendingSummary: { type: 'selection', content: text } });
+      const data = { type: 'selection', content: text, windowId: tab.windowId, ts: Date.now() };
+      await ext.storage.local.set({ pendingSummary: data });
 
       await openPromise;
 
@@ -83,7 +84,7 @@ ext.menus.onClicked.addListener(async (info, tab) => {
       try {
           await ext.runtime.sendMessage({
               action: "trigger_summary",
-              data: { type: 'selection', content: text }
+              data
           });
       } catch (e) {
           // Sidebar likely not open or ready yet, storage pickup will handle it
@@ -97,11 +98,12 @@ ext.menus.onClicked.addListener(async (info, tab) => {
 
 // Demana a la sidebar (oberta o per obrir) que resumeixi la pàgina d'una pestanya.
 async function requestPageSummary(tab) {
-  await ext.storage.local.set({ pendingSummary: { type: 'page', url: tab.url } });
+  const data = { type: 'page', url: tab.url, windowId: tab.windowId, ts: Date.now() };
+  await ext.storage.local.set({ pendingSummary: data });
   try {
       await ext.runtime.sendMessage({
           action: "trigger_summary",
-          data: { type: 'page', url: tab.url }
+          data
       });
   } catch (e) {
       // Sidebar likely closed: el pickup per storage ho gestionarà en obrir-se

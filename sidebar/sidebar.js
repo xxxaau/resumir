@@ -874,6 +874,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Context Menu / Message Handling ---
 
     let lastTriggerTime = 0;
+
+    // Els missatges i els canvis de storage arriben a totes les barres obertes.
+    // Cada trigger porta la finestra d'origen i l'instant: descartem els d'una
+    // altra finestra i els que ja han caducat (si open() va fallar).
+    const TRIGGER_MAX_AGE_MS = 10000;
+    let sidebarWindowIdPromise = null;
+    const getSidebarWindowId = () => {
+        if (!sidebarWindowIdPromise) {
+            sidebarWindowIdPromise = (ext.windows && ext.windows.getCurrent)
+                ? ext.windows.getCurrent().then(w => w && typeof w.id === "number" ? w.id : null).catch(() => null)
+                : Promise.resolve(null);
+        }
+        return sidebarWindowIdPromise;
+    };
+    const acceptsTrigger = async (data) => {
+        if (!data) return true;
+        if (typeof data.ts === "number" && Date.now() - data.ts > TRIGGER_MAX_AGE_MS) return false;
+        if (typeof data.windowId === "number") {
+            const myId = await getSidebarWindowId();
+            if (myId !== null && myId !== data.windowId) return false;
+        }
+        return true;
+    };
     
     const boundTrigger = (data) => {
         // Deduplicate triggers (prevent double summary if both message and storage events fire)
@@ -900,15 +923,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ext.runtime.onMessage.addListener((message, sender) => {
         if (sender.id !== ext.runtime.id) return;
         if (message.action === "trigger_summary") {
-            boundTrigger(message.data);
+            acceptsTrigger(message.data).then(ok => { if (ok) boundTrigger(message.data); });
         }
     });
 
     // Check for pending summary on load (context menu while sidebar was closed)
-    ext.storage.local.get("pendingSummary").then(data => {
+    ext.storage.local.get("pendingSummary").then(async data => {
         if (data.pendingSummary) {
-            ext.storage.local.remove("pendingSummary");
-            boundTrigger(data.pendingSummary);
+            await ext.storage.local.remove("pendingSummary");
+            if (await acceptsTrigger(data.pendingSummary)) boundTrigger(data.pendingSummary);
         }
     });
 
@@ -938,7 +961,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ext.storage.onChanged.addListener((changes, area) => {
         if (area === "local" && changes.pendingSummary && changes.pendingSummary.newValue) {
             ext.storage.local.remove("pendingSummary");
-            boundTrigger(changes.pendingSummary.newValue);
+            acceptsTrigger(changes.pendingSummary.newValue).then(ok => {
+                if (ok) boundTrigger(changes.pendingSummary.newValue);
+            });
         }
         if (area === "local" && changes.pendingCacheLoad?.newValue) {
             _handlePendingCacheLoad(changes.pendingCacheLoad.newValue);

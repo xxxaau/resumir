@@ -162,10 +162,10 @@ test("background: menú summarize-selection → desa pendingSummary i envia miss
 
     // Ha de desar el pendingSummary
     const stored = await storageMock.get("pendingSummary");
-    assert.deepEqual(stored.pendingSummary, {
-        type: "selection",
-        content: "Text seleccionat",
-    });
+    assert.equal(stored.pendingSummary.type, "selection");
+    assert.equal(stored.pendingSummary.content, "Text seleccionat");
+    assert.equal(stored.pendingSummary.windowId, 1, "ha de portar la finestra d'origen");
+    assert.equal(typeof stored.pendingSummary.ts, "number", "ha de portar l'instant del trigger");
 
     // Ha d'haver enviat el missatge
     assert.equal(messageSent.length, 1, "sendMessage ha de ser cridat");
@@ -230,10 +230,10 @@ test("background: menú summarize-page → desa pendingSummary i envia missatge"
     assert.equal(sidebarCalls.open.length, 1, "sidebar.open ha de ser cridat");
 
     const stored = await storageMock.get("pendingSummary");
-    assert.deepEqual(stored.pendingSummary, {
-        type: "page",
-        url: "https://example.com/page",
-    });
+    assert.equal(stored.pendingSummary.type, "page");
+    assert.equal(stored.pendingSummary.url, "https://example.com/page");
+    assert.equal(stored.pendingSummary.windowId, 2, "ha de portar la finestra d'origen");
+    assert.equal(typeof stored.pendingSummary.ts, "number", "ha de portar l'instant del trigger");
 
     assert.equal(messageSent[0].data.type, "page");
     assert.equal(messageSent[0].data.url,  "https://example.com/page");
@@ -287,9 +287,14 @@ test("background: la drecera summarize-page obre la sidebar i demana el resum", 
     assert.ok(listeners.command, "ha de registrar commands.onCommand");
     await listeners.command("summarize-page", { windowId: 7, url: "https://example.com/a" });
     assert.deepEqual(sidebarCalls.open, [7]);
-    assert.deepEqual(messageSent.at(-1), { action: "trigger_summary", data: { type: "page", url: "https://example.com/a" } });
+    const sent = messageSent.at(-1);
+    assert.equal(sent.action, "trigger_summary");
+    assert.equal(sent.data.type, "page");
+    assert.equal(sent.data.url, "https://example.com/a");
+    assert.equal(sent.data.windowId, 7);
     const stored = await storageMock.get("pendingSummary");
     assert.equal(stored.pendingSummary.url, "https://example.com/a");
+    assert.equal(stored.pendingSummary.windowId, 7);
 });
 
 test("background: una altra drecera no fa res", async () => {
