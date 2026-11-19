@@ -16,6 +16,7 @@ import { resolve, dirname, relative, extname, posix } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 import { inflateRawSync } from "zlib";
+import { findQueryKeyFetches, isAllowedPublicKeyFetch } from "./lib/security-checks.mjs";
 import { extractReleaseNotes } from "./changelog-lib.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -193,12 +194,10 @@ check("Seguretat: API key via header (no ?key= a URLs de fetch)", () => {
     const hits = [];
     for (const f of JS_FILES) {
         const src = readText(f);
-        const lines = src.split("\n");
-        lines.forEach((line, i) => {
-            if (/fetch\s*\(.*[?&]key=/.test(line)) {
-                hits.push(`${relative(root, f)}:${i + 1} → ${line.trim()}`);
-            }
-        });
+        for (const hit of findQueryKeyFetches(src)) {
+            if (isAllowedPublicKeyFetch(f, hit)) continue;
+            hits.push(`${relative(root, f)}:${hit.line} → ${hit.call}`);
+        }
     }
     if (hits.length) throw new Error(`\n  ${hits.join("\n  ")}`);
     pass("Seguretat: API key via header (no ?key= a URLs de fetch)");

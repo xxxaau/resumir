@@ -613,6 +613,7 @@ async function getPageContent() {
 
                                     if (!params) return { error: 'no params' };
 
+                                    // pre-release-check: allow — clau pública INNERTUBE de YouTube
                                     const resp = await fetch(
                                         `/youtubei/v1/get_transcript?key=${encodeURIComponent(apiKey)}`,
                                         {
