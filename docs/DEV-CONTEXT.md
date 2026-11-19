@@ -33,7 +33,7 @@ npm run lint         # ESLint (0 warnings (`--max-warnings 0`))
 npm run prerelease   # Full automated pre-release audit
 
 # Run a single test file
-node --test tests/stats.test.mjs
+node --test tests/utils.test.mjs
 ```
 
 ## Architecture
@@ -59,7 +59,6 @@ The sidebar is the main UI. Module responsibilities:
 - `content.js` — extracts page text (detects YouTube/HN/standard via Readability.js)
 - `ui.js` — all DOM rendering and plugin visibility
 - `cache.js` — read/write cache to `storage.local`
-- `stats.js` — daily request counts (quota) from `usageHistory`
 - `history.js` — saved-summaries panel; `conceptmap.js` / `markmap-native.js` — concept map; `anki.js` — Anki cards plugin
 - `utils.js` — Obsidian path/content templating, token estimation, Markdown helpers
 
@@ -67,7 +66,7 @@ For **production builds** (Firefox and Chromium), `sidebar/*.js` is bundled into
 
 ### Shared State
 - `storage.sync` — user preferences, theme, plugins config, prompts, selected model, model favorites (`favoriteModels`)
-- `storage.local` — API key (never synced; migrated out of `sync`), summary cache/history, usage stats (`stats`, `usageHistory`, `dailyStats`)
+- `storage.local` — API key (never synced; migrated out of `sync`), summary cache/history, usage stats (`stats`, `usageHistory`)
 - `shared/models.js` — `CURATED_MODELS` array is the single source of truth for available Gemini models
 
 ### Background Service Worker

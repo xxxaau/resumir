@@ -3,7 +3,7 @@
 
 // options/settings-stats.js
 // Secció «Ús» de la configuració: les estadístiques que desa la barra lateral
-// (storage.local: stats, usageHistory, dailyStats), mostrades i esborrables.
+// (storage.local: stats, usageHistory), mostrades i esborrables.
 
 const USAGE_TYPE_LABELS = {
     summary: "Resum", deepdive: "Aprofundiment", science: "Validació científica",
@@ -103,7 +103,7 @@ async function renderUsageStats() {
 async function clearUsageStats() {
     if (!confirm("S'esborraran les estadístiques d'ús (no els resums ni l'historial). No es pot desfer.")) return;
     try {
-        await ext.storage.local.remove(["stats", "usageHistory", "dailyStats"]);
+        await ext.storage.local.remove(["stats", "usageHistory"]);
         showStatus("Estadístiques esborrades.");
     } catch (e) {
         console.error("Error clearing usage stats:", e);

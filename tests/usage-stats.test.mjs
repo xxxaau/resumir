@@ -59,13 +59,13 @@ test("secció «Ús» - sense dades diu que encara no n'hi ha i el botó d'esbor
 });
 
 test("secció «Ús» - esborrar demana confirmació, ho buida i ho diu", async () => {
-    const h = await loadSettings({ local: { stats: { articles: 2, tokens: 10 }, usageHistory: [{ date: new Date().toISOString(), model: "m", inputTokens: 5, outputTokens: 5, type: "summary", latency: 1000 }], dailyStats: { "2026-10-13": 2 } }, confirmAnswer: true });
+    const h = await loadSettings({ local: { stats: { articles: 2, tokens: 10 }, usageHistory: [{ date: new Date().toISOString(), model: "m", inputTokens: 5, outputTokens: 5, type: "summary", latency: 1000 }] }, confirmAnswer: true });
     try {
         h.document.getElementById("clearUsageStats").click();
         await h.flush(20);
         assert.equal(h.calls.confirms.length, 1);
-        const left = await h.storage.local.get(["stats", "usageHistory", "dailyStats"]);
-        assert.deepEqual(Object.values(left).filter(v => v !== undefined), [], "stats, usageHistory i dailyStats esborrats");
+        const left = await h.storage.local.get(["stats", "usageHistory"]);
+        assert.deepEqual(Object.values(left).filter(v => v !== undefined), [], "stats i usageHistory esborrats");
         assert.match(h.document.getElementById("usageSection").textContent, /Encara no hi ha dades/);
     } finally { h.close(); }
 });

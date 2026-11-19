@@ -130,8 +130,6 @@ const extensionGlobals = {
     closeSourcePanel: "readonly",
     // sidebar/markmap-native.js (renderitzador SVG propi)
     markmapNative: "readonly",
-    // sidebar/stats.js
-    getDailyStats: "readonly",
     // sidebar/content.js
     getPageContent: "readonly",
     executeScriptSafe: "readonly",

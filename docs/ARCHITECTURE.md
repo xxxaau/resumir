@@ -73,7 +73,6 @@ The **Resumir** extension is a privacy-first browser extension that summarizes w
 - `summary.js` — Summarization orchestration
 - `history.js` — Summary history management
 - `cache.js` — Local storage caching
-- `stats.js` — Daily request counts (quota)
 - `ui.js` — DOM rendering and plugin visibility
 - `extractors.js` — Functions injected with `executeScript` (extraction, quote highlight)
 - `conceptmap.js` + `markmap-native.js` — Concept map (own SVG renderer)

@@ -280,7 +280,7 @@ async function saveUsageStats(inputTokens, outputTokens, contentType, modelName,
     if (!contentType) contentType = "summary";
     if (cacheTokens === undefined) cacheTokens = 0;
     try {
-        const data = await ext.storage.local.get(["stats", "usageHistory", "dailyStats"]);
+        const data = await ext.storage.local.get(["stats", "usageHistory"]);
         const currentStats = data.stats || { articles: 0, tokens: 0 };
 
         const newStats = {
@@ -305,11 +305,7 @@ async function saveUsageStats(inputTokens, outputTokens, contentType, modelName,
 
         if (history.length > 1000) history.pop();
 
-        const todayKey = new Date().toISOString().slice(0, 10);
-        const dailyStats = data.dailyStats || {};
-        dailyStats[todayKey] = (dailyStats[todayKey] || 0) + 1;
-
-        await ext.storage.local.set({ stats: newStats, usageHistory: history, dailyStats });
+        await ext.storage.local.set({ stats: newStats, usageHistory: history });
         return newStats;
     } catch (e) {
         console.error("Error saving statistics:", e);
