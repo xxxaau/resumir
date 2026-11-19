@@ -138,6 +138,7 @@ function setupGlobals(overrides = {}) {
 // Globals Anki i defaults com a globals del bundle
 Object.assign(global, require("../sidebar/anki.js"));
 Object.assign(global, require("../shared/defaults.js"));
+Object.assign(global, require("../sidebar/utils.js"));
 
 // El renderAnkiPanel real crida document.createElement → substituïm per un stub
 // que deixa que setAnkiCards (real) s'executi sense problemes de DOM
@@ -417,4 +418,86 @@ test("anki - generateMoreAnkiCards: una crida concurrent mentre la primera és e
 
     assert.equal(callCount, 1,
         "callGeminiStream NOMÉS s'ha de cridar un cop; la crida concurrent s'ha d'ignorar");
+});
+
+// ---------------------------------------------------------------------------
+// N06: «Generar més» amb text llarg → es trunca segons el context del model
+// ---------------------------------------------------------------------------
+
+test("anki - generateMoreAnkiCards: trunca el text segons el context window del model", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash", ankiLang: "ca", ankiPacket: 5 });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let capturedText = null;
+    setupGlobals({
+        callGeminiStream: async (_k, _m, _p, text, _s, onChunk) => {
+            capturedText = text;
+            onChunk('[{"q":"NOVA?","a":"R"}]');
+            return { inputTokens: 10, outputTokens: 5, cacheTokens: 0 };
+        },
+    });
+    // Context petit per forçar el truncament (80 % de 100 = 80 tokens ≈ 320 chars)
+    global.CURATED_MODELS = [{ id: "gemini-2.0-flash", contextWindow: 100 }];
+    global.window = {
+        __ankiPageText: "x".repeat(5000),
+        __ankiMeta: { url: "https://example.com/a", title: "A" },
+    };
+    global.setAnkiCards([]);
+    const ctx = { contentDiv: makeEl(), errorDiv: makeEl(), getGlobalConfig: () => ({}) };
+
+    await global.generateMoreAnkiCards(ctx, "");
+
+    assert.ok(capturedText.includes("Text truncated due to model limits"),
+        "el text enviat ha d'anar truncat per al model");
+    assert.ok(capturedText.endsWith("</UNTRUSTED_CONTENT>"),
+        "el bloc UNTRUSTED no pot quedar obert");
+});
+
+// ---------------------------------------------------------------------------
+// N06: fallback de models, estadístiques i persistència de les targetes noves
+// ---------------------------------------------------------------------------
+
+test("anki - generateMoreAnkiCards: si el model preferit falla, prova el següent i desa a caché i stats", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "m-bad", ankiLang: "ca", ankiPacket: 5 });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    const calls = [];
+    let cached = null;
+    let stats = null;
+    setupGlobals({
+        buildFallbackList: () => ["m-bad", "m-good"],
+        callGeminiStream: async (_k, model, _p, _t, _s, onChunk) => {
+            calls.push(model);
+            if (model === "m-bad") throw new Error("quota exceeded");
+            onChunk('[{"q":"NOVA?","a":"R"}]');
+            return { inputTokens: 50, outputTokens: 20, cacheTokens: 0 };
+        },
+        saveSummaryCache: async (url, title, content, model, input, output, type) => {
+            cached = { url, title, content, model, input, output, type };
+            return true;
+        },
+        saveUsageStats: async (input, output, type, model) => {
+            stats = { input, output, type, model };
+            return {};
+        },
+    });
+    global.window = {
+        __ankiPageText: "Contingut de prova.",
+        __ankiMeta: { url: "https://example.com/a", title: "A" },
+    };
+    global.setAnkiCards([]);
+    const ctx = { contentDiv: makeEl(), errorDiv: makeEl(), getGlobalConfig: () => ({}) };
+
+    await global.generateMoreAnkiCards(ctx, "");
+
+    assert.deepEqual(calls, ["m-bad", "m-good"], "ha de provar el model següent");
+    assert.equal(global.getAnkiCards().length, 1, "la targeta del model bo s'ha d'afegir");
+    assert.ok(cached, "s'ha de desar a la memòria cau");
+    assert.equal(cached.type, "anki");
+    assert.equal(cached.model, "m-good");
+    assert.ok(cached.content.startsWith("<!--anki-->\n"));
+    assert.ok(cached.content.includes("NOVA?"), "la caché ha de contenir la targeta nova");
+    assert.deepEqual(stats, { input: 50, output: 20, type: "anki", model: "m-good" });
 });

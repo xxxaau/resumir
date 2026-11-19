@@ -140,6 +140,7 @@ function setupGlobals(overrides = {}) {
 
 // Carreguem el mòdul un cop, amb globals ja configurats
 setupGlobals();
+Object.assign(global, require("../sidebar/utils.js"));
 await syncMock.set({ modelName: "gemini-2.0-flash" });
 await localMock.set({ apiKey: "AIza_test_key" });
 

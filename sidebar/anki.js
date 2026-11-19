@@ -434,7 +434,7 @@ async function generateMoreAnkiCards(ctx, focusText) {
         try {
             // Clau d'API (storage.local) i configuració del model (storage.sync)
             const { apiKey } = await ext.storage.local.get(["apiKey"]);
-            const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang", "ankiPacket"]);
+            const cfg = await ext.storage.sync.get(["modelName", "ankiPrompt", "ankiLang", "ankiPacket", "favoriteModels"]);
             const modelName = cfg.modelName || DEFAULT_MODEL_ID;
             const base = cfg.ankiPrompt || DEFAULT_ANKI_PROMPT;
             const lang = cfg.ankiLang || DEFAULT_ANKI_LANG;
@@ -457,14 +457,40 @@ async function generateMoreAnkiCards(ctx, focusText) {
             // forma explícita per part del cridant.
             const abortController = new AbortController();
 
-            // Acumulem la resposta en streaming
+            // Mateixa cadena de fallback que el resum: si el model preferit
+            // falla (quota, 400 per context…), es prova el següent. El text
+            // es trunca per model perquè un context window més petit no
+            // provoqui un 400 no reintentable.
+            const modelsToTry = (typeof buildFallbackList === "function")
+                ? buildFallbackList(modelName, cfg.favoriteModels || [])
+                : [modelName];
+            if (modelsToTry.length === 0) modelsToTry.push(modelName);
+
             let raw = "";
-            try {
-                await callGeminiStream(apiKey, modelName, prompt, pageText, abortController.signal,
-                    (chunk) => { raw += chunk; }, () => {});
-            } catch (e) {
+            let apiUsage = null;
+            let usedModel = modelName;
+            let lastPromptText = pageText;
+            let lastError = null;
+            const startedAt = Date.now();
+            for (const tryModel of modelsToTry) {
+                raw = "";
+                apiUsage = null;
+                lastPromptText = (typeof truncateTextForModel === "function")
+                    ? truncateTextForModel(pageText, tryModel)
+                    : pageText;
+                try {
+                    apiUsage = await callGeminiStream(apiKey, tryModel, prompt, lastPromptText, abortController.signal,
+                        (chunk) => { raw += chunk; }, () => {});
+                    usedModel = tryModel;
+                    lastError = null;
+                    break;
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+            if (lastError) {
                 if (ctx.errorDiv) {
-                    ctx.errorDiv.textContent = "Error generant més targetes: " + e.message;
+                    ctx.errorDiv.textContent = "Error generant més targetes: " + lastError.message;
                     ctx.errorDiv.classList.remove("hidden");
                 }
                 return;
@@ -484,6 +510,32 @@ async function generateMoreAnkiCards(ctx, focusText) {
                 showAnkiNotice(NO_MORE_MSG);
                 return;
             }
+
+            // Persistència: les targetes afegides s'han de veure en reobrir el
+            // panell (abans només vivien a memòria i es perdien). També
+            // compten a les estadístiques d'ús, com la generació inicial.
+            const meta = (typeof window !== "undefined" && window.__ankiMeta) || {};
+            const inputTokens  = apiUsage?.inputTokens  ?? Math.ceil(lastPromptText.length / 4);
+            const outputTokens = apiUsage?.outputTokens ?? Math.ceil(raw.length / 4);
+            try {
+                if (meta.url && typeof saveSummaryCache === "function") {
+                    const allCards = getAnkiCards().map(c => ({ q: c.q, a: c.a }));
+                    await saveSummaryCache(
+                        meta.url, meta.title || "", "<!--anki-->\n" + JSON.stringify(allCards),
+                        usedModel, inputTokens, outputTokens, "anki"
+                    );
+                }
+                if (typeof saveUsageStats === "function") {
+                    await saveUsageStats(
+                        inputTokens, outputTokens, "anki", usedModel,
+                        Date.now() - startedAt, meta.title || "", meta.url || "",
+                        apiUsage?.cacheTokens ?? 0
+                    );
+                }
+            } catch (e) {
+                console.warn("Anki: no s'han pogut desar les targetes noves:", e);
+            }
+
             renderAnkiPanel(ctx);
         } finally {
             if (loadingDiv) loadingDiv.classList.add("hidden");

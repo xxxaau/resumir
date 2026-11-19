@@ -400,7 +400,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             systemPrompt += "\n\nEl text conté marques [Pàgina N]. Quan una idea provingui d'una pàgina concreta, afegeix al final del punt la cita (p. N), amb el número de la marca [Pàgina N] i no el número imprès al document. Si ve de diverses pàgines, posa una cita per pàgina, p. ex. (p. 3) (p. 5), mai intervals.";
         }
         // Desa el text brut per a la regeneració Anki (Task 6). Guard per a tests Node.
-        if (typeof window !== "undefined") window.__ankiPageText = pageData.text;
+        if (typeof window !== "undefined") {
+            window.__ankiPageText = pageData.text;
+            window.__ankiMeta = { url: currentMetadata.url, title: currentMetadata.title };
+        }
 
         if (signal.aborted) {
             if (!isSuperseded()) showUserAbort(ctx, false);
@@ -416,18 +419,10 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         // per evitar dep. creuada amb api.js en tests.
         // El ratio chars/token canvia de 3.5 (original) a 4 per aproximació més precisa per Gemini.
         let wasTruncated = false;
+        // Lògica compartida amb Anki «Generar més» (sidebar/utils.js).
         function truncateForModel(text, modelId) {
-            const modelEntry = CURATED_MODELS.find(m => m.id === modelId);
-            const safeLimit = Math.floor(((modelEntry && modelEntry.contextWindow) || 200_000) * 0.8);
-            if (estimateTokens(text) > safeLimit) {
-                wasTruncated = true;
-                const charLimit = safeLimit * 4; // ~4 chars/token (abans era 3.5 — intencionadament canviat)
-                // El tall pot caure abans del tancament </UNTRUSTED_CONTENT> del
-                // wrapper (unes línies més amunt) — el reafegim explícitament
-                // perquè el bloc no quedi mai obert de cara al model.
-                return text.substring(0, charLimit) + "\n\n[... Text truncated due to model limits ...]\n</UNTRUSTED_CONTENT>";
-            }
-            return text;
+            if (typeof truncateTextForModel !== "function") return text;
+            return truncateTextForModel(text, modelId, () => { wasTruncated = true; });
         }
 
         // 3. Call Gemini API (with Auto-Fallback on Quota Exceeded)

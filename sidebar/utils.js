@@ -195,6 +195,27 @@ function estimateTokens(text) {
     return Math.ceil(text.length / 4);
 }
 
+/**
+ * Trunca el text perquè càpiga al context window del model (80 % de marge),
+ * reafegint el tancament del bloc UNTRUSTED si el tall el deixa obert.
+ * @param {string} text
+ * @param {string} modelId
+ * @param {Function} [onTruncated] - Es crida si s'ha hagut de truncar
+ * @returns {string}
+ */
+function truncateTextForModel(text, modelId, onTruncated) {
+    const models = (typeof CURATED_MODELS !== "undefined" && Array.isArray(CURATED_MODELS))
+        ? CURATED_MODELS : [];
+    const modelEntry = models.find(m => m.id === modelId);
+    const safeLimit = Math.floor(((modelEntry && modelEntry.contextWindow) || 200_000) * 0.8);
+    if (estimateTokens(text) > safeLimit) {
+        if (onTruncated) onTruncated();
+        const charLimit = safeLimit * 4;
+        return text.substring(0, charLimit) + "\n\n[... Text truncated due to model limits ...]\n</UNTRUSTED_CONTENT>";
+    }
+    return text;
+}
+
 // Export for Node.js testing environment if needed, otherwise global in browser
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -207,6 +228,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getSourceHttpUrl,
         extractExecutiveSummary,
         estimateTokens,
+        truncateTextForModel,
         textFragmentUrl,
         parseThemeColor,
         firefoxCardColor

@@ -36,6 +36,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   l'altra finestra. Un trigger vell (si la barra no s'havia pogut obrir) ja no es reprèn sol.
 - **Enllaços d'article dels fils de Hacker News:** més protecció; ja no es descarreguen adreces
   internes (IP, `localhost`, xarxa local).
+- **Anki «Generar més» / «Afinar»:** les targetes noves es desen i es tornen a veure en reobrir
+  el panell, compten a les estadístiques d'ús, i si el model preferit falla es prova el següent.
+  En pàgines llargues, el text s'ajusta al límit del model. (minor)
 - **PDF molt gran (més de 100 MB):** es rebutja amb un missatge clar en lloc de carregar-lo sencer
   a memòria. (minor)
 - **PDF que triga massa:** l'extracció s'atura de debò (també durant el bucle de pàgines) i

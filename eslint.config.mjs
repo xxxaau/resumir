@@ -22,6 +22,7 @@ const extensionGlobals = {
     formatObsidianContent: "readonly",
     formatMarkdownContent: "readonly",
     estimateTokens: "readonly",
+    truncateTextForModel: "readonly",
     firefoxCardColor: "readonly",
     textFragmentUrl: "readonly",
     // shared/models.js
@@ -60,6 +61,7 @@ const extensionGlobals = {
     // sidebar/summary.js
     startSummary: "readonly",
     classifyError: "readonly",
+    buildFallbackList: "readonly",
     applyBionicStyles: "readonly",
     handleTrigger: "readonly",
     // sidebar/ui.js
