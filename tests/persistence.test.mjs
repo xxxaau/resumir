@@ -169,7 +169,8 @@ test("Actualització — stats i usageHistory es preserven", async () => {
 
     // Historial preservat: ara en té 51
     assert.equal(data.usageHistory.length, 51, "L'historial ha de tenir 51 entrades (50 prèvies + 1 nova)");
-    assert.equal(data.usageHistory[0].url, "https://new.com", "La més recent va primer");
+    assert.equal(data.usageHistory[0].model, "gemini-2.0-flash-lite", "La més recent va primer");
+    assert.equal("url" in data.usageHistory[0], false, "La nova entrada no desa URL");
     // Les 50 entrades originals segueixen totes presents (Article 0..49)
     const titles = new Set(data.usageHistory.map(e => e.title));
     assert.ok(titles.has("Article 0"), "Article 0 (més recent de les originals) segueix present");

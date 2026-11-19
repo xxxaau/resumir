@@ -276,7 +276,7 @@ async function restoreSummaryCacheEntries(entries) {
     });
 }
 
-async function saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, title, url, cacheTokens) {
+async function saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, _title, _url, cacheTokens) {
     if (!contentType) contentType = "summary";
     if (cacheTokens === undefined) cacheTokens = 0;
     try {
@@ -290,8 +290,6 @@ async function saveUsageStats(inputTokens, outputTokens, contentType, modelName,
 
         const historyEntry = {
             date: new Date().toISOString(),
-            title: title || "No Title",
-            url: url || "No URL",
             model: modelName,
             inputTokens: Math.round(inputTokens),
             outputTokens: Math.round(outputTokens),

@@ -14,7 +14,7 @@ Les següents dades s'emmagatzemen al teu navegador. La clau d'API, la memòria 
 
 - **API Key de Google Gemini**: Necessària per connectar amb el servei d'IA. Aquesta clau es guarda localment i s'envia només en headers HTTP a la crida de l'API.
 - **Memòria cau de Resums**: Títol, URL, text del resum, model i data de generació.
-- **Historial d'ús**: Títol, URL, model, tokens consumits i durada de cada petició (pestanya "Estadístiques").
+- **Historial d'ús**: Model, tipus de resum, tokens consumits i durada de cada petició. No s'hi desa el títol ni la URL (pestanya «Ús» de la configuració).
 - **Preferències** (`storage.sync`): Configuració de model, tema, prompts i extensions actives. La clau d'API no hi és mai.
 
 El text de la pàgina que es processa no es desa externament per l'extensió mateixa, sinó que es transmet a Google Gemini per generar el resum quan l'usuari ho sol·licita.

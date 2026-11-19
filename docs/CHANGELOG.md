@@ -38,8 +38,12 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Tema:** si s'esborra la preferència, torna al tema per defecte en lloc de deixar l'aparença
   trencada. (minor)
 
-### Canviat (dev)
-- El runner de tests ja no pot acabar «en verd» si `node` no s'executa. (dev)
+  ### Canviat
+  - **Historial d'ús:** ja no desa el títol ni la URL de cada resum (no es feien servir). Les
+    estadístiques de la configuració continuen igual.
+
+  ### Canviat (dev)
+  - El runner de tests ja no pot acabar «en verd» si `node` no s'executa. (dev)
 - `docs/SECURITY.md` descriu el guard SSRF real i el camp de clau amb màscara CSS. (dev)
 
 ## [2.7.2] - 2026-10-20

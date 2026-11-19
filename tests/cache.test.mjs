@@ -245,9 +245,9 @@ test("saveUsageStats - l'entrada de l'historial te els camps correctes", async (
     assert.equal(entry.outputTokens, 40);
     assert.equal(entry.type, "deepdive");
     assert.equal(entry.latency, 3000);
-    assert.equal(entry.title, "Titular");
-    assert.equal(entry.url, "https://pro.com");
     assert.equal(entry.cacheTokens, 0);
+    assert.equal("title" in entry, false, "el títol no es desa");
+    assert.equal("url" in entry, false, "la URL no es desa");
 });
 
 test("saveUsageStats - el tipus summary per defecte", async () => {
@@ -282,8 +282,8 @@ test("saveUsageStats - l'entrada mes recent va primer (unshift)", async () => {
     await saveUsageStats(10, 5, "summary", "model-a", 100, "Primer", "https://first.com");
     await saveUsageStats(20, 10, "summary", "model-b", 200, "Segon", "https://second.com");
     const data = await storageMock.get("usageHistory");
-    assert.equal(data.usageHistory[0].title, "Segon");
-    assert.equal(data.usageHistory[1].title, "Primer");
+    assert.equal(data.usageHistory[0].model, "model-b");
+    assert.equal(data.usageHistory[1].model, "model-a");
 });
 
 test("saveUsageStats - cacheTokens es guarda correctament", async () => {

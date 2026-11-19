@@ -212,7 +212,7 @@ test("E2E: getPageContent → startSummary → cache → stats (golden path)", a
     assert.ok(Array.isArray(histData.usageHistory) && histData.usageHistory.length >= 1,
         "usageHistory ha de tenir almenys una entrada");
     const lastEntry = histData.usageHistory[0];
-    assert.equal(lastEntry.url, "https://example.com/article");
+    assert.equal("url" in lastEntry, false, "l'historial d'ús no desa la URL");
     assert.equal(lastEntry.model, "gemini-2.0-flash");
 });
 
