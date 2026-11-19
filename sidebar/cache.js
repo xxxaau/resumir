@@ -276,7 +276,30 @@ async function restoreSummaryCacheEntries(entries) {
     });
 }
 
+// Les stats es llegeixen i es reescriuen senceres. Dues generacions simultanies
+// (dues finestres) es trepitjaven. navigator.locks serialitza entre contextos
+// del mateix origen; la cua cobreix els entorns que no l'implementen (Node).
+let _statsQueue = Promise.resolve();
+function withStatsLock(task) {
+    const run = _statsQueue.then(task, task);
+    _statsQueue = run.catch(() => {});
+    return run;
+}
+
+const STATS_LOCK_NAME = "resumir-usage-stats";
+function withCrossContextStatsLock(task) {
+    if (typeof navigator !== "undefined" && navigator.locks && typeof navigator.locks.request === "function") {
+        return navigator.locks.request(STATS_LOCK_NAME, task);
+    }
+    return withStatsLock(task);
+}
+
 async function saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, _title, _url, cacheTokens) {
+    return withCrossContextStatsLock(() =>
+        _saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, cacheTokens));
+}
+
+async function _saveUsageStats(inputTokens, outputTokens, contentType, modelName, latency, cacheTokens) {
     if (!contentType) contentType = "summary";
     if (cacheTokens === undefined) cacheTokens = 0;
     try {

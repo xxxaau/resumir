@@ -18,7 +18,7 @@ global.ext = {
     },
 };
 global.CONTENT_TYPES = [{ id: "summary" }, { id: "deepdive" }];
-const { saveSummaryCache, deleteSummaryCache, getCacheKey } = require("../sidebar/cache.js");
+const { saveSummaryCache, deleteSummaryCache, getCacheKey, saveUsageStats } = require("../sidebar/cache.js");
 
 test("cache: dos desats simultanis no es trepitgen l'índex", async () => {
     inner._clear();
@@ -26,6 +26,18 @@ test("cache: dos desats simultanis no es trepitgen l'índex", async () => {
     await Promise.all(urls.map(u => saveSummaryCache(u, "T", "R", "m", 1, 1)));
     const index = inner._dump()["summary_cache_index"] || inner._dump()[Object.keys(inner._dump()).find(k => /index/i.test(k))];
     for (const u of urls) assert.ok(index.includes(getCacheKey(u, "summary")), `l'índex ha de tenir ${u}`);
+});
+
+test("saveUsageStats: dos desats simultanis no es trepitgen", async () => {
+    inner._clear();
+    await Promise.all([
+        saveUsageStats(10, 5, "summary", "m", 100, "A", "https://a.com"),
+        saveUsageStats(20, 7, "deepdive", "m", 100, "B", "https://b.com"),
+    ]);
+    const dump = inner._dump();
+    assert.equal(dump.stats.articles, 2, "les dues generacions compten");
+    assert.equal(dump.stats.tokens, 42, "10+5+20+7");
+    assert.equal(dump.usageHistory.length, 2, "les dues entrades hi són");
 });
 
 test("cache: un desat i un esborrat simultanis deixen l'índex coherent", async () => {

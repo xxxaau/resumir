@@ -30,6 +30,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   t'avisa que has d'esperar uns minuts abans de resumir.
 - **Exportar a Obsidian o copiar com a Markdown:** els resums amb `$$…$$` (fórmules) o `$&` es copien
   tal com són, sense alterar-los.
+- **Dues generacions alhora** (per exemple en dues finestres): les estadístiques d'ús ja no en
+  perden cap. (minor)
 - **Dues finestres obertes:** la drecera i el menú contextual ja no resumen també la pàgina de
   l'altra finestra. Un trigger vell (si la barra no s'havia pogut obrir) ja no es reprèn sol.
 - **Enllaços d'article dels fils de Hacker News:** més protecció; ja no es descarreguen adreces
