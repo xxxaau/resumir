@@ -5,7 +5,7 @@ import { createRequire } from "node:module";
 import { loadSettings } from "./helpers/settings-harness.mjs";
 
 const require = createRequire(import.meta.url);
-const { computeUsageSummary } = require("../options/settings-stats.js");
+const { computeUsageSummary, localDayKey } = require("../options/settings-stats.js");
 
 const NOW = new Date("2026-10-13T12:00:00Z");
 const day = (n) => new Date(NOW.getTime() - n * 86400000).toISOString();
@@ -26,6 +26,21 @@ test("computeUsageSummary - totals, avui, 7 dies, tokens, temps mitjà, per tipu
     assert.equal(u.avgLatencySec, 2.5);
     assert.deepEqual(u.byType.map(t => [t.type, t.count]), [["summary", 2], ["deepdive", 1], ["anki", 1]]);
     assert.deepEqual(u.byModel.map(m => [m.model, m.count]), [["gemini-2.5-flash", 2], ["gemini-3.1-flash-lite", 2]]);
+});
+
+test("localDayKey - usa la data local, no la UTC", () => {
+    const fake = { getFullYear: () => 2021, getMonth: () => 0, getDate: () => 4 };
+    assert.equal(localDayKey(fake), "2021-01-04");
+});
+
+test("computeUsageSummary - «Avui» compta amb el dia local (00:30 no cau a ahir)", () => {
+    const now = new Date(2021, 0, 4, 9, 0);
+    const history = [{
+        date: new Date(2021, 0, 4, 0, 30).toISOString(),
+        model: "m", inputTokens: 1, outputTokens: 1, type: "summary",
+    }];
+    const u = computeUsageSummary(history, { articles: 1 }, now);
+    assert.equal(u.today, 1);
 });
 
 test("computeUsageSummary - sense dades no peta i ho diu tot a zero", () => {

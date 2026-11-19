@@ -7,6 +7,16 @@
  */
 
 // ISO Week Date functions
+
+/** Setmana ISO a partir d'any/mes/dia de calendari (mes 1-12). */
+function isoWeekFromYMD(year, month, day) {
+    const date = new Date(Date.UTC(year, month - 1, day));
+    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+    const yearStart = Date.UTC(date.getUTCFullYear(), 0, 1);
+    const week = Math.ceil(((date.valueOf() - yearStart) / 86400000 + 1) / 7);
+    return { week, year: date.getUTCFullYear() };
+}
+
 function getISOWeekDate(d) {
     const date = new Date(d.valueOf());
     const dayNumber = (d.getUTCDay() + 6) % 7;
@@ -23,7 +33,11 @@ function getISOWeekDate(d) {
 
 function formatObsidianPath(template, dateObj = new Date()) {
     const now = dateObj;
-    
+    // La setmana ISO es deriva de la mateixa data de calendari local que la
+    // resta de tokens; getISOWeekDate fa aritmètica UTC i a la mitjanit local
+    // donava la setmana anterior.
+    const iso = isoWeekFromYMD(now.getFullYear(), now.getMonth() + 1, now.getDate());
+
     const tokens = {
         'YYYY': now.getFullYear().toString(),
         'MM': (now.getMonth() + 1).toString().padStart(2, '0'),
@@ -31,9 +45,9 @@ function formatObsidianPath(template, dateObj = new Date()) {
         'HH': now.getHours().toString().padStart(2, '0'),
         'mm': now.getMinutes().toString().padStart(2, '0'),
         // ISO Week Year
-        'gggg': () => getISOWeekDate(now).year.toString(),
+        'gggg': () => iso.year.toString(),
         // ISO Week Number
-        'ww': () => getISOWeekDate(now).week.toString().padStart(2, '0')
+        'ww': () => iso.week.toString().padStart(2, '0')
     };
 
     // 1. Handle escaped brackets [text] -> protect them
@@ -185,6 +199,7 @@ function estimateTokens(text) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         getISOWeekDate,
+        isoWeekFromYMD,
         formatObsidianPath,
         parseObsidianPath,
         formatObsidianContent,

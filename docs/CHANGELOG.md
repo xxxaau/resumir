@@ -21,6 +21,9 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Targetes Anki desades:** en reobrir-les ja no surten «Generar més» i «Afinar», que no
   funcionaven o feien servir el text d'una altra pàgina.
 - **«Desfer» a l'Historial** torna a deixar el resum amb el seu format, llargada i tokens.
+- **Rutes d'Obsidian amb la setmana (`gggg`/`ww`):** just després de mitjanit ja no cauen a la
+  carpeta de la setmana anterior. (minor)
+- **Estadístiques d'ús:** el comptador «Avui» fa servir el dia local i no reinicia a la matinada. (minor)
 - **Actualitzar la llista de models:** segueix totes les pàgines de Google, accepta la clau enganxada
   amb espais i ja no esborra com a «obsolets» favorits que sí que existeixen.
 - **Comprovar la clau amb el límit gratuït esgotat:** es desa igualment (Google l'ha reconeguda) i

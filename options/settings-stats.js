@@ -10,6 +10,14 @@ const USAGE_TYPE_LABELS = {
     conceptmap: "Mapa conceptual", simple: "Explica-ho fàcil", anki: "Targetes Anki",
 };
 
+/** Clau YYYY-MM-DD amb la data local (el «dia» que veu l'usuari). */
+function localDayKey(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
 /**
  * Càlcul pur de les xifres a mostrar.
  * @param {Array} history - storage.local.usageHistory (fins a 1000 entrades, la més nova primer)
@@ -18,15 +26,14 @@ const USAGE_TYPE_LABELS = {
  */
 function computeUsageSummary(history, stats, now = new Date()) {
     const list = Array.isArray(history) ? history : [];
-    const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
-    const todayKey = dayKey(now);
+    const todayKey = localDayKey(now);
     const weekAgo = now.getTime() - 7 * 86400000;
     let today = 0, last7 = 0, tokensIn = 0, tokensOut = 0, latencySum = 0, latencyN = 0;
     const byType = new Map(), byModel = new Map();
     for (const e of list) {
         const ts = new Date(e.date || e.timestamp).getTime();
         if (Number.isNaN(ts)) continue;
-        if (dayKey(ts) === todayKey) today++;
+        if (localDayKey(new Date(ts)) === todayKey) today++;
         if (ts >= weekAgo) last7++;
         tokensIn += e.inputTokens || 0;
         tokensOut += e.outputTokens || 0;
@@ -113,5 +120,5 @@ async function clearUsageStats() {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { computeUsageSummary };
+    module.exports = { computeUsageSummary, localDayKey };
 }

@@ -11,6 +11,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const {
     getISOWeekDate,
+    isoWeekFromYMD,
     formatObsidianPath,
     formatObsidianContent,
     formatMarkdownContent,
@@ -36,6 +37,12 @@ test("getISOWeekDate - límit d'any (2023-01-01 pertany a la setmana 52 de 2022)
     assert.equal(result.week, 52);
 });
 
+test("isoWeekFromYMD - setmana ISO a partir de la data de calendari", () => {
+    assert.deepEqual(isoWeekFromYMD(2021, 1, 4), { week: 1, year: 2021 });
+    assert.deepEqual(isoWeekFromYMD(2021, 1, 3), { week: 53, year: 2020 });
+    assert.deepEqual(isoWeekFromYMD(2024, 2, 29), { week: 9, year: 2024 });
+});
+
 // ---------------------------------------------------------------------------
 // formatObsidianPath
 // ---------------------------------------------------------------------------
@@ -50,6 +57,17 @@ test("formatObsidianPath - tokens de setmana ISO", () => {
     const date = new Date("2026-02-13T10:30:00"); // divendres, setmana 7
     const result = formatObsidianPath("Journal/gggg/Week-ww", date);
     assert.equal(result, "Journal/2026/Week-07");
+});
+
+test("formatObsidianPath - setmana ISO amb la data local, no la UTC", () => {
+    const fake = {
+        getFullYear: () => 2021, getMonth: () => 0, getDate: () => 4,
+        getHours: () => 0, getMinutes: () => 30,
+        getUTCDay: () => 0, getUTCDate: () => 3, getUTCMonth: () => 0,
+        getUTCFullYear: () => 2021,
+        valueOf: () => Date.UTC(2021, 0, 3, 22, 30),
+    };
+    assert.equal(formatObsidianPath("gggg-ww", fake), "2021-01");
 });
 
 test("formatObsidianPath - claudàtors escapats [text]", () => {
