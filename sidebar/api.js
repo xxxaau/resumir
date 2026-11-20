@@ -68,7 +68,7 @@ async function callGeminiStream(apiKey, modelName, systemPrompt, text, signal, o
     } else {
         body = {
             system_instruction: {
-                parts: { text: systemPrompt }
+                parts: [{ text: systemPrompt }]
             },
             contents: [{
                 parts: [{

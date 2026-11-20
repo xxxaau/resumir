@@ -48,6 +48,32 @@ function dataLine(obj) {
 }
 
 // ---------------------------------------------------------------------------
+// Esquema: system_instruction.parts ha de ser un array (com documenta Gemini)
+// ---------------------------------------------------------------------------
+
+test("callGeminiStream - system_instruction.parts és un array amb el prompt", async () => {
+    const payload = dataLine({ candidates: [{ content: { parts: [{ text: "ok" }] } }] });
+    const stream = makeStream(payload);
+    let capturedBody = null;
+    global.fetch = async (_url, opts) => {
+        capturedBody = JSON.parse(opts.body);
+        return {
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: { get: (h) => h.toLowerCase() === "content-type" ? "text/event-stream" : null },
+            body: stream,
+        };
+    };
+
+    await callGeminiStream(DUMMY_KEY, DUMMY_MODEL, "Ets un assistent.", "Text", null, () => {}, null);
+
+    assert.ok(Array.isArray(capturedBody.system_instruction.parts),
+        "parts ha de ser un array");
+    assert.equal(capturedBody.system_instruction.parts[0].text, "Ets un assistent.");
+});
+
+// ---------------------------------------------------------------------------
 // Cas bàsic: un sol chunk amb un sol fragment de text
 // ---------------------------------------------------------------------------
 test("callGeminiStream - un chunk retorna el text esperat via onChunk", async () => {
