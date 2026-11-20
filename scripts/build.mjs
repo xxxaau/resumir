@@ -37,7 +37,7 @@ if (manifest.name.includes("(DEV)")) {
   process.exit(1);
 }
 
-console.log(`\nðŸ”¨ Building v${version} for target: ${target}`);
+console.log(`\n🔨 Building v${version} for target: ${target}`);
 
 // Common files and directories
 const commonFiles = [
@@ -60,11 +60,11 @@ const commonDirs = [
  */
 function exec(cmd, description) {
   try {
-    console.log(`  â†’ ${description}`);
+    console.log(`  → ${description}`);
     execSync(cmd, { cwd: root, stdio: "pipe" });
     return 0;
   } catch (err) {
-    console.error(`  âŒ ${description}: ${err.message}`);
+    console.error(`  ❌ ${description}: ${err.message}`);
     throw err;
   }
 }
@@ -77,7 +77,7 @@ function copyFile(src, dest) {
   const destPath = resolve(root, dest);
   
   if (!existsSync(srcPath)) {
-    console.warn(`  âš ï¸  File not found: ${src}`);
+    console.warn(`  ⚠️  File not found: ${src}`);
     return;
   }
   
@@ -90,7 +90,7 @@ function copyFile(src, dest) {
     const content = readFileSync(srcPath);
     writeFileSync(destPath, content);
   } catch (err) {
-    console.error(`  âŒ Failed to copy ${src}: ${err.message}`);
+    console.error(`  ❌ Failed to copy ${src}: ${err.message}`);
     throw err;
   }
 }
@@ -103,7 +103,7 @@ function copyDir(src, dest) {
   const destPath = resolve(root, dest);
   
   if (!existsSync(srcPath)) {
-    console.warn(`  âš ï¸  Directory not found: ${src}`);
+    console.warn(`  ⚠️  Directory not found: ${src}`);
     return;
   }
   
@@ -128,7 +128,7 @@ function copyDir(src, dest) {
   try {
     copyRecursive(srcPath, destPath);
   } catch (err) {
-    console.error(`  âŒ Failed to copy directory ${src}: ${err.message}`);
+    console.error(`  ❌ Failed to copy directory ${src}: ${err.message}`);
     throw err;
   }
 }
@@ -136,10 +136,10 @@ function copyDir(src, dest) {
 /**
  * Build ZIP for a target
  */
-async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFiles = []) {
+async function buildZip(targetName, manifestTarget, extraFiles = []) {
   const zipName = `resumir-contingut-v${version}-${targetName}.zip`;
   
-  console.log(`\nðŸ“¦ Building ${targetName}...`);
+  console.log(`\n📦 Building ${targetName}...`);
   
   // Remove old ZIP
   const zipPath = resolve(root, "build", zipName);
@@ -170,7 +170,7 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
       mkdirSync(dirname(destPath), { recursive: true });
       copyFileSync(srcPath, destPath);
     } else {
-      console.warn(`  âš ï¸  ${file} not found`);
+      console.warn(`  ⚠️  ${file} not found`);
     }
   }
   
@@ -182,7 +182,7 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
       mkdirSync(dirname(destPath), { recursive: true });
       copyFileSync(srcPath, destPath);
     } else {
-      console.warn(`  âš ï¸  ${file} not found`);
+      console.warn(`  ⚠️  ${file} not found`);
     }
   }
   
@@ -257,7 +257,7 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
   // Cleanup
   rmSync(buildPath, { recursive: true, force: true });
   
-  console.log(`  âœ… ${zipName} ready`);
+  console.log(`  ✅ ${zipName} ready`);
 }
 
 /**
@@ -266,16 +266,16 @@ async function buildZip(targetName, manifestTarget, extraFiles = [], excludeFile
 async function main() {
   try {
     if (target === "firefox" || target === "all") {
-      await buildZip("firefox", "firefox", ["ext.js", "background.js"], []);
+      await buildZip("firefox", "firefox", ["ext.js", "background.js"]);
     }
     
     if (target === "chromium" || target === "all") {
-      await buildZip("chromium", "chromium", ["ext.js", "background.bundle.js"], []);
+      await buildZip("chromium", "chromium", ["ext.js"]);
     }
     
-    console.log(`\nâœ¨ Build complete! v${version}\n`);
+    console.log(`\n✨ Build complete! v${version}\n`);
   } catch (err) {
-    console.error(`\nâŒ Build failed: ${err.message}\n`);
+    console.error(`\n❌ Build failed: ${err.message}\n`);
     process.exit(1);
   }
 }
