@@ -183,7 +183,11 @@ async function fetchLinkedArticleText(articleUrl) {
  * Extracts and returns the relevant text content from the active tab.
  * Includes specific heuristics for HackerNews, YouTube, LinkedIn, Twitter/X, and fallback to Readability.
  */
-async function getPageContent() {
+async function getPageContent(options = {}) {
+    // Mode barat: només el camí genèric (Readability/DOM). S'usa pel preload en
+    // obrir la barra: evita el HEAD i la descàrrega de PDFs, el fetch de
+    // l'article de HN i l'obertura del panell de transcripció de YouTube.
+    const cheap = options.cheap === true;
     const tabs = await ext.tabs.query({active: true, currentWindow: true});
     if (tabs.length === 0) throw new Error("[004] No active tab found");
     const tabId = tabs[0].id;
@@ -215,7 +219,7 @@ async function getPageContent() {
     //
     // Guarda defensiva: si pdf-extract.js no està disponible (build antic o test),
     // degradem en silenci a la lògica HTML normal.
-    if (typeof isPdfUrl === "function" && typeof extractPdfText === "function") {
+    if (!cheap && typeof isPdfUrl === "function" && typeof extractPdfText === "function") {
         // Detecci\u00f3 r\u00e0pida per extensi\u00f3 .pdf (sense xarxa).
         let isPdf = isPdfUrl(tabUrl);
         // Fallback HEAD: URLs HTTPS sense .pdf poden ser PDFs (arxiv.org/pdf/123, etc.).
@@ -321,7 +325,7 @@ async function getPageContent() {
     }
 
     // HACKER NEWS SPECIAL LOGIC
-    if (urlIsOnSite(tabUrl, "news.ycombinator.com", "/item")) {
+    if (!cheap && urlIsOnSite(tabUrl, "news.ycombinator.com", "/item")) {
         try {
             const hnResult = await executeScriptSafe({
                 target: { tabId: tabId },
@@ -346,7 +350,7 @@ async function getPageContent() {
     }
     
     // YOUTUBE SPECIAL LOGIC
-    else if (urlIsOnSite(tabUrl, "youtube.com", "/watch")) {
+    else if (!cheap && urlIsOnSite(tabUrl, "youtube.com", "/watch")) {
         let noTranscript = false;
         try {
             let transcriptText = "";

@@ -116,6 +116,7 @@ const extensionGlobals = {
     typeIconSvg: "readonly",
     // sidebar/content.js
     isPdfUrl: "readonly",
+    urlIsOnSite: "readonly",
     looksLikePdfByHead: "readonly",
     extractPdfText: "readonly",
     pdfErrorMessage: "readonly",

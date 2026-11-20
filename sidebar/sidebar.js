@@ -38,6 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let abortController = null;
     let currentMetadata = { title: "", url: "", summary: "", fromCache: false, type: "summary" };
     let currentSourceText = "";
+    // Text font carregat sota demanda (resums servits de memòria cau): no es
+    // re-extrau la pàgina fins que l'usuari prem «Veure el text enviat».
+    let lazySourceLoader = null;
+    let lazySourcePromise = null;
     let contentPreload = null;
     let isBionicEnabled = false;
     let globalConfigCache = {};
@@ -63,7 +67,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateSourceBtn() {
-        if (sourceTextBtn) sourceTextBtn.disabled = !currentSourceText;
+        if (sourceTextBtn) sourceTextBtn.disabled = !(currentSourceText || lazySourceLoader);
+    }
+
+    function setSourceText(text) {
+        currentSourceText = text || "";
+        lazySourceLoader = null;
+        lazySourcePromise = null;
+        updateSourceBtn();
+    }
+
+    function setLazySourceText(loader) {
+        currentSourceText = "";
+        lazySourceLoader = typeof loader === "function" ? loader : null;
+        lazySourcePromise = null;
+        updateSourceBtn();
+    }
+
+    // Resol el text font, extraient-lo només si cal (i un sol cop encara que
+    // l'usuari cliqui diverses vegades mentre carrega).
+    function ensureSourceText() {
+        if (currentSourceText) return Promise.resolve(currentSourceText);
+        if (!lazySourcePromise && lazySourceLoader) {
+            const loader = lazySourceLoader;
+            lazySourceLoader = null;
+            lazySourcePromise = Promise.resolve()
+                .then(loader)
+                .then(t => { currentSourceText = t || ""; return currentSourceText; })
+                .catch(() => "")
+                .finally(() => { lazySourcePromise = null; updateSourceBtn(); });
+        }
+        return lazySourcePromise || Promise.resolve("");
     }
 
     // L'Historial (history.js) mostra entrades de memòria cau directament al
@@ -108,7 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
         exhaustedModels,
         showModelNotice,
         getSourceText: () => currentSourceText,
-        setSourceText: (t) => { currentSourceText = t; updateSourceBtn(); },
+        setSourceText,
+        setLazySourceText,
         getContentPreload: () => contentPreload,
         // Preload d'un sol ús (contingut de pàgina en carregar el sidebar, o
         // un PDF local seleccionat): un cop consumit a startSummary s'ha de
@@ -568,15 +603,16 @@ document.addEventListener("DOMContentLoaded", () => {
             openHistoryPanel();
         }
     });
-    if (sourceTextBtn) sourceTextBtn.addEventListener("click", () => {
-        if (!currentSourceText) return;
+    if (sourceTextBtn) sourceTextBtn.addEventListener("click", async () => {
+        const text = await ensureSourceText();
+        if (!text) return;
         const sourcePanel = document.getElementById("source-panel");
         if (sourcePanel && !sourcePanel.classList.contains("hidden")) {
             // Panel obert → tancar-lo
             closeSourcePanel();
         } else {
             // Panel tancat → obrir-lo
-            openSourcePanel(currentSourceText);
+            openSourcePanel(text);
         }
     });
     const historyBackBtn = document.getElementById("historyBackBtn");
@@ -1057,7 +1093,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (footer) footer.classList.remove("hidden");
             
             contentPreload = Promise.race([
-                getPageContent(),
+                getPageContent({ cheap: true }).then(d => ({ ...d, cheap: true })),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Preload timeout")), 2000))
             ]).catch(() => null);
 

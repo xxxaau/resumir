@@ -251,8 +251,18 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
             try {
                 const preloaded = await contentPreload;
                 if (preloaded && (preloaded.url === currentUrl || preloaded.url.startsWith("pdf-local:"))) {
-                    pageData = preloaded;
-                    if (preloaded.url.startsWith("pdf-local:")) hasLocalPdf = true;
+                    // El preload barat no ha passat pels camins específics: per a
+                    // PDF/HN/YouTube seria pitjor que l'extracció completa, així que
+                    // es descarta i es fa la normal en començar el resum.
+                    const heavyUrl = (typeof isPdfUrl === "function" && isPdfUrl(currentUrl))
+                        || (typeof urlIsOnSite === "function" && (
+                            urlIsOnSite(currentUrl, "news.ycombinator.com", "/item")
+                            || urlIsOnSite(currentUrl, "youtube.com", "/watch")
+                        ));
+                    if (!(preloaded.cheap && heavyUrl)) {
+                        pageData = preloaded;
+                        if (preloaded.url.startsWith("pdf-local:")) hasLocalPdf = true;
+                    }
                 }
             } catch (e) {
                 console.warn("Preload failed, retrying fresh:", e);
@@ -347,11 +357,17 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                     }
                 }
 
-                getPageContent().then(data => {
-                    if (data && data.text) {
-                        ctx.setSourceText(data.text);
-                    }
-                }).catch(() => { /* background preload failed silently */ });
+                // No re-extraiem la pàgina per una còpia desada: el text font es
+                // carrega quan l'usuari prem «Veure el text enviat».
+                if (typeof ctx.setLazySourceText === "function") {
+                    ctx.setLazySourceText(() => getPageContent().then(data => (data && data.text) || "").catch(() => ""));
+                } else {
+                    getPageContent().then(data => {
+                        if (data && data.text) {
+                            ctx.setSourceText(data.text);
+                        }
+                    }).catch(() => { /* background preload failed silently */ });
+                }
                 
                 return abortController;
             }

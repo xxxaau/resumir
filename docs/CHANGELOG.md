@@ -49,12 +49,16 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Tema:** si s'esborra la preferència, torna al tema per defecte en lloc de deixar l'aparença
   trencada. (minor)
 
-  ### Canviat
-  - **Historial d'ús:** ja no desa el títol ni la URL de cada resum (no es feien servir). Les
-    estadístiques de la configuració continuen igual.
+### Canviat
+- **Obrir la barra:** ja no descarrega PDFs ni busca transcripcions de YouTube si no has demanat
+  cap resum; només llegeix el text bàsic de la pàgina. (minor)
+- **Resums de memòria cau:** en reobrir-los ja no es torna a llegir la pàgina; el text enviat es
+  carrega quan prems «Veure el text enviat». (minor)
+- **Historial d'ús:** ja no desa el títol ni la URL de cada resum (no es feien servir). Les
+  estadístiques de la configuració continuen igual.
 
-  ### Canviat (dev)
-  - El runner de tests ja no pot acabar «en verd» si `node` no s'executa. (dev)
+### Canviat (dev)
+- El runner de tests ja no pot acabar «en verd» si `node` no s'executa. (dev)
 - `docs/SECURITY.md` descriu el guard SSRF real i el camp de clau amb màscara CSS. (dev)
 
 ## [2.7.2] - 2026-10-20

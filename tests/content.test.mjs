@@ -667,3 +667,60 @@ test("getPageContent - YouTube: l'etiqueta de llengua és la de la pista realmen
         assert.ok(result.text.startsWith("[TRANSCRIPT: ca]"), `ha d'etiquetar «ca» (la URL), no «en»: ${result.text.slice(0, 30)}`);
     } finally { global.fetch = prevFetch; }
 });
+
+// ---------------------------------------------------------------------------
+// getPageContent — mode barat (preload): no fa els camins cars
+// ---------------------------------------------------------------------------
+
+test("getPageContent({cheap}) - HN no descarrega l'article extern", async () => {
+    const hnTab = { id: 2, url: "https://news.ycombinator.com/item?id=12345", title: "HN Thread" };
+    let fetchCalls = 0;
+    const prevFetch = global.fetch;
+    global.fetch = async () => { fetchCalls++; throw new Error("no hauria de fer fetch"); };
+    global.ext = makeExt({ tabs: [hnTab], scriptResult: "Text genèric de la pàgina" });
+    try {
+        const result = await getPageContent({ cheap: true });
+        assert.equal(fetchCalls, 0, "el preload barat no ha de descarregar l'article");
+        assert.equal(result.text, "Text genèric de la pàgina");
+    } finally {
+        global.fetch = prevFetch;
+    }
+});
+
+test("getPageContent({cheap}) - YouTube no obre el panell de transcripció", async () => {
+    const ytTab = { id: 22, url: "https://www.youtube.com/watch?v=abc", title: "Vídeo" };
+    let storageCalls = 0;
+    global.ext = {
+        tabs: { query: async () => [ytTab], get: async () => ytTab },
+        scripting: { executeScript: async () => [{ result: "Text genèric de la pàgina" }] },
+        permissions: { request: async () => false, contains: async () => true },
+        storage: {
+            sync: { get: async () => { storageCalls++; return {}; } },
+            local: { get: async () => ({}) },
+        },
+    };
+    const result = await getPageContent({ cheap: true });
+    assert.equal(storageCalls, 0, "el camí de YouTube (preferències de pista) no s'ha d'executar");
+    assert.equal(result.text, "Text genèric de la pàgina");
+});
+
+test("getPageContent({cheap}) - un PDF no es descarrega ni es parseja", async () => {
+    const pdfTab = { id: 3, url: "https://example.com/paper.pdf", title: "Paper" };
+    let fetchCalls = 0;
+    const prevFetch = global.fetch;
+    const prevIsPdfUrl = global.isPdfUrl;
+    const prevExtractPdfText = global.extractPdfText;
+    global.isPdfUrl = (u) => /\.pdf($|[?#])/i.test(u);
+    global.extractPdfText = async () => ({ text: "PDF text", pageCount: 1 });
+    global.fetch = async () => { fetchCalls++; throw new Error("no hauria de fer fetch"); };
+    global.ext = makeExt({ tabs: [pdfTab], scriptResult: "Text genèric de la pàgina" });
+    try {
+        const result = await getPageContent({ cheap: true });
+        assert.equal(fetchCalls, 0, "el preload barat no ha de fer HEAD ni descarregar el PDF");
+        assert.equal(result.text, "Text genèric de la pàgina");
+    } finally {
+        global.fetch = prevFetch;
+        global.isPdfUrl = prevIsPdfUrl;
+        global.extractPdfText = prevExtractPdfText;
+    }
+});

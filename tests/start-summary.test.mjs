@@ -227,6 +227,38 @@ test("startSummary - retorna el resum de caché si existeix", async () => {
     assert.equal(ctx.currentMetadata.summary, "Resum de la caché");
 });
 
+test("startSummary - cache hit: no re-extrau la pàgina i el text font queda lazy", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+
+    let pageCalls = 0;
+    setupGlobals({
+        getSummaryCache: async () => ({
+            title: "Test Page",
+            url: "https://example.com",
+            summary: "Resum de la caché",
+            model: "gemini-2.0-flash",
+            timestamp: new Date().toISOString(),
+        }),
+        getPageContent: async () => {
+            pageCalls++;
+            return { title: "Test Page", url: "https://example.com", text: "Text de la pàgina" };
+        },
+    });
+
+    let lazyLoader = null;
+    const ctx = makeCtx({ setLazySourceText: (fn) => { lazyLoader = fn; } });
+    await startSummary(ctx, null, false, false, true);
+
+    assert.equal(pageCalls, 0, "una còpia desada no ha de re-extraure la pàgina");
+    assert.equal(typeof lazyLoader, "function", "s'ha de registrar un loader lazy");
+
+    const text = await lazyLoader();
+    assert.equal(pageCalls, 1, "el text s'extreu només en demanar-lo");
+    assert.equal(text, "Text de la pàgina");
+});
+
 test("startSummary - Anki des de memòria cau: renderAnkiPanel amb canGenerateMore:false", async () => {
     resetStorage();
     await syncMock.set({ modelName: "gemini-2.0-flash" });
