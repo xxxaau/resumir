@@ -14,20 +14,37 @@ const ANKI_INLINE_MAX_LEN = 100;
  */
 function parseAnkiCards(rawText) {
     if (!rawText || typeof rawText !== "string") return [];
+    // El model de vegades afegeix prosa amb claudàtors després del JSON
+    // (p. ex. `[{"q":"a","a":"b"}] Notes [1]`). Prova el text sencer i, si
+    // falla, els talls des del primer `[` fins a cada `]` (de darrere cap
+    // endavant), quedant-se amb el primer que doni targetes vàlides.
+    const attempts = [];
+    const trimmed = rawText.trim();
+    if (trimmed) attempts.push(trimmed);
     const start = rawText.indexOf("[");
-    const end = rawText.lastIndexOf("]");
-    if (start === -1 || end === -1 || end <= start) return [];
-    let parsed;
-    try {
-        parsed = JSON.parse(rawText.slice(start, end + 1));
-    } catch {
-        return [];
+    if (start !== -1) {
+        let tries = 0;
+        for (let end = rawText.length - 1; end > start && tries < 200; end--) {
+            if (rawText[end] !== "]") continue;
+            attempts.push(rawText.slice(start, end + 1));
+            tries++;
+        }
     }
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-        .filter(c => c && typeof c.q === "string" && typeof c.a === "string"
-            && c.q.trim().length > 0 && c.a.trim().length > 0)
-        .map(c => ({ q: c.q.trim(), a: c.a.trim() }));
+    for (const candidate of attempts) {
+        let parsed;
+        try {
+            parsed = JSON.parse(candidate);
+        } catch {
+            continue;
+        }
+        if (!Array.isArray(parsed)) continue;
+        const cards = parsed
+            .filter(c => c && typeof c.q === "string" && typeof c.a === "string"
+                && c.q.trim().length > 0 && c.a.trim().length > 0)
+            .map(c => ({ q: c.q.trim(), a: c.a.trim() }));
+        if (cards.length > 0) return cards;
+    }
+    return [];
 }
 
 /**

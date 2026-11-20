@@ -27,6 +27,12 @@ test("parseAnkiCards: invàlid o sense q/a → []", () => {
     assert.deepEqual(anki.parseAnkiCards('[{"q":"","a":"x"},{"a":"sense q"}]'), []);
 });
 
+test("parseAnkiCards: prosa amb claudàtors després del JSON", () => {
+    const cards = anki.parseAnkiCards('[{"q":"a","a":"b"}] Notes [1]');
+    assert.equal(cards.length, 1);
+    assert.deepEqual(cards[0], { q: "a", a: "b" });
+});
+
 test("formatCardForAnki: curta → inline STARTI...ENDI", () => {
     const out = anki.formatCardForAnki({ q: "Capital de França?", a: "París" });
     assert.equal(out, "STARTI [Basic] Capital de França? Back: París ENDI");
