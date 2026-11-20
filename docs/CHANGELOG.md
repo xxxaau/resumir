@@ -36,6 +36,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   l'altra finestra. Un trigger vell (si la barra no s'havia pogut obrir) ja no es reprèn sol.
 - **Enllaços d'article dels fils de Hacker News:** més protecció; ja no es descarreguen adreces
   internes (IP, `localhost`, xarxa local).
+- **Aturar un resum a mitges:** el tros ja generat conserva el mode biònic i els enllaços de
+  cites, minuts i pàgines, com el resum complet. (minor)
 - **Targetes Anki:** si el model afegeix text amb claudàtors després del JSON, ja no es perd
   cap targeta. (minor)
 - **Anki «Generar més» / «Afinar»:** les targetes noves es desen i es tornen a veure en reobrir

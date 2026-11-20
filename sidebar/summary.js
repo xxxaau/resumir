@@ -34,7 +34,16 @@ function showUserAbort(ctx, receivedChunks) {
     const partial = receivedChunks ? currentMetadata.summary : "";
     let message;
     if (partial && isProseType(currentMetadata.type)) {
-        contentDiv.replaceChildren(formatTextToFragment(partial, false));
+        // Mateix post-procés que un resum complet: bionic i enllaços (p. N),
+        // [m:ss] i cites, perquè el parcial no es vegi diferent.
+        const cfg = typeof ctx.getGlobalConfig === "function" ? (ctx.getGlobalConfig() || {}) : {};
+        const bionicEnabled = typeof ctx.isBionicEnabled === "function" ? !!ctx.isBionicEnabled() : false;
+        const fixation = (cfg.bionicFixation ?? (typeof DEFAULT_BIONIC !== "undefined" ? DEFAULT_BIONIC.fixation : 20)) / 100;
+        contentDiv.replaceChildren(formatTextToFragment(partial, bionicEnabled, fixation));
+        applyBionicStyles(contentDiv, bionicEnabled, cfg);
+        if (typeof linkQuotes === "function") linkQuotes(contentDiv, currentMetadata.url);
+        if (typeof linkYoutubeTimes === "function") linkYoutubeTimes(contentDiv, currentMetadata.url);
+        if (typeof linkPdfPages === "function") linkPdfPages(contentDiv, currentMetadata.url);
         contentDiv.classList.remove("hidden");
         message = "Generació aturada: el resum és incomplet.";
     } else {

@@ -1123,6 +1123,35 @@ test("aturar amb text parcial: avís informatiu, no error, i el parcial es veu f
     assert.equal(ctx.currentMetadata.summary, "Resum a mitges");
 });
 
+test("aturar amb text parcial: aplica bionic i enllaços com el resum complet", async () => {
+    resetStorage();
+    await syncMock.set({ modelName: "gemini-2.0-flash" });
+    await localMock.set({ apiKey: "AIza_test_key" });
+    let ctrl = null;
+    const calls = { quotes: 0, formatArgs: null };
+    setupGlobals({
+        getSummaryCache: async () => null,
+        callGeminiStream: async (_k, _m, _p, _t, signal, onChunk) => {
+            onChunk("Resum a mitges");
+            ctrl.abort();
+            const err = new Error("aborted"); err.name = "AbortError"; throw err;
+        },
+        formatTextToFragment: (...args) => { calls.formatArgs = args; return args[0]; },
+        linkQuotes: () => { calls.quotes++; },
+    });
+    const ctx = makeCtx({
+        isBionicEnabled: () => true,
+        getGlobalConfig: () => ({ bionicFixation: 40 }),
+        setAbortController: (c) => { ctrl = c; },
+    });
+
+    await startSummary(ctx, null, false, false, true);
+
+    assert.equal(calls.quotes, 1, "el parcial ha de portar els enllaços de cites");
+    assert.equal(calls.formatArgs[1], true, "ha d'aplicar el mode biònic");
+    assert.equal(calls.formatArgs[2], 0.4, "ha de passar la fixació configurada");
+});
+
 test("aturar abans que arribi text: net, sense resum i sense exportar l'anterior", async () => {
     resetStorage();
     await syncMock.set({ modelName: "gemini-2.0-flash" });
