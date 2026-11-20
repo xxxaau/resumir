@@ -42,7 +42,7 @@
     "version": "node scripts/bump-version.mjs && node scripts/update-changelog-html.mjs && git add manifest.base.json manifest.json manifest.chromium.json options/settings.html docs/CHANGELOG.md",
     "postversion": "node scripts/release-notes.mjs",
     "release:notes": "node scripts/release-notes.mjs",
-    "release:source": "mkdir -p build && git archive --format=zip --prefix=resumir-source/ -o build/resumir-source-v$npm_package_version.zip HEAD",
+    "release:source": "node scripts/release-source.mjs",
     "prerelease": "node scripts/pre-release-check.mjs",
     "vendor:verify": "node scripts/verify-vendor.mjs",
     "models:check": "node scripts/update-models-check.mjs",
