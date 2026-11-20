@@ -1667,6 +1667,25 @@ test("drecera - amb el resum de la pàgina ja a la vista no el torna a generar",
     } finally { h.close(); }
 });
 
+test("drecera - un trigger de pàgina i un de selecció seguits no es dedupliquen entre ells", async () => {
+    const h = await loadSidebar({
+        local: { apiKey: "AIza_test" },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        const fire = (data) => h.window.chrome.runtime.onMessage._fire(
+            { action: "trigger_summary", data },
+            { id: h.window.chrome.runtime.id }
+        );
+        fire({ type: "page", url: "x" });
+        fire({ type: "selection", content: "Text seleccionat" });
+        await sleep(600);
+        assert.ok(h.calls.fetches.length >= 2,
+            "els dos triggers s'han de processar (abans el segon es descartava)");
+    } finally { h.close(); }
+});
+
 test("drecera - un trigger d'una altra finestra s'ignora", async () => {
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },

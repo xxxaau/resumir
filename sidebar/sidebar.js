@@ -909,7 +909,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Context Menu / Message Handling ---
 
-    let lastTriggerTime = 0;
+    // Per tipus: un trigger de pàgina i un de selecció seguits són accions
+    // diferents i no s'han de menjar l'un a l'altre.
+    const lastTriggerTimes = new Map();
 
     // Els missatges i els canvis de storage arriben a totes les barres obertes.
     // Cada trigger porta la finestra d'origen i l'instant: descartem els d'una
@@ -936,9 +938,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const boundTrigger = (data) => {
         // Deduplicate triggers (prevent double summary if both message and storage events fire)
+        const triggerType = data && data.type === "selection" ? "selection" : "page";
         const now = Date.now();
-        if (now - lastTriggerTime < 500) return;
-        lastTriggerTime = now;
+        if (now - (lastTriggerTimes.get(triggerType) || 0) < 500) return;
+        lastTriggerTimes.set(triggerType, now);
 
         // La drecera i el menú contextual NO alternen (a diferència del botó, que atura):
         // una pulsació repetida de la drecera no ha d'aturar la generació en curs, i
