@@ -18,13 +18,13 @@
 
 ---
 
-## ESTAT DE PROGRÉS (actualitzat 2026-11-16, final de sessió)
+## ESTAT DE PROGRÉS (actualitzat 2026-11-20, final de sessió)
 
-**Línia base actual:** `npm test` → 861 OK, `npm run lint` → 0 avisos. Tot a `main`, un commit
-per tasca, amb test de regressió (verificat que falla sense el fix). Cap versió ni tag tocats;
-la release **no** està preparada.
+**Línia base actual:** `npm test` → 876 OK, `npm run lint` → 0 avisos, `npm run prerelease` →
+19/19. Tot a `main`, un commit per tasca, amb test de regressió (verificat que falla sense el
+fix). Cap versió ni tag tocats; la release **no** està preparada.
 
-### Fet (ordre d'execució de §8.3, passos 1–5)
+### Fet (ordre d'execució de §8.3, passos 1–9)
 
 | Tasca | Commit | Nota |
 |-------|--------|------|
@@ -44,22 +44,24 @@ la release **no** està preparada.
 | N13 | `4db1727` | Un 429 accepta la clau. Els 5xx/xarxa **no** (decisió pendent d'UX: «Desar igualment») |
 | T06 | `f8f2e8b` | Models: clau normalitzada, paginació, no esborra favorits si la llista és parcial |
 | CHANGELOG | `2c0c339` | Secció `## [Pendent de publicar]` amb totes les entrades fins aquí |
+| N07 | `e6ed44f` | Codi mort d'estadístiques esborrat (fitxer, tests, docs) |
+| T09 | `0cfb3e5` | Setmana ISO i «Avui» amb la data local |
+| N08 | `d164dd2` | Historial d'ús sense títol ni URL (privadesa; confirmat per l'usuari) |
+| N04 | `2754ba2` | Triggers per finestra + caducitat de 10 s |
+| T04 | `ba68114` | `saveUsageStats` serialitzat amb `navigator.locks` |
+| T07 + N11 | `d850b7a` | Timeout destrueix la tasca, timeout del bucle i límit de 100 MB (`TOO_BIG_FILE`) |
+| N06 | `51129b2` | Anki «Generar més»: truncament, fallback, stats i persistència |
+| T10 | `a67287d` | `findQueryKeyFetches` multilínia + excepció documentada de YouTube |
+| T11 | `61f4eb0` | Sense `not found` de `background.bundle.js`, sense `excludeFiles`, mojibake reparat |
+| N12 | `bb75d2c` | `release:source` amb script de Node (Windows) |
+| T13 | `a6df41d` | `system_instruction.parts` com a array |
+| N05 | `d8d591e` | Preload barat + text font lazy en cache hit (opció A confirmada) |
 
-### Pendent (en aquest ordre; vegeu §8.3)
+### Pendent (opcional; vegeu §8.3)
 
-6. **N07 + T09** — esborrar el codi mort d'estadístiques (`getDailyStats`, `dailyStats`) i
-   actualitzar `DEV-CONTEXT.md:62` i `ARCHITECTURE.md:76`; aplicar el **dia local** a
-   `computeUsageSummary` / `options/settings-stats.js:21-22` (el «Avui» real) i la **setmana ISO
-   local** a `formatObsidianPath` (`isoWeekFromYMD`, sense canviar `getISOWeekDate`).
-7. **N08** — deixar de desar `title`/`url` a `usageHistory` (`cache.js:287-297`). **Pregunteu
-   primer a l'usuari:** toca privadesa → revisar `docs/PRIVACY_POLICY.md`.
-8. **N04** (triggers a totes les finestres + `pendingSummary` sense caducitat) i **T04** amb
-   `navigator.locks` (la cua per context no resol la cursa real, entre finestres).
-9. **T07 + N11** (destruir `loadingTask` en timeout, timeout del bucle de pàgines, codi d'error
-   NOU per mida — `TOO_LARGE` ja vol dir «500 pàgines»), **N05** (decisió d'UX sobre el preload),
-   **N06** (Anki «Generar més»: truncament, fallback, stats, persistència).
-10. Eines: **T10, T11, N12, T13**.
 11. Opcionals: **T14** (opció B recomanada, demaneu confirmació), **T12.2/T12.3**.
+12. Petit de neteja: `eslint.config.mjs` ignora `scripts/**` i el bloc de regles per a
+    `scripts/` no s'aplica mai (anotat a `docs/BACKLOG.md`).
 
 ### Regles de procés confirmades en aquesta sessió
 
