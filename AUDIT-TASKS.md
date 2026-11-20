@@ -20,7 +20,7 @@
 
 ## ESTAT DE PROGRÉS (actualitzat 2026-11-20, final de sessió)
 
-**Línia base actual:** `npm test` → 876 OK, `npm run lint` → 0 avisos, `npm run prerelease` →
+**Línia base actual:** `npm test` → 878 OK, `npm run lint` → 0 avisos, `npm run prerelease` →
 19/19. Tot a `main`, un commit per tasca, amb test de regressió (verificat que falla sense el
 fix). Cap versió ni tag tocats; la release **no** està preparada.
 
@@ -56,10 +56,13 @@ fix). Cap versió ni tag tocats; la release **no** està preparada.
 | N12 | `bb75d2c` | `release:source` amb script de Node (Windows) |
 | T13 | `a6df41d` | `system_instruction.parts` com a array |
 | N05 | `d8d591e` | Preload barat + text font lazy en cache hit (opció A confirmada) |
+| T12.3 | `f8a8850` | `parseAnkiCards` tolerant a prosa amb claudàtors |
+| T12.2 | `f7502bc` | Aturada parcial amb bionic i enllaços |
 
 ### Pendent (opcional; vegeu §8.3)
 
-11. Opcionals: **T14** (opció B recomanada, demaneu confirmació), **T12.2/T12.3**.
+11. **T14** (opció B recomanada: esborrar la configuració morta de mapa conceptual; cal
+    confirmació), **T12.4** (deduplicar triggers per tipus) i la resta opcional.
 12. Petit de neteja: `eslint.config.mjs` ignora `scripts/**` i el bloc de regles per a
     `scripts/` no s'aplica mai (anotat a `docs/BACKLOG.md`).
 
