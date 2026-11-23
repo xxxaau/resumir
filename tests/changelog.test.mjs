@@ -7,7 +7,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseChangelog, generateHtml, mdInlineToHtml, extractReleaseNotes } from "../scripts/changelog-lib.mjs";
+import { parseChangelog, generateHtml, mdInlineToHtml, extractReleaseNotes, injectChangelog } from "../scripts/changelog-lib.mjs";
 
 const MD = [
     "# Changelog",
@@ -123,4 +123,17 @@ test("extractReleaseNotes - una capçalera amb guió llarg o sense data no compt
 
 test("extractReleaseNotes - 2.1.0 no coincideix amb 2.1.00 ni amb 2x1x0 (punts literals)", () => {
     assert.equal(extractReleaseNotes("## [2x1x0] - 2026-10-20\n### A\n- x\n", "2.1.0"), null);
+});
+
+// Regressió (2.7.3): una entrada amb `$&` o `$$` es copiava malament a settings.html perquè
+// String.replace interpretava aquests patrons i duplicava el bloc dins del propi text.
+test("injectChangelog - el text amb $&, $$ i $' es copia literal i no duplica els marcadors", () => {
+    const page = "<p>a</p>\n<!-- CHANGELOG_START -->\nvell\n<!-- CHANGELOG_END -->\n<p>z</p>";
+    const novell = "<li>fórmules <code>$$…$$</code> i <code>$&amp;</code> i $' i $`</li>";
+    const out = injectChangelog(page, novell);
+    assert.ok(out.includes(novell), "el text nou ha de ser literal");
+    assert.equal(out.split("CHANGELOG_START").length - 1, 1, "un sol marcador d'inici");
+    assert.equal(out.split("CHANGELOG_END").length - 1, 1, "un sol marcador de final");
+    assert.ok(!out.includes("vell"));
+    assert.equal(injectChangelog("sense marcadors", novell), null);
 });

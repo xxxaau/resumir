@@ -191,3 +191,24 @@ export function extractReleaseNotes(md, version) {
     flushSection(title);
     return out.join("\n").trim();
 }
+
+const CL_START = "<!-- CHANGELOG_START -->";
+const CL_END   = "<!-- CHANGELOG_END -->";
+
+/**
+ * Substitueix el bloc entre CHANGELOG_START / CHANGELOG_END de settings.html.
+ *
+ * La substitució va amb una FUNCIÓ: amb una cadena, `String.replace` interpreta `$&`, `$$`, `` $` ``
+ * i `$'` del text del CHANGELOG (p. ex. una entrada que parla de `$&`) i corromp l'HTML.
+ *
+ * @param {string} settingsHtml Contingut de settings.html.
+ * @param {string} newHtml HTML de l'historial (generateHtml).
+ * @returns {string|null} L'HTML nou, o null si falten els marcadors.
+ */
+export function injectChangelog(settingsHtml, newHtml) {
+    if (!settingsHtml.includes(CL_START) || !settingsHtml.includes(CL_END)) return null;
+    return settingsHtml.replace(
+        new RegExp(`${CL_START}[\\s\\S]*?${CL_END}`),
+        () => `${CL_START}\n${newHtml}\n            ${CL_END}`
+    );
+}
