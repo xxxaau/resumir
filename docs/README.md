@@ -37,7 +37,8 @@ L'inventari complet amb categories i fonts de veritat és a
 ### Registres i backlog
 **BACKLOG.md** (idees pendents, no històric) · **CHANGELOG.md** (canvis
   publicats) · **LEARNINGS.md** (lliçons tècniques sessió a sessió, amb
-  taula de continguts al capdamunt)
+  taula de continguts al capdamunt) · **VALIDACIO-2.7.3.md** (registre de
+  canvis i checklist per validar la propera versió)
 
 ---
 

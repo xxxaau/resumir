@@ -66,9 +66,9 @@ manteniment del final i preparar la release quan convingui.
 
 ### Pendent
 
-- **Release:** renomenar `## [Pendent de publicar]` a `## [X.Y.Z] - AAAA-MM-DD`, córrer
-  `node scripts/update-changelog-html.mjs` i revisar les quatre superfícies públiques
-  (vegeu `docs/RELEASE-PROCESS.md`). No s'ha tocat cap versió.
+- **Release 2.7.3:** versió decidida però **encara no preparada**. Registre de canvis,
+  validació automàtica i proves manuals a `docs/VALIDACIO-2.7.3.md`. No s'ha tocat cap
+  versió ni cap manifest.
 
 ### Regles de procés confirmades en aquesta sessió
 

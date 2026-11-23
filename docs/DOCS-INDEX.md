@@ -61,7 +61,8 @@ Tres categories:
 Registres datats; reflecteixen el seu moment, no l'estat actual:
 
 `docs/CHANGELOG.md` · `docs/LEARNINGS.md` (té taula de continguts al capdamunt —
-consulta-la abans d'afegir-hi res, per no duplicar una lliçó ja capturada)
+consulta-la abans d'afegir-hi res, per no duplicar una lliçó ja capturada) ·
+`docs/VALIDACIO-2.7.3.md` (registre de canvis i checklist per validar la 2.7.3)
 
 ## Plantilles
 
