@@ -18,11 +18,14 @@
 
 ---
 
-## ESTAT DE PROGRÉS (actualitzat 2026-11-20, final de sessió)
+## ESTAT DE PROGRÉS (actualitzat 2026-11-23, final de sessió)
 
-**Línia base actual:** `npm test` → 878 OK, `npm run lint` → 0 avisos, `npm run prerelease` →
+**Línia base actual:** `npm test` → 879 OK, `npm run lint` → 0 avisos, `npm run prerelease` →
 19/19. Tot a `main`, un commit per tasca, amb test de regressió (verificat que falla sense el
 fix). Cap versió ni tag tocats; la release **no** està preparada.
+
+**Totes les tasques del pla (T01–T14, N01–N15) estan tancades.** Només queden les notes de
+manteniment del final i preparar la release quan convingui.
 
 ### Fet (ordre d'execució de §8.3, passos 1–9)
 
@@ -58,13 +61,16 @@ fix). Cap versió ni tag tocats; la release **no** està preparada.
 | N05 | `d8d591e` | Preload barat + text font lazy en cache hit (opció A confirmada) |
 | T12.3 | `f8a8850` | `parseAnkiCards` tolerant a prosa amb claudàtors |
 | T12.2 | `f7502bc` | Aturada parcial amb bionic i enllaços |
+| T12.4 | `7e97cc6` | Deduplicació de triggers per tipus (pàgina/selecció) |
+| T14 (B) | `ce391b6` | Configuració morta de mapa conceptual treta; valors 4/6/true fixats |
 
-### Pendent (opcional; vegeu §8.3)
+### Pendent
 
-11. **T14** (opció B recomanada: esborrar la configuració morta de mapa conceptual; cal
-    confirmació), **T12.4** (deduplicar triggers per tipus) i la resta opcional.
-12. Petit de neteja: `eslint.config.mjs` ignora `scripts/**` i el bloc de regles per a
-    `scripts/` no s'aplica mai (anotat a `docs/BACKLOG.md`).
+- **Release:** renomenar `## [Pendent de publicar]` a `## [X.Y.Z] - AAAA-MM-DD`, córrer
+  `node scripts/update-changelog-html.mjs` i revisar les quatre superfícies públiques
+  (vegeu `docs/RELEASE-PROCESS.md`). No s'ha tocat cap versió.
+- Petit de neteja (anotat a `docs/BACKLOG.md`): `eslint.config.mjs` ignora `scripts/**` i el
+  bloc de regles per a `scripts/` no s'aplica mai.
 
 ### Regles de procés confirmades en aquesta sessió
 
@@ -1391,7 +1397,7 @@ risc de regressió o decisió de producte).
 7. **N04**, i després **T04 amb `navigator.locks`**.
 8. **T07 amb N11**, **N05**, **N06**.
 9. Eines i higiene: **T10, T11, N12, T13**.
-10. Opcionals: **T14 (B)** i la resta de **T12** (12.2, 12.3).
+10. Opcionals: **T14 (B)** i la resta de **T12** (12.2, 12.3, 12.4). — **Fet** (2026-11-23).
 
 Ja són al `docs/BACKLOG.md` i no es dupliquen aquí: accions de GitHub fixades
 per SHA, Dependabot, Node 20 a la matriu de CI, lint de `scripts/`.
