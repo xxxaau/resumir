@@ -23,26 +23,64 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
-// ─── REFERÈNCIA DE MODELS ACTUALS (May 2026) ────────────────────────────────
+// ─── REFERÈNCIA DE MODELS ACTUALS (November 2026) ───────────────────────────
 // Font: Google Gemini API docs (https://ai.google.dev/gemini-api/docs/models)
-// Actualitzar manualment quan Google publiqui nous models
+// Actualitzar manualment quan Google publiqui nous models. Els models Gemini
+// 2.5 ja no s'inclouen: Google els ha deprecat i els nous projectes no hi tenen
+// accés.
 
 const REFERENCE_MODELS = [
-    // Tier: Flash Lite (més ràpids, més económics)
-    { 
+    // Tier: Flash Lite (més ràpids, més econòmics)
+    {
+        id: "gemini-3.5-flash-lite",
+        label: "Gemini 3.5 Flash Lite",
+        priceIn: 0.30,       // USD per 1M input tokens
+        priceOut: 2.50,      // USD per 1M output tokens
+        rpd: 1000,           // Requests per day (estimació free tier)
+        contextWindow: 1_000_000,
+        fallback: true,
+        active: true,
+        launchDate: "2026-03-01",
+        notes: "Model per defecte: Lite estable més nou, recomanat per Google"
+    },
+    {
         id: "gemini-3.1-flash-lite",
         label: "Gemini 3.1 Flash Lite",
-        priceIn: 0.25,       // USD per 1M input tokens
-        priceOut: 1.50,      // USD per 1M output tokens
-        rpd: 2000,           // Requests per day
+        priceIn: 0.25,
+        priceOut: 1.50,
+        rpd: 2000,
         contextWindow: 1_000_000,
         fallback: true,
         active: true,
         launchDate: "2025-12-01",
-        notes: "Model recomanat per a primer ús (més ràpid + més cheap que 3.0)"
+        notes: "Lite anterior, encara estable i una mica més barat"
     },
-    
+
     // Tier: Flash (estable, equilibrat)
+    {
+        id: "gemini-3.8-flash",
+        label: "Gemini 3.8 Flash",
+        priceIn: 1.50,
+        priceOut: 7.50,
+        rpd: 1500,
+        contextWindow: 1_000_000,
+        fallback: true,
+        active: true,
+        launchDate: "2026-10-01",
+        notes: "Preu des de l'1/1/2027 (fins al 31/12/2026: $0.75/$3.75)"
+    },
+    {
+        id: "gemini-3.6-flash",
+        label: "Gemini 3.6 Flash",
+        priceIn: 1.50,
+        priceOut: 7.50,
+        rpd: 1500,
+        contextWindow: 1_000_000,
+        fallback: true,
+        active: true,
+        launchDate: "2026-06-01",
+        notes: "Generació Flash anterior, mateix preu que 3.8"
+    },
     {
         id: "gemini-3-flash-preview",
         label: "Gemini 3 Flash",
@@ -53,22 +91,86 @@ const REFERENCE_MODELS = [
         fallback: true,
         active: true,
         launchDate: "2025-12-01",
-        notes: "Versió 3 estable i equilibrada"
+        notes: "Preview llegada, mantinguda per compatibilitat"
+    },
+
+    // Open models (alternativa sense cost)
+    {
+        id: "gemma-4-31b-it",
+        label: "Gemma 4 (31B)",
+        priceIn: 0.00,
+        priceOut: 0.00,
+        rpd: 2000,
+        contextWindow: 262_144,
+        fallback: true,
+        active: true,
+        launchDate: "2026-03-31",
+        notes: "Open source, gratuït al free tier; sense tier de pagament"
     },
     {
-        id: "gemini-2.5-flash",
-        label: "Gemini 2.5 Flash",
-        priceIn: 0.30,
-        priceOut: 2.50,
+        id: "gemma-4-26b-a4b-it",
+        label: "Gemma 4 (26B A4B)",
+        priceIn: 0.00,
+        priceOut: 0.00,
+        rpd: 2000,
+        contextWindow: 262_144,
+        fallback: true,
+        active: true,
+        launchDate: "2026-03-31",
+        notes: "Open source MoE, gratuït; recomanat per Google per començar"
+    },
+
+    // Tier: Gemini 4 (frontier; només Hydrogen té free tier)
+    {
+        id: "gemini-4-hydrogen",
+        label: "Gemini 4 Hydrogen",
+        priceIn: 1.50,
+        priceOut: 7.50,
         rpd: 500,
+        contextWindow: 1_000_000,
+        fallback: true,
+        active: true,
+        launchDate: "2026-09-01",
+        notes: "Frontier amb free tier; preu Flash"
+    },
+    {
+        id: "gemini-4-carbon",
+        label: "Gemini 4 Carbon",
+        priceIn: 4.00,
+        priceOut: 20.00,
+        rpd: 0,
         contextWindow: 1_000_000,
         fallback: false,
         active: true,
-        launchDate: "2024-05-01",
-        notes: "Versió anterior, mantinguda per compatibilitat"
+        launchDate: "2026-09-01",
+        notes: "Només de pagament; $4/$20 des de l'1/12/2026 (abans $2/$10)"
     },
-    
-    // Tier: Pro (més potent, més lent)
+    {
+        id: "gemini-4-argon",
+        label: "Gemini 4 Argon",
+        priceIn: 4.00,
+        priceOut: 20.00,
+        rpd: 0,
+        contextWindow: 1_000_000,
+        fallback: false,
+        active: true,
+        launchDate: "2026-09-01",
+        notes: "Només de pagament; $4/$20 des de l'1/12/2026 (abans $2/$10)"
+    },
+    {
+        id: "gemini-4-neon",
+        label: "Gemini 4 Neon",
+        priceIn: 3.00,
+        priceOut: 15.00,
+        rpd: 0,
+        contextWindow: 1_000_000,
+        fallback: false,
+        active: true,
+        launchDate: "2026-09-01",
+        notes: "Només de pagament"
+    },
+
+    // Tier: Pro Preview (màxima potència)
     {
         id: "gemini-3.1-pro-preview",
         label: "Gemini 3.1 Pro",
@@ -79,65 +181,11 @@ const REFERENCE_MODELS = [
         fallback: false,
         active: true,
         launchDate: "2025-12-01",
-        notes: "Model potent per a tasques complexes, versió més nova que 3.0"
-    },
-    {
-        id: "gemini-2.5-pro",
-        label: "Gemini 2.5 Pro",
-        priceIn: 1.25,
-        priceOut: 5.00,
-        rpd: 50,
-        contextWindow: 1_000_000,
-        fallback: false,
-        active: true,
-        launchDate: "2024-05-01",
-        notes: "Versió anterior de Pro"
-    },
-    
-    // Open models (alternativa sense cost)
-    {
-        id: "gemma-3-27b-it",
-        label: "Gemma 3 (27B)",
-        priceIn: 0.15,
-        priceOut: 0.15,
-        rpd: 2000,
-        contextWindow: 131_072,
-        fallback: true,
-        active: true,
-        launchDate: "2025-04-01",
-        notes: "Model open source, gratuït"
-    },
-    
-    // DEPRECAT (marcat per a eliminació)
-    {
-        id: "gemini-2.0-flash",
-        label: "Gemini 2.0 Flash",
-        priceIn: 0.10,
-        priceOut: 0.40,
-        rpd: 1500,
-        contextWindow: 1_000_000,
-        fallback: true,
-        active: false,
-        deprecated: true,
-        eolDate: "2026-06-01",
-        notes: "Deprecat 01/06/2026"
-    },
-    {
-        id: "gemini-2.0-flash-lite",
-        label: "Gemini 2.0 Flash Lite",
-        priceIn: 0.07,
-        priceOut: 0.30,
-        rpd: 999999,
-        contextWindow: 1_000_000,
-        fallback: true,
-        active: false,
-        deprecated: true,
-        eolDate: "2026-06-01",
-        notes: "Deprecat 01/06/2026"
+        notes: ">200k tokens: $4 input / $18 output"
     }
 ];
 
-const EUR_RATE = 0.92; // 2026-Q2
+const EUR_RATE = 0.91; // 2026-Q4
 
 // ─── FUNCIONS ────────────────────────────────────────────────────────────────
 

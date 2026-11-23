@@ -90,15 +90,15 @@ test("buildFallbackList - no duplica el model preferit", () => {
 
 test("buildFallbackList - no inclou models sense fallback:true", () => {
     const list = buildFallbackList("gemini-2.5-flash", ["gemini-2.5-flash"]);
-    assert.ok(!list.includes("gemini-2.5-pro"), "gemini-2.5-pro no ha d'estar al fallback");
+    assert.ok(!list.includes("gemini-4-carbon"), "gemini-4-carbon no ha d'estar al fallback");
 });
 
 test("buildFallbackList - inclou models de CURATED_MODELS amb fallback:true com a darrer recurs", () => {
-    // Si l'únic favorit és gemini-2.5-pro, els fallbacks de CURATED_MODELS s'afegeixen
-    const list = buildFallbackList("gemini-2.5-pro", ["gemini-2.5-pro"]);
-    assert.ok(list.includes("gemini-3.1-flash-lite"), "Ha d'incloure flash-lite com a fallback de CURATED_MODELS");
-    assert.ok(list.includes("gemini-2.5-flash"), "Ha d'incloure flash com a fallback");
-    assert.ok(list.includes("gemini-3.5-flash"), "Ha d'incloure 3.5 flash com a fallback");
+    // Si l'únic favorit és gemini-4-carbon, els fallbacks de CURATED_MODELS s'afegeixen
+    const list = buildFallbackList("gemini-4-carbon", ["gemini-4-carbon"]);
+    assert.ok(list.includes("gemini-3.5-flash-lite"), "Ha d'incloure flash-lite com a fallback de CURATED_MODELS");
+    assert.ok(list.includes("gemini-3.8-flash"), "Ha d'incloure flash com a fallback");
+    assert.ok(list.includes("gemini-4-hydrogen"), "Ha d'incloure Gemini 4 Hydrogen com a fallback");
 });
 
 // Regressió (microcopy): el missatge [001] ara diu «clau d'API» (no «API Key»)

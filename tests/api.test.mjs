@@ -36,13 +36,13 @@ test("getCuratedModelInfo - model desconegut usa valors de fallback", () => {
 });
 
 test("getCuratedModelInfo - variant -latest coincideix amb el model base", () => {
-    const info = getCuratedModelInfo("gemini-2.5-flash-latest");
-    assert.equal(info.label, "Gemini 2.5 Flash");
+    const info = getCuratedModelInfo("gemini-3.8-flash-latest");
+    assert.equal(info.label, "Gemini 3.8 Flash");
 });
 
-test("getCuratedModelInfo - gemini-2.5-pro té el RPD més baix (recursos limitats)", () => {
-    const info = getCuratedModelInfo("gemini-2.5-pro");
-    assert.equal(info.rpd, 50);
+test("getCuratedModelInfo - els models només de pagament tenen RPD 0", () => {
+    const info = getCuratedModelInfo("gemini-4-carbon");
+    assert.equal(info.rpd, 0);
 });
 
 test("getCuratedModelInfo - gemini-3.1-flash-lite té el RPD més alt dels models curats", () => {
@@ -56,9 +56,10 @@ test("getCuratedModelInfo - gemini-3.1-flash-lite té el RPD més alt dels model
 
 test("CURATED_MODELS conté els models clau esperats", () => {
     assert.ok(CURATED_MODELS.length >= 1, "Ha d'haver-hi almenys un model");
-    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-3.5-flash"), "Ha d'existir gemini-3.5-flash");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-3.5-flash-lite"), "Ha d'existir gemini-3.5-flash-lite");
     assert.ok(CURATED_MODELS.some(m => m.id === "gemini-3.1-flash-lite"), "Ha d'existir gemini-3.1-flash-lite");
-    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-2.5-pro"), "Ha d'existir gemini-2.5-pro");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemini-4-hydrogen"), "Ha d'existir gemini-4-hydrogen");
+    assert.ok(CURATED_MODELS.some(m => m.id === "gemma-4-31b-it"), "Ha d'existir gemma-4-31b-it");
 });
 
 test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
@@ -72,8 +73,8 @@ test("CURATED_MODELS - tots els models tenen els camps requerits", () => {
     }
 });
 
-test("CURATED_MODELS - el primer model és el model per defecte (gemini-3.1-flash-lite)", () => {
-    assert.equal(CURATED_MODELS[0].id, "gemini-3.1-flash-lite");
+test("CURATED_MODELS - el primer model és el model per defecte (gemini-3.5-flash-lite)", () => {
+    assert.equal(CURATED_MODELS[0].id, "gemini-3.5-flash-lite");
 });
 
 // ---------------------------------------------------------------------------

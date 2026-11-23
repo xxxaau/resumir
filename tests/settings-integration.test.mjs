@@ -286,7 +286,7 @@ test("General - la clau d'API va ABANS del model (sense clau no es poden actuali
         assert.ok(pos("apiKey") > -1 && pos("modelName") > -1);
         assert.ok(pos("apiKey") < pos("modelName"));
         assert.equal(h.document.getElementById("apiKey").getAttribute("autocomplete"), "off");
-        assert.equal(h.document.getElementById("modelName").placeholder, "gemini-3.1-flash-lite", "Placeholder = el model per defecte actual, no un d'obsolet");
+        assert.equal(h.document.getElementById("modelName").placeholder, "gemini-3.5-flash-lite", "Placeholder = el model per defecte actual, no un d'obsolet");
     } finally { h.close(); }
 });
 
@@ -450,15 +450,15 @@ test("plantilla de Markdown - la configuració mostra la MATEIXA que fa servir l
 // model. Ara hi ha nom llegible, nivell i «Recomanat».
 // ---------------------------------------------------------------------------
 test("selector de models - sota el camp es veu el nom llegible, el nivell i «Recomanat»", async () => {
-    const h = await loadSettings({ sync: { modelName: "gemini-3.1-flash-lite" } });
+    const h = await loadSettings({ sync: { modelName: "gemini-3.5-flash-lite" } });
     try {
         const sum = h.document.getElementById("modelSummary");
         assert.ok(sum, "Ha d'existir #modelSummary");
-        assert.match(sum.textContent, /Gemini 3\.1 Flash Lite/);
+        assert.match(sum.textContent, /Gemini 3\.5 Flash Lite/);
         assert.match(sum.textContent, /Ràpid i econòmic/);
         assert.match(sum.textContent, /Recomanat/);
         const input = h.document.getElementById("modelName");
-        input.value = "gemini-2.5-pro";
+        input.value = "gemini-4-carbon";
         input.dispatchEvent(new h.window.Event("input", { bubbles: true }));
         assert.match(sum.textContent, /Màxima qualitat/);
         assert.doesNotMatch(sum.textContent, /Recomanat/);
@@ -1153,11 +1153,11 @@ test("barra de canvis pendents - «Desar» desa i «Descartar» torna al valor d
 });
 
 test("selector de models - el model triat es veu amb nom i identificador en segon pla; l'identificador manual és un desplegable avançat", async () => {
-    const h = await loadSettings({ sync: { modelName: "gemini-2.5-pro" } });
+    const h = await loadSettings({ sync: { modelName: "gemini-4-carbon" } });
     try {
         const sum = h.document.getElementById("modelSummary");
-        assert.match(sum.querySelector("strong").textContent, /Gemini 2\.5 Pro/);
-        assert.equal(sum.querySelector(".model-id").textContent, "gemini-2.5-pro");
+        assert.match(sum.querySelector("strong").textContent, /Gemini 4 Carbon/);
+        assert.equal(sum.querySelector(".model-id").textContent, "gemini-4-carbon");
         const adv = h.document.querySelector("details.model-advanced");
         assert.ok(adv.contains(h.document.getElementById("modelName")), "el camp de text és a l'avançat");
         assert.equal(adv.open, false);

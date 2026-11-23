@@ -7,35 +7,40 @@
 // Importat via require() en els tests Node.
 
 /** Taxa de conversió USD → EUR. Font: referència editorial, actualitzar cada trimestre.
- * Last updated: August 9, 2026 (Q3 2026 rate from ECB, EUR/USD ≈ 1.1535)
+ * Last updated: November 20, 2026 (Q4 2026 rate from ECB, EUR/USD ≈ 1.0990)
  */
-const EUR_RATE = 0.87; // 2026-Q3
+const EUR_RATE = 0.91; // 2026-Q4
 
-// Pricing/context window verificats el 2026-08-09 contra
-// https://ai.google.dev/gemini-api/docs/pricing (pàgina actualitzada 2026-08-05)
-// i https://ai.google.dev/gemini-api/docs/models. Els RPD del free tier no surten
+// Pricing/context window verificats el 2026-11-23 contra
+// https://ai.google.dev/gemini-api/docs/pricing i
+// https://ai.google.dev/gemini-api/docs/models. Els RPD del free tier no surten
 // en aquestes pàgines (cal consultar AI Studio per compte); es mantenen valors
-// anteriors quan no hi ha font nova, marcats com a estimació.
+// anteriors o estimacions conservadores quan no hi ha font nova.
+// Els Gemini 2.5 Flash i Pro es retiren l'1/12/2026 i Google redirigeix
+// 2.5 Flash a 3.5 Flash-Lite i 2.5 Pro a 3.8 Flash; 2.5 Flash-Lite se substitueix
+// pel 3.5 Flash-Lite (recomanat per Google per a projectes nous).
 const CURATED_MODELS = [
     // Flash Lite — prioritat màxima (ràpids, econòmics)
-    { id: "gemini-3.1-flash-lite",     label: "Gemini 3.1 Flash Lite",    priceIn: 0.25,   priceOut: 1.50,   rpd: 2000,   contextWindow: 1_000_000, fallback: true  },
     { id: "gemini-3.5-flash-lite",     label: "Gemini 3.5 Flash Lite",    priceIn: 0.30,   priceOut: 2.50,   rpd: 1000,   contextWindow: 1_000_000, fallback: true  },
-    { id: "gemini-2.5-flash-lite",     label: "Gemini 2.5 Flash Lite",    priceIn: 0.10,   priceOut: 0.40,   rpd: 1000,   contextWindow: 1_000_000, fallback: true  },
+    { id: "gemini-3.1-flash-lite",     label: "Gemini 3.1 Flash Lite",    priceIn: 0.25,   priceOut: 1.50,   rpd: 2000,   contextWindow: 1_000_000, fallback: true  },
 
-    // Flash — equilibri velocitat/cost
+    // Flash — equilibri velocitat/cost. Preus vigents des de l'1/1/2027 ($1,50/$7,50; fins al 31/12/2026
+    // Google cobra $0,75/$3,75): l'estimació no ha de quedar curta.
+    { id: "gemini-3.8-flash",          label: "Gemini 3.8 Flash",         priceIn: 1.50,   priceOut: 7.50,   rpd: 1500,   contextWindow: 1_000_000, fallback: true  },
     { id: "gemini-3.6-flash",          label: "Gemini 3.6 Flash",         priceIn: 1.50,   priceOut: 7.50,   rpd: 1500,   contextWindow: 1_000_000, fallback: true  },
-    { id: "gemini-3.5-flash",          label: "Gemini 3.5 Flash",         priceIn: 1.50,   priceOut: 9.00,   rpd: 1500,   contextWindow: 1_000_000, fallback: true  },
-    { id: "gemini-2.5-flash",          label: "Gemini 2.5 Flash",         priceIn: 0.30,   priceOut: 2.50,   rpd: 500,    contextWindow: 1_000_000, fallback: true  },
 
     // Gemma — open source, gratis, bon valor per resumir
-    { id: "gemma-3-27b-it",            label: "Gemma 3 (27B)",            priceIn: 0.15,   priceOut: 0.15,   rpd: 2000,   contextWindow: 131_072,   fallback: true  },
-    { id: "gemma-3-12b-it",            label: "Gemma 3 (12B)",            priceIn: 0.10,   priceOut: 0.10,   rpd: 2000,   contextWindow: 131_072,   fallback: true  },
+    { id: "gemma-4-31b-it",            label: "Gemma 4 (31B)",            priceIn: 0.00,   priceOut: 0.00,   rpd: 2000,   contextWindow: 262_144,   fallback: true  },
+    { id: "gemma-4-26b-a4b-it",        label: "Gemma 4 (26B A4B)",        priceIn: 0.00,   priceOut: 0.00,   rpd: 2000,   contextWindow: 262_144,   fallback: true  },
 
     // Flash Preview — per sobre de Pro (preu Flash, qualitat propera a Pro)
     { id: "gemini-3-flash-preview",    label: "Gemini 3 Flash",           priceIn: 0.50,   priceOut: 3.00,   rpd: 1000,   contextWindow: 1_048_576, fallback: true  },
 
-    // Pro — màxima potència
-    { id: "gemini-2.5-pro",            label: "Gemini 2.5 Pro",           priceIn: 1.25,   priceOut: 10.00,  rpd: 50,     contextWindow: 1_000_000, fallback: false },
+    // Gemini 4 — models frontier; Hydrogen té free tier, la resta només de pagament (Carbon i Argon: preu vigent des de l'1/12/2026)
+    { id: "gemini-4-hydrogen",         label: "Gemini 4 Hydrogen",        priceIn: 1.50,   priceOut: 7.50,   rpd: 500,    contextWindow: 1_000_000, fallback: true  },
+    { id: "gemini-4-carbon",           label: "Gemini 4 Carbon",          priceIn: 4.00,   priceOut: 20.00,  rpd: 0,      contextWindow: 1_000_000, fallback: false },
+    { id: "gemini-4-argon",            label: "Gemini 4 Argon",           priceIn: 4.00,   priceOut: 20.00,  rpd: 0,      contextWindow: 1_000_000, fallback: false },
+    { id: "gemini-4-neon",             label: "Gemini 4 Neon",            priceIn: 3.00,   priceOut: 15.00,  rpd: 0,      contextWindow: 1_000_000, fallback: false },
 
     // Pro Preview — última generació Pro
     { id: "gemini-3.1-pro-preview",    label: "Gemini 3.1 Pro",           priceIn: 2.00,   priceOut: 12.00,  rpd: 100,    contextWindow: 1_048_576, fallback: false },
@@ -43,10 +48,11 @@ const CURATED_MODELS = [
 
 /**
  * Model usat per defecte si l'usuari no n'ha triat cap.
- * PRIORITAT: Lite models per a millor UX en primera càrrega (ràpid + económic)
- * Gemini 3.1 Flash Lite és el més nou i ràpid disponible.
+ * PRIORITAT: Lite models per a millor UX en primera càrrega (ràpid + econòmic)
+ * Gemini 3.5 Flash Lite és el Lite estable més nou i el recomanat per Google
+ * per a projectes nous.
  */
-const DEFAULT_MODEL_ID = "gemini-3.1-flash-lite";
+const DEFAULT_MODEL_ID = "gemini-3.5-flash-lite";
 
 /**
  * Pricing/quota fallback when a model is not in CURATED_MODELS.
@@ -67,7 +73,7 @@ const DEFAULT_MODEL_INFO = {
  *   2. Flash (no preview)
  *   3. Gemma
  *   4. Flash Preview (flash + preview — sobre Pro)
- *   5. Pro (no preview)
+ *   5. Pro (no preview; inclou la família Gemini 4)
  *   6. Pro Preview (pro + preview)
  *   7. Altres (image, specialized, etc.)
  * Dins cada grup, versions més recents primer.
@@ -89,7 +95,7 @@ function sortModelsByPriority(models) {
             if (lower.includes("flash-lite")) group = 1;
             else if (lower.includes("flash")) group = 2;
             else if (lower.includes("gemma")) group = 3;
-            else if (lower.includes("pro")) group = 5;
+            else if (lower.includes("pro") || lower.startsWith("gemini-4")) group = 5;
             else group = 7;
         } else {
             if (lower.includes("flash")) group = 4;
@@ -123,7 +129,7 @@ function describeModel(id) {
     let tier = null;
     if (lower.includes("flash-lite") || lower.includes("gemma")) tier = "fast";
     else if (lower.includes("flash")) tier = "balanced";
-    else if (lower.includes("pro")) tier = "max";
+    else if (lower.includes("pro") || lower.startsWith("gemini-4")) tier = "max";
     const labels = { fast: "Ràpid i econòmic", balanced: "Equilibrat", max: "Màxima qualitat" };
     return {
         name: curated ? curated.label : String(id || ""),
