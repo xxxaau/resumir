@@ -69,3 +69,11 @@ test("settings.css: el desplegable de models mai és més ample que el seu conte
     const body = ruleBody(css, "#modelsList");
     assert.match(body, /width:\s*min\(400px,\s*100%\)/);
 });
+
+// Amplada mínima de la barra: el navegador no permet limitar-la, així que el contingut
+// declara un min-width a l'html perquè no es comprimeixi per sota d'un mínim usable.
+test("sidebar.css - l'html declara una amplada mínima (>= 280px) per a panells estrets", () => {
+    const css = readFileSync(resolve(ROOT, "sidebar/sidebar.css"), "utf8");
+    const body = ruleBody(css, "html");
+    assert.ok(px(body, "min-width") >= 280, "html { min-width } ha de ser >= 280px");
+});

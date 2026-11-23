@@ -56,6 +56,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   trencada. (minor)
 
 ### Canviat
+- **Barra molt estreta:** per sota de 300 px d'amplada el contingut ja no es comprimeix fins a
+  solapar-se; apareix desplaçament horitzontal. (minor)
 - **Models disponibles:** actualitzats als que ofereix Google ara: Gemini 4 (Hydrogen, Carbon, Argon i Neon),
   Gemini 3.8 Flash, Gemma 4 i Gemini 3.5 Flash-Lite, que passa a ser el recomanat. S'han retirat
   Gemini 2.5 Flash i Pro (Google els tanca l'1/12/2026) i 2.5 Flash-Lite (substituït pel 3.5). El preu

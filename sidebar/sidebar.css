@@ -97,7 +97,11 @@
 
 /* WCAG 2.4.11: la barra d'eines/títol fixos a dalt i el peu a baix no han de tapar
    l'element que rep el focus en navegar amb teclat. */
+/* Amplada mínima: el navegador deixa a l'usuari estrenyer el panell tant com vulgui i l'extensió no
+   ho pot limitar. Per sota d'aquest valor el contingut deixa de comprimir-se (apareix scroll
+   horitzontal) en lloc de solapar-se o quedar tallat. Per sota de 340px ja s'amaguen elements del peu. */
 html {
+  min-width: 300px;
   scroll-padding-top: calc(var(--toolbar-height, 0px) + var(--backbar-height, 0px) + 44px);
   scroll-padding-bottom: 48px;
 }
