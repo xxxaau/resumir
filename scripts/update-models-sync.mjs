@@ -16,7 +16,7 @@
  *   npm run models:sync
  */
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -137,7 +137,6 @@ const REFERENCE_MODELS = [
     }
 ];
 
-const REFERENCE_DEFAULT_MODEL = "gemini-3.1-flash-lite";
 const EUR_RATE = 0.92; // 2026-Q2
 
 // ─── FUNCIONS ────────────────────────────────────────────────────────────────
@@ -147,7 +146,7 @@ function readCurrentModels() {
     const content = readFileSync(modelsPath, "utf8");
     
     // Extreure DEFAULT_MODEL_ID
-    const defaultMatch = content.match(/const DEFAULT_MODEL_ID\s*=\s*['"]([\w\-]+)['"]/);
+    const defaultMatch = content.match(/const DEFAULT_MODEL_ID\s*=\s*['"]([\w-]+)['"]/);
     const currentDefault = defaultMatch ? defaultMatch[1] : null;
     
     return { content, currentDefault };
@@ -156,8 +155,6 @@ function readCurrentModels() {
 function compareModels() {
     const { currentDefault } = readCurrentModels();
     
-    const referenceIds = new Set(REFERENCE_MODELS.filter(m => m.active).map(m => m.id));
-    const deprecatedIds = new Set(REFERENCE_MODELS.filter(m => m.deprecated).map(m => m.id));
     
     console.log("\n📊 INFORME DE SINCRONITZACIÓ DE MODELS\n");
     console.log("═".repeat(70));
@@ -195,67 +192,6 @@ function compareModels() {
     console.log("\n═".repeat(70));
     console.log("\n✅ Informe generat. Per actualitzar automàticament:");
     console.log("   npm run models:sync -- --update\n");
-}
-
-function updateModelsFile() {
-    const modelsPath = resolve(root, "shared/models.js");
-    const now = new Date();
-    const qMonth = Math.floor(now.getMonth() / 3) + 1;
-    
-    const activeModels = REFERENCE_MODELS.filter(m => m.active);
-    
-    // Generar codi JavaScript
-    let modelCode = "const CURATED_MODELS = [\n";
-    
-    // Agrupa per tier
-    const tiers = {
-        lite: activeModels.filter(m => m.id.includes("lite")),
-        flash: activeModels.filter(m => m.id.includes("flash") && !m.id.includes("lite")),
-        pro: activeModels.filter(m => m.id.includes("pro")),
-        other: activeModels.filter(m => !m.id.includes("lite") && !m.id.includes("flash") && !m.id.includes("pro"))
-    };
-    
-    // Lite (prioritat alta)
-    if (tiers.lite.length > 0) {
-        modelCode += "    // Tier: Flash Lite (més ràpids, més económics) — recomanat per a primer ús\n";
-        tiers.lite.forEach(m => {
-            modelCode += `    { id: "${m.id}", label: "${m.label}", priceIn: ${m.priceIn}, priceOut: ${m.priceOut}, rpd: ${m.rpd}, contextWindow: ${m.contextWindow}, fallback: ${m.fallback} },\n`;
-        });
-        modelCode += "    \n";
-    }
-    
-    // Flash
-    if (tiers.flash.length > 0) {
-        modelCode += "    // Tier: Flash (estable, equilibrat)\n";
-        tiers.flash.forEach(m => {
-            modelCode += `    { id: "${m.id}", label: "${m.label}", priceIn: ${m.priceIn}, priceOut: ${m.priceOut}, rpd: ${m.rpd}, contextWindow: ${m.contextWindow}, fallback: ${m.fallback} },\n`;
-        });
-        modelCode += "    \n";
-    }
-    
-    // Pro
-    if (tiers.pro.length > 0) {
-        modelCode += "    // Tier: Pro (més potent, més lent)\n";
-        tiers.pro.forEach(m => {
-            modelCode += `    { id: "${m.id}", label: "${m.label}", priceIn: ${m.priceIn}, priceOut: ${m.priceOut}, rpd: ${m.rpd}, contextWindow: ${m.contextWindow}, fallback: ${m.fallback} },\n`;
-        });
-        modelCode += "    \n";
-    }
-    
-    // Other
-    if (tiers.other.length > 0) {
-        modelCode += "    // Open models (alternativa sense cost)\n";
-        tiers.other.forEach(m => {
-            modelCode += `    { id: "${m.id}", label: "${m.label}", priceIn: ${m.priceIn}, priceOut: ${m.priceOut}, rpd: ${m.rpd}, contextWindow: ${m.contextWindow}, fallback: ${m.fallback} },\n`;
-        });
-        modelCode += "    \n";
-    }
-    
-    modelCode += "];\n";
-    
-    console.log("✅ Models actualitzats! Fitxer modificat:");
-    console.log(`   ${modelsPath}\n`);
-    console.log("Recordatori: executar `npm run prerelease` després.");
 }
 
 // ─── MAIN ────────────────────────────────────────────────────────────────────

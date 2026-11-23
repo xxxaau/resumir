@@ -1,3 +1,4 @@
+/* global chrome, window, document, CSS, getSelection */
 /**
  * scripts/smoke-e2e.mjs
  * Prova de fum en un Chromium REAL amb l'extensió carregada (build_chromium_dev):

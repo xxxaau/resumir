@@ -9,10 +9,10 @@
  *   node scripts/build.mjs chromium
  */
 
-import { readFileSync, existsSync, rmSync, mkdirSync, copyFileSync, writeFileSync, readdirSync, statSync } from "fs";
+import { readFileSync, existsSync, rmSync, mkdirSync, copyFileSync, readdirSync, statSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { execSync, spawnSync } from "child_process";
+import { execSync } from "child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -65,32 +65,6 @@ function exec(cmd, description) {
     return 0;
   } catch (err) {
     console.error(`  ❌ ${description}: ${err.message}`);
-    throw err;
-  }
-}
-
-/**
- * Copy file with directory creation
- */
-function copyFile(src, dest) {
-  const srcPath = resolve(root, src);
-  const destPath = resolve(root, dest);
-  
-  if (!existsSync(srcPath)) {
-    console.warn(`  ⚠️  File not found: ${src}`);
-    return;
-  }
-  
-  const destDir = dirname(destPath);
-  if (!existsSync(destDir)) {
-    mkdirSync(destDir, { recursive: true });
-  }
-  
-  try {
-    const content = readFileSync(srcPath);
-    writeFileSync(destPath, content);
-  } catch (err) {
-    console.error(`  ❌ Failed to copy ${src}: ${err.message}`);
     throw err;
   }
 }

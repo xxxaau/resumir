@@ -1,3 +1,4 @@
+/* global document, window */
 /**
  * scripts/web-captures.mjs
  * Regenera mapa.webp i og.jpg de web/src/shots/ amb l'extensió real. La barra lateral

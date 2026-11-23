@@ -69,8 +69,6 @@ manteniment del final i preparar la release quan convingui.
 - **Release:** renomenar `## [Pendent de publicar]` a `## [X.Y.Z] - AAAA-MM-DD`, córrer
   `node scripts/update-changelog-html.mjs` i revisar les quatre superfícies públiques
   (vegeu `docs/RELEASE-PROCESS.md`). No s'ha tocat cap versió.
-- Petit de neteja (anotat a `docs/BACKLOG.md`): `eslint.config.mjs` ignora `scripts/**` i el
-  bloc de regles per a `scripts/` no s'aplica mai.
 
 ### Regles de procés confirmades en aquesta sessió
 

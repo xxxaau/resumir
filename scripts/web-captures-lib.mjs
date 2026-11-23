@@ -1,3 +1,4 @@
+/* global chrome, window, Image */
 /**
  * scripts/web-captures-lib.mjs
  * Base comuna dels scripts de captures del web (web-captures.mjs, web-hero-anim.mjs):

@@ -1,3 +1,4 @@
+/* global window, document, scrollY */
 /**
  * scripts/web-hero-anim.mjs
  * Regenera web/src/shots/hero.webp ANIMAT: el cursor clica dues cites del resum i l'article les

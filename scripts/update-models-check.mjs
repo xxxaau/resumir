@@ -30,7 +30,7 @@ console.log("📋 Validant llista de models...\n");
 let modelsContent;
 try {
     modelsContent = readFileSync(modelsPath, "utf8");
-} catch (err) {
+} catch {
     console.error(`❌ No puc llegir ${modelsPath}`);
     process.exit(1);
 }
@@ -43,7 +43,7 @@ if (!modelsMatch) {
 }
 
 // Extreure DEFAULT_MODEL_ID (pot contenir punts: gemini-3.1-flash-lite)
-const defaultMatch = modelsContent.match(/const DEFAULT_MODEL_ID\s*=\s*['"]([\w\.\-]+)['"]/);
+const defaultMatch = modelsContent.match(/const DEFAULT_MODEL_ID\s*=\s*['"]([\w.-]+)['"]/);
 if (!defaultMatch) {
     console.error("❌ No trobo DEFAULT_MODEL_ID a models.js");
     process.exit(1);
@@ -54,13 +54,13 @@ let allOk = true;
 const modelIds = [];
 
 // Parser manual: extreure cada model (IDs pot contenir punts: gemini-3.1-flash-lite)
-const modelRegex = /\{\s*id:\s*['"]([\w\.\-]+)['"]\s*,\s*label:\s*['"](.*?)['"]\s*,\s*priceIn:\s*([\d\.]+)\s*,\s*priceOut:\s*([\d\.]+)\s*,\s*rpd:\s*([\d,]+)\s*,\s*contextWindow:\s*([\d_]+)\s*,\s*fallback:\s*(true|false)\s*\}/g;
+const modelRegex = /\{\s*id:\s*['"]([\w.-]+)['"]\s*,\s*label:\s*['"](.*?)['"]\s*,\s*priceIn:\s*([\d.]+)\s*,\s*priceOut:\s*([\d.]+)\s*,\s*rpd:\s*([\d,]+)\s*,\s*contextWindow:\s*([\d_]+)\s*,\s*fallback:\s*(true|false)\s*\}/g;
 
 let match;
 let modelCount = 0;
 
 while ((match = modelRegex.exec(modelsContent)) !== null) {
-    const [, id, label, priceIn, priceOut, rpd, contextWindow, fallback] = match;
+    const [, id, label, priceIn, priceOut, rpd] = match;
     modelCount++;
     modelIds.push(id);
 
@@ -87,7 +87,7 @@ if (!modelIds.includes(DEFAULT_MODEL_ID)) {
 
 // Alerta: models deprecats dins de CURATED_MODELS
 const deprecatedModels = [];
-const deprecatedRegex = /\{\s*id:\s*['"]([\w\.\-]+)['"]\s*,\s*label:\s*['"](.*?deprecat.*?)['"]/gi;
+const deprecatedRegex = /\{\s*id:\s*['"]([\w.-]+)['"]\s*,\s*label:\s*['"](.*?deprecat.*?)['"]/gi;
 let deprecatedMatch;
 while ((deprecatedMatch = deprecatedRegex.exec(modelsContent)) !== null) {
     deprecatedModels.push({ 
@@ -105,12 +105,11 @@ if (deprecatedModels.length > 0) {
 }
 
 // Alerta: pricing molt antic
-const eur_rate_match = modelsContent.match(/const EUR_RATE\s*=\s*([\d\.]+);\s*\/\/\s*(\d{4}-Q\d)/);
+const eur_rate_match = modelsContent.match(/const EUR_RATE\s*=\s*([\d.]+);\s*\/\/\s*(\d{4}-Q\d)/);
 if (eur_rate_match) {
-    const [, rate, period] = eur_rate_match;
+    const [, , period] = eur_rate_match;
     const [year, quarter] = period.split("-Q").map(Number);
     const q_month = (quarter - 1) * 3 + 1; // Q1→1, Q2→4, Q3→7, Q4→10
-    const rateDate = new Date(year, q_month - 1);
     const now = new Date();
     const monthsDiff = (now.getFullYear() - year) * 12 + (now.getMonth() - (q_month - 1));
     

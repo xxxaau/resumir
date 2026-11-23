@@ -94,7 +94,7 @@ try {
 } finally {
   // Tanca el browser si s'havia obert
   if (browser) {
-    try { await browser.close(); } catch (_) { /* ignora errors de tancament */ }
+    try { await browser.close(); } catch { /* ignora errors de tancament */ }
   }
 }
 

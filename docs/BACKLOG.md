@@ -125,5 +125,4 @@ Pendent, per prioritat:
 - **Seguretat de la cadena:** Dependabot (npm i github-actions) i accions fixades per SHA; `npm audit` també de devDeps (esbuild genera el codi publicat); Node 20 a la matriu de CI (`engines` diu >=20).
 - **Build determinista comprovat:** construir dues vegades a CI i comparar SHA-256 (BUILD.md diu «byte-identical»).
 - **Captures de botiga automàtiques** a partir del smoke e2e (les 5 de `MARKETS-COPY.md` §6, 1280×800).
-- **Petit:** `eslint.config.mjs` ignora `scripts/**` i el bloc de regles per a `scripts/` no s'aplica mai.
 

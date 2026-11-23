@@ -408,7 +408,6 @@ function readZipEntries(zipPath) {
     }
     if (eocd < 0) throw new Error("EOCD no trobat");
     const totalEntries = buf.readUInt16LE(eocd + 10);
-    const cdSize       = buf.readUInt32LE(eocd + 12);
     const cdOffset     = buf.readUInt32LE(eocd + 16);
 
     const entries = new Map();
@@ -417,7 +416,6 @@ function readZipEntries(zipPath) {
         if (buf.readUInt32LE(p) !== 0x02014b50) throw new Error("Central dir signature invàlida");
         const method     = buf.readUInt16LE(p + 10);
         const compSize   = buf.readUInt32LE(p + 20);
-        const uncompSize = buf.readUInt32LE(p + 24);
         const nameLen    = buf.readUInt16LE(p + 28);
         const extraLen   = buf.readUInt16LE(p + 30);
         const commentLen = buf.readUInt16LE(p + 32);
