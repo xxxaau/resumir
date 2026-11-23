@@ -5,10 +5,7 @@ Tots els canvis importants d'aquest projecte es documenten en aquest fitxer.
 El format està basat en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.html).
 
-## [Pendent de publicar]
-
-> Secció de treball: a cada canvi s'hi afegeix l'entrada. En preparar la release es renomena a
-> `## [X.Y.Z] - AAAA-MM-DD` (mentre no tingui data, no surt a «Sobre l'extensió»).
+## [2.7.3] - 2026-11-23
 
 ### Arreglat
 - **Llocs que contenen «x.com» al nom** (vox.com, dropbox.com, linux.com…): ja no es resumeixen com

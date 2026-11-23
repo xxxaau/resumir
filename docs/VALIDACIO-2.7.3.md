@@ -1,10 +1,10 @@
 # Validació de la versió 2.7.3 (registre de treball)
 
 - **Data del registre:** 2026-11-23
-- **Versió objectiu:** `2.7.3` (encara **NO preparada**)
+- **Versió objectiu:** `2.7.3` (preparada el 2026-11-23)
 - **Base:** v2.7.2 (`33ee20c`) → `main` (`git rev-list --count 33ee20c..main`)
-- **Estat:** codi i tests tancats. No s'ha tocat `package.json`, cap manifest, cap tag
-  ni s'ha fet cap publicació. La release es prepararà quan l'usuari ho demani.
+- **Estat:** codi i tests tancats; CHANGELOG, «Sobre l'extensió» i MARKETS-COPY alineats. El bump,
+  el tag i la publicació es fan amb la confirmació explícita de l'usuari.
 
 Aquest document serveix perquè **un altre agent validi els canvis** i perquè **l'usuari
 provi la versió** abans de preparar la release. Els canvis d'usuari són a

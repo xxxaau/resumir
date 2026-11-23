@@ -1488,6 +1488,29 @@
             <!-- CHANGELOG_START -->
             <div class="version-entry">
               <div class="version-title">
+                v2.7.3
+                <span class="version-date">Novembre 2026</span>
+              </div>
+              <ul class="version-list">
+                <li><strong>Llocs que contenen «x.com» al nom</strong> (vox.com, dropbox.com, linux.com…): ja no es resumeixen com si fossin X, que feia que només es resumís la metadescripció. Ara es llegeix l'article sencer.</li>
+                <li><strong>Resposta buida o bloquejada de Gemini:</strong> ara surt un error amb el motiu (codi <code>[012]</code>) en lloc d'un «Resum complet» buit que es desava a l'Historial.</li>
+                <li><strong>Aturar un resum i començar-ne un altre</strong> (per exemple, el d'una selecció) ja no barreja textos ni desa a la memòria cau un resum de la pàgina equivocada. Mentre es genera, tampoc no es carreguen les pestanyes de tipus.</li>
+                <li><strong>Targetes Anki desades:</strong> en reobrir-les ja no surten «Generar més» i «Afinar», que no funcionaven o feien servir el text d'una altra pàgina.</li>
+                <li><strong>«Desfer» a l'Historial</strong> torna a deixar el resum amb el seu format, llargada i tokens.</li>
+                <li><strong>Actualitzar la llista de models:</strong> segueix totes les pàgines de Google, accepta la clau enganxada amb espais i ja no esborra com a «obsolets» favorits que sí que existeixen.</li>
+                <li><strong>Comprovar la clau amb el límit gratuït esgotat:</strong> es desa igualment (Google l'ha reconeguda) i t'avisa que has d'esperar uns minuts abans de resumir.</li>
+                <li><strong>Exportar a Obsidian o copiar com a Markdown:</strong> els resums amb <code>$$…$$</code> (fórmules) o <code>$&amp;</code> es copien tal com són, sense alterar-los.</li>
+                <li><strong>Dues finestres obertes:</strong> la drecera i el menú contextual ja no resumen també la pàgina de l'altra finestra. Un trigger vell (si la barra no s'havia pogut obrir) ja no es reprèn sol.</li>
+                <li><strong>Enllaços d'article dels fils de Hacker News:</strong> més protecció; ja no es descarreguen adreces internes (IP, <code>localhost</code>, xarxa local).</li>
+                <li><strong>PDF local gran (més de 7 MB):</strong> el visor propi no s'obre (no hi cap), però el resum es genera igualment i sense bloquejar la pàgina.</li>
+                <li><strong>Estat inicial de la barra</strong> (sense resum, pestanya sense pàgina web i configuració de la clau): el missatge surt a dalt i centrat, amb un marge còmode, en lloc de al mig de la barra.</li>
+                <li><strong>El botó Resumir</strong> és sempre el primer de l'esquerra de la barra; a Configuració ja no es pot moure ni cap altre botó no el pot avançar.</li>
+                <li><strong>Models disponibles:</strong> actualitzats als que ofereix Google ara: Gemini 4 (Hydrogen, Carbon, Argon i Neon), Gemini 3.8 Flash, Gemma 4 i Gemini 3.5 Flash-Lite, que passa a ser el recomanat. S'han retirat Gemini 2.5 Flash i Pro (Google els tanca l'1/12/2026) i 2.5 Flash-Lite (substituït pel 3.5). El preu estimat ja compta les pujades anunciades per al desembre i el gener, i el canvi a euros s'ha recalculat.</li>
+                <li><strong>Historial d'ús:</strong> ja no desa el títol ni la URL de cada resum (no es feien servir). Les estadístiques de la configuració continuen igual.</li>
+              </ul>
+            </div>
+            <div class="version-entry">
+              <div class="version-title">
                 v2.7.2
                 <span class="version-date">Octubre 2026</span>
               </div>
@@ -1543,6 +1566,8 @@
                 <li><strong>Resums de Hacker News.</strong> En resumir un fil de HN amb un article enllaçat, ara s'inclou també el contingut de l'article (abans només s'enviava la discussió).</li>
               </ul>
             </div>
+            <details class="changelog-older">
+              <summary>Versions anteriors</summary>
             <div class="version-entry">
               <div class="version-title">
                 v2.6.1
@@ -1552,8 +1577,6 @@
                 <li><strong>Botó «Targetes Anki».</strong> Després de generar un resum, el botó de Targetes Anki es quedava desactivat i no es podia tornar a fer servir. Ara funciona correctament en qualsevol moment.</li>
               </ul>
             </div>
-            <details class="changelog-older">
-              <summary>Versions anteriors</summary>
             <div class="version-entry">
               <div class="version-title">
                 v2.6.0
