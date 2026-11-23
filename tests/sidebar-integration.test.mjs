@@ -1702,6 +1702,23 @@ test("drecera - un trigger d'una altra finestra s'ignora", async () => {
     } finally { h.close(); }
 });
 
+test("drecera - el trigger d'una altra finestra no s'esborra de l'storage (la seva barra el pot recollir)", async () => {
+    const h = await loadSidebar({
+        local: {
+            apiKey: "AIza_test",
+            pendingSummary: { type: "page", url: "https://example.com/x", windowId: 2, ts: Date.now() },
+        },
+        pageText: "Un article. ".repeat(30),
+        modelReply: "El resum.",
+    });
+    try {
+        await sleep(300);
+        assert.equal(h.calls.fetches.length, 0, "no resumeix la pàgina d'una altra finestra");
+        const left = await h.window.chrome.storage.local.get("pendingSummary");
+        assert.ok(left.pendingSummary, "el trigger de l'altra finestra ha de continuar a l'storage");
+    } finally { h.close(); }
+});
+
 test("drecera - un trigger caducat s'ignora", async () => {
     const h = await loadSidebar({
         local: { apiKey: "AIza_test" },

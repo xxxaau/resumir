@@ -936,6 +936,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return true;
     };
     
+    // Un trigger només es consumeix (s'esborra de l'storage) si és per a aquesta finestra o ja ha
+    // caducat: si és d'una altra finestra, la seva barra (potser tancada ara i oberta més tard) l'ha de
+    // poder recollir encara.
+    const consumeTrigger = async (data) => {
+        const ok = await acceptsTrigger(data);
+        const stale = !!data && typeof data.ts === "number" && Date.now() - data.ts > TRIGGER_MAX_AGE_MS;
+        if (ok || stale) await ext.storage.local.remove("pendingSummary");
+        return ok;
+    };
+
     const boundTrigger = (data) => {
         // Deduplicate triggers (prevent double summary if both message and storage events fire)
         const triggerType = data && data.type === "selection" ? "selection" : "page";
@@ -969,8 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Check for pending summary on load (context menu while sidebar was closed)
     ext.storage.local.get("pendingSummary").then(async data => {
         if (data.pendingSummary) {
-            await ext.storage.local.remove("pendingSummary");
-            if (await acceptsTrigger(data.pendingSummary)) boundTrigger(data.pendingSummary);
+            if (await consumeTrigger(data.pendingSummary)) boundTrigger(data.pendingSummary);
         }
     });
 
@@ -999,8 +1008,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Watch for pendingSummary and pendingCacheLoad (reliable fallback for Chrome sidePanel timing)
     ext.storage.onChanged.addListener((changes, area) => {
         if (area === "local" && changes.pendingSummary && changes.pendingSummary.newValue) {
-            ext.storage.local.remove("pendingSummary");
-            acceptsTrigger(changes.pendingSummary.newValue).then(ok => {
+            consumeTrigger(changes.pendingSummary.newValue).then(ok => {
                 if (ok) boundTrigger(changes.pendingSummary.newValue);
             });
         }
