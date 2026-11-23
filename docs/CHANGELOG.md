@@ -56,6 +56,10 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   trencada. (minor)
 
 ### Canviat
+- **Estat inicial de la barra** (sense resum, pestanya sense pàgina web i configuració de la clau): el
+  missatge surt a dalt i centrat, amb un marge còmode, en lloc de al mig de la barra.
+- **El botó Resumir** és sempre el primer de l'esquerra de la barra; a Configuració ja no es pot moure
+  ni cap altre botó no el pot avançar.
 - **Barra molt estreta:** per sota de 300 px d'amplada el contingut ja no es comprimeix fins a
   solapar-se; apareix desplaçament horitzontal. (minor)
 - **Models disponibles:** actualitzats als que ofereix Google ara: Gemini 4 (Hydrogen, Carbon, Argon i Neon),

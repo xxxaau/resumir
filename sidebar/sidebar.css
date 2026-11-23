@@ -338,6 +338,7 @@ body {
 
 /* El botó Resumir de la barra: icona en color primari, fons transparent. */
 #summarizeBtn.primary {
+  order: -1; /* sempre el primer de l'esquerra, passi el que passi amb l'ordre dels altres botons */
   color: var(--primary-color);
   background-color: transparent;
 }
@@ -605,13 +606,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 12px 8px 36px;
+  padding: var(--empty-state-top, 16px) 8px 24px;
   color: var(--text-color);
   box-sizing: border-box;
   white-space: normal;
-  /* Centrat verticalment mentre càpiga; si no, el panell fa scroll amb normalitat */
-  min-height: var(--centered-min-height, 0);
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .api-key-icon {
@@ -1505,10 +1504,11 @@ body {
 .history-filter:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
 
 /* Estat en repòs: només es veu si no hi ha contingut, càrrega, error ni panells */
-/* Estats sense contingut (repòs, pestanya sense pàgina web i onboarding de la clau): centrats
-   verticalment a l'espai entre la barra d'eines i el peu, una mica cap amunt (ull òptic). */
-:root { --centered-min-height: calc(100vh - var(--toolbar-height, 44px) - 56px); }
-#idle-state, #idle-unsupported { padding: 16px 16px 40px; text-align: center; box-sizing: border-box; min-height: var(--centered-min-height); flex-direction: column; align-items: center; justify-content: center; }
+/* Estats sense contingut (repòs, pestanya sense pàgina web i onboarding de la clau): a dalt, centrats
+   només en horitzontal, amb un coixí superior que creix amb l'alçada del panell (8vh, entre 16 i 72px)
+   perquè sigui visible sense desplaçar-se ni quedi enganxat a la barra d'eines. */
+:root { --empty-state-top: clamp(16px, 8vh, 72px); }
+#idle-state, #idle-unsupported { padding: var(--empty-state-top) 16px 24px; text-align: center; box-sizing: border-box; flex-direction: column; align-items: center; justify-content: flex-start; }
 #idle-state:not([hidden]), #idle-unsupported:not([hidden]) { display: flex; }
 #idle-state[hidden], #idle-unsupported[hidden] { display: none; }
 #container:has(#content:not(.hidden), #loading:not(.hidden), #error:not(.hidden), #history-panel:not(.hidden), #source-panel:not(.hidden)) :is(#idle-state, #idle-unsupported) { display: none; }

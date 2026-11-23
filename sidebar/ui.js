@@ -145,6 +145,9 @@ function applyExtensionOrder(order) {
         return g === -1 ? TOOLBAR_GROUPS.length : g;
     };
     orderedButtons.sort((a, b) => groupOf(a) - groupOf(b));
+    // El botó Resumir és sempre el primer de l'esquerra: no depèn de l'ordre desat.
+    const resumIdx = orderedButtons.findIndex(b => b.id === "summarizeBtn");
+    if (resumIdx > 0) orderedButtons.unshift(...orderedButtons.splice(resumIdx, 1));
 
     // Separadors visuals entre grups no buits (es recreen a cada ordenació)
     toolbar.querySelectorAll(".toolbar-sep").forEach(el => el.remove());

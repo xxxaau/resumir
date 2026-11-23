@@ -57,10 +57,11 @@ function applyExtensionOrder(order) {
     const list = document.querySelector(".extensions-list");
     const items = Array.from(list.querySelectorAll(".extension-item"));
     const itemsMap = new Map();
+    const itemsMapAll = new Map();
 
     items.forEach(item => {
         const id = item.querySelector(".extension-actions").getAttribute("data-extension-id");
-        if (id) itemsMap.set(id, item);
+        if (id) { itemsMap.set(id, item); itemsMapAll.set(id, item); }
     });
 
     const boxes = ensureGroupBoxes(list);
@@ -80,6 +81,10 @@ function applyExtensionOrder(order) {
 
     // Plugins que l'ordre desat no coneix (nous): al final del seu grup
     itemsMap.forEach((item, id) => place(id, item));
+
+    // «Resum» és sempre el primer del seu grup (i de la barra): no es pot moure.
+    const resumItem = itemsMapAll.get("resum");
+    if (resumItem && resumItem.parentElement) resumItem.parentElement.prepend(resumItem);
 
     updateMoveButtonsState();
 }
@@ -134,8 +139,11 @@ function updateMoveButtonsState() {
         items.forEach((item, index) => {
             const upBtn = item.querySelector(".btn-move-up");
             const downBtn = item.querySelector(".btn-move-down");
-            if (upBtn) upBtn.disabled = (index === 0);
-            if (downBtn) downBtn.disabled = (index === items.length - 1);
+            const isResum = !!item.querySelector('.extension-actions[data-extension-id="resum"]');
+            const belowResum = index > 0 && !!items[index - 1].querySelector('.extension-actions[data-extension-id="resum"]');
+            // «Resum» no es mou, i cap altre botó no pot passar per davant seu
+            if (upBtn) upBtn.disabled = (index === 0 || isResum || belowResum);
+            if (downBtn) downBtn.disabled = (index === items.length - 1 || isResum);
         });
     });
 }

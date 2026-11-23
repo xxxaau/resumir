@@ -949,24 +949,26 @@ test("reordenar - en pujar un plugin el focus continua al seu botó i s'anuncia 
     const h = await loadSettings({});
     try {
         const upBtn = (id) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-up`);
-        const third = h.document.querySelectorAll(".extension-item")[2].querySelector(".extension-actions").dataset.extensionId;
-        upBtn(third).focus();
-        upBtn(third).click();
+        // 4t element: en pujar queda 3r, encara per sota del límit (el 1r és «Resum», fix)
+        const fourth = h.document.querySelectorAll(".extension-item")[3].querySelector(".extension-actions").dataset.extensionId;
+        upBtn(fourth).focus();
+        upBtn(fourth).click();
         await h.flush(5);
-        assert.equal(h.document.activeElement, upBtn(third), "el focus no ha de caure a <body> en moure l'element");
-        assert.match(h.document.getElementById("reorderStatus").textContent, /posició 2 de \d+/);
+        assert.equal(h.document.activeElement, upBtn(fourth), "el focus no ha de caure a <body> en moure l'element");
+        assert.match(h.document.getElementById("reorderStatus").textContent, /posició 3 de \d+/);
     } finally { h.close(); }
 });
 
 test("reordenar - en arribar a un extrem, el focus passa al botó contrari (no al botó inhabilitat)", async () => {
     const h = await loadSettings({});
     try {
-        const first = h.document.querySelector(".extension-item .extension-actions").dataset.extensionId;
-        const second = h.document.querySelectorAll(".extension-item")[1].querySelector(".extension-actions").dataset.extensionId;
+        // «Resum» és fix al capdamunt: el límit superior és el 2n element (just sota seu)
+        const first = h.document.querySelectorAll(".extension-item")[1].querySelector(".extension-actions").dataset.extensionId;
+        const second = h.document.querySelectorAll(".extension-item")[2].querySelector(".extension-actions").dataset.extensionId;
         const up = (id) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-up`);
         const down = (id) => h.document.querySelector(`.extension-actions[data-extension-id="${id}"] .btn-move-down`);
         up(second).focus();
-        up(second).click();                   // ara «second» és el primer
+        up(second).click();                   // ara «second» és el primer després de «Resum»
         await h.flush(5);
         assert.equal(up(second).disabled, true);
         assert.equal(h.document.activeElement, down(second), "el focus va a «avall», que és el que té sentit");
@@ -977,13 +979,27 @@ test("reordenar - en arribar a un extrem, el focus passa al botó contrari (no a
 test("reordenar - en baixar un plugin el focus també es manté", async () => {
     const h = await loadSettings({});
     try {
-        const first = h.document.querySelector(".extension-item .extension-actions").dataset.extensionId;
+        const first = h.document.querySelectorAll(".extension-item")[1].querySelector(".extension-actions").dataset.extensionId;
         const down = h.document.querySelector(`.extension-actions[data-extension-id="${first}"] .btn-move-down`);
         down.focus();
         down.click();
         await h.flush(5);
         assert.equal(h.document.activeElement, down);
-        assert.match(h.document.getElementById("reorderStatus").textContent, /posició 2 de \d+/);
+        assert.match(h.document.getElementById("reorderStatus").textContent, /posició 3 de \d+/);
+    } finally { h.close(); }
+});
+
+// «Resum» és sempre el primer de la barra: ni es pot moure ni cap altre no el pot avançar.
+test("reordenar - «Resum» no es pot moure ni avançar (sempre el primer de la barra)", async () => {
+    const h = await loadSettings({ sync: { extensionOrder: ["selectpdf", "simple", "resum", "deepdive"] } });
+    try {
+        const items = [...h.document.querySelectorAll(".extension-item")];
+        const id = (it) => it.querySelector(".extension-actions").dataset.extensionId;
+        assert.equal(id(items[0]), "resum", "un ordre desat amb «Resum» enmig es corregeix");
+        assert.equal(items[0].querySelector(".btn-move-up").disabled, true);
+        assert.equal(items[0].querySelector(".btn-move-down").disabled, true);
+        assert.equal(items[1].querySelector(".btn-move-up").disabled, true, "el següent no pot passar per davant de «Resum»");
+        assert.equal(items[1].querySelector(".btn-move-down").disabled, false);
     } finally { h.close(); }
 });
 
