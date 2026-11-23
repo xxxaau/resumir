@@ -60,17 +60,24 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
 - **Barra molt estreta:** per sota de 300 px d'amplada el contingut ja no es comprimeix fins a
   solapar-se; apareix desplaçament horitzontal. (minor)
 - **Models disponibles:** actualitzats als que ofereix Google ara: Gemini 4 (Hydrogen, Carbon, Argon i Neon),
-  Gemini 3.8 Flash, Gemma 4 i Gemini 3.5 Flash-Lite, que passa a ser el recomanat. S'han retirat
-  Gemini 2.5 Flash i Pro (Google els tanca l'1/12/2026) i 2.5 Flash-Lite (substituït pel 3.5). El preu
-  estimat ja compta les pujades anunciades per al desembre i el gener, i el canvi a euros s'ha recalculat.
+  Gemini 3.8 Flash, Gemma 4 i Gemini 3.5 Flash-Lite, que passa a ser el recomanat. Ja no es
+  suggereixen Gemini 2.5 Flash, Pro i Flash-Lite (Google tanca Flash i Pro l'1/12/2026), Gemini 3.5 Flash ni
+  Gemma 3. Si ja havies actualitzat la llista de models, prem «Actualitzar la llista de models» a la
+  configuració per veure'ls.
 - **Obrir la barra:** ja no descarrega PDFs ni busca transcripcions de YouTube si no has demanat
   cap resum; només llegeix el text bàsic de la pàgina. (minor)
 - **Resums de memòria cau:** en reobrir-los ja no es torna a llegir la pàgina; el text enviat es
   carrega quan prems «Veure el text enviat». (minor)
-- **Historial d'ús:** ja no desa el títol ni la URL de cada resum (no es feien servir). Les
+- **Historial d'ús:** ja no desa el títol ni la URL de cada resum (no es feien servir).
+  Les entrades anteriors no es modifiquen; desapareixen en esborrar les estadístiques d'ús. Les
   estadístiques de la configuració continuen igual.
 
 ### Canviat (dev)
+- `scripts/update-changelog-html.mjs` ja no corromp «Sobre l'extensió» si el CHANGELOG conté `$&` o
+  `$$` (la substitució ara va amb una funció, `injectChangelog`). (dev)
+- `npm run release:source` és portable (script de Node) i el control de `?key=` també veu `fetch`
+  de diverses línies. (dev)
+- `release-notes.mjs` accepta la versió com a argument. (dev)
 - El lint ara cobreix també `scripts/` (abans s'ignorava i el bloc de regles no s'aplicava). (dev)
 - La configuració de mapa conceptual sense UI (profunditat, branques, descripcions, autoexpandir)
   s'ha tret; els valors queden fixats al codi. (dev)

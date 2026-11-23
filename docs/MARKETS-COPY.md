@@ -114,7 +114,7 @@ Resumir — novetats
 
 • Models actualitzats: Gemini 4, Gemini 3.8 i Gemma 4; el recomanat passa a ser Gemini 3.5 Flash-Lite (els Gemini 2.5 es retiren).
 • Un error de Gemini ara surt com a missatge clar, no com un resum buit, i aturar un resum ja no barreja textos amb el següent.
-• Targetes Anki: «Generar més» i «Afinar» funcionen també en reobrir-les; no es perd cap targeta.
+• Targetes Anki: «Generar més» i «Afinar» les targetes noves es desen i es tornen a veure en reobrir el panell; no es perd cap targeta.
 • Llocs com vox.com o dropbox.com ja no es resumeixen com si fossin X.
 • Més protecció en els enllaços dels fils de Hacker News, i els PDFs molt grans o lents s'aturen amb un missatge clar.
 • L'estat inicial de la barra surt a dalt, el botó Resumir és sempre el primer i la barra aguanta bé un panell estret.

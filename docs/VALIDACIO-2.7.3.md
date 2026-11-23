@@ -8,7 +8,7 @@
 
 Aquest document serveix perquè **un altre agent validi els canvis** i perquè **l'usuari
 provi la versió** abans de preparar la release. Els canvis d'usuari són a
-`docs/CHANGELOG.md`, secció `## [Pendent de publicar]`.
+`docs/CHANGELOG.md`, secció `## [2.7.3]`.
 
 ## 1. Què inclou
 
@@ -29,6 +29,9 @@ provi la versió** abans de preparar la release. Els canvis d'usuari són a
 | PDF local gran (>7 MB) | `b35df44` | Sense visor propi, però el resum funciona |
 | Clau amb 429 | `4db1727` | S'accepta la clau i s'avisa d'esperar |
 | Llista de models actualitzada | `99ab90a` | Gemini 4, 3.8 i Gemma 4; per defecte 3.5 Flash-Lite; sense Gemini 2.5. Verificat 2026-11-23 amb l'API real: tots els IDs de Gemini 3.x/4 i els dos Gemma 4 existeixen i `generateContent` respon (Gemma envia fragments `thought`, que `api.js` descarta) |
+| Amplada mínima de la barra (300 px) | `c3aed63` | Per sota, desplaçament horitzontal en lloc de solapaments |
+| Estats buits a dalt + Resumir fix al primer lloc | `ccb594e` | Missatge a dalt i centrat; «Resumir» sempre el primer, també a Configuració |
+| «Sobre l'extensió» amb `$&` / `$$` | `ec3300a` | L'historial no es duplica ni es corromp (dev) |
 | Actualitzar models | `f8f2e8b` | Normalitza la clau, pagina i no esborra favorits vàlids |
 | Codi mort d'estadístiques | `e6ed44f` | Sense impacte d'usuari (neteja) |
 | Setmana ISO i «Avui» locals | `0cfb3e5` | Rutes Obsidian `gggg`/`ww` i comptador diari correctes |
@@ -62,17 +65,15 @@ Executar a l'arrel del repo:
 
 ```powershell
 npm install          # només si cal
-npm test             # esperat: 879 OK
+npm test             # esperat: 0 fallades
 npm run lint         # esperat: 0 avisos (ara inclou scripts/)
 npm run vendor:verify # esperat: 3 hashes OK
 npm run build        # esperat: 2 ZIP de contingut + cap "not found"
-npm run prerelease   # esperat: 19/19
+npm run prerelease   # esperat: tots els checks OK
 ```
 
 Notes:
 - `npm run prerelease` necessita un `build` previ.
-- `package-lock.json` apareix modificat (15 línies esborrades d'un `npm install` anterior):
-  **no és intencionat; no el commitis**.
 - Els tests de regressió nous es van verificar fent `git stash push -- <fitxer font>` i
   comprovant que fallaven sense el fix.
 
@@ -106,15 +107,13 @@ Carregar la build DEV (`npm run dev` → `build_firefox_dev/manifest.json` o
 | 21 | Resposta buida/bloquejada de Gemini | Error `[012]` amb motiu |
 | 22 | Mapa conceptual | Continua amb 4 nivells, 6 branques i descripcions |
 
-## 4. Abans de preparar la release (NO fet encara)
+## 4. Release
 
-1. Renomenar `## [Pendent de publicar]` a `## [2.7.3] - AAAA-MM-DD` a
-   `docs/CHANGELOG.md` i executar `node scripts/update-changelog-html.mjs`.
-2. Revisar les quatre superfícies públiques: `README.md`, «Sobre l'extensió»,
-   `docs/CHANGELOG.md`, web (`web/src/*.njk`) i `docs/MARKETS-COPY.md`.
-3. `npm version 2.7.3 -m "chore: release v%s"` (mai editar versions a mà).
-4. `npm run build`, `npm run prerelease`, `npm run release:source`.
-5. Publicar (tag/AMO/GitHub Release) **només amb confirmació explícita de l'usuari**.
+CHANGELOG ([2.7.3]), «Sobre l'extensió», `MARKETS-COPY.md` i `PRIVACY_POLICY.md` ja estan alineats i
+la revisió independent (2026-11-23) ha donat GO amb condicions, ja resoltes. Resta seguir
+`docs/RELEASE-PROCESS.md`: `npm version 2.7.3 -m "chore: release v%s"`, `npm run build`,
+`npm run prerelease`, `npm run release:source` i publicar (tag/AMO/GitHub Release) **només amb
+confirmació explícita de l'usuari**.
 
 ## 5. Pendent conegut (no bloqueja)
 
