@@ -13,6 +13,57 @@ i criteris d'acceptació mínims.
 
 ---
 
+## Propera versió (2.7.4) — pendents de la revisió de la 2.7.3
+
+Origen: revisió independent d'Opus abans de la 2.7.3 (cap bloquejava la release). Dificultat:
+**Baixa** (< 1 h, un fitxer), **Mitjana** (diversos fitxers o cal provar en un navegador),
+**Alta** (decisió de disseny o risc de regressió). Ordre = prioritat suggerida.
+
+- **Netejar títol i URL de l'historial d'ús antic** (privadesa) — **Mitjana.**
+  Les fins a 1.000 entrades de `usageHistory` fetes abans de la 2.7.3 conserven `title` i `url`
+  (la 2.7.3 només ho evita en entrades noves). *Enfocament:* migració única en actualitzar
+  (`runtime.onInstalled` amb `reason === "update"`, a `background.js`): recórrer `usageHistory`,
+  treure `title`/`url` i desar un senyal `usageHistoryScrubbed: true` perquè no es repeteixi; esborrar
+  també `dailyStats` orfe. Test amb dades antigues. *Acceptació:* cap entrada conserva títol ni URL;
+  les estadístiques de la configuració surten iguals. Després es pot treure la nota de privadesa
+  «des de la 2.7.3».
+- **Anki «Generar més»: no reintentar errors no recuperables** — **Baixa.**
+  `sidebar/anki.js` prova tots els models davant de qualsevol error (també 401/400 i `[012]`), a
+  diferència del resum, que només reintenta els recuperables. *Enfocament:* reutilitzar el criteri de
+  `sidebar/summary.js` (extreure'l a una funció compartida a `utils.js`). *Acceptació:* un 401 o un
+  400 no fa cap segona petició; un 404/429/5xx sí que passa al model següent.
+- **PDF sense extensió `.pdf` en obrir la barra** (p. ex. `arxiv.org/pdf/NNNN`) — **Mitjana.**
+  A `sidebar/summary.js` (~263-270) la càrrega lleugera només descarta el resultat si `isPdfUrl` (només
+  mira l'extensió) diu que és PDF; la detecció per HEAD de l'extracció completa no s'hi aplica.
+  *Enfocament:* primer **reproduir-ho al harness Playwright** (no es va poder provar); si és real,
+  cridar `looksLikePdfByHead` abans d'acceptar la càrrega lleugera d'una URL https. *Acceptació:*
+  test amb una URL sense extensió que respon `application/pdf`.
+- **Provar en viu la barra per sota de 300 px** — **Baixa** (és prova, no codi).
+  Comprovar que el peu i la barra d'Anki (`position: fixed; left/right: 0`) queden bé amb
+  desplaçament horitzontal. Si no, fixar-los a `min-width: 300px`.
+- **Provar amb crides reals els models nous** — **Baixa.** Gemma 4 amb un resum real (qualitat, límit
+  gratuït), i `gemini-4-carbon/argon/neon` i `3.8/3.6-flash` (només se n'ha comprovat l'existència a
+  la doc). Ajustar `rpd` i `contextWindow` de `shared/models.js` amb els valors reals.
+- **Excepció del control `?key=` massa àmplia** (`scripts/lib/security-checks.mjs`) — **Baixa.**
+  Accepta qualsevol `fetch` de `content.js` amb `youtubei/v1/get_transcript?key=` als 500 caràcters
+  següents; un altre `?key=` dins la finestra passaria. *Enfocament:* ancorar l'excepció a la
+  crida concreta (regex amb la URL completa) i afegir un cas negatiu al test.
+- **Còpia de seguretat amb claus velles** (`options/settings-backup.js`) — **Baixa.** L'exportació
+  (`sync.get(null)`) inclou claus `conceptMap*` ja sense ús i la importació diu «s'han ignorat N
+  valors». *Enfocament:* filtrar les claus que no són a la llista blanca en exportar.
+- **Tests que falten** — **Baixa.** Que la barra (`sidebar/ui.js`) posi «Resumir» primer encara que
+  l'ordre desat el posi enmig; i el `padding` dels estats buits (ara el test només comprova
+  `min-width`).
+- **`AUDIT-TASKS.md`:** arxivar o esborrar — **Baixa.** És a l'arrel (1.401 línies), no surt a
+  `docs/DOCS-INDEX.md` i acaba dins del ZIP de codi font. *Enfocament:* moure'l a `docs/historic/`
+  (i referenciar-lo a l'índex) o esborrar-lo, ja que totes les tasques estan tancades.
+- **Mantenir el defecte i els preus de models** — **Baixa, recurrent.** Quan surti un Flash-Lite nou,
+  actualitzar `DEFAULT_MODEL_ID`. Verificar els preus després de l'1/12/2026 (Gemini 4 Carbon/Argon) i
+  l'1/1/2027 (Flash 3.8/3.6): ja són al codi els valors anunciats. Els Gemini 2.5 Flash i Pro es
+  tanquen l'1/12/2026.
+
+---
+
 ## Interfície d'usuari multidioma (i18n)
 
 **Context (2026-05-27):** Actualment tota la interfície d'usuari està en català dur — ~200+ cadenes repartides entre ~18 fitxers (3 HTML + 15 JS). No existeix cap infraestructura d'internacionalització: ni `_locales/`, ni `default_locale` als manifests, ni `chrome.i18n`, ni `__MSG__` als HTML.
