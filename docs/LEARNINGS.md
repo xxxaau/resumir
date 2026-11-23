@@ -7,6 +7,7 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 
 ## Índex
 
+- Release v2.7.3: `String.replace` amb `$&`, carpetes dev antigues, amplada de la barra i models — Sessió 2026-11-23
 - Revisió del procés de release (passos, capçalera del CHANGELOG, §8 superada) — Sessió 2026-10-20
 - Lletra responsiva de la barra lateral i captures/animació del web — Sessió 2026-10-15
 - YouTube SPA, timedtext, la targeta de Firefox, la lectura biònica i la prova a Firefox real — Sessió 2026-10-14
@@ -23,6 +24,53 @@ d'altres docs (p. ex. `CREAR-PLUGIN.md`).
 - Fix — Sessió 2026-06-10: la "bombolla" dels botons del mapa
 - Aprenentatges — Sessió v2.3.1+ (2026-06-05)
 - Aprenentatges — Sessió v2.2.10 (2026-05-22)
+
+---
+
+# Release v2.7.3: `String.replace` amb `$&`, carpetes dev antigues, amplada de la barra i models — Sessió 2026-11-23
+
+## `String.replace(regex, cadena)` interpreta `$&`, `$$`, `` $` `` i `$'` del text que injectes
+`update-changelog-html.mjs` copiava l'historial a `settings.html` amb la cadena del CHANGELOG com a
+substitució. Una entrada que parlava de `$$…$$` i `$&` (les fórmules de l'exportació) va duplicar el
+bloc **dins del propi text**: 234 línies afegides i 3 tests vermells, sense cap error del script.
+Lliçó: quan el text de substitució és dades (CHANGELOG, plantilles, entrada d'usuari), passa **sempre
+una funció** (`() => text`). Ara és `injectChangelog` (`scripts/changelog-lib.mjs`) amb test.
+
+## Les carpetes `build_*_dev/` són còpies: després de tocar codi cal `npm run dev`
+Una captura mostrava el placeholder encara centrat i «Gemini 3.1 Flash…» al peu: era la build antiga,
+no un error del CSS. El navegador carrega la carpeta generada, no el codi font. Abans de dir que un
+canvi «no es veu», regenera (`npm run dev`) i recarrega l'extensió (`about:debugging`).
+
+## No es pot fixar l'amplada del panell lateral
+Ni `side_panel` (Chrome/Edge) ni `sidebar_action` (Firefox) deixen a l'extensió limitar l'amplada: la
+decideix el navegador. Només es pot fer que el contingut aguanti: `html { min-width: 300px }` (scroll
+horitzontal per sota). Compte: el peu i la barra d'Anki són `position: fixed`, no segueixen aquest
+scroll.
+
+## Ordre de la barra i botó Resumir fix
+L'ordre dels botons és configurable (`extensionOrder`), així que «Resumir» es podia moure. Es fixa en
+tres llocs que han de coincidir: CSS `order: -1`, `ui.js` (l'ordena primer) i Configuració
+(`settings-order.js`: no es mou ni cap altre no el pot avançar, i un ordre desat amb Resum enmig es
+corregeix). «Resum» és fora de «Plugins actius» per disseny (`icon: null` al registre).
+
+## Models: verifica amb l'API real i no et refiïs d'un `-latest`
+- `GET /v1beta/models` amb una clau confirma els IDs; una crida a `generateContent` confirma que
+  responen. Gemma 4 envia el raonament com a fragment `thought: true` (`api.js` ja el descarta).
+- `gemini-flash-lite-latest` existeix i avui resol a `gemini-3.5-flash-lite`, però **no** el reconeix
+  `getCuratedModelInfo` (només `<id>-latest`) i canvia sol de preu i qualitat: el defecte es manté
+  fix i s'actualitza a mà.
+- Els preus anunciats amb data (Carbon/Argon 1/12/2026, Flash 3.8/3.6 1/1/2027) es posen ja al codi
+  perquè l'estimació no quedi curta durant la vida de la release.
+
+## Un trigger no s'ha de consumir abans de saber si és teu
+`pendingSummary` s'esborrava abans de comprovar la finestra: si la barra destinatària estava tancada,
+la drecera no feia res. Ara `consumeTrigger` només l'esborra si és per a la finestra pròpia o ja ha
+caducat.
+
+## Revisió independent abans del tag
+Demanar a Opus una revisió només de lectura de `v2.7.2..HEAD` (codi, tests, CHANGELOG, superfícies
+públiques, procés) va trobar un bug real (el trigger) i diverses afirmacions inexactes dels textos. Els
+punts que no bloquejaven són a `docs/BACKLOG.md` («Propera versió (2.7.4)»).
 
 ---
 
