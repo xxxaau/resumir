@@ -18,7 +18,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const outIdx = args.indexOf("--out");
 const outFile = outIdx !== -1 ? args[outIdx + 1] : null;
-const version = args.find((a, i) => !a.startsWith("--") && i !== outIdx + 1)
+const version = args.find((a, i) => !a.startsWith("--") && (outIdx === -1 || i !== outIdx + 1))
     || JSON.parse(readFileSync(resolve(root, "package.json"), "utf8")).version;
 
 const md = readFileSync(resolve(root, "docs/CHANGELOG.md"), "utf8");

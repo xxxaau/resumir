@@ -110,7 +110,7 @@ async function renderUsageStats() {
 async function clearUsageStats() {
     if (!confirm("S'esborraran les estadístiques d'ús (no els resums ni l'historial). No es pot desfer.")) return;
     try {
-        await ext.storage.local.remove(["stats", "usageHistory"]);
+        await ext.storage.local.remove(["stats", "usageHistory", "dailyStats"]);
         showStatus("Estadístiques esborrades.");
     } catch (e) {
         console.error("Error clearing usage stats:", e);

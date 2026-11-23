@@ -194,7 +194,7 @@ function readCurrentModels() {
     const content = readFileSync(modelsPath, "utf8");
     
     // Extreure DEFAULT_MODEL_ID
-    const defaultMatch = content.match(/const DEFAULT_MODEL_ID\s*=\s*['"]([\w-]+)['"]/);
+    const defaultMatch = content.match(/const DEFAULT_MODEL_ID\s*=\s*['"]([\w.-]+)['"]/);
     const currentDefault = defaultMatch ? defaultMatch[1] : null;
     
     return { content, currentDefault };
