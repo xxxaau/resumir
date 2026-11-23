@@ -64,6 +64,8 @@ i el projecte segueix el [Versionatge Semàntic](https://semver.org/spec/v2.0.0.
   estadístiques de la configuració continuen igual.
 
 ### Canviat (dev)
+- La configuració de mapa conceptual sense UI (profunditat, branques, descripcions, autoexpandir)
+  s'ha tret; els valors queden fixats al codi. (dev)
 - El runner de tests ja no pot acabar «en verd» si `node` no s'executa. (dev)
 - `docs/SECURITY.md` descriu el guard SSRF real i el camp de clau amb màscara CSS. (dev)
 

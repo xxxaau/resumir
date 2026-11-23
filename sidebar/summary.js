@@ -192,8 +192,7 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
                 "enableDeepdive", "deepDivePrompt", "enableScience", "sciencePrompt",
                 "enableSimple", "simplePrompt",
                 "enableConceptMap", "enableAnki", "extensionOrder", "favoriteModels",
-                "conceptMapPrompt", "conceptMapDepth", "conceptMapBranches", "conceptMapShowDescriptions",
-                "conceptMapAutoExpand",
+                "conceptMapPrompt",
                 "bionicFont", "bionicWeight", "bionicFontSize", "bionicLineHeight", "bionicFixation",
                 "ankiPrompt", "ankiLang", "ankiPacket", "summaryFormat", "summaryLength"
             ]),
@@ -219,9 +218,9 @@ async function startSummary(ctx, overrideText = null, isDeepDive = false, isScie
         } else if (isConceptMap) {
             systemPrompt = buildConceptMapPrompt(
                 config.conceptMapPrompt || DEFAULT_CONCEPTMAP_PROMPT,
-                config.conceptMapDepth || 4,
-                config.conceptMapBranches || 6,
-                config.conceptMapShowDescriptions !== false
+                4,
+                6,
+                true
             );
         }
 
