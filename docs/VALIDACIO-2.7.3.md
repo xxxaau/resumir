@@ -2,7 +2,7 @@
 
 - **Data del registre:** 2026-11-23
 - **Versió objectiu:** `2.7.3` (encara **NO preparada**)
-- **Base:** v2.7.2 (`33ee20c`) → `520db47` (37 commits a `main`)
+- **Base:** v2.7.2 (`33ee20c`) → `main` (`git rev-list --count 33ee20c..main`)
 - **Estat:** codi i tests tancats. No s'ha tocat `package.json`, cap manifest, cap tag
   ni s'ha fet cap publicació. La release es prepararà quan l'usuari ho demani.
 
@@ -28,6 +28,7 @@ provi la versió** abans de preparar la release. Els canvis d'usuari són a
 | Plantilles d'exportació | `97aea11` | `$`, `$&` i `{{…}}` es copien literals |
 | PDF local gran (>7 MB) | `b35df44` | Sense visor propi, però el resum funciona |
 | Clau amb 429 | `4db1727` | S'accepta la clau i s'avisa d'esperar |
+| Llista de models actualitzada | `99ab90a` | Gemini 4, 3.8 i Gemma 4; per defecte 3.5 Flash-Lite; sense Gemini 2.5. Verificat 2026-11-23 amb l'API real: tots els IDs de Gemini 3.x/4 i els dos Gemma 4 existeixen i `generateContent` respon (Gemma envia fragments `thought`, que `api.js` descarta) |
 | Actualitzar models | `f8f2e8b` | Normalitza la clau, pagina i no esborra favorits vàlids |
 | Codi mort d'estadístiques | `e6ed44f` | Sense impacte d'usuari (neteja) |
 | Setmana ISO i «Avui» locals | `0cfb3e5` | Rutes Obsidian `gggg`/`ww` i comptador diari correctes |
